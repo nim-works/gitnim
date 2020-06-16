@@ -25,12 +25,13 @@ type
     ccInline,                 # proc should be inlined
     ccNoInline,               # proc should not be inlined
     ccFastCall,               # fastcall (pass parameters in registers)
+    ccThisCall,               # thiscall (parameters are pushed right-to-left)
     ccClosure,                # proc has a closure
     ccNoConvention            # needed for generating proper C procs sometimes
 
 const
   CallingConvToStr*: array[TCallingConvention, string] = ["", "stdcall",
-    "cdecl", "safecall", "syscall", "inline", "noinline", "fastcall",
+    "cdecl", "safecall", "syscall", "inline", "noinline", "fastcall", "thiscall",
     "closure", "noconv"]
 
 type
@@ -218,7 +219,7 @@ type
     nkEnumFieldDef,       # `ident = expr` in an enumeration
     nkArgList,            # argument list
     nkPattern,            # a special pattern; used for matching
-    nkHiddenTryStmt,      # token used for interpretation
+    nkHiddenTryStmt,      # a hidden try statement
     nkClosure,            # (prc, env)-pair (internally used for code gen)
     nkGotoState,          # used for the state machine (for iterators)
     nkState,              # give a label to a code section (for iterators)
@@ -290,7 +291,7 @@ type
     sfTemplateParam   # symbol is a template parameter
     sfCursor          # variable/field is a cursor, see RFC 177 for details
     sfInjectDestructors # whether the proc needs the 'injectdestructors' transformation
-    sfNeverRaises     # proc can never raise an exception, not even OverflowError
+    sfNeverRaises     # proc can never raise an exception, not even OverflowDefect
                       # or out-of-memory
     sfUsedInFinallyOrExcept  # symbol is used inside an 'except' or 'finally'
 
@@ -433,8 +434,8 @@ type
       # instantiation and prior to this it has the potential to
       # be any type.
 
-    tyOpt
-      # Builtin optional type
+    tyOptDeprecated
+      # deadcode: was `tyOpt`, Builtin optional type
 
     tyVoid
       # now different from tyEmpty, hurray!
@@ -554,6 +555,9 @@ type
                            # If it has one, t.destructor is not nil.
     tfAcyclic # object type was annotated as .acyclic
     tfIncompleteStruct # treat this type as if it had sizeof(pointer)
+    tfCompleteStruct
+      # (for importc types); type is fully specified, allowing to compute
+      # sizeof, alignof, offsetof at CT
 
   TTypeFlags* = set[TTypeFlag]
 
@@ -654,7 +658,7 @@ type
     mNewString, mNewStringOfCap, mParseBiggestFloat,
     mMove, mWasMoved, mDestroy,
     mDefault, mUnown, mAccessEnv, mReset,
-    mArray, mOpenArray, mRange, mSet, mSeq, mOpt, mVarargs,
+    mArray, mOpenArray, mRange, mSet, mSeq, mVarargs,
     mRef, mPtr, mVar, mDistinct, mVoid, mTuple,
     mOrdinal,
     mInt, mInt8, mInt16, mInt32, mInt64,
@@ -1027,6 +1031,7 @@ const
   nkFloatLiterals* = {nkFloatLit..nkFloat128Lit}
   nkLambdaKinds* = {nkLambda, nkDo}
   declarativeDefs* = {nkProcDef, nkFuncDef, nkMethodDef, nkIteratorDef, nkConverterDef}
+  routineDefs* = declarativeDefs + {nkMacroDef, nkTemplateDef}
   procDefs* = nkLambdaKinds + declarativeDefs
 
   nkSymChoices* = {nkClosedSymChoice, nkOpenSymChoice}
@@ -1487,7 +1492,7 @@ proc isGCedMem*(t: PType): bool {.inline.} =
            t.kind == tyProc and t.callConv == ccClosure
 
 proc propagateToOwner*(owner, elem: PType; propagateHasAsgn = true) =
-  const HaveTheirOwnEmpty = {tySequence, tyOpt, tySet, tyPtr, tyRef, tyProc}
+  const HaveTheirOwnEmpty = {tySequence, tySet, tyPtr, tyRef, tyProc}
   owner.flags = owner.flags + (elem.flags * {tfHasMeta, tfTriggersCompileTime})
   if tfNotNil in elem.flags:
     if owner.kind in {tyGenericInst, tyGenericBody, tyGenericInvocation}:
@@ -1500,7 +1505,7 @@ proc propagateToOwner*(owner, elem: PType; propagateHasAsgn = true) =
   if mask != {} and propagateHasAsgn:
     let o2 = owner.skipTypes({tyGenericInst, tyAlias, tySink})
     if o2.kind in {tyTuple, tyObject, tyArray,
-                   tySequence, tyOpt, tySet, tyDistinct, tyOpenArray, tyVarargs}:
+                   tySequence, tySet, tyDistinct, tyOpenArray, tyVarargs}:
       o2.flags.incl mask
       owner.flags.incl mask
 

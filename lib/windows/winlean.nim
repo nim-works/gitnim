@@ -128,6 +128,8 @@ const
 
   CREATE_NO_WINDOW* = 0x08000000'i32
 
+  HANDLE_FLAG_INHERIT* = 0x00000001'i32
+
 proc getVersionExW*(lpVersionInfo: ptr OSVERSIONINFO): WINBOOL {.
     stdcall, dynlib: "kernel32", importc: "GetVersionExW", sideEffect.}
 proc getVersionExA*(lpVersionInfo: ptr OSVERSIONINFO): WINBOOL {.
@@ -710,6 +712,9 @@ proc duplicateHandle*(hSourceProcessHandle: Handle, hSourceHandle: Handle,
                       dwOptions: DWORD): WINBOOL{.stdcall, dynlib: "kernel32",
     importc: "DuplicateHandle".}
 
+proc getHandleInformation*(hObject: Handle, lpdwFlags: ptr DWORD): WINBOOL {.
+    stdcall, dynlib: "kernel32", importc: "GetHandleInformation".}
+
 proc setHandleInformation*(hObject: Handle, dwMask: DWORD,
                            dwFlags: DWORD): WINBOOL {.stdcall,
     dynlib: "kernel32", importc: "SetHandleInformation".}
@@ -717,22 +722,20 @@ proc setHandleInformation*(hObject: Handle, dwMask: DWORD,
 proc getCurrentProcess*(): Handle{.stdcall, dynlib: "kernel32",
                                    importc: "GetCurrentProcess".}
 
-when useWinUnicode:
-  proc createFileW*(lpFileName: WideCString, dwDesiredAccess, dwShareMode: DWORD,
-                    lpSecurityAttributes: pointer,
-                    dwCreationDisposition, dwFlagsAndAttributes: DWORD,
-                    hTemplateFile: Handle): Handle {.
-      stdcall, dynlib: "kernel32", importc: "CreateFileW".}
-  proc deleteFileW*(pathName: WideCString): int32 {.
-    importc: "DeleteFileW", dynlib: "kernel32", stdcall.}
-else:
-  proc createFileA*(lpFileName: cstring, dwDesiredAccess, dwShareMode: DWORD,
-                    lpSecurityAttributes: pointer,
-                    dwCreationDisposition, dwFlagsAndAttributes: DWORD,
-                    hTemplateFile: Handle): Handle {.
-      stdcall, dynlib: "kernel32", importc: "CreateFileA".}
-  proc deleteFileA*(pathName: cstring): int32 {.
-    importc: "DeleteFileA", dynlib: "kernel32", stdcall.}
+proc createFileW*(lpFileName: WideCString, dwDesiredAccess, dwShareMode: DWORD,
+                  lpSecurityAttributes: pointer,
+                  dwCreationDisposition, dwFlagsAndAttributes: DWORD,
+                  hTemplateFile: Handle): Handle {.
+    stdcall, dynlib: "kernel32", importc: "CreateFileW".}
+proc deleteFileW*(pathName: WideCString): int32 {.
+  importc: "DeleteFileW", dynlib: "kernel32", stdcall.}
+proc createFileA*(lpFileName: cstring, dwDesiredAccess, dwShareMode: DWORD,
+                  lpSecurityAttributes: pointer,
+                  dwCreationDisposition, dwFlagsAndAttributes: DWORD,
+                  hTemplateFile: Handle): Handle {.
+    stdcall, dynlib: "kernel32", importc: "CreateFileA".}
+proc deleteFileA*(pathName: cstring): int32 {.
+  importc: "DeleteFileA", dynlib: "kernel32", stdcall.}
 
 proc setEndOfFile*(hFile: Handle): WINBOOL {.stdcall, dynlib: "kernel32",
     importc: "SetEndOfFile".}

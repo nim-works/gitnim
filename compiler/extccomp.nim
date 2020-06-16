@@ -143,16 +143,16 @@ compiler vcc:
   result = (
     name: "vcc",
     objExt: "obj",
-    optSpeed: " /Ogityb2 /G7 ",
-    optSize: " /O1 /G7 ",
+    optSpeed: " /Ogityb2 ",
+    optSize: " /O1 ",
     compilerExe: "cl",
     cppCompiler: "cl",
-    compileTmpl: "/c$vccplatform $options $include /Fo$objfile $file",
-    buildGui: " /link /SUBSYSTEM:WINDOWS ",
+    compileTmpl: "/c$vccplatform $options $include /nologo /Fo$objfile $file",
+    buildGui: " /SUBSYSTEM:WINDOWS user32.lib ",
     buildDll: " /LD",
     buildLib: "lib /OUT:$libfile $objfiles",
     linkerExe: "cl",
-    linkTmpl: "$builddll$vccplatform /Fe$exefile $objfiles $buildgui $options",
+    linkTmpl: "$builddll$vccplatform /Fe$exefile $objfiles $buildgui /nologo $options",
     includeCmd: " /I",
     linkDirCmd: " /LIBPATH:",
     linkLibCmd: " $1.lib",
@@ -170,6 +170,7 @@ compiler clangcl:
   result.compilerExe = "clang-cl"
   result.cppCompiler = "clang-cl"
   result.linkerExe = "clang-cl"
+  result.linkTmpl = "-fuse-ld=lld " & result.linkTmpl
 
 # Intel C/C++ Compiler
 compiler icl:
@@ -184,32 +185,6 @@ compiler icc:
   result.name = "icc"
   result.compilerExe = "icc"
   result.linkerExe = "icc"
-
-# Local C Compiler
-compiler lcc:
-  result = (
-    name: "lcc",
-    objExt: "obj",
-    optSpeed: " -O -p6 ",
-    optSize: " -O -p6 ",
-    compilerExe: "lcc",
-    cppCompiler: "",
-    compileTmpl: "$options $include -Fo$objfile $file",
-    buildGui: " -subsystem windows",
-    buildDll: " -dll",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "lcclnk",
-    linkTmpl: "$options $buildgui $builddll -O $exefile $objfiles",
-    includeCmd: " -I",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: " -g5 ",
-    pic: "",
-    asmStmtFrmt: "_asm{$n$1$n}$n",
-    structStmtFmt: "$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {})
 
 # Borland C Compiler
 compiler bcc:
@@ -238,58 +213,6 @@ compiler bcc:
     props: {hasSwitchRange, hasComputedGoto, hasCpp, hasGcGuard,
             hasAttribute})
 
-# Digital Mars C Compiler
-compiler dmc:
-  result = (
-    name: "dmc",
-    objExt: "obj",
-    optSpeed: " -ff -o -6 ",
-    optSize: " -ff -o -6 ",
-    compilerExe: "dmc",
-    cppCompiler: "",
-    compileTmpl: "-c $options $include -o$objfile $file",
-    buildGui: " -L/exet:nt/su:windows",
-    buildDll: " -WD",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "dmc",
-    linkTmpl: "$options $buildgui $builddll -o$exefile $objfiles",
-    includeCmd: " -I",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: " -g ",
-    pic: "",
-    asmStmtFrmt: "__asm{$n$1$n}$n",
-    structStmtFmt: "$3$n$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {hasCpp})
-
-# Watcom C Compiler
-compiler wcc:
-  result = (
-    name: "wcc",
-    objExt: "obj",
-    optSpeed: " -ox -on -6 -d0 -fp6 -zW ",
-    optSize: "",
-    compilerExe: "wcl386",
-    cppCompiler: "",
-    compileTmpl: "-c $options $include -fo=$objfile $file",
-    buildGui: " -bw",
-    buildDll: " -bd",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "wcl386",
-    linkTmpl: "$options $buildgui $builddll -fe=$exefile $objfiles ",
-    includeCmd: " -i=",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: " -d2 ",
-    pic: "",
-    asmStmtFrmt: "__asm{$n$1$n}$n",
-    structStmtFmt: "$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {hasCpp})
-
 # Tiny C Compiler
 compiler tcc:
   result = (
@@ -316,43 +239,16 @@ compiler tcc:
     cppXsupport: "",
     props: {hasSwitchRange, hasComputedGoto, hasGnuAsm})
 
-# Pelles C Compiler
-compiler pcc:
-  # Pelles C
-  result = (
-    name: "pcc",
-    objExt: "obj",
-    optSpeed: " -Ox ",
-    optSize: " -Os ",
-    compilerExe: "cc",
-    cppCompiler: "",
-    compileTmpl: "-c $options $include -Fo$objfile $file",
-    buildGui: " -SUBSYSTEM:WINDOWS",
-    buildDll: " -DLL",
-    buildLib: "", # XXX: not supported yet
-    linkerExe: "cc",
-    linkTmpl: "$options $buildgui $builddll -OUT:$exefile $objfiles",
-    includeCmd: " -I",
-    linkDirCmd: "", # XXX: not supported yet
-    linkLibCmd: "", # XXX: not supported yet
-    debug: " -Zi ",
-    pic: "",
-    asmStmtFrmt: "__asm{$n$1$n}$n",
-    structStmtFmt: "$1 $2",
-    produceAsm: "",
-    cppXsupport: "",
-    props: {})
-
 # Your C Compiler
-compiler ucc:
+compiler envcc:
   result = (
-    name: "ucc",
+    name: "env",
     objExt: "o",
     optSpeed: " -O3 ",
     optSize: " -O1 ",
-    compilerExe: "cc",
+    compilerExe: "",
     cppCompiler: "",
-    compileTmpl: "-c $options $include -o $objfile $file",
+    compileTmpl: "-c $ccenvflags $options $include -o $objfile $file",
     buildGui: "",
     buildDll: " -shared ",
     buildLib: "", # XXX: not supported yet
@@ -367,7 +263,7 @@ compiler ucc:
     structStmtFmt: "$1 $2",
     produceAsm: "",
     cppXsupport: "",
-    props: {})
+    props: {hasGnuAsm})
 
 const
   CC*: array[succ(low(TSystemCC))..high(TSystemCC), TInfoCC] = [
@@ -375,14 +271,10 @@ const
     nintendoSwitchGCC(),
     llvmGcc(),
     clang(),
-    lcc(),
     bcc(),
-    dmc(),
-    wcc(),
     vcc(),
     tcc(),
-    pcc(),
-    ucc(),
+    envcc(),
     icl(),
     icc(),
     clangcl()]
@@ -414,15 +306,14 @@ proc isVSCompatible*(conf: ConfigRef): bool =
 proc getConfigVar(conf: ConfigRef; c: TSystemCC, suffix: string): string =
   # use ``cpu.os.cc`` for cross compilation, unless ``--compileOnly`` is given
   # for niminst support
-  let fullSuffix =
-    if conf.cmd == cmdCompileToCpp:
-      ".cpp" & suffix
-    elif conf.cmd == cmdCompileToOC:
-      ".objc" & suffix
-    elif conf.cmd == cmdCompileToJS:
-      ".js" & suffix
-    else:
-      suffix
+  var fullSuffix = suffix
+  case conf.backend
+  of backendCpp, backendJs, backendObjc: fullSuffix = "." & $conf.backend & suffix
+  of backendC: discard
+  of backendInvalid:
+    # during parsing of cfg files; we don't know the backend yet, no point in
+    # guessing wrong thing
+    return ""
 
   if (conf.target.hostOS != conf.target.targetOS or conf.target.hostCPU != conf.target.targetCPU) and
       optCompileOnly notin conf.globalOptions:
@@ -589,13 +480,25 @@ proc needsExeExt(conf: ConfigRef): bool {.inline.} =
            (conf.target.hostOS == osWindows)
 
 proc useCpp(conf: ConfigRef; cfile: AbsoluteFile): bool =
-  conf.cmd == cmdCompileToCpp and not cfile.string.endsWith(".c")
+  conf.backend == backendCpp and not cfile.string.endsWith(".c")
+
+proc envFlags(conf: ConfigRef): string =
+  result = if conf.backend == backendCpp:
+            getEnv("CXXFLAGS")
+          else:
+            getEnv("CFLAGS")
 
 proc getCompilerExe(conf: ConfigRef; compiler: TSystemCC; cfile: AbsoluteFile): string =
-  result = if useCpp(conf, cfile):
-             CC[compiler].cppCompiler
-           else:
-             CC[compiler].compilerExe
+  if compiler == ccEnv:
+    result = if useCpp(conf, cfile):
+              getEnv("CXX")
+            else:
+              getEnv("CC")
+  else:
+    result = if useCpp(conf, cfile):
+              CC[compiler].cppCompiler
+            else:
+              CC[compiler].compilerExe
   if result.len == 0:
     rawMessage(conf, errGenerated,
       "Compiler '$1' doesn't support the requested target" %
@@ -631,7 +534,7 @@ proc ccHasSaneOverflow*(conf: ConfigRef): bool =
 
 proc getLinkerExe(conf: ConfigRef; compiler: TSystemCC): string =
   result = if CC[compiler].linkerExe.len > 0: CC[compiler].linkerExe
-           elif optMixedMode in conf.globalOptions and conf.cmd != cmdCompileToCpp: CC[compiler].cppCompiler
+           elif optMixedMode in conf.globalOptions and conf.backend != backendCpp: CC[compiler].cppCompiler
            else: getCompilerExe(conf, compiler, AbsoluteFile"")
 
 proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile,
@@ -640,6 +543,11 @@ proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile,
   # We produce files like module.nim.cpp, so the absolute Nim filename is not
   # cfile.name but `cfile.cname.changeFileExt("")`:
   var options = cFileSpecificOptions(conf, cfile.nimname, cfile.cname.changeFileExt("").string)
+  if useCpp(conf, cfile.cname):
+    # needs to be prepended so that --passc:-std=c++17 can override default.
+    # we could avoid allocation by making cFileSpecificOptions inplace
+    options = CC[c].cppXsupport & ' ' & options
+
   var exe = getConfigVar(conf, c, ".exe")
   if exe.len == 0: exe = getCompilerExe(conf, c, cfile.cname)
 
@@ -647,9 +555,6 @@ proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile,
   if (optGenDynLib in conf.globalOptions or (conf.hcrOn and not isMainFile)) and
       ospNeedsPIC in platform.OS[conf.target.targetOS].props:
     options.add(' ' & CC[c].pic)
-
-  if useCpp(conf, cfile.cname):
-    options.add(' ' & CC[c].cppXsupport)
 
   var compilePattern: string
   # compute include paths:
@@ -687,7 +592,8 @@ proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile,
     "dfile", dfile,
     "file", cfsh, "objfile", quoteShell(objfile), "options", options,
     "include", includeCmd, "nim", getPrefixDir(conf).string,
-    "lib", conf.libpath.string])
+    "lib", conf.libpath.string,
+    "ccenvflags", envFlags(conf)])
 
   if optProduceAsm in conf.globalOptions:
     if CC[conf.cCompiler].produceAsm.len > 0:
@@ -707,7 +613,8 @@ proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile,
     "options", options, "include", includeCmd,
     "nim", quoteShell(getPrefixDir(conf)),
     "lib", quoteShell(conf.libpath),
-    "vccplatform", vccplatform(conf)])
+    "vccplatform", vccplatform(conf),
+    "ccenvflags", envFlags(conf)])
 
 proc footprint(conf: ConfigRef; cfile: Cfile): SecureHash =
   result = secureHash(
@@ -718,8 +625,10 @@ proc footprint(conf: ConfigRef; cfile: Cfile): SecureHash =
     getCompileCFileCmd(conf, cfile))
 
 proc externalFileChanged(conf: ConfigRef; cfile: Cfile): bool =
-  if conf.cmd notin {cmdCompileToC, cmdCompileToCpp, cmdCompileToOC, cmdCompileToLLVM, cmdNone}:
-    return false
+  case conf.backend
+  of backendInvalid: doAssert false
+  of backendJs: return false # pre-existing behavior, but not sure it's good
+  else: discard
 
   var hashFile = toGeneratedFile(conf, conf.withPackageName(cfile.cname), "sha1")
   var currentHash = footprint(conf, cfile)
@@ -858,18 +767,15 @@ template tryExceptOSErrorMessage(conf: ConfigRef; errorPrefix: string = "", body
         (ose.msg & " " & $ose.errorCode))
     raise
 
+proc getExtraCmds(conf: ConfigRef; output: AbsoluteFile): seq[string] =
+  when defined(macosx):
+    if optCDebug in conf.globalOptions and optGenStaticLib notin conf.globalOptions:
+      # if needed, add an option to skip or override location
+      result.add "dsymutil " & $(output).quoteShell
+
 proc execLinkCmd(conf: ConfigRef; linkCmd: string) =
   tryExceptOSErrorMessage(conf, "invocation of external linker program failed."):
     execExternalProgram(conf, linkCmd, hintLinking)
-
-proc maybeRunDsymutil(conf: ConfigRef; exe: AbsoluteFile) =
-  when defined(osx):
-    if optCDebug in conf.globalOptions and optGenStaticLib notin conf.globalOptions:
-      # if needed, add an option to skip or override location
-      let cmd = "dsymutil " & $(exe).quoteShell
-      conf.extraCmds.add cmd
-      tryExceptOSErrorMessage(conf, "invocation of dsymutil failed."):
-        execExternalProgram(conf, cmd, hintExecuting)
 
 proc execCmdsInParallel(conf: ConfigRef; cmds: seq[string]; prettyCb: proc (idx: int)) =
   let runCb = proc (idx: int, p: Process) =
@@ -941,6 +847,7 @@ proc displayProgressCC(conf: ConfigRef, path, compileCmd: string): string =
 proc callCCompiler*(conf: ConfigRef) =
   var
     linkCmd: string
+    extraCmds: seq[string]
   if conf.globalOptions * {optCompileOnly, optGenScript} == {optCompileOnly}:
     return # speed up that call if only compiling and no script shall be
            # generated
@@ -1011,6 +918,7 @@ proc callCCompiler*(conf: ConfigRef) =
       let mainOutput = if optGenScript notin conf.globalOptions: conf.prepareToWriteOutput
                        else: AbsoluteFile(conf.projectName)
       linkCmd = getLinkCmd(conf, mainOutput, objfiles)
+      extraCmds = getExtraCmds(conf, mainOutput)
       if optCompileOnly notin conf.globalOptions:
         const MaxCmdLen = when defined(windows): 8_000 else: 32_000
         if linkCmd.len > MaxCmdLen:
@@ -1020,7 +928,8 @@ proc callCCompiler*(conf: ConfigRef) =
           linkViaResponseFile(conf, linkCmd)
         else:
           execLinkCmd(conf, linkCmd)
-        maybeRunDsymutil(conf, mainOutput)
+        for cmd in extraCmds:
+          execExternalProgram(conf, cmd, hintExecuting)
   else:
     linkCmd = ""
   if optGenScript in conf.globalOptions:
@@ -1094,10 +1003,16 @@ proc writeJsonBuildInstructions*(conf: ConfigRef) =
   var buf = newStringOfCap(50)
 
   let jsonFile = conf.getNimcacheDir / RelativeFile(conf.projectName & ".json")
+  conf.jsonBuildFile = jsonFile
+  let output = conf.absOutFile
 
   var f: File
   if open(f, jsonFile.string, fmWrite):
-    lit "{\"compile\":[\L"
+    lit "{\L"
+    lit "\"outputFile\": "
+    str $output
+
+    lit ",\L\"compile\":[\L"
     cfiles(conf, f, buf, conf.toCompile, false)
     lit "],\L\"link\":[\L"
     var objfiles = ""
@@ -1105,10 +1020,10 @@ proc writeJsonBuildInstructions*(conf: ConfigRef) =
     linkfiles(conf, f, buf, objfiles, conf.toCompile, conf.externalToLink)
 
     lit "],\L\"linkcmd\": "
-    str getLinkCmd(conf, conf.absOutFile, objfiles)
+    str getLinkCmd(conf, output, objfiles)
 
     lit ",\L\"extraCmds\": "
-    lit $(%* conf.extraCmds)
+    lit $(%* getExtraCmds(conf, conf.absOutFile))
 
     lit ",\L\"stdinInput\": "
     lit $(%* conf.projectIsStdin)
@@ -1165,6 +1080,17 @@ proc runJsonBuildInstructions*(conf: ConfigRef; projectfile: AbsoluteFile) =
   let jsonFile = toGeneratedFile(conf, projectfile, "json")
   try:
     let data = json.parseFile(jsonFile.string)
+
+    let output = data["outputFile"].getStr
+    createDir output.parentDir
+    let outputCurrent = $conf.absOutFile
+    if output != outputCurrent:
+      # previously, any specified output file would be silently ignored;
+      # simply copying won't work in some cases, for example with `extraCmds`,
+      # so we just make it an error, user should use same command for jsonscript
+      # as was used with --compileOnly.
+      globalError(conf, gCmdLineInfo, "jsonscript command outputFile '$1' must match '$2' which was specified during --compileOnly, see \"outputFile\" entry in '$3' " % [outputCurrent, output, jsonFile.string])
+
     let toCompile = data["compile"]
     doAssert toCompile.kind == JArray
     var cmds: TStringSeq

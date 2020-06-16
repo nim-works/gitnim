@@ -13,7 +13,17 @@
 import ropes, tables, pathutils
 
 const
-  explanationsBaseUrl* = "https://nim-lang.org/docs"
+  explanationsBaseUrl* = "https://nim-lang.github.io/Nim"
+    # was: "https://nim-lang.org/docs" but we're now usually showing devel docs
+    # instead of latest release docs.
+
+proc createDocLink*(urlSuffix: string): string =
+  # os.`/` is not appropriate for urls.
+  result = explanationsBaseUrl
+  if urlSuffix.len > 0 and urlSuffix[0] == '/':
+    result.add urlSuffix
+  else:
+    result.add "/" & urlSuffix
 
 type
   TMsgKind* = enum
@@ -23,7 +33,7 @@ type
     errGeneralParseError,
     errNewSectionExpected,
     errInvalidDirectiveX,
-    errProveInit,
+    errProveInit, # deadcode
     errGenerated,
     errUser,
     warnCannotOpenFile,
@@ -39,7 +49,7 @@ type
     warnEachIdentIsTuple,
     warnUnsafeSetLen,
     warnUnsafeDefault,
-    warnProveInit, warnProveField, warnProveIndex,
+    warnProveInit, warnProveField, warnProveIndex, warnUnreachableElse,
     warnStaticIndexCheck, warnGcUnsafe, warnGcUnsafe2,
     warnUninit, warnGcMem, warnDestructor, warnLockLevel, warnResultShadowed,
     warnInconsistentSpacing, warnCaseTransition, warnCycleCreated,
@@ -55,7 +65,8 @@ type
     hintSource, hintPerformance, hintStackTrace, hintGCStats,
     hintGlobalVar, hintExpandMacro,
     hintUser, hintUserRaw,
-    hintExtendedContext
+    hintExtendedContext,
+    hintMsgOrigin, # since 1.3.5
 
 const
   MsgKindToStr*: array[TMsgKind, string] = [
@@ -68,7 +79,7 @@ const
     errGeneralParseError: "general parse error",
     errNewSectionExpected: "new section expected",
     errInvalidDirectiveX: "invalid directive: '$1'",
-    errProveInit: "Cannot prove that '$1' is initialized.",
+    errProveInit: "Cannot prove that '$1' is initialized.",  # deadcode
     errGenerated: "$1",
     errUser: "$1",
     warnCannotOpenFile: "cannot open '$1'",
@@ -98,6 +109,7 @@ const
     warnProveInit: "Cannot prove that '$1' is initialized. This will become a compile time error in the future.",
     warnProveField: "cannot prove that field '$1' is accessible",
     warnProveIndex: "cannot prove index '$1' is valid",
+    warnUnreachableElse: "unreachable else, all cases are already covered",
     warnStaticIndexCheck: "$1",
     warnGcUnsafe: "not GC-safe: '$1'",
     warnGcUnsafe2: "$1",
@@ -113,7 +125,7 @@ const
     warnUser: "$1",
     hintSuccess: "operation successful: $#",
     # keep in sync with `testament.isSuccess`
-    hintSuccessX: "$loc LOC; $sec sec; $mem; $build build; proj: $project; out: $output",
+    hintSuccessX: "${loc} lines; ${sec}s; $mem; $build build; proj: $project; out: $output",
     hintCC: "CC: $1",
     hintLineTooLong: "line too long",
     hintXDeclaredButNotUsed: "'$1' is declared but not used",
@@ -142,6 +154,7 @@ const
     hintUser: "$1",
     hintUserRaw: "$1",
     hintExtendedContext: "$1",
+    hintMsgOrigin: "$1",
   ]
 
 const
@@ -156,7 +169,7 @@ const
     "UnsafeCode", "UnusedImport", "InheritFromException",
     "EachIdentIsTuple",
     "UnsafeSetLen", "UnsafeDefault",
-    "ProveInit", "ProveField", "ProveIndex",
+    "ProveInit", "ProveField", "ProveIndex", "UnreachableElse",
     "IndexCheck", "GcUnsafe", "GcUnsafe2", "Uninit",
     "GcMem", "Destructor", "LockLevel", "ResultShadowed",
     "Spacing", "CaseTransition", "CycleCreated",
@@ -169,7 +182,7 @@ const
     "ExprAlwaysX", "QuitCalled", "Processing", "CodeBegin", "CodeEnd", "Conf",
     "Path", "CondTrue", "CondFalse", "Name", "Pattern", "Exec", "Link", "Dependency",
     "Source", "Performance", "StackTrace", "GCStats", "GlobalVar", "ExpandMacro",
-    "User", "UserRaw", "ExtendedContext",
+    "User", "UserRaw", "ExtendedContext", "MsgOrigin",
   ]
 
 const
@@ -181,6 +194,12 @@ const
   warnMax* = pred(hintSuccess)
   hintMin* = hintSuccess
   hintMax* = high(TMsgKind)
+
+proc msgToStr*(msg: TMsgKind): string =
+  case msg
+  of warnMin..warnMax: WarningsToStr[ord(msg) - ord(warnMin)]
+  of hintMin..hintMax: HintsToStr[ord(msg) - ord(hintMin)]
+  else: "" # we could at least do $msg - prefix `err`
 
 static:
   doAssert HintsToStr.len == ord(hintMax) - ord(hintMin) + 1
@@ -195,7 +214,7 @@ proc computeNotesVerbosity(): array[0..3, TNoteKinds] =
   result[2] = result[3] - {hintStackTrace, warnUninit, hintExtendedContext}
   result[1] = result[2] - {warnProveField, warnProveIndex,
     warnGcUnsafe, hintPath, hintDependency, hintCodeBegin, hintCodeEnd,
-    hintSource, hintGlobalVar, hintGCStats}
+    hintSource, hintGlobalVar, hintGCStats, hintMsgOrigin}
   result[0] = result[1] - {hintSuccessX, hintSuccess, hintConf,
     hintProcessing, hintPattern, hintExecuting, hintLinking, hintCC}
 

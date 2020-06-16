@@ -19,7 +19,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/lib/nim
       docdir=/usr/share/nim/doc
       datadir=/usr/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.1"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.3.5"
       ;;
     "/usr/local/bin")
       bindir=/usr/local/bin
@@ -27,7 +27,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/local/lib/nim
       docdir=/usr/local/share/nim/doc
       datadir=/usr/local/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.1"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.3.5"
       ;;
     "/opt")
       bindir="/opt/nim/bin"
@@ -35,7 +35,7 @@ if [ $# -eq 1 ] ; then
       libdir="/opt/nim/lib"
       docdir="/opt/nim/doc"
       datadir="/opt/nim/data"
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.1"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.3.5"
       ;;
     *)
       bindir="$1/nim/bin"
@@ -54,6 +54,8 @@ if [ $# -eq 1 ] ; then
   rm -f $configdir/nim.cfg
   rm -f $configdir/nimdoc.cfg
   rm -f $configdir/nimdoc.tex.cfg
+  rm -f $configdir/rename.rules.cfg
+  rm -f $configdir/config.nims
   rm -rf $docdir
   rm -rf $datadir
   rm -rf $libdir
@@ -101,6 +103,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/idgen.nim
     rm -f $nimbleDir/compiler/importer.nim
     rm -f $nimbleDir/compiler/incremental.nim
+    rm -f $nimbleDir/compiler/index.nim
     rm -f $nimbleDir/compiler/injectdestructors.nim
     rm -f $nimbleDir/compiler/installer.ini
     rm -f $nimbleDir/compiler/int128.nim
@@ -134,6 +137,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/nimfix/prettybase.nim
     rm -f $nimbleDir/compiler/nimfix/nimfix.nim.cfg
     rm -f $nimbleDir/compiler/nimlexbase.nim
+    rm -f $nimbleDir/compiler/nimpaths.nim
     rm -f $nimbleDir/compiler/nimsets.nim
     rm -f $nimbleDir/compiler/nodejs.nim
     rm -f $nimbleDir/compiler/nversion.nim
@@ -153,8 +157,9 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/pragmas.nim
     rm -f $nimbleDir/compiler/prefixmatches.nim
     rm -f $nimbleDir/compiler/procfind.nim
-    rm -f $nimbleDir/compiler/readme.txt
+    rm -f $nimbleDir/compiler/readme.md
     rm -f $nimbleDir/compiler/renderer.nim
+    rm -f $nimbleDir/compiler/renderverbatim.nim
     rm -f $nimbleDir/compiler/reorder.nim
     rm -f $nimbleDir/compiler/rod.nim
     rm -f $nimbleDir/compiler/rodimpl.nim
@@ -185,6 +190,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/sizealignoffsetimpl.nim
     rm -f $nimbleDir/compiler/sourcemap.nim
     rm -f $nimbleDir/compiler/spawn.nim
+    rm -f $nimbleDir/compiler/strutils2.nim
     rm -f $nimbleDir/compiler/suggest.nim
     rm -f $nimbleDir/compiler/syntaxes.nim
     rm -f $nimbleDir/compiler/tccgen.nim
@@ -193,8 +199,8 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/treetab.nim
     rm -f $nimbleDir/compiler/types.nim
     rm -f $nimbleDir/compiler/typesrenderer.nim
-    rm -f $nimbleDir/compiler/unittest_light.nim
     rm -f $nimbleDir/compiler/vm.nim
+    rm -f $nimbleDir/compiler/vmconv.nim
     rm -f $nimbleDir/compiler/vmdef.nim
     rm -f $nimbleDir/compiler/vmdeps.nim
     rm -f $nimbleDir/compiler/vmgen.nim

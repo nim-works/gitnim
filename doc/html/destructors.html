@@ -79,7 +79,7 @@ function main() {
       <input type="checkbox" id="checkbox" />
       <div class="slider round"></div>
     </label>
-   &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
   </div>
   <div id="global-links">
     <ul class="simple-boot">
@@ -92,12 +92,23 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
+    <div class="search-groupby">
+    Group by:
+    <select onchange="groupBy(this.value)">
+      <option value="section">Section</option>
+      <option value="type">Type</option>
+    </select>
+  </div>
+
   <ul class="simple simple-toc" id="toc-list">
 <li><a class="reference" id="about-this-document_toc" href="#about-this-document">About this document</a></li>
 <li><a class="reference" id="motivating-example_toc" href="#motivating-example">Motivating example</a></li>
@@ -114,6 +125,7 @@ function main() {
 <li><a class="reference" id="destructor-removal_toc" href="#destructor-removal">Destructor removal</a></li>
 <li><a class="reference" id="self-assignments_toc" href="#self-assignments">Self assignments</a></li>
 <li><a class="reference" id="lent-type_toc" href="#lent-type">Lent type</a></li>
+<li><a class="reference" id="the-dotcursor-annotation_toc" href="#the-dotcursor-annotation">The .cursor annotation</a></li>
 <li><a class="reference" id="owned-refs_toc" href="#owned-refs">Owned refs</a></li>
 <li><a class="reference" id="hook-lifting_toc" href="#hook-lifting">Hook lifting</a></li>
 <li><a class="reference" id="hook-generation_toc" href="#hook-generation">Hook generation</a></li>
@@ -126,7 +138,7 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Authors:</th><td> Andreas Rumpf</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.2.1</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.3.5</td></tr>
 </tbody></table>
 <h1><a class="toc-backref" id="about-this-document" href="#about-this-document">About this document</a></h1><p>This document describes the upcoming Nim runtime which does not use classical GC algorithms anymore but is based on destructors and move semantics. The new runtime's advantages are that Nim programs become oblivious to the involved heap sizes and programs are easier to write to make effective use of multi-core machines. As a nice bonus, files and sockets and the like will not require manual <tt class="docutils literal"><span class="pre">close</span></tt> calls anymore.</p>
 <p>This document aims to be a precise specification about how move semantics and destructors work in Nim.</p>
@@ -150,7 +162,7 @@ function main() {
   <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">len</span> <span class="Operator">=</span> <span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">len</span>
   <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">cap</span> <span class="Operator">=</span> <span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">cap</span>
   <span class="Keyword">if</span> <span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">data</span> <span class="Operator">!=</span> <span class="Keyword">nil</span><span class="Punctuation">:</span>
-    <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">data</span> <span class="Operator">=</span> <span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Keyword">type</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">data</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">alloc</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">cap</span> <span class="Operator">*</span> <span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">T</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+    <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">data</span> <span class="Operator">=</span> <span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Identifier">typeof</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">data</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">alloc</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">cap</span> <span class="Operator">*</span> <span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">T</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
     <span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="FloatNumber">0.</span><span class="Operator">.&lt;</span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Punctuation">:</span>
       <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">data</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">data</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span>
 
@@ -178,7 +190,7 @@ function main() {
 <span class="Keyword">proc</span> <span class="Identifier">createSeq</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">elems</span><span class="Punctuation">:</span> <span class="Identifier">varargs</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">myseq</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Operator">=</span>
   <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">cap</span> <span class="Operator">=</span> <span class="Identifier">elems</span><span class="Operator">.</span><span class="Identifier">len</span>
   <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">len</span> <span class="Operator">=</span> <span class="Identifier">elems</span><span class="Operator">.</span><span class="Identifier">len</span>
-  <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">data</span> <span class="Operator">=</span> <span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Keyword">type</span><span class="Punctuation">(</span><span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">data</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">alloc</span><span class="Punctuation">(</span><span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">cap</span> <span class="Operator">*</span> <span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">T</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+  <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">data</span> <span class="Operator">=</span> <span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Identifier">typeof</span><span class="Punctuation">(</span><span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">data</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">alloc</span><span class="Punctuation">(</span><span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">cap</span> <span class="Operator">*</span> <span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">T</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
   <span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="FloatNumber">0.</span><span class="Operator">.&lt;</span><span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Punctuation">:</span> <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">data</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Identifier">elems</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">len</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">myseq</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">inline</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">len</span></pre>
@@ -370,7 +382,19 @@ wasMoved(y)</pre>
   <span class="Comment"># everything turned into moves:</span>
   <span class="Keyword">let</span> <span class="Identifier">t</span> <span class="Operator">=</span> <span class="Identifier">construct</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="Identifier">construct</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">construct</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Punctuation">)</span>
   <span class="Identifier">echo</span> <span class="Identifier">t</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span> <span class="Comment"># accessor does not copy the element!</span></pre>
-<h1><a class="toc-backref" id="owned-refs" href="#owned-refs">Owned refs</a></h1><p>Let <tt class="docutils literal"><span class="pre">W</span></tt> be an <tt class="docutils literal"><span class="pre">owned ref</span></tt> type. Conceptually its hooks look like:</p>
+<h1><a class="toc-backref" id="the-dotcursor-annotation" href="#the-dotcursor-annotation">The .cursor annotation</a></h1><p>Under the <tt class="docutils literal"><span class="pre">--gc:arc|orc</span></tt> modes Nim's <tt class="docutils literal"><span class="pre">ref</span></tt> type is implemented via the same runtime &quot;hooks&quot; and thus via reference counting. This means that cyclic structures cannot be freed immediately (<tt class="docutils literal"><span class="pre">--gc:orc</span></tt> ships with a cycle collector). With the <tt class="docutils literal"><span class="pre">.cursor</span></tt> annotation one can break up cycles declaratively:</p>
+<pre class="listing"><span class="Keyword">type</span>
+  <span class="Identifier">Node</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
+    <span class="Identifier">left</span><span class="Punctuation">:</span> <span class="Identifier">Node</span> <span class="Comment"># owning ref</span>
+    <span class="Identifier">right</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">cursor</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span> <span class="Identifier">Node</span> <span class="Comment"># non-owning ref</span></pre><p>But please notice that this is not C++'s weak_ptr, it means the right field is not involved in the reference counting, it is a raw pointer without runtime checks.</p>
+<p>Automatic reference counting also has the disadvantage that it introduces overhead when iterating over linked structures. The <tt class="docutils literal"><span class="pre">.cursor</span></tt> annotation can also be used to avoid this overhead:</p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">it</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">cursor</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Identifier">listRoot</span>
+<span class="Keyword">while</span> <span class="Identifier">it</span> <span class="Operator">!=</span> <span class="Keyword">nil</span><span class="Punctuation">:</span>
+  <span class="Identifier">use</span><span class="Punctuation">(</span><span class="Identifier">it</span><span class="Punctuation">)</span>
+  <span class="Identifier">it</span> <span class="Operator">=</span> <span class="Identifier">it</span><span class="Operator">.</span><span class="Identifier">next</span></pre><p>In fact, <tt class="docutils literal"><span class="pre">.cursor</span></tt> more generally prevents object construction/destruction pairs and so can also be useful in other contexts. The alternative solution would be to use raw pointers (<tt class="docutils literal"><span class="pre">ptr</span></tt>) instead which is more cumbersome and also more dangerous for Nim's evolution: Later on the compiler can try to prove <tt class="docutils literal"><span class="pre">.cursor</span></tt> annotations to be safe, but for <tt class="docutils literal"><span class="pre">ptr</span></tt> the compiler has to remain silent about possible problems.</p>
+
+<h1><a class="toc-backref" id="owned-refs" href="#owned-refs">Owned refs</a></h1><p><strong>Note</strong>: The <tt class="docutils literal"><span class="pre">owned</span></tt> type constructor is only available with the <tt class="docutils literal"><span class="pre">--newruntime</span></tt> compiler switch and is experimental.</p>
+<p>Let <tt class="docutils literal"><span class="pre">W</span></tt> be an <tt class="docutils literal"><span class="pre">owned ref</span></tt> type. Conceptually its hooks look like:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Punctuation">`</span><span class="Operator">=</span><span class="Identifier">destroy</span><span class="Punctuation">`</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">W</span><span class="Punctuation">)</span> <span class="Operator">=</span>
   <span class="Keyword">if</span> <span class="Identifier">x</span> <span class="Operator">!=</span> <span class="Keyword">nil</span><span class="Punctuation">:</span>
     <span class="Identifier">assert</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">refcount</span> <span class="Operator">==</span> <span class="DecNumber">0</span><span class="Punctuation">,</span> <span class="StringLit">&quot;dangling unowned pointers exist!&quot;</span>
@@ -417,14 +441,14 @@ wasMoved(y)</pre>
 <h1><a class="toc-backref" id="nodestroy-pragma" href="#nodestroy-pragma">nodestroy pragma</a></h1><p>The experimental <span id="nodestroy_1">nodestroy</span> pragma inhibits hook injections. This can be used to specialize the object traversal in order to avoid deep recursions:</p>
 <pre class="listing"><span class="Keyword">type</span> <span class="Identifier">Node</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
   <span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">:</span> <span class="Identifier">int32</span>
-  <span class="Identifier">left</span><span class="Punctuation">,</span> <span class="Identifier">right</span><span class="Punctuation">:</span> <span class="Identifier">owned</span> <span class="Identifier">Node</span>
+  <span class="Identifier">left</span><span class="Punctuation">,</span> <span class="Identifier">right</span><span class="Punctuation">:</span> <span class="Identifier">Node</span>
 
 <span class="Keyword">type</span> <span class="Identifier">Tree</span> <span class="Operator">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">root</span><span class="Punctuation">:</span> <span class="Identifier">owned</span> <span class="Identifier">Node</span>
+  <span class="Identifier">root</span><span class="Punctuation">:</span> <span class="Identifier">Node</span>
 
 <span class="Keyword">proc</span> <span class="Punctuation">`</span><span class="Operator">=</span><span class="Identifier">destroy</span><span class="Punctuation">`</span><span class="Punctuation">(</span><span class="Identifier">t</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">Tree</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">nodestroy</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
   <span class="Comment"># use an explicit stack so that we do not get stack overflows:</span>
-  <span class="Keyword">var</span> <span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">owned</span> <span class="Identifier">Node</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="Identifier">t</span><span class="Operator">.</span><span class="Identifier">root</span><span class="Punctuation">]</span>
+  <span class="Keyword">var</span> <span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">Node</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="Identifier">t</span><span class="Operator">.</span><span class="Identifier">root</span><span class="Punctuation">]</span>
   <span class="Keyword">while</span> <span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">len</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span><span class="Punctuation">:</span>
     <span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">pop</span>
     <span class="Keyword">if</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">left</span> <span class="Operator">!=</span> <span class="Keyword">nil</span><span class="Punctuation">:</span> <span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">left</span><span class="Punctuation">)</span>
@@ -443,7 +467,7 @@ wasMoved(y)</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:17:46 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:00 UTC</small>
       </div>
     </div>
   </div>

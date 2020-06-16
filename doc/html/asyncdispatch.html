@@ -92,19 +92,16 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
-  <div class="search-groupby">
-    Group by:
-    <select onchange="groupBy(this.value)">
-      <option value="section">Section</option>
-      <option value="type">Type</option>
-    </select>
-  </div>
+  
   <ul class="simple simple-toc" id="toc-list">
 <li><a class="reference" id="asynchronous-procedures_toc" href="#asynchronous-procedures">Asynchronous procedures</a></li>
 <ul class="simple"><li><a class="reference" id="asynchronous-procedures-handling-exceptions_toc" href="#asynchronous-procedures-handling-exceptions">Handling Exceptions</a></li>
@@ -175,8 +172,11 @@ function main() {
     title="recvFromInto(socket: AsyncFD; data: pointer; size: int; saddr: ptr SockAddr;
              saddrLen: ptr SockLen; flags = {SafeDisconn}): owned(Future[int])"><wbr />recv<wbr />From<wbr />Into<span class="attachedType">AsyncFD</span></a></li>
   <li><a class="reference" href="#acceptAddr%2CAsyncFD"
-    title="acceptAddr(socket: AsyncFD; flags = {SafeDisconn}): owned(
+    title="acceptAddr(socket: AsyncFD; flags = {SafeDisconn};
+           inheritable = defined(nimInheritHandles)): owned(
     Future[tuple[address: string, client: AsyncFD]])"><wbr />accept<wbr />Addr<span class="attachedType">AsyncFD</span></a></li>
+  <li><a class="reference" href="#setInheritable%2CAsyncFD%2Cbool"
+    title="setInheritable(fd: AsyncFD; inheritable: bool): bool"><wbr />set<wbr />Inheritable<span class="attachedType">AsyncFD</span></a></li>
   <li><a class="reference" href="#closeSocket%2CAsyncFD"
     title="closeSocket(socket: AsyncFD)"><wbr />close<wbr />Socket<span class="attachedType">AsyncFD</span></a></li>
   <li><a class="reference" href="#unregister%2CAsyncFD"
@@ -206,11 +206,13 @@ function main() {
   <li><a class="reference" href="#poll%2Cint"
     title="poll(timeout = 500)"><wbr />poll<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#createAsyncNativeSocket%2Ccint%2Ccint%2Ccint"
-    title="createAsyncNativeSocket(domain: cint; sockType: cint; protocol: cint): AsyncFD"><wbr />create<wbr />Async<wbr />Native<wbr />Socket<span class="attachedType">AsyncFD</span></a></li>
+    title="createAsyncNativeSocket(domain: cint; sockType: cint; protocol: cint;
+                        inheritable = defined(nimInheritHandles)): AsyncFD"><wbr />create<wbr />Async<wbr />Native<wbr />Socket<span class="attachedType">AsyncFD</span></a></li>
   <li><a class="reference" href="#createAsyncNativeSocket%2CDomain%2CSockType%2CProtocol"
     title="createAsyncNativeSocket(domain: Domain = Domain.AF_INET;
                         sockType: SockType = SOCK_STREAM;
-                        protocol: Protocol = IPPROTO_TCP): AsyncFD"><wbr />create<wbr />Async<wbr />Native<wbr />Socket<span class="attachedType">AsyncFD</span></a></li>
+                        protocol: Protocol = IPPROTO_TCP;
+                        inheritable = defined(nimInheritHandles)): AsyncFD"><wbr />create<wbr />Async<wbr />Native<wbr />Socket<span class="attachedType">AsyncFD</span></a></li>
   <li><a class="reference" href="#newAsyncNativeSocket%2Ccint%2Ccint%2Ccint"
     title="newAsyncNativeSocket(domain: cint; sockType: cint; protocol: cint): AsyncFD"><wbr />new<wbr />Async<wbr />Native<wbr />Socket<span class="attachedType">AsyncFD</span></a></li>
   <li><a class="reference" href="#newAsyncNativeSocket%2CDomain%2CSockType%2CProtocol"
@@ -228,11 +230,10 @@ function main() {
   <li><a class="reference" href="#withTimeout%2CFuture%5BT%5D%2Cint"
     title="withTimeout[T](fut: Future[T]; timeout: int): owned(Future[bool])"><wbr />with<wbr />Timeout<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#accept%2CAsyncFD"
-    title="accept(socket: AsyncFD; flags = {SafeDisconn}): owned(Future[AsyncFD])"><wbr />accept<span class="attachedType">AsyncFD</span></a></li>
+    title="accept(socket: AsyncFD; flags = {SafeDisconn};
+       inheritable = defined(nimInheritHandles)): owned(Future[AsyncFD])"><wbr />accept<span class="attachedType">AsyncFD</span></a></li>
   <li><a class="reference" href="#send%2CAsyncFD%2Cstring"
     title="send(socket: AsyncFD; data: string; flags = {SafeDisconn}): owned(Future[void])"><wbr />send<span class="attachedType">AsyncFD</span></a></li>
-  <li><a class="reference" href="#await%2CT"
-    title="await[T](x: T)"><wbr />await<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#readAll%2CFutureStream%5Bstring%5D"
     title="readAll(future: FutureStream[string]): owned(Future[string])"><wbr />read<wbr />All<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#callSoon%2Cproc%29"
@@ -330,9 +331,9 @@ function main() {
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L238"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L246"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L246" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="PDispatcher"></a>
@@ -344,9 +345,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L246"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L254"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L246" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L254" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="CustomRef"></a>
@@ -355,9 +356,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L253"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L261"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L253" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L261" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="AsyncFD"></a>
@@ -366,9 +367,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L255"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L263"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L255" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L263" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="AsyncEvent"></a>
@@ -377,9 +378,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L268"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L276"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L268" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L276" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Callback"></a>
@@ -388,9 +389,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L270"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L278"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L270" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L278" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -404,9 +405,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L273"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L281"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L273" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L281" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newDispatcher"></a>
@@ -415,9 +416,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new Dispatcher instance.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L275"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L283"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L275" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L283" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setGlobalDispatcher"></a>
@@ -427,9 +428,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L285"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L293"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L285" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L293" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getGlobalDispatcher"></a>
@@ -438,9 +439,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L291"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L299"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L291" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L299" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getIoHandler,PDispatcher"></a>
@@ -449,9 +450,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the underlying IO Completion Port handle (Windows) or selector (Unix) for the specified dispatcher.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L296"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L304"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L296" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L304" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="register,AsyncFD"></a>
@@ -460,9 +461,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Registers <tt class="docutils literal"><span class="pre">fd</span></tt> with the dispatcher.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L301"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L309"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L301" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L309" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasPendingOperations"></a>
@@ -471,9 +472,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns <tt class="docutils literal"><span class="pre">true</span></tt> if the global dispatcher has pending operations.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L319"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L327"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L319" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L327" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newCustom"></a>
@@ -482,93 +483,109 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L416"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L424"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L416" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L424" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="recv,AsyncFD,int"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#recv%2CAsyncFD%2Cint"><span class="Identifier">recv</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Reads <strong>up to</strong> <tt class="docutils literal"><span class="pre">size</span></tt> bytes from <tt class="docutils literal"><span class="pre">socket</span></tt>. Returned future will complete once all the data requested is read, a part of the data has been read, or the socket has disconnected in which case the future will complete with a value of <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt>.</p>
 <p><strong>Warning</strong>: The <tt class="docutils literal"><span class="pre">Peek</span></tt> socket flag is not supported on Windows.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L423"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L431"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L423" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L431" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="recvInto,AsyncFD,pointer,int"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#recvInto%2CAsyncFD%2Cpointer%2Cint"><span class="Identifier">recvInto</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">buf</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span>
-    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Reads <strong>up to</strong> <tt class="docutils literal"><span class="pre">size</span></tt> bytes from <tt class="docutils literal"><span class="pre">socket</span></tt> into <tt class="docutils literal"><span class="pre">buf</span></tt>, which must at least be of that size. Returned future will complete once all the data requested is read, a part of the data has been read, or the socket has disconnected in which case the future will complete with a value of <tt class="docutils literal"><span class="pre">0</span></tt>.</p>
 <p><strong>Warning</strong>: The <tt class="docutils literal"><span class="pre">Peek</span></tt> socket flag is not supported on Windows.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L496"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L504"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L496" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L504" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="send,AsyncFD,pointer,int"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#send%2CAsyncFD%2Cpointer%2Cint"><span class="Identifier">send</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">buf</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span>
-    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Sends <tt class="docutils literal"><span class="pre">size</span></tt> bytes from <tt class="docutils literal"><span class="pre">buf</span></tt> to <tt class="docutils literal"><span class="pre">socket</span></tt>. The returned future will complete once all data has been sent.</p>
 <p><strong>WARNING</strong>: Use it with caution. If <tt class="docutils literal"><span class="pre">buf</span></tt> refers to GC'ed object, you must use GC_ref/GC_unref calls to avoid early freeing of the buffer.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L562"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L570"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L562" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L570" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sendTo,AsyncFD,pointer,int,ptr.SockAddr,SockLen"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#sendTo%2CAsyncFD%2Cpointer%2Cint%2Cptr.SockAddr%2CSockLen"><span class="Identifier">sendTo</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">saddr</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="winlean.html#SockAddr"><span class="Identifier">SockAddr</span></a><span class="Other">;</span>
            <span class="Identifier">saddrLen</span><span class="Other">:</span> <a href="winlean.html#SockLen"><span class="Identifier">SockLen</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Sends <tt class="docutils literal"><span class="pre">data</span></tt> to specified destination <tt class="docutils literal"><span class="pre">saddr</span></tt>, using socket <tt class="docutils literal"><span class="pre">socket</span></tt>. The returned future will complete once all data has been sent.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L607"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L615"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L607" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L615" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="recvFromInto,AsyncFD,pointer,int,ptr.SockAddr,ptr.SockLen"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#recvFromInto%2CAsyncFD%2Cpointer%2Cint%2Cptr.SockAddr%2Cptr.SockLen"><span class="Identifier">recvFromInto</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">saddr</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="winlean.html#SockAddr"><span class="Identifier">SockAddr</span></a><span class="Other">;</span>
                  <span class="Identifier">saddrLen</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="winlean.html#SockLen"><span class="Identifier">SockLen</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Receives a datagram data from <tt class="docutils literal"><span class="pre">socket</span></tt> into <tt class="docutils literal"><span class="pre">buf</span></tt>, which must be at least of size <tt class="docutils literal"><span class="pre">size</span></tt>, address of datagram's sender will be stored into <tt class="docutils literal"><span class="pre">saddr</span></tt> and <tt class="docutils literal"><span class="pre">saddrLen</span></tt>. Returned future will complete once one datagram has been received, and will return size of packet received.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L652"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L660"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L652" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L660" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="acceptAddr,AsyncFD"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#acceptAddr%2CAsyncFD"><span class="Identifier">acceptAddr</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span>
-    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">address</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <span class="Identifier">client</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span>
-    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#acceptAddr%2CAsyncFD"><span class="Identifier">acceptAddr</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span>
+               <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span>
+    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">address</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <span class="Identifier">client</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Accepts a new connection. Returns a future containing the client socket corresponding to that connection and the remote address of the client. The future will complete when the connection is successfully accepted.</p>
 <p>The resulting client socket is automatically registered to the dispatcher.</p>
+<p>If <tt class="docutils literal"><span class="pre">inheritable</span></tt> is false (the default), the resulting client socket will not be inheritable by child processes.</p>
 <p>The <tt class="docutils literal"><span class="pre">accept</span></tt> call may result in an error if the connecting socket disconnects during the duration of the <tt class="docutils literal"><span class="pre">accept</span></tt>. If the <tt class="docutils literal"><span class="pre">SafeDisconn</span></tt> flag is specified then this error will not be raised and instead accept will be called again.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L700"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L708"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L700" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L708" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="setInheritable,AsyncFD,bool"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#setInheritable%2CAsyncFD%2Cbool"><span class="Identifier">setInheritable</span></a><span class="Other">(</span><span class="Identifier">fd</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">inheritable</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Control whether a file handle can be inherited by child processes. Returns <tt class="docutils literal"><span class="pre">true</span></tt> on success.</p>
+<p>This procedure is not guaranteed to be available for all platforms. Test for availability with <a class="reference external" href="#declared">declared()</a>.</p>
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L805"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L805" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="closeSocket,AsyncFD"></a>
@@ -577,9 +594,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Closes a socket and ensures that it is unregistered.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L793"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L807"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L793" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L807" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="unregister,AsyncFD"></a>
@@ -588,9 +605,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Unregisters <tt class="docutils literal"><span class="pre">fd</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L798"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L812"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L798" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L812" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="contains,PDispatcher,AsyncFD"></a>
@@ -599,9 +616,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L802"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L816"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L802" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L816" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addRead,AsyncFD,Callback"></a>
@@ -615,9 +632,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Be sure your callback <tt class="docutils literal"><span class="pre">cb</span></tt> returns <tt class="docutils literal"><span class="pre">true</span></tt>, if you want to remove watch of <tt class="docutils literal"><span class="pre">read</span></tt> notifications, and <tt class="docutils literal"><span class="pre">false</span></tt>, if you want to continue receiving notifications.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L897"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L911"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L897" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L911" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addWrite,AsyncFD,Callback"></a>
@@ -631,9 +648,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Be sure your callback <tt class="docutils literal"><span class="pre">cb</span></tt> returns <tt class="docutils literal"><span class="pre">true</span></tt>, if you want to remove watch of <tt class="docutils literal"><span class="pre">write</span></tt> notifications, and <tt class="docutils literal"><span class="pre">false</span></tt>, if you want to continue receiving notifications.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L915"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L929"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L915" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L929" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addTimer,int,bool,Callback"></a>
@@ -651,9 +668,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L968"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L982"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L968" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L982" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addProcess,int,Callback"></a>
@@ -663,9 +680,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Registers callback <tt class="docutils literal"><span class="pre">cb</span></tt> to be called when process with process ID <tt class="docutils literal"><span class="pre">pid</span></tt> exited.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1002"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1016"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1002" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1016" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newAsyncEvent"></a>
@@ -676,9 +693,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>New <tt class="docutils literal"><span class="pre">AsyncEvent</span></tt> object is not automatically registered with dispatcher like <tt class="docutils literal"><span class="pre">AsyncSocket</span></tt>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1021"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1035"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1021" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1035" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="trigger,AsyncEvent"></a>
@@ -687,9 +704,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Set event <tt class="docutils literal"><span class="pre">ev</span></tt> to signaled state.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1036"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1050"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1036" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1050" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="unregister,AsyncEvent"></a>
@@ -698,9 +715,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Unregisters event <tt class="docutils literal"><span class="pre">ev</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1041"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1055"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1041" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1055" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="close,AsyncEvent"></a>
@@ -709,9 +726,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Closes event <tt class="docutils literal"><span class="pre">ev</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1052"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1066"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1052" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1066" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addEvent,AsyncEvent,Callback"></a>
@@ -721,61 +738,61 @@ class="link-seesrc" target="_blank">Source</a>
 
 Registers callback <tt class="docutils literal"><span class="pre">cb</span></tt> to be called when <tt class="docutils literal"><span class="pre">ev</span></tt> will be signaled
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1059"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1073"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1059" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1073" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="drain,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#drain%2Cint"><span class="Identifier">drain</span></a><span class="Other">(</span><span class="Identifier">timeout</span> <span class="Other">=</span> <span class="DecNumber">500</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">,</span> <span class="Identifier">UnpackError</span><span class="Other">,</span>
-                                <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IndexError</span><span class="Other">]</span><span class="Other">,</span>
+<dt><pre><span class="Keyword">proc</span> <a href="#drain%2Cint"><span class="Identifier">drain</span></a><span class="Other">(</span><span class="Identifier">timeout</span> <span class="Other">=</span> <span class="DecNumber">500</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
                         <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Waits for completion events and processes them. Raises <tt class="docutils literal"><span class="pre">ValueError</span></tt> if there are no pending operations. In contrast to <tt class="docutils literal"><span class="pre">poll</span></tt> this processes as many events as are available.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1566"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1603"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1566" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1603" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="poll,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#poll%2Cint"><span class="Identifier">poll</span></a><span class="Other">(</span><span class="Identifier">timeout</span> <span class="Other">=</span> <span class="DecNumber">500</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">,</span> <span class="Identifier">UnpackError</span><span class="Other">,</span>
-                               <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IndexError</span><span class="Other">]</span><span class="Other">,</span>
+<dt><pre><span class="Keyword">proc</span> <a href="#poll%2Cint"><span class="Identifier">poll</span></a><span class="Other">(</span><span class="Identifier">timeout</span> <span class="Other">=</span> <span class="DecNumber">500</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
                        <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Waits for completion events and processes them. Raises <tt class="docutils literal"><span class="pre">ValueError</span></tt> if there are no pending operations. This runs the underlying OS <span id="epoll_1">epoll</span> or <span id="kqueue_1">kqueue</span> primitive only once.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1573"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1610"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1573" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1610" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="createAsyncNativeSocket,cint,cint,cint"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#createAsyncNativeSocket%2Ccint%2Ccint%2Ccint"><span class="Identifier">createAsyncNativeSocket</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span> <span class="Identifier">sockType</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span> <span class="Identifier">protocol</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+<dt><pre><span class="Keyword">proc</span> <a href="#createAsyncNativeSocket%2Ccint%2Ccint%2Ccint"><span class="Identifier">createAsyncNativeSocket</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span> <span class="Identifier">sockType</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span> <span class="Identifier">protocol</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span>
+                            <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1589"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1627"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1589" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1627" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="createAsyncNativeSocket,Domain,SockType,Protocol"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#createAsyncNativeSocket%2CDomain%2CSockType%2CProtocol"><span class="Identifier">createAsyncNativeSocket</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">:</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a> <span class="Other">=</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a><span class="Other">.</span><span class="Identifier">AF_INET</span><span class="Other">;</span>
                             <span class="Identifier">sockType</span><span class="Other">:</span> <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a> <span class="Other">=</span> <span class="Identifier">SOCK_STREAM</span><span class="Other">;</span>
-                            <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Identifier">IPPROTO_TCP</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+                            <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Identifier">IPPROTO_TCP</span><span class="Other">;</span>
+                            <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1593"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1632"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1593" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1632" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newAsyncNativeSocket,cint,cint,cint"></a>
@@ -789,9 +806,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1598"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1638"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1598" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1638" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newAsyncNativeSocket,Domain,SockType,Protocol"></a>
@@ -807,35 +824,34 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1602"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1642"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1602" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1642" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="dial,string,Port,Protocol"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#dial%2Cstring%2CPort%2CProtocol"><span class="Identifier">dial</span></a><span class="Other">(</span><span class="Identifier">address</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span> <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Identifier">IPPROTO_TCP</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span>
-    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span>
-                      <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Establishes connection to the specified <tt class="docutils literal"><span class="pre">address</span></tt>:<tt class="docutils literal"><span class="pre">port</span></tt> pair via the specified protocol. The procedure iterates through possible resolutions of the <tt class="docutils literal"><span class="pre">address</span></tt> until it succeeds, meaning that it seamlessly works with both IPv4 and IPv6. Returns the async file descriptor, registered in the dispatcher of the current thread, ready to send or receive data.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1760"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1800"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1760" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1800" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="connect,AsyncFD,string,Port"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#connect%2CAsyncFD%2Cstring%2CPort"><span class="Identifier">connect</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">address</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span> <span class="Identifier">domain</span> <span class="Other">=</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a><span class="Other">.</span><span class="Identifier">AF_INET</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span>
-    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
                    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1775"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1815"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1775" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1815" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sleepAsync"></a>
@@ -844,9 +860,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Suspends the execution of the current async procedure for the next <tt class="docutils literal"><span class="pre">ms</span></tt> milliseconds.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1790"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1830"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1790" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1830" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="withTimeout,Future[T],int"></a>
@@ -857,56 +873,49 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If <tt class="docutils literal"><span class="pre">fut</span></tt> completes first the returned future will hold true, otherwise, if <tt class="docutils literal"><span class="pre">timeout</span></tt> milliseconds has elapsed first, the returned future will hold false.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1802"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1842"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1802" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1842" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="accept,AsyncFD"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#accept%2CAsyncFD"><span class="Identifier">accept</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#accept%2CAsyncFD"><span class="Identifier">accept</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span>
+           <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-Accepts a new connection. Returns a future containing the client socket corresponding to that connection. The future will complete when the connection is successfully accepted.
+<p>Accepts a new connection. Returns a future containing the client socket corresponding to that connection.</p>
+<p>If <tt class="docutils literal"><span class="pre">inheritable</span></tt> is false (the default), the resulting client socket will not be inheritable by child processes.</p>
+<p>The future will complete when the connection is successfully accepted.</p>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1824"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1864"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1824" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1864" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="send,AsyncFD,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#send%2CAsyncFD%2Cstring"><span class="Identifier">send</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Sends <tt class="docutils literal"><span class="pre">data</span></tt> to <tt class="docutils literal"><span class="pre">socket</span></tt>. The returned future will complete once all data has been sent.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1843"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1888"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1843" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="await,T"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#await%2CT"><span class="Identifier">await</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span></pre></dt>
-<dd>
-
-The 'await' keyword is also defined here for technical reasons. (Generic symbol lookup prepass.)
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncmacro.nim#L451"
-class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncmacro.nim#L451" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1888" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="readAll,FutureStream[string]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#readAll%2CFutureStream%5Bstring%5D"><span class="Identifier">readAll</span></a><span class="Other">(</span><span class="Identifier">future</span><span class="Other">:</span> <a href="asyncstreams.html#FutureStream"><span class="Identifier">FutureStream</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-Returns a future that will complete when all the string data from the specified future stream is retrieved.
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1865"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1910"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1865" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1910" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="callSoon,proc)"></a>
@@ -916,21 +925,21 @@ class="link-seesrc" target="_blank">Source</a>
 
 Schedule <tt class="docutils literal"><span class="pre">cbproc</span></tt> to be called as soon as possible. The callback is called when control returns to the event loop.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1876"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1921"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1876" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1921" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="runForever"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#runForever"><span class="Identifier">runForever</span></a><span class="Other">(</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">,</span> <span class="Identifier">UnpackError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span>
-                          <span class="Identifier">IndexError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#runForever"><span class="Identifier">runForever</span></a><span class="Other">(</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
+                  <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Begins a never ending global dispatcher poll loop.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1879"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1924"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1879" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1924" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="waitFor,Future[T]"></a>
@@ -939,9 +948,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 <strong>Blocks</strong> the current thread until the specified future completes.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1884"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1929"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1884" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1929" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -955,9 +964,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Macro which processes async procedures into the appropriate iterators and yield statements.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncmacro.nim#L341"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncmacro.nim#L284"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncmacro.nim#L341" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncmacro.nim#L284" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="multisync.m,untyped"></a>
@@ -968,9 +977,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>The generated async procedures use the <tt class="docutils literal"><span class="pre">async</span></tt> macro, whereas the generated synchronous procedures simply strip off the <tt class="docutils literal"><span class="pre">await</span></tt> calls.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncmacro.nim#L440"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncmacro.nim#L343"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncmacro.nim#L440" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncmacro.nim#L343" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -988,7 +997,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:18:41 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:20:41 UTC</small>
       </div>
     </div>
   </div>

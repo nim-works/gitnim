@@ -411,7 +411,7 @@ proc transformYield(c: PTransf, n: PNode): PNode =
 
 proc transformAddrDeref(c: PTransf, n: PNode, a, b: TNodeKind): PNode =
   result = transformSons(c, n)
-  if c.graph.config.cmd == cmdCompileToCpp or sfCompileToCpp in c.module.flags: return
+  if c.graph.config.backend == backendCpp or sfCompileToCpp in c.module.flags: return
   var n = result
   case n[0].kind
   of nkObjUpConv, nkObjDownConv, nkChckRange, nkChckRangeF, nkChckRange64:
@@ -447,7 +447,7 @@ proc generateThunk(c: PTransf; prc: PNode, dest: PType): PNode =
 
   # we cannot generate a proper thunk here for GC-safety reasons
   # (see internal documentation):
-  if c.graph.config.cmd == cmdCompileToJS: return prc
+  if c.graph.config.backend == backendJs: return prc
   result = newNodeIT(nkClosure, prc.info, dest)
   var conv = newNodeIT(nkHiddenSubConv, prc.info, dest)
   conv.add(newNodeI(nkEmpty, prc.info))
@@ -560,8 +560,8 @@ proc putArgInto(arg: PNode, formal: PType): TPutArgInto =
     of nkBracket:
       return paFastAsgnTakeTypeFromArg
     else:
-      return paDirectMapping    # XXX really correct?
-                                # what if ``arg`` has side-effects?
+      # XXX incorrect, causes #13417 when `arg` has side effects.
+      return paDirectMapping
   case arg.kind
   of nkEmpty..nkNilLit:
     result = paDirectMapping
@@ -671,9 +671,8 @@ proc transformFor(c: PTransf, n: PNode): PNode =
       idNodeTablePut(newC.mapping, formal, arg)
       # XXX BUG still not correct if the arg has a side effect!
     of paComplexOpenarray:
-      let typ = newType(tySequence, formal.owner)
-      addSonSkipIntLit(typ, formal.typ[0])
-      var temp = newTemp(c, typ, formal.info)
+      # arrays will deep copy here (pretty bad).
+      var temp = newTemp(c, arg.typ, formal.info)
       addVar(v, temp)
       stmtList.add(newAsgnStmt(c, nkFastAsgn, temp, arg))
       idNodeTablePut(newC.mapping, formal, temp)

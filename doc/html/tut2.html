@@ -79,7 +79,7 @@ function main() {
       <input type="checkbox" id="checkbox" />
       <div class="slider round"></div>
     </label>
-   &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
   </div>
   <div id="global-links">
     <ul class="simple-boot">
@@ -92,12 +92,23 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
+    <div class="search-groupby">
+    Group by:
+    <select onchange="groupBy(this.value)">
+      <option value="section">Section</option>
+      <option value="type">Type</option>
+    </select>
+  </div>
+
   <ul class="simple simple-toc" id="toc-list">
 <li><a class="reference" id="introduction_toc" href="#introduction">Introduction</a></li>
 <li><a class="reference" id="pragmas_toc" href="#pragmas">Pragmas</a></li>
@@ -126,7 +137,7 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Author:</th><td> Andreas Rumpf</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.2.1</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.3.5</td></tr>
 </tbody></table>
 <h1><a class="toc-backref" id="introduction" href="#introduction">Introduction</a></h1><blockquote><p>&quot;Repetition renders the ridiculous reasonable.&quot; -- Norman Wildberger</p></blockquote>
 <p>This document is a tutorial for the advanced constructs of the <em>Nim</em> programming language. <strong>Note that this document is somewhat obsolete as the</strong> <a class="reference external" href="manual.html">manual</a> <strong>contains many more examples of the advanced language features.</strong></p>
@@ -169,7 +180,7 @@ function main() {
 <p>Type conversions are a much more polite way to convert a type into another: They preserve the abstract <em>value</em>, not necessarily the <em>bit-pattern</em>. If a type conversion is not possible, the compiler complains or an exception is raised.</p>
 <p>The syntax for type conversions is <tt class="docutils literal"><span class="pre">destination_type(expression_to_convert)</span></tt> (like an ordinary call):</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">getID</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">Person</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span>
-  <span class="Identifier">Student</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">id</span></pre><p>The <tt class="docutils literal"><span class="pre">InvalidObjectConversionError</span></tt> exception is raised if <tt class="docutils literal"><span class="pre">x</span></tt> is not a <tt class="docutils literal"><span class="pre">Student</span></tt>.</p>
+  <span class="Identifier">Student</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">id</span></pre><p>The <tt class="docutils literal"><span class="pre">InvalidObjectConversionDefect</span></tt> exception is raised if <tt class="docutils literal"><span class="pre">x</span></tt> is not a <tt class="docutils literal"><span class="pre">Student</span></tt>.</p>
 
 <h2><a class="toc-backref" id="object-oriented-programming-object-variants" href="#object-oriented-programming-object-variants">Object variants</a></h2><p>Often an object hierarchy is overkill in certain situations where simple variant types are needed.</p>
 <p>An example:</p>
@@ -193,7 +204,7 @@ function main() {
       <span class="Identifier">condition</span><span class="Punctuation">,</span> <span class="Identifier">thenPart</span><span class="Punctuation">,</span> <span class="Identifier">elsePart</span><span class="Punctuation">:</span> <span class="Identifier">Node</span>
 
 <span class="Keyword">var</span> <span class="Identifier">n</span> <span class="Operator">=</span> <span class="Identifier">Node</span><span class="Punctuation">(</span><span class="Identifier">kind</span><span class="Punctuation">:</span> <span class="Identifier">nkFloat</span><span class="Punctuation">,</span> <span class="Identifier">floatVal</span><span class="Punctuation">:</span> <span class="FloatNumber">1.0</span><span class="Punctuation">)</span>
-<span class="Comment"># the following statement raises an `FieldError` exception, because</span>
+<span class="Comment"># the following statement raises an `FieldDefect` exception, because</span>
 <span class="Comment"># n.kind's value does not fit:</span>
 <span class="Identifier">n</span><span class="Operator">.</span><span class="Identifier">strVal</span> <span class="Operator">=</span> <span class="StringLit">&quot;&quot;</span></pre><p>As can been seen from the example, an advantage to an object hierarchy is that no conversion between different object types is needed. Yet, access to invalid object fields raises an exception.</p>
 
@@ -313,7 +324,7 @@ function main() {
     <span class="Keyword">let</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="Identifier">readLine</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">)</span>
     <span class="Keyword">let</span> <span class="Identifier">b</span> <span class="Operator">=</span> <span class="Identifier">readLine</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">)</span>
     <span class="Identifier">echo</span> <span class="StringLit">&quot;sum: &quot;</span><span class="Punctuation">,</span> <span class="Identifier">parseInt</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">)</span> <span class="Operator">+</span> <span class="Identifier">parseInt</span><span class="Punctuation">(</span><span class="Identifier">b</span><span class="Punctuation">)</span>
-  <span class="Keyword">except</span> <span class="Identifier">OverflowError</span><span class="Punctuation">:</span>
+  <span class="Keyword">except</span> <span class="Identifier">OverflowDefect</span><span class="Punctuation">:</span>
     <span class="Identifier">echo</span> <span class="StringLit">&quot;overflow!&quot;</span>
   <span class="Keyword">except</span> <span class="Identifier">ValueError</span><span class="Punctuation">:</span>
     <span class="Identifier">echo</span> <span class="StringLit">&quot;could not convert string to integer&quot;</span>
@@ -337,7 +348,7 @@ function main() {
     <span class="Identifier">msg</span> <span class="Operator">=</span> <span class="Identifier">getCurrentExceptionMsg</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
   <span class="Identifier">echo</span> <span class="StringLit">&quot;Got exception &quot;</span><span class="Punctuation">,</span> <span class="Identifier">repr</span><span class="Punctuation">(</span><span class="Identifier">e</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="StringLit">&quot; with message &quot;</span><span class="Punctuation">,</span> <span class="Identifier">msg</span></pre>
 <h2><a class="toc-backref" id="exceptions-annotating-procs-with-raised-exceptions" href="#exceptions-annotating-procs-with-raised-exceptions">Annotating procs with raised exceptions</a></h2><p>Through the use of the optional <tt class="docutils literal"><span class="pre">{.raises.}</span></tt> pragma you can specify that a proc is meant to raise a specific set of exceptions, or none at all. If the <tt class="docutils literal"><span class="pre">{.raises.}</span></tt> pragma is used, the compiler will verify that this is true. For instance, if you specify that a proc raises <tt class="docutils literal"><span class="pre">IOError</span></tt>, and at some point it (or one of the procs it calls) starts raising a new exception the compiler will prevent that proc from compiling. Usage example:</p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">complexProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">raises</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="Identifier">IOError</span><span class="Punctuation">,</span> <span class="Identifier">ArithmeticError</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
+<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">complexProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">raises</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="Identifier">IOError</span><span class="Punctuation">,</span> <span class="Identifier">ArithmeticDefect</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
   <span class="Operator">...</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">simpleProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">raises</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
@@ -460,7 +471,7 @@ function main() {
   <span class="Comment">##  # now abs(@[@[1,-2], @[-2,-3]]) == @[@[1,2], @[2,3]]</span>
   <span class="Keyword">proc</span> <span class="Identifier">fname</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">openarray</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">auto</span> <span class="Operator">=</span>
     <span class="Keyword">var</span> <span class="Identifier">temp</span><span class="Punctuation">:</span> <span class="Identifier">T</span>
-    <span class="Keyword">type</span> <span class="Identifier">outType</span> <span class="Operator">=</span> <span class="Keyword">type</span><span class="Punctuation">(</span><span class="Identifier">fname</span><span class="Punctuation">(</span><span class="Identifier">temp</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+    <span class="Keyword">type</span> <span class="Identifier">outType</span> <span class="Operator">=</span> <span class="Identifier">typeof</span><span class="Punctuation">(</span><span class="Identifier">fname</span><span class="Punctuation">(</span><span class="Identifier">temp</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
     <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">newSeq</span><span class="Punctuation">[</span><span class="Identifier">outType</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Punctuation">)</span>
     <span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="FloatNumber">0.</span><span class="Operator">.&lt;</span><span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Punctuation">:</span>
       <span class="Identifier">result</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Identifier">fname</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span><span class="Punctuation">)</span>
@@ -483,7 +494,7 @@ function main() {
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:18:13 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:17 UTC</small>
       </div>
     </div>
   </div>

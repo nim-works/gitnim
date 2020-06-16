@@ -92,19 +92,16 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
-  <div class="search-groupby">
-    Group by:
-    <select onchange="groupBy(this.value)">
-      <option value="section">Section</option>
-      <option value="type">Type</option>
-    </select>
-  </div>
+  
   <ul class="simple simple-toc" id="toc-list">
 <li>
   <a class="reference reference-toplevel" href="#6" id="56">Imports</a>
@@ -123,10 +120,7 @@ function main() {
               ## some procedures, such as getaddrinfo)
   AF_UNIX = 1,                  ## for local socket (using a file). Unsupported on Windows.
   AF_INET = 2,                  ## for network protocol IPv4 or
-  AF_INET6 = when defined(macosx):
-    30
-   else:
-    23                        ## for network protocol IPv6."><wbr />Domain<span class="attachedType"></span></a></li>
+  AF_INET6 = 23"><wbr />Domain<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#SockType"
     title="SockType = enum
   SOCK_STREAM = 1,              ## reliable stream-oriented service or Stream Sockets
@@ -137,11 +131,7 @@ function main() {
     title="Protocol = enum
   IPPROTO_TCP = 6,              ## Transmission control protocol.
   IPPROTO_UDP = 17,             ## User datagram protocol.
-  IPPROTO_IP,                 ## Internet protocol. Unsupported on Windows.
-  IPPROTO_IPV6,               ## Internet Protocol Version 6. Unsupported on Windows.
-  IPPROTO_RAW,                ## Raw IP Packets Protocol. Unsupported on Windows.
-  IPPROTO_ICMP,               ## Control message protocol. Unsupported on Windows.
-  IPPROTO_ICMPV6              ## Control message protocol for IPv6. Unsupported on Windows."><wbr />Protocol<span class="attachedType"></span></a></li>
+  IPPROTO_IP, IPPROTO_IPV6, IPPROTO_RAW, IPPROTO_ICMP, IPPROTO_ICMPV6"><wbr />Protocol<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#Servent"
     title="Servent = object
   name*: string
@@ -197,18 +187,22 @@ function main() {
     title="toInt(p: Protocol): cint"><wbr />to<wbr />Int<span class="attachedType">Protocol</span></a></li>
   <li><a class="reference" href="#toSockType%2CProtocol"
     title="toSockType(protocol: Protocol): SockType"><wbr />to<wbr />Sock<wbr />Type<span class="attachedType">Protocol</span></a></li>
-  <li><a class="reference" href="#createNativeSocket%2CDomain%2CSockType%2CProtocol"
+  <li><a class="reference" href="#close%2CSocketHandle"
+    title="close(socket: SocketHandle)"><wbr />close<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#setInheritable%2CSocketHandle%2Cbool"
+    title="setInheritable(s: SocketHandle; inheritable: bool): bool"><wbr />set<wbr />Inheritable<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#createNativeSocket%2Ccint%2Ccint%2Ccint%2Cbool"
+    title="createNativeSocket(domain: cint; sockType: cint; protocol: cint;
+                   inheritable: bool = defined(nimInheritHandles)): SocketHandle"><wbr />create<wbr />Native<wbr />Socket<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#createNativeSocket%2CDomain%2CSockType%2CProtocol%2Cbool"
     title="createNativeSocket(domain: Domain = AF_INET; sockType: SockType = SOCK_STREAM;
-                   protocol: Protocol = IPPROTO_TCP): SocketHandle"><wbr />create<wbr />Native<wbr />Socket<span class="attachedType">Domain</span></a></li>
-  <li><a class="reference" href="#createNativeSocket%2Ccint%2Ccint%2Ccint"
-    title="createNativeSocket(domain: cint; sockType: cint; protocol: cint): SocketHandle"><wbr />create<wbr />Native<wbr />Socket<span class="attachedType"></span></a></li>
+                   protocol: Protocol = IPPROTO_TCP;
+                   inheritable: bool = defined(nimInheritHandles)): SocketHandle"><wbr />create<wbr />Native<wbr />Socket<span class="attachedType">Domain</span></a></li>
   <li><a class="reference" href="#newNativeSocket%2CDomain%2CSockType%2CProtocol"
     title="newNativeSocket(domain: Domain = AF_INET; sockType: SockType = SOCK_STREAM;
                 protocol: Protocol = IPPROTO_TCP): SocketHandle"><wbr />new<wbr />Native<wbr />Socket<span class="attachedType">Domain</span></a></li>
   <li><a class="reference" href="#newNativeSocket%2Ccint%2Ccint%2Ccint"
     title="newNativeSocket(domain: cint; sockType: cint; protocol: cint): SocketHandle"><wbr />new<wbr />Native<wbr />Socket<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#close%2CSocketHandle"
-    title="close(socket: SocketHandle)"><wbr />close<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#bindAddr%2CSocketHandle%2Cptr.SockAddr%2CSockLen"
     title="bindAddr(socket: SocketHandle; name: ptr SockAddr; namelen: SockLen): cint"><wbr />bind<wbr />Addr<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#listen%2CSocketHandle"
@@ -251,7 +245,8 @@ function main() {
   <li><a class="reference" href="#selectWrite%2Cseq%5BSocketHandle%5D%2Cint"
     title="selectWrite(writefds: var seq[SocketHandle]; timeout = 500): int"><wbr />select<wbr />Write<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#accept%2CSocketHandle"
-    title="accept(fd: SocketHandle): (SocketHandle, string)"><wbr />accept<span class="attachedType"></span></a></li>
+    title="accept(fd: SocketHandle; inheritable = defined(nimInheritHandles)): (SocketHandle,
+    string)"><wbr />accept<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -304,10 +299,7 @@ class="link-seesrc" target="_blank">Source</a>
               <span class="Comment">## some procedures, such as getaddrinfo)</span>
   <span class="Identifier">AF_UNIX</span> <span class="Other">=</span> <span class="DecNumber">1</span><span class="Other">,</span>                  <span class="Comment">## for local socket (using a file). Unsupported on Windows.</span>
   <span class="Identifier">AF_INET</span> <span class="Other">=</span> <span class="DecNumber">2</span><span class="Other">,</span>                  <span class="Comment">## for network protocol IPv4 or</span>
-  <span class="Identifier">AF_INET6</span> <span class="Other">=</span> <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">macosx</span><span class="Other">)</span><span class="Other">:</span>
-    <span class="DecNumber">30</span>
-  <span class="Keyword"> else</span><span class="Other">:</span>
-    <span class="DecNumber">23</span>                        <span class="Comment">## for network protocol IPv6.</span></pre></dt>
+  <span class="Identifier">AF_INET6</span> <span class="Other">=</span> <span class="DecNumber">23</span></pre></dt>
 <dd>
 
 
@@ -337,11 +329,7 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">IPPROTO_TCP</span> <span class="Other">=</span> <span class="DecNumber">6</span><span class="Other">,</span>              <span class="Comment">## Transmission control protocol.</span>
   <span class="Identifier">IPPROTO_UDP</span> <span class="Other">=</span> <span class="DecNumber">17</span><span class="Other">,</span>             <span class="Comment">## User datagram protocol.</span>
-  <span class="Identifier">IPPROTO_IP</span><span class="Other">,</span>                 <span class="Comment">## Internet protocol. Unsupported on Windows.</span>
-  <span class="Identifier">IPPROTO_IPV6</span><span class="Other">,</span>               <span class="Comment">## Internet Protocol Version 6. Unsupported on Windows.</span>
-  <span class="Identifier">IPPROTO_RAW</span><span class="Other">,</span>                <span class="Comment">## Raw IP Packets Protocol. Unsupported on Windows.</span>
-  <span class="Identifier">IPPROTO_ICMP</span><span class="Other">,</span>               <span class="Comment">## Control message protocol. Unsupported on Windows.</span>
-  <span class="Identifier">IPPROTO_ICMPV6</span>              <span class="Comment">## Control message protocol for IPv6. Unsupported on Windows.</span></pre></dt>
+  <span class="Identifier">IPPROTO_IP</span><span class="Other">,</span> <span class="Identifier">IPPROTO_IPV6</span><span class="Other">,</span> <span class="Identifier">IPPROTO_RAW</span><span class="Other">,</span> <span class="Identifier">IPPROTO_ICMP</span><span class="Other">,</span> <span class="Identifier">IPPROTO_ICMPV6</span></pre></dt>
 <dd>
 
 third argument to <tt class="docutils literal"><span class="pre">socket</span></tt> proc
@@ -532,31 +520,61 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L179" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="createNativeSocket,Domain,SockType,Protocol"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#createNativeSocket%2CDomain%2CSockType%2CProtocol"><span class="Identifier">createNativeSocket</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">:</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a> <span class="Other">=</span> <span class="Identifier">AF_INET</span><span class="Other">;</span> <span class="Identifier">sockType</span><span class="Other">:</span> <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a> <span class="Other">=</span> <span class="Identifier">SOCK_STREAM</span><span class="Other">;</span>
-                       <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Identifier">IPPROTO_TCP</span><span class="Other">)</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="close,SocketHandle"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#close%2CSocketHandle"><span class="Identifier">close</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-Creates a new socket; returns <tt class="docutils literal"><span class="pre">osInvalidSocket</span></tt> if an error occurs.
+closes a socket.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L188"
 class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L188" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="createNativeSocket,cint,cint,cint"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#createNativeSocket%2Ccint%2Ccint%2Ccint"><span class="Identifier">createNativeSocket</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span> <span class="Identifier">sockType</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span> <span class="Identifier">protocol</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">)</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+<a id="setInheritable,SocketHandle,bool"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#setInheritable%2CSocketHandle%2Cbool"><span class="Identifier">setInheritable</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">;</span> <span class="Identifier">inheritable</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Set whether a socket is inheritable by child processes. Returns <tt class="docutils literal"><span class="pre">true</span></tt> on success.</p>
+<p>This function is not implemented on all platform, test for availability with <tt class="docutils literal"><span class="pre">declared() &lt;system.html#declared,untyped&gt;</span></tt>.</p>
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L198"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L198" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="createNativeSocket,cint,cint,cint,bool"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#createNativeSocket%2Ccint%2Ccint%2Ccint%2Cbool"><span class="Identifier">createNativeSocket</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span> <span class="Identifier">sockType</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span> <span class="Identifier">protocol</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span>
+                       <span class="Identifier">inheritable</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Creates a new socket; returns <tt class="docutils literal"><span class="pre">osInvalidSocket</span></tt> if an error occurs.</p>
+<p><tt class="docutils literal"><span class="pre">inheritable</span></tt> decides if the resulting SocketHandle can be inherited by child processes.</p>
 <p>Use this overload if one of the enums specified above does not contain what you need.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L194"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L206"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L194" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L206" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="createNativeSocket,Domain,SockType,Protocol,bool"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#createNativeSocket%2CDomain%2CSockType%2CProtocol%2Cbool"><span class="Identifier">createNativeSocket</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">:</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a> <span class="Other">=</span> <span class="Identifier">AF_INET</span><span class="Other">;</span> <span class="Identifier">sockType</span><span class="Other">:</span> <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a> <span class="Other">=</span> <span class="Identifier">SOCK_STREAM</span><span class="Other">;</span>
+                       <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Identifier">IPPROTO_TCP</span><span class="Other">;</span>
+                       <span class="Identifier">inheritable</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Creates a new socket; returns <tt class="docutils literal"><span class="pre">osInvalidSocket</span></tt> if an error occurs.</p>
+<p><tt class="docutils literal"><span class="pre">inheritable</span></tt> decides if the resulting SocketHandle can be inherited by child processes.</p>
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L226"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L226" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newNativeSocket,Domain,SockType,Protocol"></a>
@@ -571,9 +589,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new socket; returns <tt class="docutils literal"><span class="pre">osInvalidSocket</span></tt> if an error occurs.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L202"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L236"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L202" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L236" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newNativeSocket,cint,cint,cint"></a>
@@ -589,20 +607,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Use this overload if one of the enums specified above does not contain what you need.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L209"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L243"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L209" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="close,SocketHandle"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#close%2CSocketHandle"><span class="Identifier">close</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-closes a socket.
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L218"
-class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L218" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L243" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindAddr,SocketHandle,ptr.SockAddr,SockLen"></a>
@@ -612,9 +619,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L227"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L252"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L227" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L252" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="listen,SocketHandle"></a>
@@ -624,9 +631,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Marks <tt class="docutils literal"><span class="pre">socket</span></tt> as accepting connections. <tt class="docutils literal"><span class="pre">Backlog</span></tt> specifies the maximum length of the queue of pending connections.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L231"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L256"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L231" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L256" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getAddrInfo,string,Port,Domain,SockType,Protocol"></a>
@@ -638,9 +645,9 @@ class="link-seesrc" target="_blank">Source</a>
 <blockquote><p><strong>Warning</strong>: The resulting <tt class="docutils literal"><span class="pre">ptr AddrInfo</span></tt> must be freed using <tt class="docutils literal"><span class="pre">freeAddrInfo</span></tt>!</p></blockquote>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L241"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L266"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L241" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L266" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ntohl,uint32"></a>
@@ -649,9 +656,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts 32-bit unsigned integers from network to host byte order. On machines where the host byte order is the same as network byte order, this is a no-op; otherwise, it performs a 4-byte swap operation.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L268"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L293"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L268" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L293" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ntohs,uint16"></a>
@@ -660,9 +667,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts 16-bit unsigned integers from network to host byte order. On machines where the host byte order is the same as network byte order, this is a no-op; otherwise, it performs a 2-byte swap operation.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L278"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L303"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L278" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L303" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getServByName,string,string"></a>
@@ -674,9 +681,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>On posix this will search through the <tt class="docutils literal"><span class="pre">/etc/services</span></tt> file.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L297"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L322"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L297" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L322" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getServByPort,Port,string"></a>
@@ -688,9 +695,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>On posix this will search through the <tt class="docutils literal"><span class="pre">/etc/services</span></tt> file.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L313"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L338"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L313" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L338" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getHostByAddr,string"></a>
@@ -699,9 +706,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 This function will lookup the hostname of an IP Address.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L329"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L354"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L329" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L354" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getHostByName,string"></a>
@@ -710,9 +717,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 This function will lookup the IP address of a hostname.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L371"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L396"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L371" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L396" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getHostname"></a>
@@ -721,9 +728,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the local hostname (not the FQDN)
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L400"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L425"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L400" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L425" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getSockDomain,SocketHandle"></a>
@@ -732,9 +739,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns the socket's domain (AF_INET or AF_INET6).
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L416"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L441"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L416" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L441" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getAddrString,ptr.SockAddr"></a>
@@ -744,9 +751,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 return the string representation of address within sockAddr
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L428"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L454"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L428" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L454" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getSockName,SocketHandle"></a>
@@ -755,9 +762,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns the socket's associated port number.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L461"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L487"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L461" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L487" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getLocalAddr,SocketHandle,Domain"></a>
@@ -769,9 +776,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Similar to POSIX's <span id="getsockname_1">getsockname</span>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L476"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L502"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L476" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L502" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getPeerAddr,SocketHandle,Domain"></a>
@@ -783,9 +790,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Similar to POSIX's <span id="getpeername_1">getpeername</span></p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L513"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L539"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L513" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L539" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getSockOptInt,SocketHandle,int,int"></a>
@@ -795,9 +802,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 getsockopt for integer options.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L550"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L576"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L550" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L576" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setSockOptInt,SocketHandle,int,int,int"></a>
@@ -807,9 +814,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 setsockopt for integer options.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L560"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L586"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L560" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L586" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setBlocking,SocketHandle,bool"></a>
@@ -820,9 +827,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Raises OSError on error.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L568"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L594"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L568" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L594" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="selectRead,seq[SocketHandle],int"></a>
@@ -833,9 +840,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><tt class="docutils literal"><span class="pre">timeout</span></tt> is specified in milliseconds and <tt class="docutils literal"><span class="pre">-1</span></tt> can be specified for an unlimited time.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L612"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L638"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L612" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L638" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="selectWrite,seq[SocketHandle],int"></a>
@@ -847,22 +854,24 @@ class="link-seesrc" target="_blank">Source</a>
 <p><tt class="docutils literal"><span class="pre">timeout</span></tt> is specified in milliseconds and <tt class="docutils literal"><span class="pre">-1</span></tt> can be specified for an unlimited time.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L633"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L659"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L633" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L659" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="accept,SocketHandle"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#accept%2CSocketHandle"><span class="Identifier">accept</span></a><span class="Other">(</span><span class="Identifier">fd</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">,</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#accept%2CSocketHandle"><span class="Identifier">accept</span></a><span class="Other">(</span><span class="Identifier">fd</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">;</span> <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span>
+    <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">,</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Accepts a new client connection.</p>
+<p><tt class="docutils literal"><span class="pre">inheritable</span></tt> decides if the resulting SocketHandle can be inherited by child processes.</p>
 <p>Returns (osInvalidSocket, &quot;&quot;) if an error occurred.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L655"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L681"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L655" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L681" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -876,9 +885,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts 32-bit unsigned integers from host to network byte order. On machines where the host byte order is the same as network byte order, this is a no-op; otherwise, it performs a 4-byte swap operation.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L285"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L310"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L285" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L310" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="htons.t,uint16"></a>
@@ -887,9 +896,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts 16-bit unsigned integers from host to network byte order. On machines where the host byte order is the same as network byte order, this is a no-op; otherwise, it performs a 2-byte swap operation.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L291"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/nativesockets.nim#L316"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L291" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/nativesockets.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -897,7 +906,7 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="19">
 <h1><a class="toc-backref" href="#19">Exports</a></h1>
 <dl class="item">
-<a href="winlean.html#WSAEWOULDBLOCK"><span class="Identifier">WSAEWOULDBLOCK</span></a>, <a href="winlean.html#WSAECONNRESET"><span class="Identifier">WSAECONNRESET</span></a>, <a href="winlean.html#WSAECONNABORTED"><span class="Identifier">WSAECONNABORTED</span></a>, <a href="winlean.html#WSAENETRESET"><span class="Identifier">WSAENETRESET</span></a>, <a href="winlean.html#WSANOTINITIALISED"><span class="Identifier">WSANOTINITIALISED</span></a>, <a href="winlean.html#WSAENOTSOCK"><span class="Identifier">WSAENOTSOCK</span></a>, <a href="winlean.html#WSAEINPROGRESS"><span class="Identifier">WSAEINPROGRESS</span></a>, <a href="winlean.html#WSAEINTR"><span class="Identifier">WSAEINTR</span></a>, <a href="winlean.html#WSAEDISCON"><span class="Identifier">WSAEDISCON</span></a>, <a href="winlean.html#ERROR_NETNAME_DELETED"><span class="Identifier">ERROR_NETNAME_DELETED</span></a>, <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a>, <a href="winlean.html#Sockaddr_in"><span class="Identifier">Sockaddr_in</span></a>, <a href="winlean.html#AddrInfo"><span class="Identifier">AddrInfo</span></a>, <a href="winlean.html#INADDR_ANY"><span class="Identifier">INADDR_ANY</span></a>, <a href="winlean.html#SockAddr"><span class="Identifier">SockAddr</span></a>, <a href="winlean.html#SockLen"><span class="Identifier">SockLen</span></a>, <a href="winlean.html#Sockaddr_in6"><span class="Identifier">Sockaddr_in6</span></a>, <a href="winlean.html#Sockaddr_storage"><span class="Identifier">Sockaddr_storage</span></a>, <a href="winlean.html#inet_ntoa"><span class="Identifier">inet_ntoa</span></a>, <a href="winlean.html#recv"><span class="Identifier">recv</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="options.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="os.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="winlean.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="winlean.html#connect"><span class="Identifier">connect</span></a>, <a href="winlean.html#send"><span class="Identifier">send</span></a>, <a href="winlean.html#accept"><span class="Identifier">accept</span></a>, <a href="winlean.html#recvfrom"><span class="Identifier">recvfrom</span></a>, <a href="winlean.html#sendto"><span class="Identifier">sendto</span></a>, <a href="winlean.html#freeaddrinfo"><span class="Identifier">freeaddrinfo</span></a>, <a href="winlean.html#SO_ERROR"><span class="Identifier">SO_ERROR</span></a>, <a href="winlean.html#SOL_SOCKET"><span class="Identifier">SOL_SOCKET</span></a>, <a href="winlean.html#SOMAXCONN"><span class="Identifier">SOMAXCONN</span></a>, <a href="winlean.html#SO_ACCEPTCONN"><span class="Identifier">SO_ACCEPTCONN</span></a>, <a href="winlean.html#SO_BROADCAST"><span class="Identifier">SO_BROADCAST</span></a>, <a href="winlean.html#SO_DEBUG"><span class="Identifier">SO_DEBUG</span></a>, <a href="winlean.html#SO_DONTROUTE"><span class="Identifier">SO_DONTROUTE</span></a>, <a href="winlean.html#SO_KEEPALIVE"><span class="Identifier">SO_KEEPALIVE</span></a>, <a href="winlean.html#SO_OOBINLINE"><span class="Identifier">SO_OOBINLINE</span></a>, <a href="winlean.html#SO_REUSEADDR"><span class="Identifier">SO_REUSEADDR</span></a>, <a href="winlean.html#SO_REUSEPORT"><span class="Identifier">SO_REUSEPORT</span></a>, <a href="winlean.html#MSG_PEEK"><span class="Identifier">MSG_PEEK</span></a>
+<a href="winlean.html#WSAEWOULDBLOCK"><span class="Identifier">WSAEWOULDBLOCK</span></a>, <a href="winlean.html#WSAECONNRESET"><span class="Identifier">WSAECONNRESET</span></a>, <a href="winlean.html#WSAECONNABORTED"><span class="Identifier">WSAECONNABORTED</span></a>, <a href="winlean.html#WSAENETRESET"><span class="Identifier">WSAENETRESET</span></a>, <a href="winlean.html#WSANOTINITIALISED"><span class="Identifier">WSANOTINITIALISED</span></a>, <a href="winlean.html#WSAENOTSOCK"><span class="Identifier">WSAENOTSOCK</span></a>, <a href="winlean.html#WSAEINPROGRESS"><span class="Identifier">WSAEINPROGRESS</span></a>, <a href="winlean.html#WSAEINTR"><span class="Identifier">WSAEINTR</span></a>, <a href="winlean.html#WSAEDISCON"><span class="Identifier">WSAEDISCON</span></a>, <a href="winlean.html#ERROR_NETNAME_DELETED"><span class="Identifier">ERROR_NETNAME_DELETED</span></a>, <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a>, <a href="winlean.html#Sockaddr_in"><span class="Identifier">Sockaddr_in</span></a>, <a href="winlean.html#AddrInfo"><span class="Identifier">AddrInfo</span></a>, <a href="winlean.html#INADDR_ANY"><span class="Identifier">INADDR_ANY</span></a>, <a href="winlean.html#SockAddr"><span class="Identifier">SockAddr</span></a>, <a href="winlean.html#SockLen"><span class="Identifier">SockLen</span></a>, <a href="winlean.html#Sockaddr_in6"><span class="Identifier">Sockaddr_in6</span></a>, <a href="winlean.html#Sockaddr_storage"><span class="Identifier">Sockaddr_storage</span></a>, <a href="winlean.html#inet_ntoa"><span class="Identifier">inet_ntoa</span></a>, <a href="winlean.html#recv"><span class="Identifier">recv</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="options.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="os.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="winlean.html#=="><span class="Identifier">==</span></a>, <a href="system.html#=="><span class="Identifier">==</span></a>, <a href="winlean.html#connect"><span class="Identifier">connect</span></a>, <a href="winlean.html#send"><span class="Identifier">send</span></a>, <a href="winlean.html#accept"><span class="Identifier">accept</span></a>, <a href="winlean.html#recvfrom"><span class="Identifier">recvfrom</span></a>, <a href="winlean.html#sendto"><span class="Identifier">sendto</span></a>, <a href="winlean.html#freeaddrinfo"><span class="Identifier">freeaddrinfo</span></a>, <a href="winlean.html#SO_ERROR"><span class="Identifier">SO_ERROR</span></a>, <a href="winlean.html#SOL_SOCKET"><span class="Identifier">SOL_SOCKET</span></a>, <a href="winlean.html#SOMAXCONN"><span class="Identifier">SOMAXCONN</span></a>, <a href="winlean.html#SO_ACCEPTCONN"><span class="Identifier">SO_ACCEPTCONN</span></a>, <a href="winlean.html#SO_BROADCAST"><span class="Identifier">SO_BROADCAST</span></a>, <a href="winlean.html#SO_DEBUG"><span class="Identifier">SO_DEBUG</span></a>, <a href="winlean.html#SO_DONTROUTE"><span class="Identifier">SO_DONTROUTE</span></a>, <a href="winlean.html#SO_KEEPALIVE"><span class="Identifier">SO_KEEPALIVE</span></a>, <a href="winlean.html#SO_OOBINLINE"><span class="Identifier">SO_OOBINLINE</span></a>, <a href="winlean.html#SO_REUSEADDR"><span class="Identifier">SO_REUSEADDR</span></a>, <a href="winlean.html#SO_REUSEPORT"><span class="Identifier">SO_REUSEPORT</span></a>, <a href="winlean.html#MSG_PEEK"><span class="Identifier">MSG_PEEK</span></a>
 </dl></div>
 
   </div>
@@ -907,7 +916,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:11 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:21:26 UTC</small>
       </div>
     </div>
   </div>

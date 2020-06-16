@@ -166,8 +166,6 @@
 ##
 ## * The effect system (``raises: []``) does not work with async procedures.
 
-include "system/inclrtl"
-
 import os, tables, strutils, times, heapqueue, options, asyncstreams
 import options, math, std/monotimes
 import asyncfutures except callSoon
@@ -229,6 +227,16 @@ proc callSoon*(cbproc: proc () {.gcsafe.}) {.gcsafe.}
 proc initCallSoonProc =
   if asyncfutures.getCallSoonProc().isNil:
     asyncfutures.setCallSoonProc(callSoon)
+
+template implementSetInheritable() {.dirty.} =
+  when declared(setInheritable):
+    proc setInheritable*(fd: AsyncFD, inheritable: bool): bool =
+      ## Control whether a file handle can be inherited by child processes.
+      ## Returns ``true`` on success.
+      ##
+      ## This procedure is not guaranteed to be available for all platforms.
+      ## Test for availability with `declared()`_.
+      fd.FileHandle.setInheritable(inheritable)
 
 when defined(windows) or defined(nimdoc):
   import winlean, sets, hashes
@@ -697,7 +705,8 @@ when defined(windows) or defined(nimdoc):
           retFuture.complete(bytesReceived)
     return retFuture
 
-  proc acceptAddr*(socket: AsyncFD, flags = {SocketFlag.SafeDisconn}):
+  proc acceptAddr*(socket: AsyncFD, flags = {SocketFlag.SafeDisconn},
+                   inheritable = defined(nimInheritHandles)):
       owned(Future[tuple[address: string, client: AsyncFD]]) =
     ## Accepts a new connection. Returns a future containing the client socket
     ## corresponding to that connection and the remote address of the client.
@@ -706,6 +715,9 @@ when defined(windows) or defined(nimdoc):
     ## The resulting client socket is automatically registered to the
     ## dispatcher.
     ##
+    ## If ``inheritable`` is false (the default), the resulting client socket will
+    ## not be inheritable by child processes.
+    ##
     ## The ``accept`` call may result in an error if the connecting socket
     ## disconnects during the duration of the ``accept``. If the ``SafeDisconn``
     ## flag is specified then this error will not be raised and instead
@@ -713,7 +725,7 @@ when defined(windows) or defined(nimdoc):
     verifyPresence(socket)
     var retFuture = newFuture[tuple[address: string, client: AsyncFD]]("acceptAddr")
 
-    var clientSock = createNativeSocket()
+    var clientSock = createNativeSocket(inheritable = inheritable)
     if clientSock == osInvalidSocket: raiseOSError(osLastError())
 
     const lpOutputLen = 1024
@@ -789,6 +801,8 @@ when defined(windows) or defined(nimdoc):
       # free ``ol``.
 
     return retFuture
+
+  implementSetInheritable()
 
   proc closeSocket*(socket: AsyncFD) =
     ## Closes a socket and ensures that it is unregistered.
@@ -1092,6 +1106,9 @@ else:
   import selectors
   from posix import EINTR, EAGAIN, EINPROGRESS, EWOULDBLOCK, MSG_PEEK,
                     MSG_NOSIGNAL
+  when declared(posix.accept4):
+    from posix import accept4, SOCK_CLOEXEC
+
   const
     InitCallbackListSize = 4         # initial size of callbacks sequence,
                                      # associated with file/socket descriptor.
@@ -1265,6 +1282,8 @@ else:
       # descriptor was unregistered in callback via `unregister()`.
       discard
 
+  implementSetInheritable()
+
   proc closeSocket*(sock: AsyncFD) =
     let selector = getGlobalDispatcher().selector
     if sock.SocketHandle notin selector:
@@ -1352,7 +1371,8 @@ else:
                      flags.toOSFlags())
       if res < 0:
         let lastError = osLastError()
-        if lastError.int32 notin {EINTR, EWOULDBLOCK, EAGAIN}:
+        if lastError.int32 != EINTR and lastError.int32 != EWOULDBLOCK and
+           lastError.int32 != EAGAIN:
           if flags.isDisconnectionError(lastError):
             retFuture.complete("")
           else:
@@ -1380,7 +1400,8 @@ else:
                      flags.toOSFlags())
       if res < 0:
         let lastError = osLastError()
-        if lastError.int32 notin {EINTR, EWOULDBLOCK, EAGAIN}:
+        if lastError.int32 != EINTR and lastError.int32 != EWOULDBLOCK and
+           lastError.int32 != EAGAIN:
           if flags.isDisconnectionError(lastError):
             retFuture.complete(0)
           else:
@@ -1448,7 +1469,8 @@ else:
                        cast[ptr SockAddr](addr(staddr[0])), stalen)
       if res < 0:
         let lastError = osLastError()
-        if lastError.int32 notin {EINTR, EWOULDBLOCK, EAGAIN}:
+        if lastError.int32 != EINTR and lastError.int32 != EWOULDBLOCK and
+           lastError.int32 != EAGAIN:
           retFuture.fail(newException(OSError, osErrorMsg(lastError)))
         else:
           result = false # We still want this callback to be called.
@@ -1473,7 +1495,8 @@ else:
                          saddr, saddrLen)
       if res < 0:
         let lastError = osLastError()
-        if lastError.int32 notin {EINTR, EWOULDBLOCK, EAGAIN}:
+        if lastError.int32 != EINTR and lastError.int32 != EWOULDBLOCK and
+           lastError.int32 != EAGAIN:
           retFuture.fail(newException(OSError, osErrorMsg(lastError)))
         else:
           result = false
@@ -1482,7 +1505,8 @@ else:
     addRead(socket, cb)
     return retFuture
 
-  proc acceptAddr*(socket: AsyncFD, flags = {SocketFlag.SafeDisconn}):
+  proc acceptAddr*(socket: AsyncFD, flags = {SocketFlag.SafeDisconn},
+                   inheritable = defined(nimInheritHandles)):
       owned(Future[tuple[address: string, client: AsyncFD]]) =
     var retFuture = newFuture[tuple[address: string,
         client: AsyncFD]]("acceptAddr")
@@ -1490,11 +1514,24 @@ else:
       result = true
       var sockAddress: Sockaddr_storage
       var addrLen = sizeof(sockAddress).SockLen
-      var client = accept(sock.SocketHandle,
-                          cast[ptr SockAddr](addr(sockAddress)), addr(addrLen))
+      var client =
+        when declared(accept4):
+          accept4(sock.SocketHandle, cast[ptr SockAddr](addr(sockAddress)),
+                  addr(addrLen), if inheritable: 0 else: SOCK_CLOEXEC)
+        else:
+          accept(sock.SocketHandle, cast[ptr SockAddr](addr(sockAddress)),
+                 addr(addrLen))
+      when declared(setInheritable) and not declared(accept4):
+        if client != osInvalidSocket and not setInheritable(client, inheritable):
+          # Set failure first because close() itself can fail,
+          # altering osLastError().
+          retFuture.fail(newOSError(osLastError()))
+          close client
+          return false
+
       if client == osInvalidSocket:
         let lastError = osLastError()
-        assert lastError.int32 notin {EWOULDBLOCK, EAGAIN}
+        assert lastError.int32 != EWOULDBLOCK and lastError.int32 != EAGAIN
         if lastError.int32 == EINTR:
           return false
         else:
@@ -1576,8 +1613,9 @@ proc poll*(timeout = 500) =
   ## `epoll`:idx: or `kqueue`:idx: primitive only once.
   discard runOnce(timeout)
 
-template createAsyncNativeSocketImpl(domain, sockType, protocol) =
-  let handle = createNativeSocket(domain, sockType, protocol)
+template createAsyncNativeSocketImpl(domain, sockType, protocol: untyped,
+                                     inheritable = defined(nimInheritHandles)) =
+  let handle = createNativeSocket(domain, sockType, protocol, inheritable)
   if handle == osInvalidSocket:
     return osInvalidSocket.AsyncFD
   handle.setBlocking(false)
@@ -1587,13 +1625,15 @@ template createAsyncNativeSocketImpl(domain, sockType, protocol) =
   register(result)
 
 proc createAsyncNativeSocket*(domain: cint, sockType: cint,
-                           protocol: cint): AsyncFD =
-  createAsyncNativeSocketImpl(domain, sockType, protocol)
+                              protocol: cint,
+                              inheritable = defined(nimInheritHandles)): AsyncFD =
+  createAsyncNativeSocketImpl(domain, sockType, protocol, inheritable)
 
 proc createAsyncNativeSocket*(domain: Domain = Domain.AF_INET,
-                           sockType: SockType = SOCK_STREAM,
-                           protocol: Protocol = IPPROTO_TCP): AsyncFD =
-  createAsyncNativeSocketImpl(domain, sockType, protocol)
+                              sockType: SockType = SOCK_STREAM,
+                              protocol: Protocol = IPPROTO_TCP,
+                              inheritable = defined(nimInheritHandles)): AsyncFD =
+  createAsyncNativeSocketImpl(domain, sockType, protocol, inheritable)
 
 proc newAsyncNativeSocket*(domain: cint, sockType: cint,
     protocol: cint): AsyncFD {.deprecated: "use createAsyncNativeSocket instead".} =
@@ -1822,12 +1862,17 @@ proc withTimeout*[T](fut: Future[T], timeout: int): owned(Future[bool]) =
   return retFuture
 
 proc accept*(socket: AsyncFD,
-    flags = {SocketFlag.SafeDisconn}): owned(Future[AsyncFD]) =
+             flags = {SocketFlag.SafeDisconn},
+             inheritable = defined(nimInheritHandles)): owned(Future[AsyncFD]) =
   ## Accepts a new connection. Returns a future containing the client socket
   ## corresponding to that connection.
+  ##
+  ## If ``inheritable`` is false (the default), the resulting client socket
+  ## will not be inheritable by child processes.
+  ##
   ## The future will complete when the connection is successfully accepted.
   var retFut = newFuture[AsyncFD]("accept")
-  var fut = acceptAddr(socket, flags)
+  var fut = acceptAddr(socket, flags, inheritable)
   fut.callback =
     proc (future: Future[tuple[address: string, client: AsyncFD]]) =
       assert future.finished

@@ -79,7 +79,7 @@ function main() {
       <input type="checkbox" id="checkbox" />
       <div class="slider round"></div>
     </label>
-   &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
   </div>
   <div id="global-links">
     <ul class="simple-boot">
@@ -92,12 +92,23 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
+    <div class="search-groupby">
+    Group by:
+    <select onchange="groupBy(this.value)">
+      <option value="section">Section</option>
+      <option value="type">Type</option>
+    </select>
+  </div>
+
   <ul class="simple simple-toc" id="toc-list">
 <li><a class="reference" id="introduction_toc" href="#introduction">Introduction</a></li>
 <ul class="simple"><li><a class="reference" id="introduction-quick-start_toc" href="#introduction-quick-start">Quick start</a></li>
@@ -122,7 +133,7 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Author:</th><td> Erik O'Leary</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.2.1</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.3.5</td></tr>
 </tbody></table>
 <h1><a class="toc-backref" id="introduction" href="#introduction">Introduction</a></h1><p>This document describes the <span id="documentation-generation-tools_1">documentation generation tools</span> built into the <a class="reference external" href="nimc.html">Nim compiler</a>, which can generate HTML and JSON output from input .nim files and projects, as well as HTML and LaTeX from input RST (reStructuredText) files. The output documentation will include module dependencies (<tt class="docutils literal"><span class="pre">import</span></tt>), any top-level documentation comments (##), and exported symbols (*), including procedures, types, and variables.</p>
 
@@ -130,8 +141,16 @@ function main() {
 <pre>nim doc &lt;filename&gt;.nim</pre>
 <p>Generate HTML documentation for a whole project:</p>
 <pre># delete any htmldocs/*.idx file before starting
-nim doc --project --index:on --git.url:&lt;url&gt; --git.commit:&lt;tag&gt; &lt;main_filename&gt;.nim
-nim buildIndex -o:htmldocs/theindex.html htmldocs</pre>
+nim doc --project --index:on --git.url:&lt;url&gt; --git.commit:&lt;tag&gt; --outdir:htmldocs &lt;main_filename&gt;.nim
+# this will generate html files, a theindex.html index, css and js under `htmldocs`
+# See also `--docroot` to specify a relative root.
+# to get search (dochacks.js) to work locally, you need a server otherwise
+# CORS will prevent opening file:// urls; this works:
+python3 -m http.server 7029 --directory htmldocs
+# When --outdir is omitted it defaults to $projectPath/htmldocs,
+or `$nimcache/htmldocs` with `--usenimcache` which avoids clobbering your sources;
+and likewise without `--project`.
+Adding `-r` will open in a browser directly.</pre>
 
 <h2><a class="toc-backref" id="introduction-documentation-comments" href="#introduction-documentation-comments">Documentation Comments</a></h2><p>Any comments which are preceded by a double-hash (##), are interpreted as documentation.  Comments are parsed as RST (see <a class="reference external" href="http://docutils.sourceforge.net/docs/user/rst/quickref.html">reference</a>), providing Nim module authors the ability to easily generate richly formatted documentation with only their well-documented code.</p>
 <p>Example:</p>
@@ -279,7 +298,7 @@ proc helloWorld(times: int) {.raises: [], tags: [].}
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:18:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:11 UTC</small>
       </div>
     </div>
   </div>

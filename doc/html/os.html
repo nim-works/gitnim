@@ -92,19 +92,16 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
-  <div class="search-groupby">
-    Group by:
-    <select onchange="groupBy(this.value)">
-      <option value="section">Section</option>
-      <option value="type">Type</option>
-    </select>
-  </div>
+  
   <ul class="simple simple-toc" id="toc-list">
 <li>
   <a class="reference reference-toplevel" href="#6" id="56">Imports</a>
@@ -127,21 +124,11 @@ function main() {
     title="OSErrorCode = distinct int32"><wbr />OSError<wbr />Code<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#FilePermission"
     title="FilePermission = enum
-  fpUserExec,                 ## execute access for the file owner
-  fpUserWrite,                ## write access for the file owner
-  fpUserRead,                 ## read access for the file owner
-  fpGroupExec,                ## execute access for the group
-  fpGroupWrite,               ## write access for the group
-  fpGroupRead,                ## read access for the group
-  fpOthersExec,               ## execute access for others
-  fpOthersWrite,              ## write access for others
-  fpOthersRead                ## read access for others"><wbr />File<wbr />Permission<span class="attachedType"></span></a></li>
+  fpUserExec, fpUserWrite, fpUserRead, fpGroupExec, fpGroupWrite, fpGroupRead,
+  fpOthersExec, fpOthersWrite, fpOthersRead"><wbr />File<wbr />Permission<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#PathComponent"
     title="PathComponent = enum
-  pcFile,                     ## path refers to a file
-  pcLinkToFile,               ## path refers to a symbolic link to a file
-  pcDir,                      ## path refers to a directory
-  pcLinkToDir                 ## path refers to a symbolic link to a directory"><wbr />Path<wbr />Component<span class="attachedType"></span></a></li>
+  pcFile, pcLinkToFile, pcDir, pcLinkToDir"><wbr />Path<wbr />Component<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#DeviceId"
     title="DeviceId = Dev"><wbr />Device<wbr />Id<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#FileId"
@@ -303,6 +290,8 @@ function main() {
     title="setCurrentDir(newDir: string)"><wbr />set<wbr />Current<wbr />Dir<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#absolutePath%2Cstring"
     title="absolutePath(path: string; root = getCurrentDir()): string"><wbr />absolute<wbr />Path<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#normalizeExe%2Cstring"
+    title="normalizeExe(file: var string)"><wbr />normalize<wbr />Exe<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#normalizePath%2Cstring"
     title="normalizePath(path: var string)"><wbr />normalize<wbr />Path<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#normalizedPath%2Cstring"
@@ -450,7 +439,7 @@ function main() {
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="pathnorm.html">pathnorm</a>, <a class="reference external" href="posix.html">posix</a>, <a class="reference external" href="times.html">times</a>
+<a class="reference external" href="since.html">since</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="pathnorm.html">pathnorm</a>, <a class="reference external" href="posix.html">posix</a>, <a class="reference external" href="times.html">times</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -461,9 +450,9 @@ function main() {
 
 Effect that denotes a read from an environment variable.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L85"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L86"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L85" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L86" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="WriteEnvEffect"></a>
@@ -472,9 +461,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Effect that denotes a write to an environment variable.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L87"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L88"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L87" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L88" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ReadDirEffect"></a>
@@ -483,9 +472,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Effect that denotes a read operation from the directory structure.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L90"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L91"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L90" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L91" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="WriteDirEffect"></a>
@@ -494,9 +483,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Effect that denotes a write operation to the directory structure.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L93"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L94"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L93" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L94" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="OSErrorCode"></a>
@@ -505,22 +494,15 @@ class="link-seesrc" target="_blank">Source</a>
 
 Specifies an OS Error Code.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L97"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L98"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L97" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L98" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="FilePermission"></a>
 <dt><pre><a href="os.html#FilePermission"><span class="Identifier">FilePermission</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">fpUserExec</span><span class="Other">,</span>                 <span class="Comment">## execute access for the file owner</span>
-  <span class="Identifier">fpUserWrite</span><span class="Other">,</span>                <span class="Comment">## write access for the file owner</span>
-  <span class="Identifier">fpUserRead</span><span class="Other">,</span>                 <span class="Comment">## read access for the file owner</span>
-  <span class="Identifier">fpGroupExec</span><span class="Other">,</span>                <span class="Comment">## execute access for the group</span>
-  <span class="Identifier">fpGroupWrite</span><span class="Other">,</span>               <span class="Comment">## write access for the group</span>
-  <span class="Identifier">fpGroupRead</span><span class="Other">,</span>                <span class="Comment">## read access for the group</span>
-  <span class="Identifier">fpOthersExec</span><span class="Other">,</span>               <span class="Comment">## execute access for others</span>
-  <span class="Identifier">fpOthersWrite</span><span class="Other">,</span>              <span class="Comment">## write access for others</span>
-  <span class="Identifier">fpOthersRead</span>                <span class="Comment">## read access for others</span></pre></dt>
+  <span class="Identifier">fpUserExec</span><span class="Other">,</span> <span class="Identifier">fpUserWrite</span><span class="Other">,</span> <span class="Identifier">fpUserRead</span><span class="Other">,</span> <span class="Identifier">fpGroupExec</span><span class="Other">,</span> <span class="Identifier">fpGroupWrite</span><span class="Other">,</span> <span class="Identifier">fpGroupRead</span><span class="Other">,</span>
+  <span class="Identifier">fpOthersExec</span><span class="Other">,</span> <span class="Identifier">fpOthersWrite</span><span class="Other">,</span> <span class="Identifier">fpOthersRead</span></pre></dt>
 <dd>
 
 <p>File access permission, modelled after UNIX.</p>
@@ -531,17 +513,14 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1549"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1584"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1549" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1584" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="PathComponent"></a>
 <dt><pre><a href="os.html#PathComponent"><span class="Identifier">PathComponent</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">pcFile</span><span class="Other">,</span>                     <span class="Comment">## path refers to a file</span>
-  <span class="Identifier">pcLinkToFile</span><span class="Other">,</span>               <span class="Comment">## path refers to a symbolic link to a file</span>
-  <span class="Identifier">pcDir</span><span class="Other">,</span>                      <span class="Comment">## path refers to a directory</span>
-  <span class="Identifier">pcLinkToDir</span>                 <span class="Comment">## path refers to a symbolic link to a directory</span></pre></dt>
+  <span class="Identifier">pcFile</span><span class="Other">,</span> <span class="Identifier">pcLinkToFile</span><span class="Other">,</span> <span class="Identifier">pcDir</span><span class="Other">,</span> <span class="Identifier">pcLinkToDir</span></pre></dt>
 <dd>
 
 <p>Enumeration specifying a path component.</p>
@@ -551,9 +530,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1999"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2034"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1999" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2034" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="DeviceId"></a>
@@ -562,9 +541,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3012"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3056"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3012" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3056" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="FileId"></a>
@@ -573,9 +552,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3013"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3057"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3013" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3057" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="FileInfo"></a>
@@ -599,9 +578,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3016"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3060"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3016" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3060" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -616,9 +595,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Characters that may produce invalid filenames across Linux, Windows, Mac, etc. You can check if your filename contains these char and strip them for safety. Mac bans <tt class="docutils literal"><span class="pre">':'</span></tt>, Linux bans <tt class="docutils literal"><span class="pre">'/'</span></tt>, Windows bans all others.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L53"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L54"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L53" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L54" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="invalidFilenames"></a>
@@ -630,9 +609,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Filenames that may be invalid across Linux, Windows, Mac, etc. You can check if your filename match these and rename it for safety (Currently all invalid filenames are from Windows only).
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L57"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L58"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L57" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L58" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="doslikeFileSystem"></a>
@@ -766,9 +745,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Platform specific file extension for executables. On Windows <tt class="docutils literal"><span class="pre">[&quot;exe&quot;, &quot;cmd&quot;, &quot;bat&quot;]</span></tt>, on Posix <tt class="docutils literal"><span class="pre">[&quot;&quot;]</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1159"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1172"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1159" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1172" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -782,9 +761,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Ensures <tt class="docutils literal"><span class="pre">path</span></tt> has exactly 0 or 1 trailing <tt class="docutils literal"><span class="pre">DirSep</span></tt>, depending on <tt class="docutils literal"><span class="pre">trailingSep</span></tt>, and taking care of edge cases: it preservers whether a path is absolute or relative, and makes sure trailing sep is <tt class="docutils literal"><span class="pre">DirSep</span></tt>, not <tt class="docutils literal"><span class="pre">AltSep</span></tt>. Trailing <tt class="docutils literal"><span class="pre">/.</span></tt> are compressed, see examples.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L101"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L104"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L101" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L104" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="normalizePathEnd,string_2"></a>
@@ -792,17 +771,17 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 outplace overload
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">normalizePathEnd</span><span class="Other">(</span><span class="StringLit">&quot;/lib//.//&quot;</span><span class="Other">,</span> <span class="Identifier">trailingSep</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;/lib/&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">normalizePathEnd</span><span class="Other">(</span><span class="StringLit">&quot;lib/./.&quot;</span><span class="Other">,</span> <span class="Identifier">trailingSep</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;lib&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">normalizePathEnd</span><span class="Other">(</span><span class="StringLit">&quot;.//./.&quot;</span><span class="Other">,</span> <span class="Identifier">trailingSep</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;.&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">normalizePathEnd</span><span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="Identifier">trailingSep</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">normalizePathEnd</span><span class="Other">(</span><span class="StringLit">&quot;/&quot;</span><span class="Other">,</span> <span class="Identifier">trailingSep</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;/&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">normalizePathEnd</span><span class="Punctuation">(</span><span class="StringLit">&quot;/lib//.//&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">trailingSep</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">true</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/lib/&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">normalizePathEnd</span><span class="Punctuation">(</span><span class="StringLit">&quot;lib/./.&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">trailingSep</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">false</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;lib&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">normalizePathEnd</span><span class="Punctuation">(</span><span class="StringLit">&quot;.//./.&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">trailingSep</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">false</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;.&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">normalizePathEnd</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">trailingSep</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">true</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace"> </span><span class="Comment"># not / !</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">normalizePathEnd</span><span class="Punctuation">(</span><span class="StringLit">&quot;/&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">trailingSep</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">false</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/&quot;</span><span class="Whitespace"> </span><span class="Comment"># not &quot;&quot; !</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L124"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L127"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L124" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L127" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="joinPath,string,string"></a>
@@ -820,21 +799,21 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="uri.html#/,Uri,string">uri./ proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;usr&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;lib&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/lib&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;usr&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;lib/&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/lib/&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;usr&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;usr/&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;lib&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;lib&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;/lib&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;/lib&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;usr/&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;/lib&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/lib&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;usr/lib&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;../bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/bin&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;lib&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/lib&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;lib/&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/lib/&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;lib&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;lib&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;/lib&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/lib&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;/lib&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/lib&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/lib&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;../bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/bin&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L148"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L151"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L148" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L151" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="joinPath,varargs[string]"></a>
@@ -851,15 +830,15 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#splitPath,string">splitPath proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;a&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;a&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;a&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;b&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;c&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;a/b/c&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">joinPath</span><span class="Other">(</span><span class="StringLit">&quot;usr/lib&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;../../var&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;log&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;var/log&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;a&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;a&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;a&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;b&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;c&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;a/b/c&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">joinPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/lib&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;../../var&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;log&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;var/log&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L192"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L195"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L192" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L195" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="/,string,string"></a>
@@ -876,17 +855,17 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="uri.html#/,Uri,string">uri./ proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;usr&quot;</span> <span class="Operator">/</span> <span class="StringLit">&quot;&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr&quot;</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;&quot;</span> <span class="Operator">/</span> <span class="StringLit">&quot;lib&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;lib&quot;</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;&quot;</span> <span class="Operator">/</span> <span class="StringLit">&quot;/lib&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;/lib&quot;</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;usr/&quot;</span> <span class="Operator">/</span> <span class="StringLit">&quot;/lib/&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/lib/&quot;</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;usr&quot;</span> <span class="Operator">/</span> <span class="StringLit">&quot;lib&quot;</span> <span class="Operator">/</span> <span class="StringLit">&quot;../bin&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/bin&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr&quot;</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;lib&quot;</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;lib&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;/lib&quot;</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/lib&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/&quot;</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;/lib/&quot;</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/lib/&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr&quot;</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;lib&quot;</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;../bin&quot;</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/bin&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L218"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L221"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L218" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L221" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="splitPath,string"></a>
@@ -903,20 +882,20 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#relativePath,string,string">relativePath proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">splitPath</span><span class="Other">(</span><span class="StringLit">&quot;usr/local/bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Other">(</span><span class="StringLit">&quot;usr/local&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;bin&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">splitPath</span><span class="Other">(</span><span class="StringLit">&quot;usr/local/bin/&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Other">(</span><span class="StringLit">&quot;usr/local/bin&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">splitPath</span><span class="Other">(</span><span class="StringLit">&quot;/bin/&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Other">(</span><span class="StringLit">&quot;/bin&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span>
-<span class="Keyword">when</span> <span class="Other">(</span><span class="Identifier">NimMajor</span><span class="Other">,</span> <span class="Identifier">NimMinor</span><span class="Other">)</span> <span class="Operator">&lt;=</span> <span class="Other">(</span><span class="DecNumber">1</span><span class="Other">,</span> <span class="DecNumber">0</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">splitPath</span><span class="Other">(</span><span class="StringLit">&quot;/bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;bin&quot;</span><span class="Other">)</span>
-<span class="Keyword">else</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">splitPath</span><span class="Other">(</span><span class="StringLit">&quot;/bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Other">(</span><span class="StringLit">&quot;/&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;bin&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">splitPath</span><span class="Other">(</span><span class="StringLit">&quot;bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;bin&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">splitPath</span><span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">splitPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/local/bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/local&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">splitPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/local/bin/&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/local/bin&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">splitPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;/bin/&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;/bin&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="Identifier">NimMajor</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">NimMinor</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">&lt;=</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">splitPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;/bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Keyword">else</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">splitPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;/bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;/&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">splitPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">splitPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L238"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L241"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L241" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isAbsolute,string"></a>
@@ -927,22 +906,22 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Checks whether a given <tt class="docutils literal"><span class="pre">path</span></tt> is absolute.</p>
 <p>On Windows, network paths are considered absolute too.</p>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;&quot;</span><span class="Other">.</span><span class="Identifier">isAbsolute</span>
-<span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;.&quot;</span><span class="Other">.</span><span class="Identifier">isAbsolute</span>
-<span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;/&quot;</span><span class="Other">.</span><span class="Identifier">isAbsolute</span>
-  <span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;a/&quot;</span><span class="Other">.</span><span class="Identifier">isAbsolute</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;/a/&quot;</span><span class="Other">.</span><span class="Identifier">isAbsolute</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Operator">.</span><span class="Identifier">isAbsolute</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="StringLit">&quot;.&quot;</span><span class="Operator">.</span><span class="Identifier">isAbsolute</span><span class="Whitespace">
+</span><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;/&quot;</span><span class="Operator">.</span><span class="Identifier">isAbsolute</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="StringLit">&quot;a/&quot;</span><span class="Operator">.</span><span class="Identifier">isAbsolute</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;/a/&quot;</span><span class="Operator">.</span><span class="Identifier">isAbsolute</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L277"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L280"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L277" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L280" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="relativePath,string,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#relativePath%2Cstring%2Cstring"><span class="Identifier">relativePath</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">,</span> <span class="Identifier">base</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">sep</span> <span class="Other">=</span> <span class="Identifier">DirSep</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">noSideEffect</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span>
-    <span class="Identifier">extern</span><span class="Other">:</span> <span class="StringLit">&quot;nos$1&quot;</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#relativePath%2Cstring%2Cstring"><span class="Identifier">relativePath</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">,</span> <span class="Identifier">base</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">sep</span> <span class="Other">=</span> <span class="Identifier">DirSep</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">extern</span><span class="Other">:</span> <span class="StringLit">&quot;nos$1&quot;</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Converts <tt class="docutils literal"><span class="pre">path</span></tt> to a path relative to <tt class="docutils literal"><span class="pre">base</span></tt>.</p>
@@ -954,36 +933,35 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#tailDir,string">tailDir proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">relativePath</span><span class="Other">(</span><span class="StringLit">&quot;/Users/me/bar/z.nim&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;/Users/other/bad&quot;</span><span class="Other">,</span> <span class="CharLit">'/'</span><span class="Other">)</span> <span class="Operator">==</span>
-    <span class="StringLit">&quot;../../me/bar/z.nim&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">relativePath</span><span class="Other">(</span><span class="StringLit">&quot;/Users/me/bar/z.nim&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;/Users/other&quot;</span><span class="Other">,</span> <span class="CharLit">'/'</span><span class="Other">)</span> <span class="Operator">==</span>
-    <span class="StringLit">&quot;../me/bar/z.nim&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">relativePath</span><span class="Other">(</span><span class="StringLit">&quot;/Users///me/bar//z.nim&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;//Users/&quot;</span><span class="Other">,</span> <span class="CharLit">'/'</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;me/bar/z.nim&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">relativePath</span><span class="Other">(</span><span class="StringLit">&quot;/Users/me/bar/z.nim&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;/Users/me&quot;</span><span class="Other">,</span> <span class="CharLit">'/'</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;bar/z.nim&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">relativePath</span><span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;/users/moo&quot;</span><span class="Other">,</span> <span class="CharLit">'/'</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">relativePath</span><span class="Other">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;.&quot;</span><span class="Other">,</span> <span class="CharLit">'/'</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">relativePath</span><span class="Other">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;foo&quot;</span><span class="Other">,</span> <span class="CharLit">'/'</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;.&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">relativePath</span><span class="Punctuation">(</span><span class="StringLit">&quot;/Users/me/bar/z.nim&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;/Users/other/bad&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="CharLit">&apos;/&apos;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;../../me/bar/z.nim&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">relativePath</span><span class="Punctuation">(</span><span class="StringLit">&quot;/Users/me/bar/z.nim&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;/Users/other&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="CharLit">&apos;/&apos;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;../me/bar/z.nim&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">relativePath</span><span class="Punctuation">(</span><span class="StringLit">&quot;/Users///me/bar//z.nim&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;//Users/&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="CharLit">&apos;/&apos;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;me/bar/z.nim&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">relativePath</span><span class="Punctuation">(</span><span class="StringLit">&quot;/Users/me/bar/z.nim&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;/Users/me&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="CharLit">&apos;/&apos;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;bar/z.nim&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">relativePath</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;/users/moo&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="CharLit">&apos;/&apos;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">relativePath</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;.&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="CharLit">&apos;/&apos;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">relativePath</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="CharLit">&apos;/&apos;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;.&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L363"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L370"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L363" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L370" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isRelativeTo,string,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#isRelativeTo%2Cstring%2Cstring"><span class="Identifier">isRelativeTo</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">base</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#isRelativeTo%2Cstring%2Cstring"><span class="Identifier">isRelativeTo</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">base</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Returns true if <tt class="docutils literal"><span class="pre">path</span></tt> is relative to <tt class="docutils literal"><span class="pre">base</span></tt>.
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">isRelativeTo</span><span class="Other">(</span><span class="StringLit">&quot;./foo//bar&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;foo&quot;</span><span class="Other">)</span>
-<span class="Identifier">doAssert</span> <span class="Identifier">isRelativeTo</span><span class="Other">(</span><span class="StringLit">&quot;foo/bar&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;.&quot;</span><span class="Other">)</span>
-<span class="Identifier">doAssert</span> <span class="Identifier">isRelativeTo</span><span class="Other">(</span><span class="StringLit">&quot;/foo/bar.nim&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;/foo/bar.nim&quot;</span><span class="Other">)</span>
-<span class="Identifier">doAssert</span> <span class="Keyword">not</span> <span class="Identifier">isRelativeTo</span><span class="Other">(</span><span class="StringLit">&quot;foo/bar.nims&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;foo/bar.nim&quot;</span><span class="Other">)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">isRelativeTo</span><span class="Punctuation">(</span><span class="StringLit">&quot;./foo//bar&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">isRelativeTo</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo/bar&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;.&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">isRelativeTo</span><span class="Punctuation">(</span><span class="StringLit">&quot;/foo/bar.nim&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;/foo/bar.nim&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">isRelativeTo</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo/bar.nims&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo/bar.nim&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L445"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L458"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L445" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L458" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parentDir,string"></a>
@@ -1000,20 +978,20 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#parentDirs.i,string">parentDirs iterator</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">parentDir</span><span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-<span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">parentDir</span><span class="Other">(</span><span class="StringLit">&quot;/usr/local/bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;/usr/local&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">parentDir</span><span class="Other">(</span><span class="StringLit">&quot;foo/bar//&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">parentDir</span><span class="Other">(</span><span class="StringLit">&quot;//foo//bar//.&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;/foo&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">parentDir</span><span class="Other">(</span><span class="StringLit">&quot;./foo&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;.&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">parentDir</span><span class="Other">(</span><span class="StringLit">&quot;/./foo//./&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;/&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">parentDir</span><span class="Other">(</span><span class="StringLit">&quot;a//./&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;.&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">parentDir</span><span class="Other">(</span><span class="StringLit">&quot;a/b/c/..&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;a&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">parentDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+</span><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">parentDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;/usr/local/bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/usr/local&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">parentDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo/bar//&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">parentDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;//foo//bar//.&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/foo&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">parentDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;./foo&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;.&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">parentDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;/./foo//./&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">parentDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;a//./&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;.&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">parentDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;a/b/c/..&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;a&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L464"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L477"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L464" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L477" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tailDir,string"></a>
@@ -1028,18 +1006,18 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#parentDir,string">parentDir proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">tailDir</span><span class="Other">(</span><span class="StringLit">&quot;/bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;bin&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">tailDir</span><span class="Other">(</span><span class="StringLit">&quot;bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">tailDir</span><span class="Other">(</span><span class="StringLit">&quot;bin/&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">tailDir</span><span class="Other">(</span><span class="StringLit">&quot;/usr/local/bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/local/bin&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">tailDir</span><span class="Other">(</span><span class="StringLit">&quot;//usr//local//bin//&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr//local//bin//&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">tailDir</span><span class="Other">(</span><span class="StringLit">&quot;./usr/local/bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/local/bin&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">tailDir</span><span class="Other">(</span><span class="StringLit">&quot;usr/local/bin&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;local/bin&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">tailDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;/bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;bin&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">tailDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">tailDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;bin/&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">tailDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;/usr/local/bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/local/bin&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">tailDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;//usr//local//bin//&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr//local//bin//&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">tailDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;./usr/local/bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/local/bin&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">tailDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/local/bin&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;local/bin&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L500"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L513"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L500" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L513" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isRootDir,string"></a>
@@ -1048,17 +1026,17 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 Checks whether a given <tt class="docutils literal"><span class="pre">path</span></tt> is a root directory.
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">isRootDir</span><span class="Other">(</span><span class="StringLit">&quot;&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">isRootDir</span><span class="Other">(</span><span class="StringLit">&quot;.&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">isRootDir</span><span class="Other">(</span><span class="StringLit">&quot;/&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">isRootDir</span><span class="Other">(</span><span class="StringLit">&quot;a&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="Identifier">isRootDir</span><span class="Other">(</span><span class="StringLit">&quot;/a&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="Identifier">isRootDir</span><span class="Other">(</span><span class="StringLit">&quot;a/b/c&quot;</span><span class="Other">)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">isRootDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">isRootDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;.&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">isRootDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;/&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">isRootDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;a&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">isRootDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;/a&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">isRootDir</span><span class="Punctuation">(</span><span class="StringLit">&quot;a/b/c&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L525"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L538"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L525" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L538" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="/../,string,string"></a>
@@ -1071,14 +1049,14 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#parentDir,string">parentDir proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;a/b/c&quot;</span> <span class="Operator">/../</span> <span class="StringLit">&quot;d/e&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;a/b/d/e&quot;</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;a&quot;</span> <span class="Operator">/../</span> <span class="StringLit">&quot;d/e&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;a/d/e&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;a/b/c&quot;</span><span class="Whitespace"> </span><span class="Operator">/../</span><span class="Whitespace"> </span><span class="StringLit">&quot;d/e&quot;</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;a/b/d/e&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;a&quot;</span><span class="Whitespace"> </span><span class="Operator">/../</span><span class="Whitespace"> </span><span class="StringLit">&quot;d/e&quot;</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;a/d/e&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L590"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L603"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L590" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L603" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="searchExtPos,string"></a>
@@ -1094,15 +1072,15 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#addFileExt,string,string">addFileExt proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">searchExtPos</span><span class="Other">(</span><span class="StringLit">&quot;a/b/c&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Operator">-</span><span class="DecNumber">1</span>
-<span class="Identifier">assert</span> <span class="Identifier">searchExtPos</span><span class="Other">(</span><span class="StringLit">&quot;c.nim&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="DecNumber">1</span>
-<span class="Identifier">assert</span> <span class="Identifier">searchExtPos</span><span class="Other">(</span><span class="StringLit">&quot;a/b/c.nim&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="DecNumber">5</span>
-<span class="Identifier">assert</span> <span class="Identifier">searchExtPos</span><span class="Other">(</span><span class="StringLit">&quot;a.b.c.nim&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="DecNumber">5</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">searchExtPos</span><span class="Punctuation">(</span><span class="StringLit">&quot;a/b/c&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">-</span><span class="DecNumber">1</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">searchExtPos</span><span class="Punctuation">(</span><span class="StringLit">&quot;c.nim&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">searchExtPos</span><span class="Punctuation">(</span><span class="StringLit">&quot;a/b/c.nim&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">5</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">searchExtPos</span><span class="Punctuation">(</span><span class="StringLit">&quot;a.b.c.nim&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">5</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L612"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L625"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L612" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L625" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="splitFile,string"></a>
@@ -1121,27 +1099,27 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#addFileExt,string,string">addFileExt proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Other">(</span><span class="Identifier">dir</span><span class="Other">,</span> <span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">ext</span><span class="Other">)</span> <span class="Other">=</span> <span class="Identifier">splitFile</span><span class="Other">(</span><span class="StringLit">&quot;usr/local/nimc.html&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">dir</span> <span class="Operator">==</span> <span class="StringLit">&quot;usr/local&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">name</span> <span class="Operator">==</span> <span class="StringLit">&quot;nimc&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">ext</span> <span class="Operator">==</span> <span class="StringLit">&quot;.html&quot;</span>
-<span class="Other">(</span><span class="Identifier">dir</span><span class="Other">,</span> <span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">ext</span><span class="Other">)</span> <span class="Other">=</span> <span class="Identifier">splitFile</span><span class="Other">(</span><span class="StringLit">&quot;/usr/local/os&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">dir</span> <span class="Operator">==</span> <span class="StringLit">&quot;/usr/local&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">name</span> <span class="Operator">==</span> <span class="StringLit">&quot;os&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">ext</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-<span class="Other">(</span><span class="Identifier">dir</span><span class="Other">,</span> <span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">ext</span><span class="Other">)</span> <span class="Other">=</span> <span class="Identifier">splitFile</span><span class="Other">(</span><span class="StringLit">&quot;/usr/local/&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">dir</span> <span class="Operator">==</span> <span class="StringLit">&quot;/usr/local&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">name</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">ext</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-<span class="Other">(</span><span class="Identifier">dir</span><span class="Other">,</span> <span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">ext</span><span class="Other">)</span> <span class="Other">=</span> <span class="Identifier">splitFile</span><span class="Other">(</span><span class="StringLit">&quot;/tmp.txt&quot;</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">dir</span> <span class="Operator">==</span> <span class="StringLit">&quot;/&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">name</span> <span class="Operator">==</span> <span class="StringLit">&quot;tmp&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">ext</span> <span class="Operator">==</span> <span class="StringLit">&quot;.txt&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="Identifier">dir</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">name</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">ext</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">splitFile</span><span class="Punctuation">(</span><span class="StringLit">&quot;usr/local/nimc.html&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">dir</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;usr/local&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">name</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;nimc&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">ext</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;.html&quot;</span><span class="Whitespace">
+</span><span class="Punctuation">(</span><span class="Identifier">dir</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">name</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">ext</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">splitFile</span><span class="Punctuation">(</span><span class="StringLit">&quot;/usr/local/os&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">dir</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/usr/local&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">name</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;os&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">ext</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+</span><span class="Punctuation">(</span><span class="Identifier">dir</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">name</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">ext</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">splitFile</span><span class="Punctuation">(</span><span class="StringLit">&quot;/usr/local/&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">dir</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/usr/local&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">name</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">ext</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+</span><span class="Punctuation">(</span><span class="Identifier">dir</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">name</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">ext</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">splitFile</span><span class="Punctuation">(</span><span class="StringLit">&quot;/tmp.txt&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">dir</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">name</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;tmp&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">ext</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;.txt&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L637"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L650"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L637" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L650" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="extractFilename,string"></a>
@@ -1159,14 +1137,14 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#addFileExt,string,string">addFileExt proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">extractFilename</span><span class="Other">(</span><span class="StringLit">&quot;foo/bar/&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">extractFilename</span><span class="Other">(</span><span class="StringLit">&quot;foo/bar&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;bar&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">extractFilename</span><span class="Other">(</span><span class="StringLit">&quot;foo/bar.baz&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;bar.baz&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">extractFilename</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo/bar/&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">extractFilename</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo/bar&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;bar&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">extractFilename</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo/bar.baz&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;bar.baz&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L690"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L703"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L690" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L703" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lastPathPart,string"></a>
@@ -1183,13 +1161,13 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#addFileExt,string,string">addFileExt proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">lastPathPart</span><span class="Other">(</span><span class="StringLit">&quot;foo/bar/&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;bar&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">lastPathPart</span><span class="Other">(</span><span class="StringLit">&quot;foo/bar&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;bar&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">lastPathPart</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo/bar/&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;bar&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">lastPathPart</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo/bar&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;bar&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L713"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L726"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L713" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L726" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="changeFileExt,string,string"></a>
@@ -1208,14 +1186,14 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#addFileExt,string,string">addFileExt proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">changeFileExt</span><span class="Other">(</span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;baz&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo.baz&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">changeFileExt</span><span class="Other">(</span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">changeFileExt</span><span class="Other">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;baz&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo.baz&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">changeFileExt</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;baz&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo.baz&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">changeFileExt</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">changeFileExt</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;baz&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo.baz&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L731"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L744"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L731" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L744" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addFileExt,string,string"></a>
@@ -1233,14 +1211,14 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#changeFileExt,string,string">changeFileExt proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">addFileExt</span><span class="Other">(</span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;baz&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo.bar&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">addFileExt</span><span class="Other">(</span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo.bar&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">addFileExt</span><span class="Other">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;baz&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo.baz&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">addFileExt</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;baz&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">addFileExt</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo.bar&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">addFileExt</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;baz&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo.baz&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L757"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L770"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L757" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L770" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cmpPaths,string,string"></a>
@@ -1250,16 +1228,16 @@ class="link-seesrc" target="_blank">Source</a>
 
 <p>Compares two paths.</p>
 <p>On a case-sensitive filesystem this is done case-sensitively otherwise case-insensitively. Returns:</p>
-<p>0 iff pathA == pathB<br />&lt; 0 iff pathA &lt; pathB<br />&gt; 0 iff pathA &gt; pathB<br /></p>
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">macosx</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">cmpPaths</span><span class="Other">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Foo&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="DecNumber">0</span>
-<span class="Keyword">elif</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">cmpPaths</span><span class="Other">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Foo&quot;</span><span class="Other">)</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span></pre>
+<p>0 if pathA == pathB<br />&lt; 0 if pathA &lt; pathB<br />&gt; 0 if pathA &gt; pathB<br /></p>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">macosx</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">cmpPaths</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;Foo&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Whitespace">
+</span><span class="Keyword">elif</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">cmpPaths</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;Foo&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">&gt;</span><span class="Whitespace"> </span><span class="DecNumber">0</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L781"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L794"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L781" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L794" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="unixToNativePath,string,string"></a>
@@ -1272,9 +1250,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>On systems with a concept of &quot;drives&quot;, <tt class="docutils literal"><span class="pre">drive</span></tt> is used to determine which drive label to use during absolute path conversion. <tt class="docutils literal"><span class="pre">drive</span></tt> defaults to the drive of the current working directory, and is ignored on systems that do not have a concept of &quot;drives&quot;.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L808"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L821"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L808" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L821" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="==,OSErrorCode,OSErrorCode"></a>
@@ -1312,11 +1290,11 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#osLastError">osLastError proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">linux</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">osErrorMsg</span><span class="Other">(</span><span class="Identifier">OSErrorCode</span><span class="Other">(</span><span class="DecNumber">0</span><span class="Other">)</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">osErrorMsg</span><span class="Other">(</span><span class="Identifier">OSErrorCode</span><span class="Other">(</span><span class="DecNumber">1</span><span class="Other">)</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;Operation not permitted&quot;</span>
-  <span class="Identifier">assert</span> <span class="Identifier">osErrorMsg</span><span class="Other">(</span><span class="Identifier">OSErrorCode</span><span class="Other">(</span><span class="DecNumber">2</span><span class="Other">)</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;No such file or directory&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">linux</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">osErrorMsg</span><span class="Punctuation">(</span><span class="Identifier">OSErrorCode</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">osErrorMsg</span><span class="Punctuation">(</span><span class="Identifier">OSErrorCode</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;Operation not permitted&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">osErrorMsg</span><span class="Punctuation">(</span><span class="Identifier">OSErrorCode</span><span class="Punctuation">(</span><span class="DecNumber">2</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;No such file or directory&quot;</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/oserr.nim#L18"
 class="link-seesrc" target="_blank">Source</a>
@@ -1388,13 +1366,13 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#envPairs.i">envPairs iterator</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">getEnv</span><span class="Other">(</span><span class="StringLit">&quot;unknownEnv&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">getEnv</span><span class="Other">(</span><span class="StringLit">&quot;unknownEnv&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;doesn\'t exist&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;doesn\'t exist&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">getEnv</span><span class="Punctuation">(</span><span class="StringLit">&quot;unknownEnv&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">getEnv</span><span class="Punctuation">(</span><span class="StringLit">&quot;unknownEnv&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;doesn&apos;t exist&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;doesn&apos;t exist&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L112"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L111"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L112" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L111" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="existsEnv,string"></a>
@@ -1409,12 +1387,12 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#envPairs.i">envPairs iterator</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="Identifier">existsEnv</span><span class="Other">(</span><span class="StringLit">&quot;unknownEnv&quot;</span><span class="Other">)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">existsEnv</span><span class="Punctuation">(</span><span class="StringLit">&quot;unknownEnv&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L139"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L138"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L139" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L138" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="putEnv,string,string"></a>
@@ -1430,9 +1408,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L157"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L156"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L157" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L156" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="delEnv,string"></a>
@@ -1448,9 +1426,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L191"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L190"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L190" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getHomeDir"></a>
@@ -1468,12 +1446,12 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#setCurrentDir,string">setCurrentDir proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">getHomeDir</span><span class="Other">(</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">expandTilde</span><span class="Other">(</span><span class="StringLit">&quot;~&quot;</span><span class="Other">)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">getHomeDir</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">expandTilde</span><span class="Punctuation">(</span><span class="StringLit">&quot;~&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L868"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L881"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L868" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L881" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getConfigDir"></a>
@@ -1493,9 +1471,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L887"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L900"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L887" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L900" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getTempDir"></a>
@@ -1514,9 +1492,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L911"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L924"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L911" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L924" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="expandTilde,string"></a>
@@ -1534,14 +1512,14 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#setCurrentDir,string">setCurrentDir proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">expandTilde</span><span class="Other">(</span><span class="StringLit">&quot;~&quot;</span> <span class="Operator">/</span> <span class="StringLit">&quot;appname.cfg&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">getHomeDir</span><span class="Other">(</span><span class="Other">)</span> <span class="Operator">/</span> <span class="StringLit">&quot;appname.cfg&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">expandTilde</span><span class="Other">(</span><span class="StringLit">&quot;~/foo/bar&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">getHomeDir</span><span class="Other">(</span><span class="Other">)</span> <span class="Operator">/</span> <span class="StringLit">&quot;foo/bar&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">expandTilde</span><span class="Other">(</span><span class="StringLit">&quot;/foo/bar&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;/foo/bar&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">expandTilde</span><span class="Punctuation">(</span><span class="StringLit">&quot;~&quot;</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;appname.cfg&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">getHomeDir</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;appname.cfg&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">expandTilde</span><span class="Punctuation">(</span><span class="StringLit">&quot;~/foo/bar&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">getHomeDir</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo/bar&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">expandTilde</span><span class="Punctuation">(</span><span class="StringLit">&quot;/foo/bar&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;/foo/bar&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L938"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L951"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L938" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L951" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="quoteShellWindows,string"></a>
@@ -1553,9 +1531,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Based on Python's <tt class="docutils literal"><span class="pre">subprocess.list2cmdline</span></tt>. See <a class="reference external" href="http://msdn.microsoft.com/en-us/library/17w5ykft.aspx">this link</a> for more details.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L969"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L982"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L969" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L982" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="quoteShellPosix,string"></a>
@@ -1565,9 +1543,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Quote <tt class="docutils literal"><span class="pre">s</span></tt>, so it can be safely passed to POSIX shell. Based on Python's <tt class="docutils literal"><span class="pre">pipes.quote</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L999"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1012"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L999" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1012" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="quoteShell,string"></a>
@@ -1579,9 +1557,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>When on Windows, it calls <a class="reference external" href="#quoteShellWindows,string">quoteShellWindows proc</a>. Otherwise, calls <a class="reference external" href="#quoteShellPosix,string">quoteShellPosix proc</a>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1015"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1028"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1015" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1028" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="quoteShellCommand,openArray[string]"></a>
@@ -1589,15 +1567,15 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 Concatenates and quotes shell arguments <tt class="docutils literal"><span class="pre">args</span></tt>.
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">quoteShellCommand</span><span class="Other">(</span><span class="Other">[</span><span class="StringLit">&quot;aaa&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;c d&quot;</span><span class="Other">]</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;aaa \'\' \'c d\'&quot;</span>
-<span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">windows</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">quoteShellCommand</span><span class="Other">(</span><span class="Other">[</span><span class="StringLit">&quot;aaa&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;c d&quot;</span><span class="Other">]</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;aaa \&quot;\&quot; \&quot;c d\&quot;&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">quoteShellCommand</span><span class="Punctuation">(</span><span class="Punctuation">[</span><span class="StringLit">&quot;aaa&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;c d&quot;</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;aaa &apos;&apos; &apos;c d&apos;&quot;</span><span class="Whitespace">
+</span><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">windows</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">quoteShellCommand</span><span class="Punctuation">(</span><span class="Punctuation">[</span><span class="StringLit">&quot;aaa&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;c d&quot;</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;aaa </span><span class="EscapeSequence">\&quot;</span><span class="EscapeSequence">\&quot;</span><span class="EscapeSequence"> \&quot;</span><span class="EscapeSequence">c d\&quot;</span><span class="StringLit">&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1026"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1039"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1026" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1039" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="existsFile,string"></a>
@@ -1613,9 +1591,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1077"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1090"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1077" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1090" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="existsDir,string"></a>
@@ -1623,16 +1601,16 @@ class="link-seesrc" target="_blank">Source</a>
                                 <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-<p>Returns true iff the directory <tt class="docutils literal"><span class="pre">dir</span></tt> exists. If <tt class="docutils literal"><span class="pre">dir</span></tt> is a file, false is returned. Follows symlinks.</p>
+<p>Returns true if the directory <tt class="docutils literal"><span class="pre">dir</span></tt> exists. If <tt class="docutils literal"><span class="pre">dir</span></tt> is a file, false is returned. Follows symlinks.</p>
 <p>See also:</p>
 <ul class="simple"><li><a class="reference external" href="#existsFile,string">existsFile proc</a></li>
 <li><a class="reference external" href="#symlinkExists,string">symlinkExists proc</a></li>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1097"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1110"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1097" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1110" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="symlinkExists,string"></a>
@@ -1640,16 +1618,16 @@ class="link-seesrc" target="_blank">Source</a>
                                      <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="os.html#ReadDirEffect"><span class="Identifier">ReadDirEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-<p>Returns true iff the symlink <tt class="docutils literal"><span class="pre">link</span></tt> exists. Will return true regardless of whether the link points to a directory or file.</p>
+<p>Returns true if the symlink <tt class="docutils literal"><span class="pre">link</span></tt> exists. Will return true regardless of whether the link points to a directory or file.</p>
 <p>See also:</p>
 <ul class="simple"><li><a class="reference external" href="#existsFile,string">existsFile proc</a></li>
 <li><a class="reference external" href="#existsDir,string">existsDir proc</a></li>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1116"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1129"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1116" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1129" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fileExists,string"></a>
@@ -1663,9 +1641,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1136"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1149"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1136" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1149" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="dirExists,string"></a>
@@ -1679,9 +1657,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1144"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1157"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1144" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1157" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="findExe,string,bool,openArray[string]"></a>
@@ -1695,9 +1673,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If the system supports symlinks it also resolves them until it meets the actual file. This behavior can be disabled if desired by setting <tt class="docutils literal"><span class="pre">followSymlinks = false</span></tt>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1163"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1176"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1163" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1176" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getLastModificationTime,string"></a>
@@ -1713,9 +1691,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1221"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1234"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1221" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1234" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getLastAccessTime,string"></a>
@@ -1731,9 +1709,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1239"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1252"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1239" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1252" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getCreationTime,string"></a>
@@ -1750,9 +1728,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1257"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1270"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1257" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1270" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fileNewer,string,string"></a>
@@ -1767,9 +1745,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1279"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1292"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1279" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1292" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getCurrentDir"></a>
@@ -1788,9 +1766,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1296"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1310"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1296" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1310" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setCurrentDir,string"></a>
@@ -1806,9 +1784,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1351"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1371"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1351" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1371" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="absolutePath,string"></a>
@@ -1822,12 +1800,29 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#normalizePath,string">normalizePath proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">absolutePath</span><span class="Other">(</span><span class="StringLit">&quot;a&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">getCurrentDir</span><span class="Other">(</span><span class="Other">)</span> <span class="Operator">/</span> <span class="StringLit">&quot;a&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">absolutePath</span><span class="Punctuation">(</span><span class="StringLit">&quot;a&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">getCurrentDir</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">/</span><span class="Whitespace"> </span><span class="StringLit">&quot;a&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1370"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1390"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1370" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1390" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="normalizeExe,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#normalizeExe%2Cstring"><span class="Identifier">normalizeExe</span></a><span class="Other">(</span><span class="Identifier">file</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+on posix, prepends <tt class="docutils literal"><span class="pre">./</span></tt> if <tt class="docutils literal"><span class="pre">file</span></tt> doesn't contain <tt class="docutils literal"><span class="pre">/</span></tt> and is not <tt class="docutils literal"><span class="pre">&quot;&quot;, &quot;.&quot;, &quot;..&quot;</span></tt>.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">sugar</span><span class="Whitespace">
+</span><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo&quot;</span><span class="Operator">.</span><span class="Identifier">dup</span><span class="Punctuation">(</span><span class="Identifier">normalizeExe</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;./foo&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo/../bar&quot;</span><span class="Operator">.</span><span class="Identifier">dup</span><span class="Punctuation">(</span><span class="Identifier">normalizeExe</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;foo/../bar&quot;</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Operator">.</span><span class="Identifier">dup</span><span class="Punctuation">(</span><span class="Identifier">normalizeExe</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1410"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1410" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="normalizePath,string"></a>
@@ -1840,18 +1835,19 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Warning: URL-encoded and Unicode attempts at directory traversal are not detected. Triple dot is not handled.</p>
 <p>See also:</p>
 <ul class="simple"><li><a class="reference external" href="#absolutePath,string">absolutePath proc</a></li>
-<li><a class="reference external" href="#normalizedPath,string">normalizedPath proc</a> for a version which returns a new string</li>
+<li><a class="reference external" href="#normalizedPath,string">normalizedPath proc</a> for outplace version</li>
+<li><a class="reference external" href="#normalizeExe,string">normalizeExe proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Keyword">var</span> <span class="Identifier">a</span> <span class="Other">=</span> <span class="StringLit">&quot;a///b//..//c///d&quot;</span>
-  <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">normalizePath</span><span class="Other">(</span><span class="Other">)</span>
-  <span class="Identifier">assert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="StringLit">&quot;a/c/d&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="StringLit">&quot;a///b//..//c///d&quot;</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">normalizePath</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;a/c/d&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1387"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1422"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1387" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1422" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="normalizedPath,string"></a>
@@ -1864,13 +1860,13 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#normalizePath,string">normalizePath proc</a> for the in-place version</li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="Identifier">normalizedPath</span><span class="Other">(</span><span class="StringLit">&quot;a///b//..//c///d&quot;</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;a/c/d&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">normalizedPath</span><span class="Punctuation">(</span><span class="StringLit">&quot;a///b//..//c///d&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;a/c/d&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1438"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1473"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1438" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1473" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sameFile,string,string"></a>
@@ -1886,9 +1882,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1469"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1504"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1469" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1504" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sameFileContent,string,string"></a>
@@ -1902,9 +1898,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1514"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1549"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1514" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1549" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFilePermissions,string"></a>
@@ -1920,9 +1916,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1565"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1600"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1565" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1600" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setFilePermissions,string,set[FilePermission]"></a>
@@ -1938,9 +1934,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1603"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1638"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1603" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1638" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="copyFile,string,string"></a>
@@ -1963,9 +1959,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1645"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1680"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1645" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1680" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tryRemoveFile,string"></a>
@@ -1984,9 +1980,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1722"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1757"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1722" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1757" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="removeFile,string"></a>
@@ -2006,9 +2002,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1754"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1789"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1754" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1789" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="moveFile,string,string"></a>
@@ -2029,9 +2025,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1794"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1829"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1794" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1829" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="exitStatusLikeShell,cint"></a>
@@ -2040,9 +2036,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts exit code from <tt class="docutils literal"><span class="pre">c_system</span></tt> into a shell exit code.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1820"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1855"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1820" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1855" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="execShellCmd,string"></a>
@@ -2056,9 +2052,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Examples:</strong></p>
 <pre class="listing"><span class="Keyword">discard</span> <span class="Identifier">execShellCmd</span><span class="Punctuation">(</span><span class="StringLit">&quot;ls -la&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1831"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1866"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1831" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1866" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="expandFilename,string"></a>
@@ -2070,9 +2066,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Raises <tt class="docutils literal"><span class="pre">OSError</span></tt> in case of an error. Follows symlinks.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1948"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1983"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1948" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1983" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getCurrentCompilerExe"></a>
@@ -2083,9 +2079,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Can be used to retrieve the currently executing Nim compiler from a Nim or nimscript program, or the nimble binary inside a nimble program (likewise with other binaries built from compiler API).</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2009"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2044"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2009" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2044" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="removeDir,string"></a>
@@ -2106,9 +2102,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2196"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2231"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2196" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2231" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="existsOrCreateDir,string"></a>
@@ -2128,9 +2124,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2265"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2300"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2265" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2300" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="createDir,string"></a>
@@ -2151,9 +2147,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2285"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2320"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2285" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2320" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="copyDir,string,string"></a>
@@ -2177,9 +2173,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2316"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2351"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2316" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2351" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="moveDir,string,string"></a>
@@ -2199,9 +2195,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2348"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2383"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2348" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2383" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="createSymlink,string,string"></a>
@@ -2216,9 +2212,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2366"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2401"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2366" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2401" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="createHardlink,string,string"></a>
@@ -2232,9 +2228,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2394"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2429"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2394" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2429" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="copyFileWithPermissions,string,string"></a>
@@ -2257,9 +2253,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2416"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2451"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2416" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2451" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="copyDirWithPermissions,string,string"></a>
@@ -2283,9 +2279,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2449"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2484"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2449" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2484" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="inclFilePermissions,string,set[FilePermission]"></a>
@@ -2295,9 +2291,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 A convenience proc for:<pre class="listing"><span class="Identifier">setFilePermissions</span><span class="Punctuation">(</span><span class="Identifier">filename</span><span class="Punctuation">,</span> <span class="Identifier">getFilePermissions</span><span class="Punctuation">(</span><span class="Identifier">filename</span><span class="Punctuation">)</span><span class="Operator">+</span><span class="Identifier">permissions</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2492"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2527"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2492" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2527" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="exclFilePermissions,string,set[FilePermission]"></a>
@@ -2307,9 +2303,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 A convenience proc for:<pre class="listing"><span class="Identifier">setFilePermissions</span><span class="Punctuation">(</span><span class="Identifier">filename</span><span class="Punctuation">,</span> <span class="Identifier">getFilePermissions</span><span class="Punctuation">(</span><span class="Identifier">filename</span><span class="Punctuation">)</span><span class="Operator">-</span><span class="Identifier">permissions</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2501"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2536"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2501" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2536" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="expandSymlink,string"></a>
@@ -2323,9 +2319,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2510"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2545"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2510" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2545" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseCmdLine,string"></a>
@@ -2353,9 +2349,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2529"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2564"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2529" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2564" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="paramCount"></a>
@@ -2377,9 +2373,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Keyword">else</span><span class="Punctuation">:</span>
   <span class="Comment"># Do something else!</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2628"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2663"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2628" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2663" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="paramStr,int"></a>
@@ -2387,7 +2383,7 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 <p>Returns the <tt class="docutils literal"><span class="pre">i</span></tt>-th <span id="command-line-argument_1">command line argument</span> given to the application.</p>
-<p><tt class="docutils literal"><span class="pre">i</span></tt> should be in the range <tt class="docutils literal"><span class="pre">1..paramCount()</span></tt>, the <tt class="docutils literal"><span class="pre">IndexError</span></tt> exception will be raised for invalid values.  Instead of iterating over <a class="reference external" href="#paramCount">paramCount()</a> with this proc you can call the convenience <a class="reference external" href="#commandLineParams">commandLineParams()</a>.</p>
+<p><tt class="docutils literal"><span class="pre">i</span></tt> should be in the range <tt class="docutils literal"><span class="pre">1..paramCount()</span></tt>, the <tt class="docutils literal"><span class="pre">IndexDefect</span></tt> exception will be raised for invalid values.  Instead of iterating over <a class="reference external" href="#paramCount">paramCount()</a> with this proc you can call the convenience <a class="reference external" href="#commandLineParams">commandLineParams()</a>.</p>
 <p>Similarly to <span id="argv_1">argv</span> in C, it is possible to call <tt class="docutils literal"><span class="pre">paramStr(0)</span></tt> but this will return OS specific contents (usually the name of the invoked executable). You should avoid this and call <a class="reference external" href="#getAppFilename">getAppFilename()</a> instead.</p>
 <p><strong>Availability</strong>: When generating a dynamic library (see <tt class="docutils literal"><span class="pre">--app:lib</span></tt>) on Posix this proc is not defined. Test for availability using <a class="reference external" href="system.html#declared,untyped">declared()</a>.</p>
 <p>See also:</p>
@@ -2403,9 +2399,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Keyword">else</span><span class="Punctuation">:</span>
   <span class="Comment"># Do something else!</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2656"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2691"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2656" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2691" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="commandLineParams"></a>
@@ -2428,9 +2424,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Keyword">else</span><span class="Punctuation">:</span>
   <span class="Comment"># Do something else!</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2745"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2796"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2745" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2796" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getAppFilename"></a>
@@ -2445,9 +2441,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2906"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2950"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2906" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2950" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getAppDir"></a>
@@ -2460,9 +2456,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2972"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3016"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2972" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3016" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sleep,int"></a>
@@ -2471,9 +2467,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sleeps <tt class="docutils literal"><span class="pre">milsecs</span></tt> milliseconds.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2979"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3023"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2979" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3023" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFileSize,string"></a>
@@ -2483,9 +2479,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the file size of <tt class="docutils literal"><span class="pre">file</span></tt> (in bytes). <tt class="docutils literal"><span class="pre">OSError</span></tt> is raised in case of an error.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2989"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3033"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2989" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3033" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFileInfo,FileHandle"></a>
@@ -2500,9 +2496,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3097"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3141"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3097" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3141" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFileInfo,File"></a>
@@ -2516,9 +2512,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3123"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3167"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3123" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3167" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFileInfo,string"></a>
@@ -2536,9 +2532,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3133"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3177"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3133" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3177" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isHidden,string"></a>
@@ -2550,18 +2546,18 @@ class="link-seesrc" target="_blank">Source</a>
 <p>On posix: returns true if <tt class="docutils literal"><span class="pre">lastPathPart(path)</span></tt> starts with <tt class="docutils literal"><span class="pre">.</span></tt> and is not <tt class="docutils literal"><span class="pre">.</span></tt> or <tt class="docutils literal"><span class="pre">..</span></tt>.</p>
 <p><strong>Note</strong>: paths are not normalized to determine <tt class="docutils literal"><span class="pre">isHidden</span></tt>.</p>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">posix</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;.foo&quot;</span><span class="Other">.</span><span class="Identifier">isHidden</span>
-  <span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;.foo/bar&quot;</span><span class="Other">.</span><span class="Identifier">isHidden</span>
-  <span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;.&quot;</span><span class="Other">.</span><span class="Identifier">isHidden</span>
-  <span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;..&quot;</span><span class="Other">.</span><span class="Identifier">isHidden</span>
-  <span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;&quot;</span><span class="Other">.</span><span class="Identifier">isHidden</span>
-  <span class="Identifier">assert</span> <span class="StringLit">&quot;.foo/&quot;</span><span class="Other">.</span><span class="Identifier">isHidden</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">when</span><span class="Whitespace"> </span><span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">posix</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;.foo&quot;</span><span class="Operator">.</span><span class="Identifier">isHidden</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="StringLit">&quot;.foo/bar&quot;</span><span class="Operator">.</span><span class="Identifier">isHidden</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="StringLit">&quot;.&quot;</span><span class="Operator">.</span><span class="Identifier">isHidden</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="StringLit">&quot;..&quot;</span><span class="Operator">.</span><span class="Identifier">isHidden</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Operator">.</span><span class="Identifier">isHidden</span><span class="Whitespace">
+  </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="StringLit">&quot;.foo/&quot;</span><span class="Operator">.</span><span class="Identifier">isHidden</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3171"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3215"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3171" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3215" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getCurrentProcessId"></a>
@@ -2574,9 +2570,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3201"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3245"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3201" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3245" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setLastModificationTime,string,"></a>
@@ -2585,9 +2581,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets the <tt class="docutils literal"><span class="pre">file</span></tt>'s last modification time. <tt class="docutils literal"><span class="pre">OSError</span></tt> is raised in case of an error.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3213"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3257"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3213" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3257" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -2609,9 +2605,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="Identifier">isValidFilename</span><span class="Punctuation">(</span><span class="StringLit">&quot;OwO:UwU&quot;</span><span class="Punctuation">)</span> <span class="Comment">## &quot;:&quot; is invalid (Mac)</span>
 <span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="Identifier">isValidFilename</span><span class="Punctuation">(</span><span class="StringLit">&quot;aux.bat&quot;</span><span class="Punctuation">)</span> <span class="Comment">## &quot;AUX&quot; is invalid (Windows)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3230"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L3274"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3230" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L3274" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -2650,9 +2646,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Comment"># a/b</span>
 <span class="Comment"># a</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L538"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L551"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L538" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L551" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="envPairs.i"></a>
@@ -2670,9 +2666,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L216"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/includes/osenv.nim#L215"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L216" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/includes/osenv.nim#L215" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="walkPattern.i,string"></a>
@@ -2689,9 +2685,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1906"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1941"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1906" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1941" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="walkFiles.i,string"></a>
@@ -2708,9 +2704,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1920"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1955"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1920" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1955" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="walkDirs.i,string"></a>
@@ -2727,9 +2723,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1934"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L1969"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1934" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L1969" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="walkDir.i,string"></a>
@@ -2758,9 +2754,9 @@ dirA/fileA2.txt</pre>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2031"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2066"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2031" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2066" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="walkDirRec.i,string"></a>
@@ -2789,9 +2785,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2129"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/os.nim#L2164"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2129" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/os.nim#L2164" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -2804,7 +2800,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:13 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:21:30 UTC</small>
       </div>
     </div>
   </div>

@@ -77,39 +77,40 @@ function main() {
 <h1 id="basic-workflow">Basic workflow</h1><p>Currently hot code reloading does not work for the main module itself, so we have to use a helper module where the major logic we want to change during development resides.</p>
 <p>In this example we use SDL2 to create a window and we reload the logic code when <tt class="docutils literal"><span class="pre">F9</span></tt> is pressed. The important lines are marked with <tt class="docutils literal"><span class="pre">#***</span></tt>. To install SDL2 you can use <tt class="docutils literal"><span class="pre">nimble install sdl2</span></tt>.</p>
 <pre class="listing"><span class="Comment"># logic.nim</span>
-<span class="Keyword">import</span> <span class="Identifier">sdl2</span><span class="Operator">/</span><span class="Identifier">sdl</span>
+<span class="Keyword">import</span> <span class="Identifier">sdl2</span>
 
 <span class="Comment">#*** import the hotcodereloading stdlib module ***</span>
 <span class="Keyword">import</span> <span class="Identifier">hotcodereloading</span>
 
 <span class="Keyword">var</span> <span class="Identifier">runGame</span><span class="Operator">*:</span> <span class="Identifier">bool</span> <span class="Operator">=</span> <span class="Identifier">true</span>
-<span class="Keyword">var</span> <span class="Identifier">window</span><span class="Punctuation">:</span> <span class="Identifier">Window</span>
-<span class="Keyword">var</span> <span class="Identifier">renderer</span><span class="Punctuation">:</span> <span class="Identifier">Renderer</span>
+<span class="Keyword">var</span> <span class="Identifier">window</span><span class="Punctuation">:</span> <span class="Identifier">WindowPtr</span>
+<span class="Keyword">var</span> <span class="Identifier">renderer</span><span class="Punctuation">:</span> <span class="Identifier">RendererPtr</span>
+<span class="Keyword">var</span> <span class="Identifier">evt</span> <span class="Operator">=</span> <span class="Identifier">sdl2</span><span class="Operator">.</span><span class="Identifier">defaultEvent</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">init</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span>
-  <span class="Keyword">discard</span> <span class="Identifier">sdl</span><span class="Operator">.</span><span class="Identifier">init</span><span class="Punctuation">(</span><span class="Identifier">INIT_EVERYTHING</span><span class="Punctuation">)</span>
-  <span class="Identifier">window</span> <span class="Operator">=</span> <span class="Identifier">createWindow</span><span class="Punctuation">(</span><span class="StringLit">&quot;testing&quot;</span><span class="Punctuation">,</span> <span class="Identifier">WINDOWPOS_UNDEFINED</span><span class="Operator">.</span><span class="Identifier">cint</span><span class="Punctuation">,</span> <span class="Identifier">WINDOWPOS_UNDEFINED</span><span class="Operator">.</span><span class="Identifier">cint</span><span class="Punctuation">,</span> <span class="DecNumber">640</span><span class="Punctuation">,</span> <span class="DecNumber">480</span><span class="Punctuation">,</span> <span class="DecNumber">0'</span><span class="Identifier">u32</span><span class="Punctuation">)</span>
-  <span class="Identifier">assert</span><span class="Punctuation">(</span><span class="Identifier">window</span> <span class="Operator">!=</span> <span class="Keyword">nil</span><span class="Punctuation">,</span> <span class="Operator">$</span><span class="Identifier">sdl</span><span class="Operator">.</span><span class="Identifier">getError</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+  <span class="Keyword">discard</span> <span class="Identifier">sdl2</span><span class="Operator">.</span><span class="Identifier">init</span><span class="Punctuation">(</span><span class="Identifier">INIT_EVERYTHING</span><span class="Punctuation">)</span>
+  <span class="Identifier">window</span> <span class="Operator">=</span> <span class="Identifier">createWindow</span><span class="Punctuation">(</span><span class="StringLit">&quot;testing&quot;</span><span class="Punctuation">,</span> <span class="Identifier">SDL_WINDOWPOS_UNDEFINED</span><span class="Operator">.</span><span class="Identifier">cint</span><span class="Punctuation">,</span> <span class="Identifier">SDL_WINDOWPOS_UNDEFINED</span><span class="Operator">.</span><span class="Identifier">cint</span><span class="Punctuation">,</span> <span class="DecNumber">640</span><span class="Punctuation">,</span> <span class="DecNumber">480</span><span class="Punctuation">,</span> <span class="DecNumber">0'</span><span class="Identifier">u32</span><span class="Punctuation">)</span>
+  <span class="Identifier">assert</span><span class="Punctuation">(</span><span class="Identifier">window</span> <span class="Operator">!=</span> <span class="Keyword">nil</span><span class="Punctuation">,</span> <span class="Operator">$</span><span class="Identifier">sdl2</span><span class="Operator">.</span><span class="Identifier">getError</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
   <span class="Identifier">renderer</span> <span class="Operator">=</span> <span class="Identifier">createRenderer</span><span class="Punctuation">(</span><span class="Identifier">window</span><span class="Punctuation">,</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="Identifier">RENDERER_SOFTWARE</span><span class="Punctuation">)</span>
-  <span class="Identifier">assert</span><span class="Punctuation">(</span><span class="Identifier">renderer</span> <span class="Operator">!=</span> <span class="Keyword">nil</span><span class="Punctuation">,</span> <span class="Operator">$</span><span class="Identifier">sdl</span><span class="Operator">.</span><span class="Identifier">getError</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+  <span class="Identifier">assert</span><span class="Punctuation">(</span><span class="Identifier">renderer</span> <span class="Operator">!=</span> <span class="Keyword">nil</span><span class="Punctuation">,</span> <span class="Operator">$</span><span class="Identifier">sdl2</span><span class="Operator">.</span><span class="Identifier">getError</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">destroy</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span>
   <span class="Identifier">destroyRenderer</span><span class="Punctuation">(</span><span class="Identifier">renderer</span><span class="Punctuation">)</span>
   <span class="Identifier">destroyWindow</span><span class="Punctuation">(</span><span class="Identifier">window</span><span class="Punctuation">)</span>
 
-<span class="Keyword">var</span> <span class="Identifier">posX</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
-<span class="Keyword">var</span> <span class="Identifier">posY</span> <span class="Operator">=</span> <span class="DecNumber">0</span>
-<span class="Keyword">var</span> <span class="Identifier">dX</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
-<span class="Keyword">var</span> <span class="Identifier">dY</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
+<span class="Keyword">var</span> <span class="Identifier">posX</span><span class="Punctuation">:</span> <span class="Identifier">cint</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
+<span class="Keyword">var</span> <span class="Identifier">posY</span><span class="Punctuation">:</span> <span class="Identifier">cint</span> <span class="Operator">=</span> <span class="DecNumber">0</span>
+<span class="Keyword">var</span> <span class="Identifier">dX</span><span class="Punctuation">:</span> <span class="Identifier">cint</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
+<span class="Keyword">var</span> <span class="Identifier">dY</span><span class="Punctuation">:</span> <span class="Identifier">cint</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">update</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span>
-  <span class="Keyword">for</span> <span class="Identifier">evt</span> <span class="Keyword">in</span> <span class="Identifier">events</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-    <span class="Keyword">if</span> <span class="Identifier">evt</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">==</span> <span class="Identifier">QUIT</span><span class="Punctuation">:</span>
+  <span class="Keyword">while</span> <span class="Identifier">pollEvent</span><span class="Punctuation">(</span><span class="Identifier">evt</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+    <span class="Keyword">if</span> <span class="Identifier">evt</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">==</span> <span class="Identifier">QuitEvent</span><span class="Punctuation">:</span>
       <span class="Identifier">runGame</span> <span class="Operator">=</span> <span class="Identifier">false</span>
       <span class="Keyword">break</span>
-    <span class="Keyword">if</span> <span class="Identifier">evt</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">==</span> <span class="Identifier">KEY_DOWN</span><span class="Punctuation">:</span>
-      <span class="Keyword">if</span> <span class="Identifier">evt</span><span class="Operator">.</span><span class="Identifier">key</span><span class="Operator">.</span><span class="Identifier">keysym</span><span class="Operator">.</span><span class="Identifier">scancode</span> <span class="Operator">==</span> <span class="Identifier">SCANCODE_ESCAPE</span><span class="Punctuation">:</span> <span class="Identifier">runGame</span> <span class="Operator">=</span> <span class="Identifier">false</span>
-      <span class="Keyword">elif</span> <span class="Identifier">evt</span><span class="Operator">.</span><span class="Identifier">key</span><span class="Operator">.</span><span class="Identifier">keysym</span><span class="Operator">.</span><span class="Identifier">scancode</span> <span class="Operator">==</span> <span class="Identifier">SCANCODE_F9</span><span class="Punctuation">:</span>
+    <span class="Keyword">if</span> <span class="Identifier">evt</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">==</span> <span class="Identifier">KeyDown</span><span class="Punctuation">:</span>
+      <span class="Keyword">if</span> <span class="Identifier">evt</span><span class="Operator">.</span><span class="Identifier">key</span><span class="Operator">.</span><span class="Identifier">keysym</span><span class="Operator">.</span><span class="Identifier">scancode</span> <span class="Operator">==</span> <span class="Identifier">SDL_SCANCODE_ESCAPE</span><span class="Punctuation">:</span> <span class="Identifier">runGame</span> <span class="Operator">=</span> <span class="Identifier">false</span>
+      <span class="Keyword">elif</span> <span class="Identifier">evt</span><span class="Operator">.</span><span class="Identifier">key</span><span class="Operator">.</span><span class="Identifier">keysym</span><span class="Operator">.</span><span class="Identifier">scancode</span> <span class="Operator">==</span> <span class="Identifier">SDL_SCANCODE_F9</span><span class="Punctuation">:</span>
         <span class="Comment">#*** reload this logic.nim module on the F9 keypress ***</span>
         <span class="Identifier">performCodeReload</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
   
@@ -122,14 +123,14 @@ function main() {
   <span class="Keyword">if</span> <span class="Identifier">posY</span> <span class="Operator">&gt;=</span> <span class="DecNumber">480</span><span class="Punctuation">:</span> <span class="Identifier">dY</span> <span class="Operator">=</span> <span class="Operator">-</span><span class="DecNumber">2</span>
   <span class="Keyword">if</span> <span class="Identifier">posY</span> <span class="Operator">&lt;=</span> <span class="DecNumber">0</span><span class="Punctuation">:</span> <span class="Identifier">dY</span> <span class="Operator">=</span> <span class="Operator">+</span><span class="DecNumber">2</span>
   
-  <span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">setRenderDrawColor</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">,</span> <span class="DecNumber">255</span><span class="Punctuation">,</span> <span class="DecNumber">255</span><span class="Punctuation">)</span>
-  <span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">renderClear</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-  <span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">setRenderDrawColor</span><span class="Punctuation">(</span><span class="DecNumber">255</span><span class="Punctuation">,</span> <span class="DecNumber">128</span><span class="Punctuation">,</span> <span class="DecNumber">128</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">)</span>
+  <span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">setDrawColor</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">,</span> <span class="DecNumber">255</span><span class="Punctuation">,</span> <span class="DecNumber">255</span><span class="Punctuation">)</span>
+  <span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">clear</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">setDrawColor</span><span class="Punctuation">(</span><span class="DecNumber">255</span><span class="Punctuation">,</span> <span class="DecNumber">128</span><span class="Punctuation">,</span> <span class="DecNumber">128</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">)</span>
   
-  <span class="Keyword">var</span> <span class="Identifier">rect</span><span class="Punctuation">:</span> <span class="Identifier">Rect</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">posX</span> <span class="Operator">-</span> <span class="DecNumber">25</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">:</span> <span class="Identifier">posY</span> <span class="Operator">-</span> <span class="DecNumber">25</span><span class="Punctuation">,</span> <span class="Identifier">w</span><span class="Punctuation">:</span> <span class="DecNumber">50</span><span class="Punctuation">,</span> <span class="Identifier">h</span><span class="Punctuation">:</span> <span class="DecNumber">50</span><span class="Punctuation">)</span>
-  <span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">renderFillRect</span><span class="Punctuation">(</span><span class="Identifier">rect</span><span class="Operator">.</span><span class="Keyword">addr</span><span class="Punctuation">)</span>
+  <span class="Keyword">var</span> <span class="Identifier">rect</span> <span class="Operator">=</span> <span class="Identifier">Rect</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">posX</span> <span class="Operator">-</span> <span class="DecNumber">25</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">:</span> <span class="Identifier">posY</span> <span class="Operator">-</span> <span class="DecNumber">25</span><span class="Punctuation">,</span> <span class="Identifier">w</span><span class="Punctuation">:</span> <span class="FloatNumber">50.</span><span class="Identifier">cint</span><span class="Punctuation">,</span> <span class="Identifier">h</span><span class="Punctuation">:</span> <span class="FloatNumber">50.</span><span class="Identifier">cint</span><span class="Punctuation">)</span>
+  <span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">fillRect</span><span class="Punctuation">(</span><span class="Identifier">rect</span><span class="Punctuation">)</span>
   <span class="Identifier">delay</span><span class="Punctuation">(</span><span class="DecNumber">16</span><span class="Punctuation">)</span>
-  <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">renderPresent</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><pre class="listing"><span class="Comment"># mymain.nim</span>
+  <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">present</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><pre class="listing"><span class="Comment"># mymain.nim</span>
 <span class="Keyword">import</span> <span class="Identifier">logic</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">main</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span>
@@ -149,10 +150,10 @@ mymain &amp;
 mymain.exe
 # edit</pre>
 <p>For example, change the line:<pre>
-discard renderer.setRenderDrawColor(255, 128, 128, 0)</pre>
+discard renderer.setDrawColor(255, 128, 128, 0)</pre>
 </p>
 <p>into:<pre>
-discard renderer.setRenderDrawColor(255, 255, 128, 0)</pre>
+discard renderer.setDrawColor(255, 255, 128, 0)</pre>
 </p>
 <p>(This will change the color of the rectangle.)</p>
 <p>Then recompile the project, but do not restart or quit the mymain.exe program!</p>
@@ -183,7 +184,18 @@ nim c --hotcodereloading:on mymain.nim</pre>
 <p>It's expected that most projects will implement the reloading with a suitable build-system triggered IPC notification mechanism, but a polling solution is also possible through the provided <span id="hasanymodulechanged_1">hasAnyModuleChanged()</span> API.</p>
 <p>In order to access <tt class="docutils literal"><span class="pre">beforeCodeReload</span></tt>, <tt class="docutils literal"><span class="pre">afterCodeReload</span></tt>, <tt class="docutils literal"><span class="pre">hasModuleChanged</span></tt> or <tt class="docutils literal"><span class="pre">hasAnyModuleChanged</span></tt> one must import the <span id="hotcodereloading_2">hotcodereloading</span> module.</p>
 
-<h1 id="native-code-targets">Native code targets</h1><p>Native projects using the hot code reloading option will be implicitly compiled with the <tt class="docutils literal"><span class="pre">-d:useNimRtl</span></tt> option and they will depend on both the <tt class="docutils literal"><span class="pre">nimrtl</span></tt> library and the <tt class="docutils literal"><span class="pre">nimhcr</span></tt> library which implements the hot code reloading run-time.</p>
+<h1 id="native-code-targets">Native code targets</h1><p>Native projects using the hot code reloading option will be implicitly compiled with the <tt class="docutils literal"><span class="pre">-d:useNimRtl</span></tt> option and they will depend on both the <tt class="docutils literal"><span class="pre">nimrtl</span></tt> library and the <tt class="docutils literal"><span class="pre">nimhcr</span></tt> library which implements the hot code reloading run-time. Both libraries can be found in the <tt class="docutils literal"><span class="pre">lib</span></tt> folder of Nim and can be compiled into dynamic libraries to satisfy runtime demands of the example code above. An example of compiling <tt class="docutils literal"><span class="pre">nimhcr.nim</span></tt> and <tt class="docutils literal"><span class="pre">nimrtl.nim</span></tt> when the source dir of Nim is installed with choosenim follows.</p>
+<pre>
+# Unix/MacOS
+# Make sure you are in the directory containing your .nim files
+$ cd your-source-directory
+
+# Compile two required files and set their output directory to current dir
+$ nim c --outdir:$PWD ~/.choosenim/toolchains/nim-#devel/lib/nimhcr.nim
+$ nim c --outdir:$PWD ~/.choosenim/toolchains/nim-#devel/lib/nimrtl.nim
+
+# verify that you have two files named libnimhcr and libnimrtl in your
+# source directory (.dll for Windows, .so for Unix, .dylib for MacOS)</pre>
 <p>All modules of the project will be compiled to separate dynamic link libraries placed in the <tt class="docutils literal"><span class="pre">nimcache</span></tt> directory. Please note that during the execution of the program, the hot code reloading run-time will load only copies of these libraries in order to not interfere with any newly issued build commands.</p>
 <p>The main module of the program is considered non-reloadable. Please note that procs from reloadable modules should not appear in the call stack of program while <tt class="docutils literal"><span class="pre">performCodeReload</span></tt> is being called. Thus, the main module is a suitable place for implementing a program loop capable of calling <tt class="docutils literal"><span class="pre">performCodeReload</span></tt>.</p>
 <p>Please note that reloading won't be possible when any of the type definitions in the program has been changed. When closure iterators are used (directly or through async code), the reloaded refinitions will affect only newly created instances. Existing iterator instancess will execute their original code to completion.</p>
@@ -196,7 +208,7 @@ nim c --hotcodereloading:on mymain.nim</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:18:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:12 UTC</small>
       </div>
     </div>
   </div>

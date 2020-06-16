@@ -30,7 +30,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/lib/nim
       docdir=/usr/share/nim/doc
       datadir=/usr/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.1"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.3.5"
       ;;
     "/usr/local/bin")
       bindir=/usr/local/bin
@@ -38,7 +38,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/local/lib/nim
       docdir=/usr/local/share/nim/doc
       datadir=/usr/local/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.1"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.3.5"
       ;;
     "/opt")
       bindir="/opt/nim/bin"
@@ -46,7 +46,7 @@ if [ $# -eq 1 ] ; then
       libdir="/opt/nim/lib"
       docdir="/opt/nim/doc"
       datadir="/opt/nim/data"
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.1"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.3.5"
       mkdir -p /opt/nim
       mkdir -p $bindir
       mkdir -p $configdir
@@ -113,6 +113,10 @@ if [ $# -eq 1 ] ; then
   chmod 644 $configdir/nimdoc.cfg
   cp config/nimdoc.tex.cfg $configdir/nimdoc.tex.cfg
   chmod 644 $configdir/nimdoc.tex.cfg
+  cp config/rename.rules.cfg $configdir/rename.rules.cfg
+  chmod 644 $configdir/rename.rules.cfg
+  cp config/config.nims $configdir/config.nims
+  chmod 644 $configdir/config.nims
   cp lib/cycle.h $libdir/cycle.h
   chmod 644 $libdir/cycle.h
   cp lib/nimrtl.nim $libdir/nimrtl.nim
@@ -141,6 +145,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/posix/posix_nintendoswitch_consts.nim
   cp lib/posix/linux.nim $libdir/posix/linux.nim
   chmod 644 $libdir/posix/linux.nim
+  cp lib/posix/posix_haiku.nim $libdir/posix/posix_haiku.nim
+  chmod 644 $libdir/posix/posix_haiku.nim
   cp lib/posix/posix_other_consts.nim $libdir/posix/posix_other_consts.nim
   chmod 644 $libdir/posix/posix_other_consts.nim
   cp lib/posix/posix.nim $libdir/posix/posix.nim
@@ -237,6 +243,12 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/system/setops.nim
   cp lib/system/channels.nim $libdir/system/channels.nim
   chmod 644 $libdir/system/channels.nim
+  cp lib/system/bitmasks.nim $libdir/system/bitmasks.nim
+  chmod 644 $libdir/system/bitmasks.nim
+  cp lib/system/cellseqs_v1.nim $libdir/system/cellseqs_v1.nim
+  chmod 644 $libdir/system/cellseqs_v1.nim
+  cp lib/system/cellseqs_v2.nim $libdir/system/cellseqs_v2.nim
+  chmod 644 $libdir/system/cellseqs_v2.nim
   cp lib/system/osalloc.nim $libdir/system/osalloc.nim
   chmod 644 $libdir/system/osalloc.nim
   cp lib/system/inclrtl.nim $libdir/system/inclrtl.nim
@@ -309,6 +321,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/system/memalloc.nim
   cp lib/system/gc_regions.nim $libdir/system/gc_regions.nim
   chmod 644 $libdir/system/gc_regions.nim
+  cp lib/system/cyclicrefs_bacon.nim $libdir/system/cyclicrefs_bacon.nim
+  chmod 644 $libdir/system/cyclicrefs_bacon.nim
   cp lib/system/cgprocs.nim $libdir/system/cgprocs.nim
   chmod 644 $libdir/system/cgprocs.nim
   cp lib/system/assertions.nim $libdir/system/assertions.nim
@@ -443,6 +457,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/pure/includes/osseps.nim
   cp lib/pure/includes/unicode_ranges.nim $libdir/pure/includes/unicode_ranges.nim
   chmod 644 $libdir/pure/includes/unicode_ranges.nim
+  cp lib/pure/ssl_config.nim $libdir/pure/ssl_config.nim
+  chmod 644 $libdir/pure/ssl_config.nim
   cp lib/pure/strutils.nim $libdir/pure/strutils.nim
   chmod 644 $libdir/pure/strutils.nim
   cp lib/pure/distros.nim $libdir/pure/distros.nim
@@ -487,6 +503,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/pure/pathnorm.nim
   cp lib/pure/strscans.nim $libdir/pure/strscans.nim
   chmod 644 $libdir/pure/strscans.nim
+  cp lib/pure/quitprocs.nim $libdir/pure/quitprocs.nim
+  chmod 644 $libdir/pure/quitprocs.nim
   cp lib/pure/lenientops.nim $libdir/pure/lenientops.nim
   chmod 644 $libdir/pure/lenientops.nim
   cp lib/pure/async.nim $libdir/pure/async.nim
@@ -641,12 +659,22 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/impure/db_odbc.nim
   cp lib/std/with.nim $libdir/std/with.nim
   chmod 644 $libdir/std/with.nim
+  cp lib/std/private/nimbleutils.nim $libdir/std/private/nimbleutils.nim
+  chmod 644 $libdir/std/private/nimbleutils.nim
+  cp lib/std/private/globs.nim $libdir/std/private/globs.nim
+  chmod 644 $libdir/std/private/globs.nim
   cp lib/std/private/underscored_calls.nim $libdir/std/private/underscored_calls.nim
   chmod 644 $libdir/std/private/underscored_calls.nim
+  cp lib/std/private/since.nim $libdir/std/private/since.nim
+  chmod 644 $libdir/std/private/since.nim
+  cp lib/std/private/miscdollars.nim $libdir/std/private/miscdollars.nim
+  chmod 644 $libdir/std/private/miscdollars.nim
   cp lib/std/wordwrap.nim $libdir/std/wordwrap.nim
   chmod 644 $libdir/std/wordwrap.nim
   cp lib/std/compilesettings.nim $libdir/std/compilesettings.nim
   chmod 644 $libdir/std/compilesettings.nim
+  cp lib/std/jsonutils.nim $libdir/std/jsonutils.nim
+  chmod 644 $libdir/std/jsonutils.nim
   cp lib/std/editdistance.nim $libdir/std/editdistance.nim
   chmod 644 $libdir/std/editdistance.nim
   cp lib/std/wrapnils.nim $libdir/std/wrapnils.nim
@@ -757,6 +785,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/importer.nim
   cp compiler/incremental.nim $nimbleDir/compiler/incremental.nim
   chmod 644 $nimbleDir/compiler/incremental.nim
+  cp compiler/index.nim $nimbleDir/compiler/index.nim
+  chmod 644 $nimbleDir/compiler/index.nim
   cp compiler/injectdestructors.nim $nimbleDir/compiler/injectdestructors.nim
   chmod 644 $nimbleDir/compiler/injectdestructors.nim
   cp compiler/installer.ini $nimbleDir/compiler/installer.ini
@@ -823,6 +853,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/nimfix/nimfix.nim.cfg
   cp compiler/nimlexbase.nim $nimbleDir/compiler/nimlexbase.nim
   chmod 644 $nimbleDir/compiler/nimlexbase.nim
+  cp compiler/nimpaths.nim $nimbleDir/compiler/nimpaths.nim
+  chmod 644 $nimbleDir/compiler/nimpaths.nim
   cp compiler/nimsets.nim $nimbleDir/compiler/nimsets.nim
   chmod 644 $nimbleDir/compiler/nimsets.nim
   cp compiler/nodejs.nim $nimbleDir/compiler/nodejs.nim
@@ -861,10 +893,12 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/prefixmatches.nim
   cp compiler/procfind.nim $nimbleDir/compiler/procfind.nim
   chmod 644 $nimbleDir/compiler/procfind.nim
-  cp compiler/readme.txt $nimbleDir/compiler/readme.txt
-  chmod 644 $nimbleDir/compiler/readme.txt
+  cp compiler/readme.md $nimbleDir/compiler/readme.md
+  chmod 644 $nimbleDir/compiler/readme.md
   cp compiler/renderer.nim $nimbleDir/compiler/renderer.nim
   chmod 644 $nimbleDir/compiler/renderer.nim
+  cp compiler/renderverbatim.nim $nimbleDir/compiler/renderverbatim.nim
+  chmod 644 $nimbleDir/compiler/renderverbatim.nim
   cp compiler/reorder.nim $nimbleDir/compiler/reorder.nim
   chmod 644 $nimbleDir/compiler/reorder.nim
   cp compiler/rod.nim $nimbleDir/compiler/rod.nim
@@ -925,6 +959,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/sourcemap.nim
   cp compiler/spawn.nim $nimbleDir/compiler/spawn.nim
   chmod 644 $nimbleDir/compiler/spawn.nim
+  cp compiler/strutils2.nim $nimbleDir/compiler/strutils2.nim
+  chmod 644 $nimbleDir/compiler/strutils2.nim
   cp compiler/suggest.nim $nimbleDir/compiler/suggest.nim
   chmod 644 $nimbleDir/compiler/suggest.nim
   cp compiler/syntaxes.nim $nimbleDir/compiler/syntaxes.nim
@@ -941,10 +977,10 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/types.nim
   cp compiler/typesrenderer.nim $nimbleDir/compiler/typesrenderer.nim
   chmod 644 $nimbleDir/compiler/typesrenderer.nim
-  cp compiler/unittest_light.nim $nimbleDir/compiler/unittest_light.nim
-  chmod 644 $nimbleDir/compiler/unittest_light.nim
   cp compiler/vm.nim $nimbleDir/compiler/vm.nim
   chmod 644 $nimbleDir/compiler/vm.nim
+  cp compiler/vmconv.nim $nimbleDir/compiler/vmconv.nim
+  chmod 644 $nimbleDir/compiler/vmconv.nim
   cp compiler/vmdef.nim $nimbleDir/compiler/vmdef.nim
   chmod 644 $nimbleDir/compiler/vmdef.nim
   cp compiler/vmdeps.nim $nimbleDir/compiler/vmdeps.nim

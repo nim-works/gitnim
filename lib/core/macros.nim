@@ -8,6 +8,7 @@
 #
 
 include "system/inclrtl"
+import std/private/since
 
 ## This module contains the interface to the compiler's abstract syntax
 ## tree (`AST`:idx:). Macros operate on this tree.
@@ -105,7 +106,7 @@ type
     ntyError,
     ntyBuiltinTypeClass, ntyUserTypeClass, ntyUserTypeClassInst,
     ntyCompositeTypeClass, ntyInferred, ntyAnd, ntyOr, ntyNot,
-    ntyAnything, ntyStatic, ntyFromExpr, ntyOpt, ntyVoid
+    ntyAnything, ntyStatic, ntyFromExpr, ntyOptDeprecated, ntyVoid
 
   TNimTypeKinds* {.deprecated.} = set[NimTypeKind]
   NimSymKind* = enum
@@ -478,7 +479,7 @@ type
 
 proc bindSym*(ident: string | NimNode, rule: BindSymRule = brClosed): NimNode {.
               magic: "NBindSym", noSideEffect.}
-  ## Ceates a node that binds `ident` to a symbol node. The bound symbol
+  ## Creates a node that binds `ident` to a symbol node. The bound symbol
   ## may be an overloaded symbol.
   ## if `ident` is a NimNode, it must have ``nnkIdent`` kind.
   ## If ``rule == brClosed`` either an ``nnkClosedSymChoice`` tree is
@@ -792,6 +793,10 @@ proc newLit*[T](s: set[T]): NimNode {.compileTime.} =
   result = nnkCurly.newTree
   for x in s:
     result.add newLit(x)
+  if result.len == 0:
+    # add type cast for empty set
+    var typ = getTypeInst(typeof(s))[1]
+    result = newCall(typ,result)
 
 proc newLit*(arg: tuple): NimNode {.compileTime.} =
   result = nnkPar.newTree

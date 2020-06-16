@@ -92,19 +92,16 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
-  <div class="search-groupby">
-    Group by:
-    <select onchange="groupBy(this.value)">
-      <option value="section">Section</option>
-      <option value="type">Type</option>
-    </select>
-  </div>
+  
   <ul class="simple simple-toc" id="toc-list">
 <li><a class="reference" id="basic-usage_toc" href="#basic-usage">Basic usage</a></li>
 <li>
@@ -123,8 +120,10 @@ function main() {
   else:
       val
       has"><wbr />Option<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#UnpackDefect"
+    title="UnpackDefect = object of Defect"><wbr />Unpack<wbr />Defect<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#UnpackError"
-    title="UnpackError = object of Defect"><wbr />Unpack<wbr />Error<span class="attachedType"></span></a></li>
+    title="UnpackError {.deprecated: &quot;See corresponding Defect&quot;.} = UnpackDefect"><wbr />Unpack<wbr />Error<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -144,7 +143,7 @@ function main() {
   <li><a class="reference" href="#isNone%2COption%5BT%5D"
     title="isNone[T](self: Option[T]): bool"><wbr />is<wbr />None<span class="attachedType">Option</span></a></li>
   <li><a class="reference" href="#get%2COption%5BT%5D"
-    title="get[T](self: Option[T]): T"><wbr />get<span class="attachedType">Option</span></a></li>
+    title="get[T](self: Option[T]): lent T"><wbr />get<span class="attachedType">Option</span></a></li>
   <li><a class="reference" href="#get%2COption%5BT%5D%2CT"
     title="get[T](self: Option[T]; otherwise: T): T"><wbr />get<span class="attachedType">Option</span></a></li>
   <li><a class="reference" href="#get%2COption%5BT%5D_2"
@@ -188,7 +187,7 @@ function main() {
       <span class="Keyword">return</span> <span class="Identifier">some</span><span class="Punctuation">(</span><span class="Identifier">i</span><span class="Punctuation">)</span>
   <span class="Keyword">return</span> <span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span>  <span class="Comment"># This line is actually optional,</span>
                     <span class="Comment"># because the default is empty</span></pre><pre class="listing"><span class="Keyword">let</span> <span class="Identifier">found</span> <span class="Operator">=</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">find</span><span class="Punctuation">(</span><span class="CharLit">'c'</span><span class="Punctuation">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">found</span><span class="Operator">.</span><span class="Identifier">isSome</span> <span class="Keyword">and</span> <span class="Identifier">found</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">2</span></pre><p>The <tt class="docutils literal"><span class="pre">get</span></tt> operation demonstrated above returns the underlying value, or raises <tt class="docutils literal"><span class="pre">UnpackError</span></tt> if there is no value. Note that <tt class="docutils literal"><span class="pre">UnpackError</span></tt> inherits from <tt class="docutils literal"><span class="pre">system.Defect</span></tt>, and should therefore never be caught. Instead, rely on checking if the option contains a value with <a class="reference external" href="#isSome,Option[T]">isSome</a> and <a class="reference external" href="#isNone,Option[T]">isNone</a> procs.</p>
+<span class="Identifier">assert</span> <span class="Identifier">found</span><span class="Operator">.</span><span class="Identifier">isSome</span> <span class="Keyword">and</span> <span class="Identifier">found</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">2</span></pre><p>The <tt class="docutils literal"><span class="pre">get</span></tt> operation demonstrated above returns the underlying value, or raises <tt class="docutils literal"><span class="pre">UnpackDefect</span></tt> if there is no value. Note that <tt class="docutils literal"><span class="pre">UnpackDefect</span></tt> inherits from <tt class="docutils literal"><span class="pre">system.Defect</span></tt>, and should therefore never be caught. Instead, rely on checking if the option contains a value with <a class="reference external" href="#isSome,Option[T]">isSome</a> and <a class="reference external" href="#isNone,Option[T]">isNone</a> procs.</p>
 <p>How to deal with an absence of a value:</p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">result</span> <span class="Operator">=</span> <span class="StringLit">&quot;team&quot;</span><span class="Operator">.</span><span class="Identifier">find</span><span class="Punctuation">(</span><span class="CharLit">'i'</span><span class="Punctuation">)</span>
 
@@ -222,8 +221,8 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/options.nim#L69" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="UnpackError"></a>
-<dt><pre><a href="options.html#UnpackError"><span class="Identifier">UnpackError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="system.html#Defect"><span class="Identifier">Defect</span></a></pre></dt>
+<a id="UnpackDefect"></a>
+<dt><pre><a href="options.html#UnpackDefect"><span class="Identifier">UnpackDefect</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="system.html#Defect"><span class="Identifier">Defect</span></a></pre></dt>
 <dd>
 
 
@@ -231,6 +230,17 @@ class="link-seesrc" target="_blank">Source</a>
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L77"
 class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/options.nim#L77" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="UnpackError"></a>
+<dt><pre><a href="options.html#UnpackError"><span class="Identifier">UnpackError</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">deprecated</span><span class="Other">:</span> <span class="StringLit">&quot;See corresponding Defect&quot;</span></span><span class="Other">.}</span></span> <span class="Other">=</span> <a href="options.html#UnpackDefect"><span class="Identifier">UnpackDefect</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L78"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/options.nim#L78" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -248,16 +258,15 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#none,typedesc">none</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">type</span>
-  <span class="Identifier">Foo</span> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
-    <span class="Identifier">a</span><span class="Other">:</span> <span class="Identifier">int</span>
-    <span class="Identifier">b</span><span class="Other">:</span> <span class="Identifier">string</span>
-
-<span class="Keyword">var</span> <span class="Identifier">c</span><span class="Other">:</span> <span class="Identifier">Foo</span>
-<span class="Identifier">assert</span> <span class="Identifier">c</span><span class="Other">.</span><span class="Identifier">isNil</span>
-<span class="Keyword">var</span> <span class="Identifier">d</span> <span class="Other">=</span> <span class="Identifier">option</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">d</span><span class="Other">.</span><span class="Identifier">isNone</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">type</span><span class="Whitespace">
+  </span><span class="Identifier">Foo</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Keyword">ref</span><span class="Whitespace"> </span><span class="Keyword">object</span><span class="Whitespace">
+    </span><span class="Identifier">a</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Whitespace">
+    </span><span class="Identifier">b</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">string</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">Foo</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">isNil</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">d</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">option</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">d</span><span class="Operator">.</span><span class="Identifier">isNone</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L80"
 class="link-seesrc" target="_blank">Source</a>
@@ -275,14 +284,14 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#isSome,Option[T]">isSome</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">var</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="StringLit">&quot;abc&quot;</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Operator">$</span><span class="Keyword">type</span><span class="Other">(</span><span class="Identifier">a</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;Option[system.string]&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">isSome</span>
-<span class="Identifier">assert</span> <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">get</span> <span class="Operator">==</span> <span class="StringLit">&quot;abc&quot;</span>
-<span class="Identifier">assert</span> <span class="Operator">$</span><span class="Identifier">b</span> <span class="Operator">==</span> <span class="StringLit">&quot;Some(42)&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="StringLit">&quot;abc&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Keyword">type</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;Option[system.string]&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">isSome</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;abc&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;Some(42)&quot;</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L101"
 class="link-seesrc" target="_blank">Source</a>
@@ -300,10 +309,10 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#isNone,Option[T]">isNone</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">isNone</span>
-<span class="Identifier">assert</span> <span class="Operator">$</span><span class="Keyword">type</span><span class="Other">(</span><span class="Identifier">a</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;Option[system.int]&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">isNone</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Keyword">type</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;Option[system.int]&quot;</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L124"
 class="link-seesrc" target="_blank">Source</a>
@@ -326,12 +335,12 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 Checks if an <tt class="docutils literal"><span class="pre">Option</span></tt> contains a value.
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">var</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">string</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">isSome</span>
-<span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">isSome</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">string</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">isSome</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">isSome</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L143"
 class="link-seesrc" target="_blank">Source</a>
@@ -343,12 +352,12 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 Checks if an <tt class="docutils literal"><span class="pre">Option</span></tt> is empty.
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">var</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">string</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">isNone</span>
-<span class="Identifier">assert</span> <span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">isNone</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">string</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">isNone</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">isNone</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L157"
 class="link-seesrc" target="_blank">Source</a>
@@ -356,7 +365,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="get,Option[T]"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#get%2COption%5BT%5D"><span class="Identifier">get</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#get%2COption%5BT%5D"><span class="Identifier">get</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#lent"><span class="Identifier">lent</span></a> <span class="Identifier">T</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Returns contents of an <tt class="docutils literal"><span class="pre">Option</span></tt>. If it is <tt class="docutils literal"><span class="pre">None</span></tt>, then an exception is thrown.</p>
@@ -364,13 +373,13 @@ class="link-seesrc" target="_blank">Source</a>
 <ul class="simple"><li><a class="reference external" href="#get,Option[T],T">get proc</a> with the default return value</li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">let</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">string</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">get</span> <span class="Operator">==</span> <span class="DecNumber">42</span>
-<span class="Identifier">doAssertRaises</span><span class="Other">(</span><span class="Identifier">UnpackError</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">echo</span> <span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">get</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">let</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">string</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+</span><span class="Identifier">doAssertRaises</span><span class="Punctuation">(</span><span class="Identifier">UnpackDefect</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">echo</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">get</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L170"
 class="link-seesrc" target="_blank">Source</a>
@@ -382,12 +391,12 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 Returns the contents of the <tt class="docutils literal"><span class="pre">Option</span></tt> or an <tt class="docutils literal"><span class="pre">otherwise</span></tt> value if the <tt class="docutils literal"><span class="pre">Option</span></tt> is <tt class="docutils literal"><span class="pre">None</span></tt>.
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">var</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">get</span><span class="Other">(</span><span class="DecNumber">9999</span><span class="Other">)</span> <span class="Operator">==</span> <span class="DecNumber">42</span>
-<span class="Identifier">assert</span> <span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">get</span><span class="Other">(</span><span class="DecNumber">9999</span><span class="Other">)</span> <span class="Operator">==</span> <span class="DecNumber">9999</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Punctuation">(</span><span class="DecNumber">9999</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Punctuation">(</span><span class="DecNumber">9999</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">9999</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L188"
 class="link-seesrc" target="_blank">Source</a>
@@ -399,13 +408,13 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 Returns contents of the <tt class="docutils literal"><span class="pre">var Option</span></tt>. If it is <tt class="docutils literal"><span class="pre">None</span></tt>, then an exception is thrown.
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">let</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">string</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">get</span> <span class="Operator">==</span> <span class="DecNumber">42</span>
-<span class="Identifier">doAssertRaises</span><span class="Other">(</span><span class="Identifier">UnpackError</span><span class="Other">)</span><span class="Other">:</span>
-  <span class="Identifier">echo</span> <span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">get</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">let</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">string</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+</span><span class="Identifier">doAssertRaises</span><span class="Punctuation">(</span><span class="Identifier">UnpackDefect</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">echo</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">get</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L203"
 class="link-seesrc" target="_blank">Source</a>
@@ -422,18 +431,19 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#filter,Option[T],proc(T)">filter proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">d</span> <span class="Other">=</span> <span class="DecNumber">0</span>
-<span class="Keyword">proc</span> <span class="Identifier">saveDouble</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> <span class="Other">=</span>
-  <span class="Identifier">d</span> <span class="Other">=</span> <span class="DecNumber">2</span> <span class="Operator">*</span> <span class="Identifier">x</span>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">d</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Whitespace">
+</span><span class="Keyword">proc</span><span class="Whitespace"> </span><span class="Identifier">saveDouble</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace">
+  </span><span class="Identifier">d</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Operator">*</span><span class="Identifier">x</span><span class="Whitespace">
 
-<span class="Keyword">let</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-<span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">map</span><span class="Other">(</span><span class="Identifier">saveDouble</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">d</span> <span class="Operator">==</span> <span class="DecNumber">0</span>
-<span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">map</span><span class="Other">(</span><span class="Identifier">saveDouble</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">d</span> <span class="Operator">==</span> <span class="DecNumber">84</span></pre>
+</span><span class="Keyword">let</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+
+</span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">map</span><span class="Punctuation">(</span><span class="Identifier">saveDouble</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">d</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Whitespace">
+</span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">map</span><span class="Punctuation">(</span><span class="Identifier">saveDouble</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">d</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">84</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L218"
 class="link-seesrc" target="_blank">Source</a>
@@ -451,15 +461,16 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#filter,Option[T],proc(T)">filter proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">var</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-<span class="Keyword">proc</span> <span class="Identifier">isEven</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span>
-  <span class="Identifier">x</span> <span class="Keyword">mod</span> <span class="DecNumber">2</span> <span class="Operator">==</span> <span class="DecNumber">0</span>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
 
-<span class="Identifier">assert</span> <span class="Operator">$</span><span class="Other">(</span><span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">map</span><span class="Other">(</span><span class="Identifier">isEven</span><span class="Other">)</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;Some(true)&quot;</span>
-<span class="Identifier">assert</span> <span class="Operator">$</span><span class="Other">(</span><span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">map</span><span class="Other">(</span><span class="Identifier">isEven</span><span class="Other">)</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;None[bool]&quot;</span></pre>
+</span><span class="Keyword">proc</span><span class="Whitespace"> </span><span class="Identifier">isEven</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">bool</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace">
+  </span><span class="Identifier">x</span><span class="Whitespace"> </span><span class="Keyword">mod</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Whitespace">
+
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">map</span><span class="Punctuation">(</span><span class="Identifier">isEven</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;Some(true)&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Punctuation">(</span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">map</span><span class="Punctuation">(</span><span class="Identifier">isEven</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;None[bool]&quot;</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L242"
 class="link-seesrc" target="_blank">Source</a>
@@ -471,9 +482,9 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 Remove one level of structure in a nested <tt class="docutils literal"><span class="pre">Option</span></tt>.
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Operator">$</span><span class="Identifier">flatten</span><span class="Other">(</span><span class="Identifier">a</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;Some(42)&quot;</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Identifier">flatten</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;Some(42)&quot;</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L269"
 class="link-seesrc" target="_blank">Source</a>
@@ -493,20 +504,19 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#filter,Option[T],proc(T)">filter proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">doublePositives</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Option</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span> <span class="Other">=</span>
-  <span class="Keyword">if</span> <span class="Identifier">x</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span><span class="Other">:</span>
-    <span class="Keyword">return</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">2</span> <span class="Operator">*</span> <span class="Identifier">x</span><span class="Other">)</span>
-  <span class="Keyword">else</span><span class="Other">:</span>
-    <span class="Keyword">return</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-
-<span class="Keyword">let</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-  <span class="Identifier">c</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="Operator">-</span><span class="DecNumber">11</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">flatMap</span><span class="Other">(</span><span class="Identifier">doublePositives</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">84</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">flatMap</span><span class="Other">(</span><span class="Identifier">doublePositives</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">c</span><span class="Other">.</span><span class="Identifier">flatMap</span><span class="Other">(</span><span class="Identifier">doublePositives</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">proc</span><span class="Whitespace"> </span><span class="Identifier">doublePositives</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">Option</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace">
+  </span><span class="Keyword">if</span><span class="Whitespace"> </span><span class="Identifier">x</span><span class="Whitespace"> </span><span class="Operator">&gt;</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Punctuation">:</span><span class="Whitespace">
+    </span><span class="Keyword">return</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">2</span><span class="Operator">*</span><span class="Identifier">x</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Keyword">else</span><span class="Punctuation">:</span><span class="Whitespace">
+    </span><span class="Keyword">return</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">c</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="Operator">-</span><span class="DecNumber">11</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">flatMap</span><span class="Punctuation">(</span><span class="Identifier">doublePositives</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">84</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">flatMap</span><span class="Punctuation">(</span><span class="Identifier">doublePositives</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">flatMap</span><span class="Punctuation">(</span><span class="Identifier">doublePositives</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L280"
 class="link-seesrc" target="_blank">Source</a>
@@ -524,17 +534,16 @@ class="link-seesrc" target="_blank">Source</a>
 <li><a class="reference external" href="#flatMap,Option[A],proc(A)">flatMap proc</a></li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">isEven</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span>
-  <span class="Identifier">x</span> <span class="Keyword">mod</span> <span class="DecNumber">2</span> <span class="Operator">==</span> <span class="DecNumber">0</span>
-
-<span class="Keyword">let</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-  <span class="Identifier">c</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="Operator">-</span><span class="DecNumber">11</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">a</span><span class="Other">.</span><span class="Identifier">filter</span><span class="Other">(</span><span class="Identifier">isEven</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">b</span><span class="Other">.</span><span class="Identifier">filter</span><span class="Other">(</span><span class="Identifier">isEven</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">c</span><span class="Other">.</span><span class="Identifier">filter</span><span class="Other">(</span><span class="Identifier">isEven</span><span class="Other">)</span> <span class="Operator">==</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">proc</span><span class="Whitespace"> </span><span class="Identifier">isEven</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">bool</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace">
+  </span><span class="Identifier">x</span><span class="Whitespace"> </span><span class="Keyword">mod</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">c</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="Operator">-</span><span class="DecNumber">11</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">filter</span><span class="Punctuation">(</span><span class="Identifier">isEven</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">filter</span><span class="Punctuation">(</span><span class="Identifier">isEven</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">filter</span><span class="Punctuation">(</span><span class="Identifier">isEven</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L311"
 class="link-seesrc" target="_blank">Source</a>
@@ -546,15 +555,16 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 Returns <tt class="docutils literal"><span class="pre">true</span></tt> if both <tt class="docutils literal"><span class="pre">Option`s are `None</span></tt>, or if they are both <tt class="docutils literal"><span class="pre">Some</span></tt> and have equal values.
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">let</span>
-  <span class="Identifier">a</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">b</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-  <span class="Identifier">c</span> <span class="Other">=</span> <span class="Identifier">some</span><span class="Other">(</span><span class="DecNumber">42</span><span class="Other">)</span>
-  <span class="Identifier">d</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Identifier">c</span>
-<span class="Identifier">assert</span> <span class="Identifier">b</span> <span class="Operator">==</span> <span class="Identifier">d</span>
-<span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="Other">(</span><span class="Identifier">a</span> <span class="Operator">==</span> <span class="Identifier">b</span><span class="Other">)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">let</span><span class="Whitespace">
+  </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">c</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">d</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Whitespace">
+
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">d</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/options.nim#L336"
 class="link-seesrc" target="_blank">Source</a>
@@ -597,7 +607,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:10 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:21:26 UTC</small>
       </div>
     </div>
   </div>

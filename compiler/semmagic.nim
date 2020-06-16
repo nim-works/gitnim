@@ -402,14 +402,18 @@ proc turnFinalizerIntoDestructor(c: PContext; orig: PSym; info: TLineInfo): PSym
   # Replace nkDerefExpr by nkHiddenDeref
   # nkDeref is for 'ref T':  x[].field
   # nkHiddenDeref is for 'var T': x<hidden deref [] here>.field
-  proc transform(n: PNode; old, fresh: PType; oldParam, newParam: PSym): PNode =
+  proc transform(procSym: PSym; n: PNode; old, fresh: PType; oldParam, newParam: PSym): PNode =
     result = shallowCopy(n)
     if sameTypeOrNil(n.typ, old):
       result.typ = fresh
-    if n.kind == nkSym and n.sym == oldParam:
-      result.sym = newParam
+    if n.kind == nkSym:
+      if n.sym == oldParam:
+        result.sym = newParam
+      elif n.sym.owner == orig:
+        result.sym = copySym(n.sym)
+        result.sym.owner = procSym
     for i in 0 ..< safeLen(n):
-      result[i] = transform(n[i], old, fresh, oldParam, newParam)
+      result[i] = transform(procSym, n[i], old, fresh, oldParam, newParam)
     #if n.kind == nkDerefExpr and sameType(n[0].typ, old):
     #  result =
 
@@ -423,21 +427,35 @@ proc turnFinalizerIntoDestructor(c: PContext; orig: PSym; info: TLineInfo): PSym
   let newParam = newSym(skParam, oldParam.name, result, result.info)
   newParam.typ = newParamType
   # proc body:
-  result.ast = transform(orig.ast, origParamType, newParamType, oldParam, newParam)
+  result.ast = transform(result, orig.ast, origParamType, newParamType, oldParam, newParam)
   # proc signature:
   result.typ = newProcType(result.info, result)
   result.typ.addParam newParam
 
 proc semQuantifier(c: PContext; n: PNode): PNode =
-  checkMinSonsLen(n, 2, c.config)
+  checkSonsLen(n, 2, c.config)
   openScope(c)
-  for i in 0..n.len-2:
-    let v = newSymS(skForVar, n[i], c)
-    styleCheckDef(c.config, v)
-    onDef(n.info, v)
-    n[i] = newSymNode(v)
-    addDecl(c, v)
-  n[^1] = forceBool(c, semExprWithType(c, n[^1]))
+  result = newNodeIT(n.kind, n.info, n.typ)
+  result.add n[0]
+  let args = n[1]
+  assert args.kind == nkArgList
+  for i in 0..args.len-2:
+    let it = args[i]
+    var valid = false
+    if it.kind == nkInfix:
+      let op = considerQuotedIdent(c, it[0])
+      if op.id == ord(wIn):
+        let v = newSymS(skForVar, it[1], c)
+        styleCheckDef(c.config, v)
+        onDef(it[1].info, v)
+        let domain = semExprWithType(c, it[2], {efWantIterator})
+        v.typ = domain.typ
+        valid = true
+        addDecl(c, v)
+        result.add newTree(nkInfix, it[0], newSymNode(v), domain)
+    if not valid:
+      localError(c.config, n.info, "<quantifier> 'in' <range> expected")
+  result.add forceBool(c, semExprWithType(c, args[^1]))
   closeScope(c)
 
 proc semOld(c: PContext; n: PNode): PNode =

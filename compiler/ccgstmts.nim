@@ -727,6 +727,7 @@ proc genRaiseStmt(p: BProc, t: PNode) =
     initLocExprSingleUse(p, t[0], a)
     finallyActions(p)
     var e = rdLoc(a)
+    discard getTypeDesc(p.module, t[0].typ)
     var typ = skipTypes(t[0].typ, abstractPtrs)
     # XXX For reasons that currently escape me, this is only required by the new
     # C++ based exception handling:
@@ -1440,7 +1441,7 @@ proc genAsmOrEmitStmt(p: BProc, t: PNode, isAsmStmt=false): Rope =
         else:
           # ignore empty lines
           result.add("\"")
-          result.add(x)
+          result.add(x.replace("\"", "\\\""))
           result.add("\\n\"\n")
   else:
     res.add("\L")

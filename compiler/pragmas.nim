@@ -53,7 +53,7 @@ const
     wDeprecated,
     wFloatChecks, wInfChecks, wNanChecks, wPragma, wEmit, wUnroll,
     wLinearScanEnd, wPatterns, wTrMacros, wEffects, wNoForward, wReorder, wComputedGoto,
-    wInjectStmt, wExperimental, wThis, wUsed, wInvariant, wAssume}
+    wInjectStmt, wExperimental, wThis, wUsed, wInvariant, wAssume, wAssert}
   lambdaPragmas* = declPragmas + {FirstCallConv..LastCallConv,
     wNoSideEffect, wSideEffect, wNoreturn, wNosinks, wDynlib, wHeader,
     wThread, wAsmNoStackFrame,
@@ -61,7 +61,7 @@ const
     wGcSafe, wCodegenDecl} - {wExportNims, wError, wUsed}  # why exclude these?
   typePragmas* = declPragmas + {wMagic, wAcyclic,
     wPure, wHeader, wCompilerProc, wCore, wFinal, wSize, wShallow,
-    wIncompleteStruct, wByCopy, wByRef,
+    wIncompleteStruct, wCompleteStruct, wByCopy, wByRef,
     wInheritable, wGensym, wInject, wRequiresInit, wUnchecked, wUnion, wPacked,
     wBorrow, wGcSafe, wPartial, wExplain, wPackage}
   fieldPragmas* = declPragmas + {
@@ -179,7 +179,7 @@ proc processImportCpp(c: PContext; s: PSym, extname: string, info: TLineInfo) =
   incl(s.flags, sfImportc)
   incl(s.flags, sfInfixCall)
   excl(s.flags, sfForward)
-  if c.config.cmd == cmdCompileToC:
+  if c.config.backend == backendC:
     let m = s.getModule()
     incl(m.flags, sfCompileToCpp)
   incl c.config.globalOptions, optMixedMode
@@ -330,31 +330,28 @@ proc processDynLib(c: PContext, n: PNode, sym: PSym) =
       sym.typ.callConv = ccCDecl
 
 proc processNote(c: PContext, n: PNode) =
+  template handleNote(toStrArray, msgMin, notes) =
+    let x = findStr(toStrArray, n[0][1].ident.s)
+    if x >= 0:
+      nk = TNoteKind(x + ord(msgMin))
+      let x = c.semConstBoolExpr(c, n[1])
+      n[1] = x
+      if x.kind == nkIntLit and x.intVal != 0: incl(notes, nk)
+      else: excl(notes, nk)
+    else:
+      invalidPragma(c, n)
+
   if n.kind in nkPragmaCallKinds and n.len == 2 and
       n[0].kind == nkBracketExpr and
       n[0].len == 2 and
       n[0][1].kind == nkIdent and n[0][0].kind == nkIdent:
     var nk: TNoteKind
     case whichKeyword(n[0][0].ident)
-    of wHint:
-      var x = findStr(HintsToStr, n[0][1].ident.s)
-      if x >= 0: nk = TNoteKind(x + ord(hintMin))
-      else: invalidPragma(c, n); return
-    of wWarning:
-      var x = findStr(WarningsToStr, n[0][1].ident.s)
-      if x >= 0: nk = TNoteKind(x + ord(warnMin))
-      else: invalidPragma(c, n); return
-    else:
-      invalidPragma(c, n)
-      return
-
-    let x = c.semConstBoolExpr(c, n[1])
-    n[1] = x
-    if x.kind == nkIntLit and x.intVal != 0: incl(c.config.notes, nk)
-    else: excl(c.config.notes, nk)
-    # checkme: honor cmdlineNotes with: c.setNote(nk, x.kind == nkIntLit and x.intVal != 0)
-  else:
-    invalidPragma(c, n)
+    of wHint: handleNote(HintsToStr, hintMin, c.config.notes)
+    of wWarning: handleNote(WarningsToStr, warnMin, c.config.notes)
+    of wWarningAsError: handleNote(WarningsToStr, warnMin, c.config.warningAsErrors)
+    else: invalidPragma(c, n)
+  else: invalidPragma(c, n)
 
 proc pragmaToOptions(w: TSpecialWord): TOptions {.inline.} =
   case w
@@ -364,7 +361,6 @@ proc pragmaToOptions(w: TSpecialWord): TOptions {.inline.} =
   of wRangeChecks: {optRangeCheck}
   of wBoundChecks: {optBoundsCheck}
   of wOverflowChecks: {optOverflowCheck}
-  of wNilChecks: {optNilCheck}
   of wFloatChecks: {optNaNCheck, optInfCheck}
   of wNanChecks: {optNaNCheck}
   of wInfChecks: {optInfCheck}
@@ -473,14 +469,12 @@ proc processPop(c: PContext, n: PNode) =
 proc processDefine(c: PContext, n: PNode) =
   if (n.kind in nkPragmaCallKinds and n.len == 2) and (n[1].kind == nkIdent):
     defineSymbol(c.config.symbols, n[1].ident.s)
-    message(c.config, n.info, warnDeprecated, "define is deprecated")
   else:
     invalidPragma(c, n)
 
 proc processUndef(c: PContext, n: PNode) =
   if (n.kind in nkPragmaCallKinds and n.len == 2) and (n[1].kind == nkIdent):
     undefSymbol(c.config.symbols, n[1].ident.s)
-    message(c.config, n.info, warnDeprecated, "undef is deprecated")
   else:
     invalidPragma(c, n)
 
@@ -803,8 +797,8 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
       of wExportc, wExportCpp:
         makeExternExport(c, sym, getOptionalStr(c, it, "$1"), it.info)
         if k == wExportCpp:
-          if c.config.cmd != cmdCompileToCpp:
-            localError(c.config, it.info, "exportcpp requires `nim cpp`, got " & $c.config.cmd)
+          if c.config.backend != backendCpp:
+            localError(c.config, it.info, "exportcpp requires `cpp` backend, got " & $c.config.backend)
           else:
             incl(sym.flags, sfMangleCpp)
         incl(sym.flags, sfUsed) # avoid wrong hints
@@ -825,7 +819,7 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
       of wImportCpp:
         processImportCpp(c, sym, getOptionalStr(c, it, "$1"), it.info)
       of wImportJs:
-        if c.config.cmd != cmdCompileToJS:
+        if c.config.backend != backendJs:
           localError(c.config, it.info, "`importjs` pragma requires the JavaScript target")
         let name = getOptionalStr(c, it, "$1")
         incl(sym.flags, sfImportc)
@@ -1078,6 +1072,10 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
         noVal(c, it)
         if sym.typ == nil: invalidPragma(c, it)
         else: incl(sym.typ.flags, tfIncompleteStruct)
+      of wCompleteStruct:
+        noVal(c, it)
+        if sym.typ == nil: invalidPragma(c, it)
+        else: incl(sym.typ.flags, tfCompleteStruct)
       of wUnchecked:
         noVal(c, it)
         if sym.typ == nil or sym.typ.kind notin {tyArray, tyUncheckedArray}:

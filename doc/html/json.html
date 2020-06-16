@@ -92,19 +92,16 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
-  <div class="search-groupby">
-    Group by:
-    <select onchange="groupBy(this.value)">
-      <option value="section">Section</option>
-      <option value="type">Type</option>
-    </select>
-  </div>
+  
   <ul class="simple simple-toc" id="toc-list">
 <li><a class="reference" id="overview_toc" href="#overview">Overview</a></li>
 <ul class="simple"><li><a class="reference" id="overview-parsing-json_toc" href="#overview-parsing-json">Parsing JSON</a></li>
@@ -298,6 +295,8 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#%25%2A.m%2Cuntyped"
     title="`%*`(x: untyped): untyped"><wbr />`%*`<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#isRefSkipDistinct.m%2Ctyped"
+    title="isRefSkipDistinct(arg: typed): untyped"><wbr />is<wbr />Ref<wbr />Skip<wbr />Distinct<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -364,15 +363,20 @@ function main() {
 <span class="Identifier">doAssert</span> <span class="Identifier">jsonNode</span><span class="Punctuation">[</span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">getFloat</span><span class="Punctuation">(</span><span class="FloatNumber">3.14</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="FloatNumber">3.14</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">jsonNode</span><span class="Punctuation">{</span><span class="StringLit">&quot;nope&quot;</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">getFloat</span><span class="Punctuation">(</span><span class="FloatNumber">3.14</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="FloatNumber">3.14</span> <span class="Comment"># note the {}</span></pre>
 <h2><a class="toc-backref" id="overview-unmarshalling" href="#overview-unmarshalling">Unmarshalling</a></h2><p>In addition to reading dynamic data, Nim can also unmarshal JSON directly into a type with the <tt class="docutils literal"><span class="pre">to</span></tt> macro.</p>
+<p>Note: Use <a class="reference external" href="options.html#Option">Option</a> for keys sometimes missing in json responses, and backticks around keys with a reserved keyword as name.</p>
 <pre class="listing"><span class="Keyword">import</span> <span class="Identifier">json</span>
+<span class="Keyword">import</span> <span class="Identifier">options</span>
 
 <span class="Keyword">type</span>
   <span class="Identifier">User</span> <span class="Operator">=</span> <span class="Keyword">object</span>
     <span class="Identifier">name</span><span class="Punctuation">:</span> <span class="Identifier">string</span>
     <span class="Identifier">age</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
+    <span class="Punctuation">`</span><span class="Keyword">type</span><span class="Punctuation">`</span><span class="Punctuation">:</span> <span class="Identifier">Option</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span>
 
 <span class="Keyword">let</span> <span class="Identifier">userJson</span> <span class="Operator">=</span> <span class="Identifier">parseJson</span><span class="Punctuation">(</span><span class="LongStringLit">&quot;&quot;&quot;{ &quot;name&quot;: &quot;Nim&quot;, &quot;age&quot;: 12 }&quot;&quot;&quot;</span><span class="Punctuation">)</span>
-<span class="Keyword">let</span> <span class="Identifier">user</span> <span class="Operator">=</span> <span class="Identifier">to</span><span class="Punctuation">(</span><span class="Identifier">userJson</span><span class="Punctuation">,</span> <span class="Identifier">User</span><span class="Punctuation">)</span></pre>
+<span class="Keyword">let</span> <span class="Identifier">user</span> <span class="Operator">=</span> <span class="Identifier">to</span><span class="Punctuation">(</span><span class="Identifier">userJson</span><span class="Punctuation">,</span> <span class="Identifier">User</span><span class="Punctuation">)</span>
+<span class="Keyword">if</span> <span class="Identifier">user</span><span class="Operator">.</span><span class="Punctuation">`</span><span class="Keyword">type</span><span class="Punctuation">`</span><span class="Operator">.</span><span class="Identifier">isSome</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Identifier">assert</span> <span class="Identifier">user</span><span class="Operator">.</span><span class="Punctuation">`</span><span class="Keyword">type</span><span class="Punctuation">`</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">!=</span> <span class="StringLit">&quot;robot&quot;</span></pre>
 <h1><a class="toc-backref" id="creating-json" href="#creating-json">Creating JSON</a></h1><p>This module can also be used to comfortably create JSON using the <tt class="docutils literal"><span class="pre">%*</span></tt> operator:</p>
 <pre class="listing"><span class="Keyword">import</span> <span class="Identifier">json</span>
 
@@ -386,19 +390,18 @@ function main() {
 
 <span class="Keyword">var</span> <span class="Identifier">j2</span> <span class="Operator">=</span> <span class="Operator">%*</span> <span class="Punctuation">{</span><span class="StringLit">&quot;name&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;Isaac&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;books&quot;</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="StringLit">&quot;Robot Dreams&quot;</span><span class="Punctuation">]</span><span class="Punctuation">}</span>
 <span class="Identifier">j2</span><span class="Punctuation">[</span><span class="StringLit">&quot;details&quot;</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Operator">%*</span> <span class="Punctuation">{</span><span class="StringLit">&quot;age&quot;</span><span class="Punctuation">:</span><span class="DecNumber">35</span><span class="Punctuation">,</span> <span class="StringLit">&quot;pi&quot;</span><span class="Punctuation">:</span><span class="FloatNumber">3.1415</span><span class="Punctuation">}</span>
-<span class="Identifier">echo</span> <span class="Identifier">j2</span></pre>
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Comment">## Note: for JObject, key ordering is preserved, unlike in some languages,</span>
-<span class="Comment">## this is convenient for some use cases. Example:</span>
-<span class="Keyword">type</span>
-  <span class="Identifier">Foo</span> <span class="Other">=</span> <span class="Keyword">object</span>
-    <span class="Identifier">a1</span><span class="Other">,</span> <span class="Identifier">a2</span><span class="Other">,</span> <span class="Identifier">a0</span><span class="Other">,</span> <span class="Identifier">a3</span><span class="Other">,</span> <span class="Identifier">a4</span><span class="Other">:</span> <span class="Identifier">int</span>
+<span class="Identifier">echo</span> <span class="Identifier">j2</span></pre><p>See also: std/jsonutils for hookable json serialization/deserialization of arbitrary types.</p>
 
-<span class="Identifier">doAssert</span> <span class="Operator">$</span><span class="Other">(</span><span class="Operator">%*</span><span class="Identifier">Foo</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;&quot;{&quot;a1&quot;:0,&quot;a2&quot;:0,&quot;a0&quot;:0,&quot;a3&quot;:0,&quot;a4&quot;:0}&quot;&quot;&quot;</span></pre></p>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Comment">## Note: for JObject, key ordering is preserved, unlike in some languages,</span><span class="Whitespace">
+</span><span class="Comment">## this is convenient for some use cases. Example:</span><span class="Whitespace">
+</span><span class="Keyword">type</span><span class="Whitespace"> </span><span class="Identifier">Foo</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Keyword">object</span><span class="Whitespace">
+  </span><span class="Identifier">a1</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">a2</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">a0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">a3</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">a4</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Punctuation">(</span><span class="Operator">%*</span><span class="Whitespace"> </span><span class="Identifier">Foo</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot;{&quot;a1&quot;:0,&quot;a2&quot;:0,&quot;a0&quot;:0,&quot;a3&quot;:0,&quot;a4&quot;:0}&quot;&quot;&quot;</span></pre></p>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="hashes.html">hashes</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="lexbase.html">lexbase</a>, <a class="reference external" href="streams.html">streams</a>, <a class="reference external" href="macros.html">macros</a>, <a class="reference external" href="parsejson.html">parsejson</a>, <a class="reference external" href="options.html">options</a>
+<a class="reference external" href="hashes.html">hashes</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="lexbase.html">lexbase</a>, <a class="reference external" href="streams.html">streams</a>, <a class="reference external" href="macros.html">macros</a>, <a class="reference external" href="parsejson.html">parsejson</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="since.html">since</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -410,9 +413,9 @@ function main() {
 
 possible JSON node types
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L157"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L169"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L157" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L169" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="JsonNode"></a>
@@ -421,9 +424,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 JSON node
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L166"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L178"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L166" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L178" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="JsonNodeObj"></a>
@@ -455,9 +458,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L167"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L179"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L167" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L179" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -471,9 +474,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">JString JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L184"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L196"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L184" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L196" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newJInt,BiggestInt"></a>
@@ -482,9 +485,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">JInt JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L192"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L204"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L192" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L204" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newJFloat,float"></a>
@@ -493,9 +496,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">JFloat JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L196"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L208"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L196" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L208" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newJBool,bool"></a>
@@ -504,9 +507,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">JBool JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L200"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L212"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L200" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L212" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newJNull"></a>
@@ -515,9 +518,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">JNull JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L204"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L216"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L204" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L216" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newJObject"></a>
@@ -526,9 +529,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">JObject JsonNode</span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L208"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L220"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L208" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L220" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newJArray"></a>
@@ -537,9 +540,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">JArray JsonNode</span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L212"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L224"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L212" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L224" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getStr,JsonNode,string"></a>
@@ -550,9 +553,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Returns <tt class="docutils literal"><span class="pre">default</span></tt> if <tt class="docutils literal"><span class="pre">n</span></tt> is not a <tt class="docutils literal"><span class="pre">JString</span></tt>, or if <tt class="docutils literal"><span class="pre">n</span></tt> is nil.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L216"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L228"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L216" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L228" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getInt,JsonNode,int"></a>
@@ -563,9 +566,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Returns <tt class="docutils literal"><span class="pre">default</span></tt> if <tt class="docutils literal"><span class="pre">n</span></tt> is not a <tt class="docutils literal"><span class="pre">JInt</span></tt>, or if <tt class="docutils literal"><span class="pre">n</span></tt> is nil.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L223"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L235"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L223" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L235" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getBiggestInt,JsonNode,BiggestInt"></a>
@@ -577,9 +580,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Returns <tt class="docutils literal"><span class="pre">default</span></tt> if <tt class="docutils literal"><span class="pre">n</span></tt> is not a <tt class="docutils literal"><span class="pre">JInt</span></tt>, or if <tt class="docutils literal"><span class="pre">n</span></tt> is nil.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L230"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L242"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L230" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L242" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFloat,JsonNode,float"></a>
@@ -590,9 +593,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Returns <tt class="docutils literal"><span class="pre">default</span></tt> if <tt class="docutils literal"><span class="pre">n</span></tt> is not a <tt class="docutils literal"><span class="pre">JFloat</span></tt> or <tt class="docutils literal"><span class="pre">JInt</span></tt>, or if <tt class="docutils literal"><span class="pre">n</span></tt> is nil.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L237"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L249"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L237" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L249" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getBool,JsonNode,bool"></a>
@@ -603,9 +606,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Returns <tt class="docutils literal"><span class="pre">default</span></tt> if <tt class="docutils literal"><span class="pre">n</span></tt> is not a <tt class="docutils literal"><span class="pre">JBool</span></tt>, or if <tt class="docutils literal"><span class="pre">n</span></tt> is nil.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L247"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L259"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L247" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L259" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFields,JsonNode"></a>
@@ -617,9 +620,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Returns <tt class="docutils literal"><span class="pre">default</span></tt> if <tt class="docutils literal"><span class="pre">n</span></tt> is not a <tt class="docutils literal"><span class="pre">JObject</span></tt>, or if <tt class="docutils literal"><span class="pre">n</span></tt> is nil.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L254"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L266"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L254" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L266" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getElems,JsonNode,seq[JsonNode]"></a>
@@ -631,9 +634,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Returns <tt class="docutils literal"><span class="pre">default</span></tt> if <tt class="docutils literal"><span class="pre">n</span></tt> is not a <tt class="docutils literal"><span class="pre">JArray</span></tt>, or if <tt class="docutils literal"><span class="pre">n</span></tt> is nil.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L263"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L275"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L263" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L275" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="add,JsonNode,JsonNode"></a>
@@ -642,9 +645,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Adds <tt class="docutils literal"><span class="pre">child</span></tt> to a JArray node <tt class="docutils literal"><span class="pre">father</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L270"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L282"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L270" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L282" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="add,JsonNode,string,JsonNode"></a>
@@ -653,9 +656,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets a field from a <tt class="docutils literal"><span class="pre">JObject</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L275"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L287"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L275" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L287" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="%,string"></a>
@@ -664,46 +667,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JString JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L280"
-class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L280" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="%,uint"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%25%2Cuint"><span class="Identifier">`%`</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#uint"><span class="Identifier">uint</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JInt JsonNode</span></tt>.
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L284"
-class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L284" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="%,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%25%2Cint"><span class="Identifier">`%`</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JInt JsonNode</span></tt>.
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L288"
-class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="%,BiggestUInt"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%25%2CBiggestUInt"><span class="Identifier">`%`</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#BiggestUInt"><span class="Identifier">BiggestUInt</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JInt JsonNode</span></tt>.
-&nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L292"
 class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L292" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="%,BiggestInt"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%25%2CBiggestInt"><span class="Identifier">`%`</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#BiggestInt"><span class="Identifier">BiggestInt</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="%,uint"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#%25%2Cuint"><span class="Identifier">`%`</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#uint"><span class="Identifier">uint</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JInt JsonNode</span></tt>.
@@ -713,15 +683,48 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L296" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="%,int"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#%25%2Cint"><span class="Identifier">`%`</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JInt JsonNode</span></tt>.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L300"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L300" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="%,BiggestUInt"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#%25%2CBiggestUInt"><span class="Identifier">`%`</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#BiggestUInt"><span class="Identifier">BiggestUInt</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JInt JsonNode</span></tt>.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L304"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L304" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="%,BiggestInt"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#%25%2CBiggestInt"><span class="Identifier">`%`</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#BiggestInt"><span class="Identifier">BiggestInt</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JInt JsonNode</span></tt>.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L308"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L308" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="%,float"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%25%2Cfloat"><span class="Identifier">`%`</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JFloat JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L300"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L312"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L300" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L312" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="%,bool"></a>
@@ -730,9 +733,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JBool JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L304"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L316"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L304" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="%,openArray[tuple[string,JsonNode]]"></a>
@@ -742,9 +745,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JObject JsonNode</span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L308"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L320"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L308" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L320" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="%,openArray[T]"></a>
@@ -753,9 +756,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JArray JsonNode</span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L316"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L328"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="%"></a>
@@ -764,9 +767,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JObject JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L321"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L333"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L321" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L333" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="%,Option[T]"></a>
@@ -775,9 +778,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JNull JsonNode</span></tt> if <tt class="docutils literal"><span class="pre">opt</span></tt> is empty, otherwise it delegates to the underlying value.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L326"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L338"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L326" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L338" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[]=,JsonNode,string,JsonNode"></a>
@@ -786,9 +789,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets a field from a <tt class="docutils literal"><span class="pre">JObject</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L344"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L356"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L344" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L356" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="%,T"></a>
@@ -797,9 +800,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Construct JsonNode from tuples and objects.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L349"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L361"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L349" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L361" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="%,ref."></a>
@@ -808,9 +811,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Generic constructor for JSON data. Creates a new <tt class="docutils literal"><span class="pre">JObject JsonNode</span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L354"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L366"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L354" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L366" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="%_2"></a>
@@ -819,9 +822,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Construct a JsonNode that represents the specified enum value as a string. Creates a new <tt class="docutils literal"><span class="pre">JString JsonNode</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L361"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L373"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L361" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L373" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="==,JsonNode,JsonNode"></a>
@@ -830,9 +833,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Check two nodes for equality
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L397"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L409"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L397" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L409" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hash,JsonNode"></a>
@@ -841,9 +844,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Compute the hash for a JSON node
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L429"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L441"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L429" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L441" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hash,OrderedTable[string,JsonNode]"></a>
@@ -853,9 +856,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L447"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L459"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L447" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L459" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="len,JsonNode"></a>
@@ -864,9 +867,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 If <tt class="docutils literal"><span class="pre">n</span></tt> is a <tt class="docutils literal"><span class="pre">JArray</span></tt>, it returns the number of elements. If <tt class="docutils literal"><span class="pre">n</span></tt> is a <tt class="docutils literal"><span class="pre">JObject</span></tt>, it returns the number of pairs. Else it returns 0.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L452"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L464"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L452" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L464" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[],JsonNode,string"></a>
@@ -875,9 +878,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Gets a field from a <tt class="docutils literal"><span class="pre">JObject</span></tt>, which must not be nil. If the value at <tt class="docutils literal"><span class="pre">name</span></tt> does not exist, raises KeyError.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L461"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L473"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L461" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L473" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[],JsonNode,int"></a>
@@ -886,9 +889,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Gets the node at <tt class="docutils literal"><span class="pre">index</span></tt> in an Array. Result is undefined if <tt class="docutils literal"><span class="pre">index</span></tt> is out of bounds, but as long as array bound checks are enabled it will result in an exception.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L470"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L482"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L470" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L482" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasKey,JsonNode,string"></a>
@@ -897,9 +900,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Checks if <tt class="docutils literal"><span class="pre">key</span></tt> exists in <tt class="docutils literal"><span class="pre">node</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L478"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L490"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L478" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L490" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="contains,JsonNode,string"></a>
@@ -908,9 +911,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Checks if <tt class="docutils literal"><span class="pre">key</span></tt> exists in <tt class="docutils literal"><span class="pre">node</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L483"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L495"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L483" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L495" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="contains,JsonNode,JsonNode"></a>
@@ -919,9 +922,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Checks if <tt class="docutils literal"><span class="pre">val</span></tt> exists in array <tt class="docutils literal"><span class="pre">node</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L488"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L500"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L488" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L500" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="{},JsonNode,varargs[string]"></a>
@@ -932,9 +935,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This proc can be used to create tree structures on the fly (sometimes called <span id="autovivification_1">autovivification</span>):</p>
 <pre class="listing"><span class="Identifier">myjson</span><span class="Punctuation">{</span><span class="StringLit">&quot;parent&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;child&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;grandchild&quot;</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Identifier">newJInt</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L493"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L505"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L493" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L505" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="{},JsonNode,varargs[int]"></a>
@@ -943,9 +946,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Traverses the node and gets the given value. If any of the indexes do not exist, returns <tt class="docutils literal"><span class="pre">nil</span></tt>. Also returns <tt class="docutils literal"><span class="pre">nil</span></tt> if one of the intermediate data structures is not an array.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L510"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L522"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L510" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L522" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getOrDefault,JsonNode,string"></a>
@@ -954,9 +957,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Gets a field from a <tt class="docutils literal"><span class="pre">node</span></tt>. If <tt class="docutils literal"><span class="pre">node</span></tt> is nil or not an object or value at <tt class="docutils literal"><span class="pre">key</span></tt> does not exist, returns nil
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L520"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L532"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L520" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L532" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="{},JsonNode,string"></a>
@@ -965,9 +968,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Gets a field from a <tt class="docutils literal"><span class="pre">node</span></tt>. If <tt class="docutils literal"><span class="pre">node</span></tt> is nil or not an object or value at <tt class="docutils literal"><span class="pre">key</span></tt> does not exist, returns nil
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L526"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L538"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L526" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L538" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="{}=,JsonNode,varargs[string],JsonNode"></a>
@@ -977,9 +980,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Traverses the node and tries to set the value at the given location to <tt class="docutils literal"><span class="pre">value</span></tt>. If any of the keys are missing, they are added.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L531"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L543"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L531" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L543" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="delete,JsonNode,string"></a>
@@ -988,9 +991,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Deletes <tt class="docutils literal"><span class="pre">obj[key]</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L541"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L553"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L541" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L553" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="copy,JsonNode"></a>
@@ -999,9 +1002,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Performs a deep copy of <tt class="docutils literal"><span class="pre">a</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L548"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L560"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L548" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L560" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="escapeJsonUnquoted,string,string"></a>
@@ -1010,9 +1013,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts a string <tt class="docutils literal"><span class="pre">s</span></tt> to its JSON representation without quotes. Appends to <tt class="docutils literal"><span class="pre">result</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L582"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L594"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L582" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L594" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="escapeJsonUnquoted,string"></a>
@@ -1021,9 +1024,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts a string <tt class="docutils literal"><span class="pre">s</span></tt> to its JSON representation without quotes.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L599"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L611"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L599" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L611" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="escapeJson,string,string"></a>
@@ -1032,9 +1035,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts a string <tt class="docutils literal"><span class="pre">s</span></tt> to its JSON representation with quotes. Appends to <tt class="docutils literal"><span class="pre">result</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L604"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L616"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L604" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L616" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="escapeJson,string"></a>
@@ -1043,9 +1046,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts a string <tt class="docutils literal"><span class="pre">s</span></tt> to its JSON representation with quotes.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L611"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L623"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L611" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L623" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pretty,JsonNode,int"></a>
@@ -1055,11 +1058,11 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Returns a JSON Representation of <tt class="docutils literal"><span class="pre">node</span></tt>, with indentation and on multiple lines.</p>
 <p>Similar to prettyprint in Python.</p>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">j</span> <span class="Other">=</span> <span class="Operator">%*</span><span class="Other">{</span><span class="StringLit">&quot;name&quot;</span><span class="Other">:</span> <span class="StringLit">&quot;Isaac&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;books&quot;</span><span class="Other">:</span> <span class="Other">[</span><span class="StringLit">&quot;Robot Dreams&quot;</span><span class="Other">]</span><span class="Other">,</span>
-        <span class="StringLit">&quot;details&quot;</span><span class="Other">:</span> <span class="Other">{</span><span class="StringLit">&quot;age&quot;</span><span class="Other">:</span> <span class="DecNumber">35</span><span class="Other">,</span> <span class="StringLit">&quot;pi&quot;</span><span class="Other">:</span> <span class="FloatNumber">3.1415</span><span class="Other">}</span><span class="Other">}</span>
-<span class="Identifier">doAssert</span> <span class="Identifier">pretty</span><span class="Other">(</span><span class="Identifier">j</span><span class="Other">)</span> <span class="Operator">==</span>
-    <span class="StringLit">&quot;&quot;&quot;{
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">j</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Operator">%*</span><span class="Whitespace"> </span><span class="Punctuation">{</span><span class="StringLit">&quot;name&quot;</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="StringLit">&quot;Isaac&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;books&quot;</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="StringLit">&quot;Robot Dreams&quot;</span><span class="Punctuation">]</span><span class="Punctuation">,</span><span class="Whitespace">
+            </span><span class="StringLit">&quot;details&quot;</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Punctuation">{</span><span class="StringLit">&quot;age&quot;</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="DecNumber">35</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;pi&quot;</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="FloatNumber">3.1415</span><span class="Punctuation">}</span><span class="Punctuation">}</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">pretty</span><span class="Punctuation">(</span><span class="Identifier">j</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot;
+{
   &quot;name&quot;: &quot;Isaac&quot;,
   &quot;books&quot;: [
     &quot;Robot Dreams&quot;
@@ -1070,9 +1073,9 @@ class="link-seesrc" target="_blank">Source</a>
   }
 }&quot;&quot;&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L675"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L687"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L675" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L687" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toUgly,string,JsonNode"></a>
@@ -1084,9 +1087,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This provides higher efficiency than the <tt class="docutils literal"><span class="pre">pretty</span></tt> procedure as it does <strong>not</strong> attempt to format the resulting JSON to make it human readable.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L697"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L709"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L697" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L709" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$,JsonNode"></a>
@@ -1095,46 +1098,47 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts <tt class="docutils literal"><span class="pre">node</span></tt> to its JSON Representation on one line.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L737"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L749"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L737" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L749" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseJson,Stream,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#parseJson%2CStream%2Cstring"><span class="Identifier">parseJson</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="streams.html#Stream"><span class="Identifier">Stream</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">JsonParsingError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+<dt><pre><span class="Keyword">proc</span> <a href="#parseJson%2CStream%2Cstring"><span class="Identifier">parseJson</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="streams.html#Stream"><span class="Identifier">Stream</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">JsonParsingError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Parses from a stream <tt class="docutils literal"><span class="pre">s</span></tt> into a <tt class="docutils literal"><span class="pre">JsonNode</span></tt>. <tt class="docutils literal"><span class="pre">filename</span></tt> is only needed for nice error messages. If <tt class="docutils literal"><span class="pre">s</span></tt> contains extra data, it will raise <tt class="docutils literal"><span class="pre">JsonParsingError</span></tt>. This closes the stream <tt class="docutils literal"><span class="pre">s</span></tt> after it's done.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L838"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L850"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L838" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L850" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseJson,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#parseJson%2Cstring"><span class="Identifier">parseJson</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">JsonParsingError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#parseJson%2Cstring"><span class="Identifier">parseJson</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">JsonParsingError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Parses JSON from <tt class="docutils literal"><span class="pre">buffer</span></tt>. If <tt class="docutils literal"><span class="pre">buffer</span></tt> contains extra data, it will raise <tt class="docutils literal"><span class="pre">JsonParsingError</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L928"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L940"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L928" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L940" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseFile,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#parseFile%2Cstring"><span class="Identifier">parseFile</span></a><span class="Other">(</span><span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">JsonParsingError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#parseFile%2Cstring"><span class="Identifier">parseFile</span></a><span class="Other">(</span><span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">JsonParsingError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Parses <tt class="docutils literal"><span class="pre">file</span></tt> into a <tt class="docutils literal"><span class="pre">JsonNode</span></tt>. If <tt class="docutils literal"><span class="pre">file</span></tt> contains extra data, it will raise <tt class="docutils literal"><span class="pre">JsonParsingError</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L933"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L945"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L933" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L945" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="to,JsonNode,typedesc[T]"></a>
@@ -1173,9 +1177,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">doAssert</span> <span class="Identifier">data</span><span class="Operator">.</span><span class="Identifier">person</span><span class="Operator">.</span><span class="Identifier">age</span> <span class="Operator">==</span> <span class="DecNumber">21</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">data</span><span class="Operator">.</span><span class="Identifier">list</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">4</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L1194"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L1207"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L1194" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L1207" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1189,9 +1193,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Iterator for the items of <tt class="docutils literal"><span class="pre">node</span></tt>. <tt class="docutils literal"><span class="pre">node</span></tt> has to be a JArray.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L742"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L754"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L742" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L754" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mitems.i,JsonNode"></a>
@@ -1200,9 +1204,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Iterator for the items of <tt class="docutils literal"><span class="pre">node</span></tt>. <tt class="docutils literal"><span class="pre">node</span></tt> has to be a JArray. Items can be modified.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L748"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L760"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L748" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L760" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pairs.i,JsonNode"></a>
@@ -1211,9 +1215,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Iterator for the child elements of <tt class="docutils literal"><span class="pre">node</span></tt>. <tt class="docutils literal"><span class="pre">node</span></tt> has to be a JObject.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L755"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L767"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L755" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L767" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="keys.i,JsonNode"></a>
@@ -1222,9 +1226,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Iterator for the keys in <tt class="docutils literal"><span class="pre">node</span></tt>. <tt class="docutils literal"><span class="pre">node</span></tt> has to be a JObject.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L761"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L773"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L761" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L773" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mpairs.i,JsonNode"></a>
@@ -1234,22 +1238,22 @@ class="link-seesrc" target="_blank">Source</a>
 
 Iterator for the child elements of <tt class="docutils literal"><span class="pre">node</span></tt>. <tt class="docutils literal"><span class="pre">node</span></tt> has to be a JObject. Values can be modified
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L767"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L779"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L767" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L779" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseJsonFragments.i,Stream,string"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#parseJsonFragments.i%2CStream%2Cstring"><span class="Identifier">parseJsonFragments</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="streams.html#Stream"><span class="Identifier">Stream</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Defect</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">JsonParsingError</span><span class="Other">,</span>
-    <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">JsonParsingError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Parses from a stream <tt class="docutils literal"><span class="pre">s</span></tt> into <tt class="docutils literal"><span class="pre">JsonNodes</span></tt>. <tt class="docutils literal"><span class="pre">filename</span></tt> is only needed for nice error messages. The JSON fragments are separated by whitespace. This can be substantially faster than the comparable loop <tt class="docutils literal"><span class="pre">for x in splitWhitespace(s): yield parseJson(x)</span></tt>. This closes the stream <tt class="docutils literal"><span class="pre">s</span></tt> after it's done.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L822"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L834"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L822" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L834" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1263,9 +1267,20 @@ class="link-seesrc" target="_blank">Source</a>
 
 Convert an expression to a JsonNode directly, without having to specify <tt class="docutils literal"><span class="pre">%</span></tt> for every element.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L392"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L404"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L392" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L404" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="isRefSkipDistinct.m,typed"></a>
+<dt><pre><span class="Keyword">macro</span> <a href="#isRefSkipDistinct.m%2Ctyped"><span class="Identifier">isRefSkipDistinct</span></a><span class="Other">(</span><span class="Identifier">arg</span><span class="Other">:</span> <a href="system.html#typed"><span class="Identifier">typed</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a></pre></dt>
+<dd>
+
+internal only, do not use
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L969"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L969" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1279,9 +1294,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L314"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/json.nim#L326"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L314" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/json.nim#L326" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1289,7 +1304,7 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="19">
 <h1><a class="toc-backref" href="#19">Exports</a></h1>
 <dl class="item">
-<a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="parsejson.html#JsonEventKind"><span class="Identifier">JsonEventKind</span></a>, <a href="parsejson.html#JsonError"><span class="Identifier">JsonError</span></a>, <a href="parsejson.html#JsonParser"><span class="Identifier">JsonParser</span></a>, <a href="parsejson.html#JsonKindError"><span class="Identifier">JsonKindError</span></a>, <a href="io.html#open"><span class="Identifier">open</span></a>, <a href="io.html#open"><span class="Identifier">open</span></a>, <a href="lexbase.html#open"><span class="Identifier">open</span></a>, <a href="io.html#open"><span class="Identifier">open</span></a>, <a href="parsejson.html#open"><span class="Identifier">open</span></a>, <a href="lexbase.html#close"><span class="Identifier">close</span></a>, <a href="streams.html#close"><span class="Identifier">close</span></a>, <a href="io.html#close"><span class="Identifier">close</span></a>, <a href="parsejson.html#close"><span class="Identifier">close</span></a>, <a href="parsejson.html#str"><span class="Identifier">str</span></a>, <a href="parsejson.html#getInt"><span class="Identifier">getInt</span></a>, <a href="parsejson.html#getFloat"><span class="Identifier">getFloat</span></a>, <a href="macros.html#kind"><span class="Identifier">kind</span></a>, <a href="parsejson.html#kind"><span class="Identifier">kind</span></a>, <a href="parsejson.html#getColumn"><span class="Identifier">getColumn</span></a>, <a href="parsejson.html#getLine"><span class="Identifier">getLine</span></a>, <a href="parsejson.html#getFilename"><span class="Identifier">getFilename</span></a>, <a href="parsejson.html#errorMsg"><span class="Identifier">errorMsg</span></a>, <a href="parsejson.html#errorMsgExpected"><span class="Identifier">errorMsgExpected</span></a>, <a href="parsejson.html#next"><span class="Identifier">next</span></a>, <a href="parsejson.html#JsonParsingError"><span class="Identifier">JsonParsingError</span></a>, <a href="parsejson.html#raiseParseErr"><span class="Identifier">raiseParseErr</span></a>
+<a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="tables.html#$"><span class="Identifier">$</span></a>, <a href="parsejson.html#JsonEventKind"><span class="Identifier">JsonEventKind</span></a>, <a href="parsejson.html#JsonError"><span class="Identifier">JsonError</span></a>, <a href="parsejson.html#JsonParser"><span class="Identifier">JsonParser</span></a>, <a href="parsejson.html#JsonKindError"><span class="Identifier">JsonKindError</span></a>, <a href="io.html#open"><span class="Identifier">open</span></a>, <a href="io.html#open"><span class="Identifier">open</span></a>, <a href="lexbase.html#open"><span class="Identifier">open</span></a>, <a href="io.html#open"><span class="Identifier">open</span></a>, <a href="parsejson.html#open"><span class="Identifier">open</span></a>, <a href="lexbase.html#close"><span class="Identifier">close</span></a>, <a href="streams.html#close"><span class="Identifier">close</span></a>, <a href="io.html#close"><span class="Identifier">close</span></a>, <a href="parsejson.html#close"><span class="Identifier">close</span></a>, <a href="parsejson.html#str"><span class="Identifier">str</span></a>, <a href="parsejson.html#getInt"><span class="Identifier">getInt</span></a>, <a href="parsejson.html#getFloat"><span class="Identifier">getFloat</span></a>, <a href="macros.html#kind"><span class="Identifier">kind</span></a>, <a href="parsejson.html#kind"><span class="Identifier">kind</span></a>, <a href="parsejson.html#getColumn"><span class="Identifier">getColumn</span></a>, <a href="parsejson.html#getLine"><span class="Identifier">getLine</span></a>, <a href="parsejson.html#getFilename"><span class="Identifier">getFilename</span></a>, <a href="parsejson.html#errorMsg"><span class="Identifier">errorMsg</span></a>, <a href="parsejson.html#errorMsgExpected"><span class="Identifier">errorMsgExpected</span></a>, <a href="parsejson.html#next"><span class="Identifier">next</span></a>, <a href="parsejson.html#JsonParsingError"><span class="Identifier">JsonParsingError</span></a>, <a href="parsejson.html#raiseParseErr"><span class="Identifier">raiseParseErr</span></a>, <a href="strutils.html#nimIdentNormalize"><span class="Identifier">nimIdentNormalize</span></a>
 </dl></div>
 
   </div>
@@ -1299,7 +1314,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:07 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:21:22 UTC</small>
       </div>
     </div>
   </div>

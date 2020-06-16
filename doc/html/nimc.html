@@ -79,7 +79,7 @@ function main() {
       <input type="checkbox" id="checkbox" />
       <div class="slider round"></div>
     </label>
-   &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
   </div>
   <div id="global-links">
     <ul class="simple-boot">
@@ -92,12 +92,23 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
+    <div class="search-groupby">
+    Group by:
+    <select onchange="groupBy(this.value)">
+      <option value="section">Section</option>
+      <option value="type">Type</option>
+    </select>
+  </div>
+
   <ul class="simple simple-toc" id="toc-list">
 <li><a class="reference" id="introduction_toc" href="#introduction">Introduction</a></li>
 <li><a class="reference" id="compiler-usage_toc" href="#compiler-usage">Compiler Usage</a></li>
@@ -138,7 +149,7 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Author:</th><td> Andreas Rumpf</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.2.1</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.3.5</td></tr>
 </tbody></table><blockquote><p>&quot;Look at you, hacker. A pathetic creature of meat and bone, panting and sweating as you run through my corridors. How can you challenge a perfect, immortal machine?&quot;</p></blockquote>
 
 <h1><a class="toc-backref" id="introduction" href="#introduction">Introduction</a></h1><p>This document describes the usage of the <em>Nim compiler</em> on the different supported platforms. It is not a definition of the Nim programming language (which is covered in the <a class="reference external" href="manual.html">manual</a>).</p>
@@ -152,11 +163,12 @@ nim command [options] [projectfile] [arguments]</pre>
 <dl class="docutils"><dt>Command:</dt>
 <dd><table frame="void"><tr><th align="left">compile, c</th><td align="left">compile project with default code generator (C)</td>
 </tr>
-<tr><th align="left">doc</th><td align="left">generate the documentation for inputfile</td>
+<tr><th align="left">r</th><td align="left">compile to $nimcache/projname, run with [arguments] using backend specified by <tt class="docutils literal"><span class="pre">--backend</span></tt> (default: c)</td>
 </tr>
-</table></dd>
-<dt>Arguments:</dt>
-<dd>arguments are passed to the program being run (if --run option is selected)</dd>
+<tr><th align="left">doc</th><td align="left">generate the documentation for inputfile for backend specified by <tt class="docutils literal"><span class="pre">--backend</span></tt> (default: c)</td>
+</tr>
+</table><p>Arguments: arguments are passed to the program being run (if --run option is selected)</p>
+</dd>
 <dt>Options:</dt>
 <dd><table frame="void"><tr><th align="left">-p, --path:PATH</th><td align="left">add path to search paths</td>
 </tr>
@@ -206,7 +218,7 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 <tr><th align="left">e</th><td align="left">run a Nimscript file</td>
 </tr>
-<tr><th align="left">rst2html</th><td align="left">convert a reStructuredText file to HTML</td>
+<tr><th align="left">rst2html</th><td align="left">convert a reStructuredText file to HTML use <tt class="docutils literal"><span class="pre">--docCmd:skip</span></tt> to skip compiling snippets</td>
 </tr>
 <tr><th align="left">rst2tex</th><td align="left">convert a reStructuredText file to TeX</td>
 </tr>
@@ -240,8 +252,6 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 <tr><th align="left">--infChecks:on|off</th><td align="left">turn Inf checks on|off</td>
 </tr>
-<tr><th align="left">--nilChecks:on|off</th><td align="left">turn nil checks on|off</td>
-</tr>
 <tr><th align="left">--refChecks:on|off</th><td align="left">turn ref checks on|off (only for --newruntime)</td>
 </tr>
 </table></dd>
@@ -249,6 +259,8 @@ nim command [options] [projectfile] [arguments]</pre>
 <dd><table frame="void"><tr><th align="left">-o:FILE, --out:FILE</th><td align="left">set the output filename</td>
 </tr>
 <tr><th align="left">--outdir:DIR</th><td align="left">set the path where the output file will be written</td>
+</tr>
+<tr><th align="left">--usenimcache</th><td align="left">will use <tt class="docutils literal"><span class="pre">outdir=$$nimcache</span></tt>, whichever it resolves to after all options have been processed</td>
 </tr>
 <tr><th align="left">--stdout:on|off</th><td align="left">output to stdout</td>
 </tr>
@@ -263,6 +275,8 @@ nim command [options] [projectfile] [arguments]</pre>
 <tr><th align="left">--hints:on|off|list</th><td align="left">turn all hints on|off or list all available</td>
 </tr>
 <tr><th align="left">--hint[X]:on|off</th><td align="left">turn specific hint X on|off</td>
+</tr>
+<tr><th align="left">--warningAsError[X]:on|off</th><td align="left">turn specific warning X into an error on|off</td>
 </tr>
 <tr><th align="left">--styleCheck:off|hint|error</th><td align="left">produce hints or errors for Nim identifiers that do not adhere to Nim's official style guide <a class="reference external" href="https://nim-lang.org/docs/nep1.html">https://nim-lang.org/docs/nep1.html</a></td>
 </tr>
@@ -306,7 +320,11 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 <tr><th align="left">--project</th><td align="left">document the whole project (doc2)</td>
 </tr>
-<tr><th align="left">--docRoot:path</th><td align="left">nim doc --docRoot:/foo --project --outdir:docs /foo/sub/main.nim generates: docs/sub/main.html if path == @pkg, will use nimble file enclosing dir if path == @path, will use first matching dir in --path if path == @default (the default and most useful), will use best match among @pkg,@path. if these are nonexistant, will use project path</td>
+<tr><th align="left">--docRoot:path</th><td align="left"><tt class="docutils literal"><span class="pre">nim doc --docRoot:/foo --project --outdir:docs /foo/sub/main.nim</span></tt> generates: docs/sub/main.html if path == @pkg, will use nimble file enclosing dir if path == @path, will use first matching dir in <tt class="docutils literal"><span class="pre">--path</span></tt> if path == @default (the default and most useful), will use best match among @pkg,@path. if these are nonexistant, will use project path</td>
+</tr>
+<tr><th align="left">-b, --backend:c|cpp|js|objc sets backend to use with commands like `nim doc` or `nim r`</th><td align="left"></td>
+</tr>
+<tr><th align="left">--docCmd:cmd</th><td align="left">if <tt class="docutils literal"><span class="pre">cmd == skip</span></tt>, skips runnableExamples else, runs runnableExamples with given options, eg: <tt class="docutils literal"><span class="pre">--docCmd:&quot;-d:foo --threads:on&quot;</span></tt></td>
 </tr>
 <tr><th align="left">--docSeeSrcUrl:url</th><td align="left">activate 'see source' for doc and doc2 commands (see doc.item.seesrc in config/nimdoc.cfg)</td>
 </tr>
@@ -354,7 +372,7 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 <tr><th align="left">--skipProjCfg:on|off</th><td align="left">do not read the project's configuration file</td>
 </tr>
-<tr><th align="left">--gc:refc|markAndSweep|boehm|go|none|regions</th><td align="left">select the GC to use; default is 'refc'</td>
+<tr><th align="left">--gc:refc|arc|orc|markAndSweep|boehm|go|none|regions</th><td align="left">select the GC to use; default is 'refc'</td>
 </tr>
 <tr><th align="left">--exceptions:setjmp|cpp|goto|quirky</th><td align="left">select the exception handling implementation</td>
 </tr>
@@ -504,6 +522,7 @@ nim c --cc:llvm_gcc --compile_only myfile.nim</pre>
 <p>This uses the configuration defined in <tt class="docutils literal"><span class="pre">config\nim.cfg</span></tt> for <tt class="docutils literal"><span class="pre">lvm_gcc</span></tt>.</p>
 <p>If nimcache already contains compiled code from a different compiler for the same project, add the <tt class="docutils literal"><span class="pre">-f</span></tt> flag to force all files to be recompiled.</p>
 <p>The default compiler is defined at the top of <tt class="docutils literal"><span class="pre">config\nim.cfg</span></tt>. Changing this setting affects the compiler used by <tt class="docutils literal"><span class="pre">koch</span></tt> to (re)build Nim.</p>
+<p>To use the <tt class="docutils literal"><span class="pre">CC</span></tt> environment variable, use <tt class="docutils literal"><span class="pre">nim c --cc:env myfile.nim</span></tt>. To use the <tt class="docutils literal"><span class="pre">CXX</span></tt> environment variable, use <tt class="docutils literal"><span class="pre">nim cpp --cc:env myfile.nim</span></tt>. <tt class="docutils literal"><span class="pre">--cc:env</span></tt> is available since Nim version 1.4.</p>
 
 <h1><a class="toc-backref" id="cross-compilation" href="#cross-compilation">Cross compilation</a></h1><p>To cross compile, use for example:<pre>
 nim c --cpu:i386 --os:linux --compileOnly --genScript myproject.nim</pre>
@@ -584,7 +603,7 @@ nim c -d:useNimRtl myprog.nim</pre>
 <tr><td><tt class="docutils literal"><span class="pre">ssl</span></tt></td><td>Enables OpenSSL support for the sockets module.</td></tr>
 <tr><td><tt class="docutils literal"><span class="pre">memProfiler</span></tt></td><td>Enables memory profiling for the native GC.</td></tr>
 <tr><td><tt class="docutils literal"><span class="pre">uClibc</span></tt></td><td>Use uClibc instead of libc. (Relevant for Unix-like OSes)</td></tr>
-<tr><td><tt class="docutils literal"><span class="pre">checkAbi</span></tt></td><td>When using types from C headers, add checks that compare what's in the Nim file with what's in the C header (requires a C compiler with _Static_assert support, like any C11 compiler)</td></tr>
+<tr><td><tt class="docutils literal"><span class="pre">checkAbi</span></tt></td><td>When using types from C headers, add checks that compare what's in the Nim file with what's in the C header. This may become enabled by default in the future.</td></tr>
 <tr><td><tt class="docutils literal"><span class="pre">tempDir</span></tt></td><td>This symbol takes a string as its value, like <tt class="docutils literal"><span class="pre">--define:tempDir:/some/temp/path</span></tt> to override the temporary directory returned by <tt class="docutils literal"><span class="pre">os.getTempDir()</span></tt>. The value <strong>should</strong> end with a directory separator character. (Relevant for the Android platform)</td></tr>
 <tr><td><tt class="docutils literal"><span class="pre">useShPath</span></tt></td><td>This symbol takes a string as its value, like <tt class="docutils literal"><span class="pre">--define:useShPath:/opt/sh/bin/sh</span></tt> to override the path for the <tt class="docutils literal"><span class="pre">sh</span></tt> binary, in cases where it is not located in the default location <tt class="docutils literal"><span class="pre">/bin/sh</span></tt>.</td></tr>
 <tr><td><tt class="docutils literal"><span class="pre">noSignalHandler</span></tt></td><td>Disable the crash handler from <tt class="docutils literal"><span class="pre">system.nim</span></tt>.</td></tr>
@@ -666,7 +685,7 @@ nim c --dynlibOverride:lua --passL:liblua.lib program.nim</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:18:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:11 UTC</small>
       </div>
     </div>
   </div>

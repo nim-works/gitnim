@@ -199,7 +199,7 @@ proc kill*(p: Process) {.rtl, extern: "nosp$1", tags: [].}
   ## * `terminate proc <#terminate,Process>`_
 
 proc running*(p: Process): bool {.rtl, extern: "nosp$1", tags: [].}
-  ## Returns true iff the process `p` is still running. Returns immediately.
+  ## Returns true if the process `p` is still running. Returns immediately.
 
 proc processID*(p: Process): int {.rtl, extern: "nosp$1".} =
   ## Returns `p`'s process ID.
@@ -630,8 +630,11 @@ when defined(Windows) and not defined(useNimRtl):
       success = winlean.createProcessW(nil, tmp, nil, nil, 1, flags,
         ee, wwd, si, procInfo)
     else:
+      var ee =
+        if e.str.isNil: cstring(nil)
+        else: cstring(e.str)
       success = winlean.createProcessA(nil,
-        cmdl, nil, nil, 1, NORMAL_PRIORITY_CLASS, e, wd, si, procInfo)
+        cmdl, nil, nil, 1, NORMAL_PRIORITY_CLASS, ee, wd, si, procInfo)
     let lastError = osLastError()
 
     if poParentStreams notin options:
@@ -1171,6 +1174,67 @@ elif not defined(useNimRtl):
           discard posix.close(kqFD)
 
       result = exitStatusLikeShell(p.exitStatus)
+  elif defined(haiku):
+    const
+      B_OBJECT_TYPE_THREAD = 3
+      B_EVENT_INVALID = 0x1000
+      B_RELATIVE_TIMEOUT = 0x8
+
+    type
+      ObjectWaitInfo {.importc: "object_wait_info", header: "OS.h".} = object
+        obj {.importc: "object".}: int32
+        typ {.importc: "type".}: uint16
+        events: uint16
+
+    proc waitForObjects(infos: ptr ObjectWaitInfo, numInfos: cint, flags: uint32,
+                        timeout: int64): clong
+                       {.importc: "wait_for_objects_etc", header: "OS.h".}
+
+    proc waitForExit(p: Process, timeout: int = -1): int =
+      if p.exitFlag:
+        return exitStatusLikeShell(p.exitStatus)
+
+      if timeout == -1:
+        var status: cint = 1
+        if waitpid(p.id, status, 0) < 0:
+          raiseOSError(osLastError())
+        p.exitFlag = true
+        p.exitStatus = status
+      else:
+        var info = ObjectWaitInfo(
+          obj: p.id, # Haiku's PID is actually the main thread ID.
+          typ: B_OBJECT_TYPE_THREAD,
+          events: B_EVENT_INVALID # notify when the thread die.
+        )
+
+        while true:
+          var status: cint = 1
+          let count = waitForObjects(addr info, 1, B_RELATIVE_TIMEOUT, timeout)
+
+          if count < 0:
+            let err = count.cint
+            if err == ETIMEDOUT:
+              # timeout expired, so we try to kill the process
+              if posix.kill(p.id, SIGKILL) == -1:
+                raiseOSError(osLastError())
+              if waitpid(p.id, status, 0) < 0:
+                raiseOSError(osLastError())
+              p.exitFlag = true
+              p.exitStatus = status
+              break
+            elif err != EINTR:
+              raiseOSError(err.OSErrorCode)
+          elif count > 0:
+            if waitpid(p.id, status, 0) < 0:
+              raiseOSError(osLastError())
+            p.exitFlag = true
+            p.exitStatus = status
+            break
+          else:
+            doAssert false, "unreachable!"
+
+      result = exitStatusLikeShell(p.exitStatus)
+
   else:
     import times
 
@@ -1374,12 +1438,16 @@ elif not defined(useNimRtl):
 
 
 proc execCmdEx*(command: string, options: set[ProcessOption] = {
-                poStdErrToStdOut, poUsePath}): tuple[
+                poStdErrToStdOut, poUsePath}, env: StringTableRef = nil,
+                workingDir = "", input = ""): tuple[
                 output: TaintedString,
                 exitCode: int] {.tags:
                 [ExecIOEffect, ReadIOEffect, RootEffect], gcsafe.} =
-  ## A convenience proc that runs the `command`, grabs all its output and
-  ## exit code and returns both.
+  ## A convenience proc that runs the `command`, and returns its `output` and
+  ## `exitCode`. `env` and `workingDir` params behave as for `startProcess`.
+  ## If `input.len > 0`, it is passed as stdin.
+  ## Note: this could block if `input.len` is greater than your OS's maximum
+  ## pipe buffer size.
   ##
   ## See also:
   ## * `execCmd proc <#execCmd,string>`_
@@ -1388,17 +1456,32 @@ proc execCmdEx*(command: string, options: set[ProcessOption] = {
   ## * `execProcess proc
   ##   <#execProcess,string,string,openArray[string],StringTableRef,set[ProcessOption]>`_
   ##
-  ## Example:
-  ##
-  ## .. code-block:: Nim
-  ##  let (outp, errC) = execCmdEx("nim c -r mytestfile.nim")
+  runnableExamples:
+    var result = execCmdEx("nim r --hints:off -", options = {}, input = "echo 3*4")
+    import strutils, strtabs
+    stripLineEnd(result[0]) ## portable way to remove trailing newline, if any
+    doAssert result == ("12", 0)
+    doAssert execCmdEx("ls --nonexistant").exitCode != 0
+    when defined(posix):
+      assert execCmdEx("echo $FO", env = newStringTable({"FO": "B"})) == ("B\n", 0)
+      assert execCmdEx("echo $PWD", workingDir = "/") == ("/\n", 0)
 
-  var p = startProcess(command, options = options + {poEvalCommand})
+  when (NimMajor, NimMinor, NimPatch) < (1, 3, 5):
+    doAssert input.len == 0
+    doAssert workingDir.len == 0
+    doAssert env == nil
+
+  var p = startProcess(command, options = options + {poEvalCommand},
+    workingDir = workingDir, env = env)
   var outp = outputStream(p)
 
-  # There is no way to provide input for the child process
-  # anymore. Closing it will create EOF on stdin instead of eternal
-  # blocking.
+  if input.len > 0:
+    # There is no way to provide input for the child process
+    # anymore. Closing it will create EOF on stdin instead of eternal
+    # blocking.
+    # Writing in chunks would require a selectors (eg kqueue/epoll) to avoid
+    # blocking on io.
+    inputStream(p).write(input)
   close inputStream(p)
 
   result = (TaintedString"", -1)

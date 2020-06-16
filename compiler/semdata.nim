@@ -21,6 +21,7 @@ type
     notes*: TNoteKinds
     features*: set[Feature]
     otherPragmas*: PNode      # every pragma can be pushed
+    warningAsErrors*: TNoteKinds
 
   POptionEntry* = ref TOptionEntry
   PProcCon* = ref TProcCon
@@ -213,6 +214,7 @@ proc newOptionEntry*(conf: ConfigRef): POptionEntry =
   result.defaultCC = ccDefault
   result.dynlib = nil
   result.notes = conf.notes
+  result.warningAsErrors = conf.warningAsErrors
 
 proc pushOptionEntry*(c: PContext): POptionEntry =
   new(result)
@@ -221,12 +223,14 @@ proc pushOptionEntry*(c: PContext): POptionEntry =
   result.defaultCC = prev.defaultCC
   result.dynlib = prev.dynlib
   result.notes = c.config.notes
+  result.warningAsErrors = c.config.warningAsErrors
   result.features = c.features
   c.optionStack.add(result)
 
 proc popOptionEntry*(c: PContext) =
   c.config.options = c.optionStack[^1].options
   c.config.notes = c.optionStack[^1].notes
+  c.config.warningAsErrors = c.optionStack[^1].warningAsErrors
   c.features = c.optionStack[^1].features
   c.optionStack.setLen(c.optionStack.len - 1)
 
@@ -317,7 +321,8 @@ proc makeTypeDesc*(c: PContext, typ: PType): PType =
 proc makeTypeSymNode*(c: PContext, typ: PType, info: TLineInfo): PNode =
   let typedesc = newTypeS(tyTypeDesc, c)
   incl typedesc.flags, tfCheckedForDestructor
-  typedesc.addSonSkipIntLit(assertNotNil(c.config, typ))
+  internalAssert(c.config, typ != nil)
+  typedesc.addSonSkipIntLit(typ)
   let sym = newSym(skType, c.cache.idAnon, getCurrOwner(c), info,
                    c.config.options).linkTo(typedesc)
   return newSymNode(sym, info)

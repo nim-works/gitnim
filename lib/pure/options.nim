@@ -40,7 +40,7 @@
 ##    assert found.isSome and found.get() == 2
 ##
 ## The `get` operation demonstrated above returns the underlying value, or
-## raises `UnpackError` if there is no value. Note that `UnpackError`
+## raises `UnpackDefect` if there is no value. Note that `UnpackDefect`
 ## inherits from `system.Defect`, and should therefore never be caught.
 ## Instead, rely on checking if the option contains a value with
 ## `isSome <#isSome,Option[T]>`_ and `isNone <#isNone,Option[T]>`_ procs.
@@ -74,8 +74,8 @@ type
       val: T
       has: bool
 
-  UnpackError* = object of Defect
-
+  UnpackDefect* = object of Defect
+  UnpackError* {.deprecated: "See corresponding Defect".} = UnpackDefect
 
 proc option*[T](val: T): Option[T] {.inline.} =
   ## Can be used to convert a pointer type (`ptr` or `ref` or `proc`) to an option type.
@@ -167,7 +167,7 @@ proc isNone*[T](self: Option[T]): bool {.inline.} =
   else:
     not self.has
 
-proc get*[T](self: Option[T]): T {.inline.} =
+proc get*[T](self: Option[T]): lent T {.inline.} =
   ## Returns contents of an `Option`. If it is `None`, then an exception is
   ## thrown.
   ##
@@ -178,12 +178,12 @@ proc get*[T](self: Option[T]): T {.inline.} =
       a = some(42)
       b = none(string)
     assert a.get == 42
-    doAssertRaises(UnpackError):
+    doAssertRaises(UnpackDefect):
       echo b.get
 
   if self.isNone:
-    raise newException(UnpackError, "Can't obtain a value from a `none`")
-  self.val
+    raise newException(UnpackDefect, "Can't obtain a value from a `none`")
+  result = self.val
 
 proc get*[T](self: Option[T], otherwise: T): T {.inline.} =
   ## Returns the contents of the `Option` or an `otherwise` value if
@@ -208,11 +208,11 @@ proc get*[T](self: var Option[T]): var T {.inline.} =
       a = some(42)
       b = none(string)
     assert a.get == 42
-    doAssertRaises(UnpackError):
+    doAssertRaises(UnpackDefect):
       echo b.get
 
   if self.isNone:
-    raise newException(UnpackError, "Can't obtain a value from a `none`")
+    raise newException(UnpackDefect, "Can't obtain a value from a `none`")
   return self.val
 
 proc map*[T](self: Option[T], callback: proc (input: T)) {.inline.} =
@@ -411,7 +411,7 @@ when isMainModule:
       check some("a").isSome
 
     test "none":
-      expect UnpackError:
+      expect UnpackDefect:
         discard none(int).get()
       check(none(int).isNone)
       check(not none(string).isSome)
@@ -486,7 +486,7 @@ when isMainModule:
 
       let tmp = option(intref)
       check(sizeof(tmp) == sizeof(ptr int))
-      
+
       var prc = proc (x: int): int = x + 1
       check(option(prc).isSome)
       prc = nil

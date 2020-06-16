@@ -25,15 +25,19 @@
 ## ``AsyncHttpClient``:
 ##
 ## .. code-block:: Nim
-##   import httpClient
+## import asyncdispatch, httpclient
+##
+## proc asyncProc(): Future[string] {.async.} =
 ##   var client = newAsyncHttpClient()
-##   echo await client.getContent("http://google.com")
+##   return await client.getContent("http://example.com")
+##
+## echo waitFor asyncProc()
 ##
 ## The functionality implemented by ``HttpClient`` and ``AsyncHttpClient``
 ## is the same, so you can use whichever one suits you best in the examples
 ## shown here.
 ##
-## **Note:** You will need to run asynchronous examples in an async proc
+## **Note:** You need to run asynchronous examples in an async proc
 ## otherwise you will get an ``Undeclared identifier: 'await'`` error.
 ##
 ## Using HTTP POST
@@ -196,7 +200,7 @@
 ##    let client = newHttpClient(maxRedirects = 0)
 ##
 
-include "system/inclrtl"
+import std/private/since
 
 import net, strutils, uri, parseutils, base64, os, mimetypes, streams,
   math, random, httpcore, times, tables, streams, std/monotimes
@@ -221,7 +225,7 @@ type
     bodyStream*: FutureStream[string]
 
 proc code*(response: Response | AsyncResponse): HttpCode
-           {.raises: [ValueError, OverflowError].} =
+           {.raises: [ValueError, OverflowDefect].} =
   ## Retrieves the specified response's ``HttpCode``.
   ##
   ## Raises a ``ValueError`` if the response's ``status`` does not have a
@@ -453,7 +457,7 @@ proc sendFile(socket: Socket | AsyncSocket,
   file.close()
 
 proc redirection(status: string): bool =
-  const redirectionNRs = ["301", "302", "303", "307"]
+  const redirectionNRs = ["301", "302", "303", "307", "308"]
   for i in items(redirectionNRs):
     if status.startsWith(i):
       return true
@@ -569,6 +573,17 @@ proc newHttpClient*(userAgent = defUserAgent, maxRedirects = 5,
   ## ``TimeoutError`` is raised.
   ##
   ## ``headers`` specifies the HTTP Headers.
+  runnableExamples:
+    import asyncdispatch, httpclient, strutils
+
+    proc asyncProc(): Future[string] {.async.} =
+      var client = newAsyncHttpClient()
+      return await client.getContent("http://example.com")
+
+    let exampleHtml = waitFor asyncProc()
+    assert "Example Domain" in exampleHtml
+    assert not ("Pizza" in exampleHtml)
+
   new result
   result.headers = headers
   result.userAgent = userAgent
@@ -818,7 +833,7 @@ proc parseResponse(client: HttpClient | AsyncHttpClient,
   if not fullyRead:
     httpError("Connection was closed before full request has been made")
 
-  if getBody:
+  if getBody and result.code != Http204:
     when client is HttpClient:
       client.bodyStream = newStringStream()
       result.bodyStream = client.bodyStream

@@ -92,19 +92,16 @@ function main() {
       <li>
         <a href="theindex.html">Index</a>
       </li>
+      <li>
+        <a href="compiler/theindex.html">Compiler docs</a>
+      </li>
     </ul>
   </div>
   <div id="searchInputDiv">
     Search: <input type="text" id="searchInput"
       onkeyup="search()" />
   </div>
-  <div class="search-groupby">
-    Group by:
-    <select onchange="groupBy(this.value)">
-      <option value="section">Section</option>
-      <option value="type">Type</option>
-    </select>
-  </div>
+  
   <ul class="simple simple-toc" id="toc-list">
 <li>
   <a class="reference reference-toplevel" href="#6" id="56">Imports</a>
@@ -153,6 +150,8 @@ function main() {
     title="`[]`[T](c: var CritBitTree[T]; key: string): var T"><wbr />`[]`<span class="attachedType">CritBitTree</span></a></li>
   <li><a class="reference" href="#%24%2CCritBitTree%5BT%5D"
     title="`$`[T](c: CritBitTree[T]): string"><wbr />`$`<span class="attachedType">CritBitTree</span></a></li>
+  <li><a class="reference" href="#commonPrefixLen%2CCritBitTree%5BT%5D"
+    title="commonPrefixLen[T](c: CritBitTree[T]): int"><wbr />common<wbr />Prefix<wbr />Len<span class="attachedType">CritBitTree</span></a></li>
 
   </ul>
 </li>
@@ -196,33 +195,33 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc">This module implements a <span id="crit-bit-tree_1">crit bit tree</span> which is an efficient container for a sorted set of strings, or for a sorted mapping of strings. Based on the excellent paper by Adam Langley. (A crit bit tree is a form of <span id="radix-tree_1">radix tree</span> or <span id="patricia-trie_1">patricia trie</span>.)
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">static</span> <span class="Other">:</span>
-  <span class="Keyword">block</span><span class="Other">:</span>
-    <span class="Keyword">var</span> <span class="Identifier">critbitAsSet</span><span class="Other">:</span> <span class="Identifier">CritBitTree</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span>
-    <span class="Identifier">doAssert</span> <span class="Identifier">critbitAsSet</span><span class="Other">.</span><span class="Identifier">len</span> <span class="Operator">==</span> <span class="DecNumber">0</span>
-    <span class="Identifier">incl</span> <span class="Identifier">critbitAsSet</span><span class="Other">,</span> <span class="StringLit">&quot;kitten&quot;</span>
-    <span class="Identifier">doAssert</span> <span class="Identifier">critbitAsSet</span><span class="Other">.</span><span class="Identifier">len</span> <span class="Operator">==</span> <span class="DecNumber">1</span>
-    <span class="Identifier">incl</span> <span class="Identifier">critbitAsSet</span><span class="Other">,</span> <span class="StringLit">&quot;puppy&quot;</span>
-    <span class="Identifier">doAssert</span> <span class="Identifier">critbitAsSet</span><span class="Other">.</span><span class="Identifier">len</span> <span class="Operator">==</span> <span class="DecNumber">2</span>
-    <span class="Identifier">incl</span> <span class="Identifier">critbitAsSet</span><span class="Other">,</span> <span class="StringLit">&quot;kitten&quot;</span>
-    <span class="Identifier">doAssert</span> <span class="Identifier">critbitAsSet</span><span class="Other">.</span><span class="Identifier">len</span> <span class="Operator">==</span> <span class="DecNumber">2</span>
-    <span class="Identifier">incl</span> <span class="Identifier">critbitAsSet</span><span class="Other">,</span> <span class="StringLit">&quot;&quot;</span>
-    <span class="Identifier">doAssert</span> <span class="Identifier">critbitAsSet</span><span class="Other">.</span><span class="Identifier">len</span> <span class="Operator">==</span> <span class="DecNumber">3</span>
-<span class="Keyword">block</span><span class="Other">:</span>
-  <span class="Keyword">var</span> <span class="Identifier">critbitAsDict</span><span class="Other">:</span> <span class="Identifier">CritBitTree</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span>
-  <span class="Identifier">critbitAsDict</span><span class="Other">[</span><span class="StringLit">&quot;key&quot;</span><span class="Other">]</span> <span class="Other">=</span> <span class="DecNumber">42</span>
-  <span class="Identifier">doAssert</span> <span class="Identifier">critbitAsDict</span><span class="Other">[</span><span class="StringLit">&quot;key&quot;</span><span class="Other">]</span> <span class="Operator">==</span> <span class="DecNumber">42</span>
-  <span class="Identifier">critbitAsDict</span><span class="Other">[</span><span class="StringLit">&quot;key&quot;</span><span class="Other">]</span> <span class="Other">=</span> <span class="DecNumber">0</span>
-  <span class="Identifier">doAssert</span> <span class="Identifier">critbitAsDict</span><span class="Other">[</span><span class="StringLit">&quot;key&quot;</span><span class="Other">]</span> <span class="Operator">==</span> <span class="DecNumber">0</span>
-  <span class="Identifier">critbitAsDict</span><span class="Other">[</span><span class="StringLit">&quot;key&quot;</span><span class="Other">]</span> <span class="Other">=</span> <span class="Operator">-</span><span class="Identifier">int</span><span class="Other">.</span><span class="Identifier">high</span>
-  <span class="Identifier">doAssert</span> <span class="Identifier">critbitAsDict</span><span class="Other">[</span><span class="StringLit">&quot;key&quot;</span><span class="Other">]</span> <span class="Operator">==</span> <span class="Operator">-</span><span class="Identifier">int</span><span class="Other">.</span><span class="Identifier">high</span>
-  <span class="Identifier">critbitAsDict</span><span class="Other">[</span><span class="StringLit">&quot;key&quot;</span><span class="Other">]</span> <span class="Other">=</span> <span class="Identifier">int</span><span class="Other">.</span><span class="Identifier">high</span>
-  <span class="Identifier">doAssert</span> <span class="Identifier">critbitAsDict</span><span class="Other">[</span><span class="StringLit">&quot;key&quot;</span><span class="Other">]</span> <span class="Operator">==</span> <span class="Identifier">int</span><span class="Other">.</span><span class="Identifier">high</span></pre></p>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">static</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Keyword">block</span><span class="Punctuation">:</span><span class="Whitespace">
+    </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Whitespace">
+    </span><span class="Identifier">incl</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;kitten&quot;</span><span class="Whitespace">
+    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Whitespace">
+    </span><span class="Identifier">incl</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;puppy&quot;</span><span class="Whitespace">
+    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Whitespace">
+    </span><span class="Identifier">incl</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;kitten&quot;</span><span class="Whitespace">
+    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Whitespace">
+    </span><span class="Identifier">incl</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;&quot;</span><span class="Whitespace">
+    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">critbitAsSet</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">3</span><span class="Whitespace">
+</span><span class="Keyword">block</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">critbitAsDict</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+  </span><span class="Identifier">critbitAsDict</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">critbitAsDict</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+  </span><span class="Identifier">critbitAsDict</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">critbitAsDict</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Whitespace">
+  </span><span class="Identifier">critbitAsDict</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Operator">-</span><span class="Identifier">int</span><span class="Operator">.</span><span class="Identifier">high</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">critbitAsDict</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">-</span><span class="Identifier">int</span><span class="Operator">.</span><span class="Identifier">high</span><span class="Whitespace">
+  </span><span class="Identifier">critbitAsDict</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Operator">.</span><span class="Identifier">high</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">critbitAsDict</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Operator">.</span><span class="Identifier">high</span></pre></p>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="sequtils.html">sequtils</a>
+<a class="reference external" href="since.html">since</a>, <a class="reference external" href="sequtils.html">sequtils</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -250,7 +249,12 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><span class="Keyword">proc</span> <a href="#len%2CCritBitTree%5BT%5D"><span class="Identifier">len</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a></pre></dt>
 <dd>
 
-returns the number of elements in <tt class="docutils literal"><span class="pre">c</span></tt> in O(1).
+Returns the number of elements in <tt class="docutils literal"><span class="pre">c</span></tt> in O(1).
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">2</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L36"
 class="link-seesrc" target="_blank">Source</a>
@@ -261,143 +265,265 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><span class="Keyword">proc</span> <a href="#contains%2CCritBitTree%5BT%5D%2Cstring"><span class="Identifier">contains</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-returns true iff <tt class="docutils literal"><span class="pre">c</span></tt> contains the given <tt class="docutils literal"><span class="pre">key</span></tt>.
+Returns true if <tt class="docutils literal"><span class="pre">c</span></tt> contains the given <tt class="docutils literal"><span class="pre">key</span></tt>.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L50"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L56"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L50" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L56" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasKey,CritBitTree[T],string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#hasKey%2CCritBitTree%5BT%5D%2Cstring"><span class="Identifier">hasKey</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-alias for <tt class="docutils literal"><span class="pre">contains</span></tt>.
+Alias for <a class="reference external" href="#contains,CritBitTree[T],string">contains</a>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L54"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L65"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L54" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L65" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="excl,CritBitTree[T],string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#excl%2CCritBitTree%5BT%5D%2Cstring"><span class="Identifier">excl</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span></pre></dt>
 <dd>
 
-removes <tt class="docutils literal"><span class="pre">key</span></tt> (and its associated value) from the set <tt class="docutils literal"><span class="pre">c</span></tt>. If the <tt class="docutils literal"><span class="pre">key</span></tt> does not exist, nothing happens.
+<p>Removes <tt class="docutils literal"><span class="pre">key</span></tt> (and its associated value) from the set <tt class="docutils literal"><span class="pre">c</span></tt>. If the <tt class="docutils literal"><span class="pre">key</span></tt> does not exist, nothing happens.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#incl,CritBitTree[void],string">incl proc</a></li>
+<li><a class="reference external" href="#incl,CritBitTree[T],string,T">incl proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">excl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L132"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L143"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L132" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L143" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="missingOrExcl,CritBitTree[T],string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#missingOrExcl%2CCritBitTree%5BT%5D%2Cstring"><span class="Identifier">missingOrExcl</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a></pre></dt>
 <dd>
 
-Returns true iff <tt class="docutils literal"><span class="pre">c</span></tt> does not contain the given <tt class="docutils literal"><span class="pre">key</span></tt>. If the key does exist, c.excl(key) is performed.
+<p>Returns true if <tt class="docutils literal"><span class="pre">c</span></tt> does not contain the given <tt class="docutils literal"><span class="pre">key</span></tt>. If the key does exist, c.excl(key) is performed.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#excl,CritBitTree[T],string">excl proc</a></li>
+<li><a class="reference external" href="#containsOrIncl,CritBitTree[T],string,T">containsOrIncl proc</a></li>
+<li><a class="reference external" href="#containsOrIncl,CritBitTree[void],string">containsOrIncl proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">block</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">missingOrExcl</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Keyword">block</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+  </span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">missingOrExcl</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L137"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L158"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L137" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L158" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="containsOrIncl,CritBitTree[T],string,T"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#containsOrIncl%2CCritBitTree%5BT%5D%2Cstring%2CT"><span class="Identifier">containsOrIncl</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a></pre></dt>
 <dd>
 
-returns true iff <tt class="docutils literal"><span class="pre">c</span></tt> contains the given <tt class="docutils literal"><span class="pre">key</span></tt>. If the key does not exist <tt class="docutils literal"><span class="pre">c[key] = val</span></tt> is performed.
+<p>Returns true if <tt class="docutils literal"><span class="pre">c</span></tt> contains the given <tt class="docutils literal"><span class="pre">key</span></tt>. If the key does not exist <tt class="docutils literal"><span class="pre">c[key] = val</span></tt> is performed.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#incl,CritBitTree[void],string">incl proc</a></li>
+<li><a class="reference external" href="#incl,CritBitTree[T],string,T">incl proc</a></li>
+<li><a class="reference external" href="#containsOrIncl,CritBitTree[void],string">containsOrIncl proc</a></li>
+<li><a class="reference external" href="#missingOrExcl,CritBitTree[T],string">missingOrExcl proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">block</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">containsOrIncl</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Keyword">block</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+  </span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">21</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">containsOrIncl</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">21</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L144"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L180"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L144" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L180" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="containsOrIncl,CritBitTree[void],string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#containsOrIncl%2CCritBitTree%5Bvoid%5D%2Cstring"><span class="Identifier">containsOrIncl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-returns true iff <tt class="docutils literal"><span class="pre">c</span></tt> contains the given <tt class="docutils literal"><span class="pre">key</span></tt>. If the key does not exist it is inserted into <tt class="docutils literal"><span class="pre">c</span></tt>.
+<p>Returns true if <tt class="docutils literal"><span class="pre">c</span></tt> contains the given <tt class="docutils literal"><span class="pre">key</span></tt>. If the key does not exist it is inserted into <tt class="docutils literal"><span class="pre">c</span></tt>.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#incl,CritBitTree[void],string">incl proc</a></li>
+<li><a class="reference external" href="#incl,CritBitTree[T],string,T">incl proc</a></li>
+<li><a class="reference external" href="#containsOrIncl,CritBitTree[T],string,T">containsOrIncl proc</a></li>
+<li><a class="reference external" href="#missingOrExcl,CritBitTree[T],string">missingOrExcl proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">block</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Keyword">not</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">containsOrIncl</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Keyword">block</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+  </span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">containsOrIncl</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L153"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L206"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L153" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L206" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="inc,CritBitTree[int],string,int"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#inc%2CCritBitTree%5Bint%5D%2Cstring%2Cint"><span class="Identifier">inc</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span class="Other">=</span> <span class="DecNumber">1</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-increments <tt class="docutils literal"><span class="pre">c[key]</span></tt> by <tt class="docutils literal"><span class="pre">val</span></tt>.
+Increments <tt class="docutils literal"><span class="pre">c[key]</span></tt> by <tt class="docutils literal"><span class="pre">val</span></tt>.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Whitespace">
+</span><span class="Identifier">inc</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">2</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L160"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L229"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L160" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L229" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="incl,CritBitTree[void],string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#incl%2CCritBitTree%5Bvoid%5D%2Cstring"><span class="Identifier">incl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-includes <tt class="docutils literal"><span class="pre">key</span></tt> in <tt class="docutils literal"><span class="pre">c</span></tt>.
+<p>Includes <tt class="docutils literal"><span class="pre">key</span></tt> in <tt class="docutils literal"><span class="pre">c</span></tt>.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#excl,CritBitTree[T],string">excl proc</a></li>
+<li><a class="reference external" href="#incl,CritBitTree[T],string,T">incl proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">hasKey</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L165"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L240"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L165" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L240" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="incl,CritBitTree[T],string,T"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#incl%2CCritBitTree%5BT%5D%2Cstring%2CT"><span class="Identifier">incl</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span></pre></dt>
 <dd>
 
-inserts <tt class="docutils literal"><span class="pre">key</span></tt> with value <tt class="docutils literal"><span class="pre">val</span></tt> into <tt class="docutils literal"><span class="pre">c</span></tt>.
+<p>Inserts <tt class="docutils literal"><span class="pre">key</span></tt> with value <tt class="docutils literal"><span class="pre">val</span></tt> into <tt class="docutils literal"><span class="pre">c</span></tt>.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#excl,CritBitTree[T],string">excl proc</a></li>
+<li><a class="reference external" href="#incl,CritBitTree[void],string">incl proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">42</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L169"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L253"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L169" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L253" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[]=,CritBitTree[T],string,T"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%3D%2CCritBitTree%5BT%5D%2Cstring%2CT"><span class="Identifier">`[]=`</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span></pre></dt>
 <dd>
 
-puts a (key, value)-pair into <tt class="docutils literal"><span class="pre">t</span></tt>.
+<p>Puts a (key, value)-pair into <tt class="docutils literal"><span class="pre">t</span></tt>.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#[],CritBitTree[T],string">[] proc</a></li>
+<li><a class="reference external" href="#[],CritBitTree[T],string_2">[] proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">42</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L174"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L267"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L174" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L267" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[],CritBitTree[T],string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%2CCritBitTree%5BT%5D%2Cstring"><span class="Identifier">`[]`</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-retrieves the value at <tt class="docutils literal"><span class="pre">c[key]</span></tt>. If <tt class="docutils literal"><span class="pre">key</span></tt> is not in <tt class="docutils literal"><span class="pre">t</span></tt>, the <tt class="docutils literal"><span class="pre">KeyError</span></tt> exception is raised. One can check with <tt class="docutils literal"><span class="pre">hasKey</span></tt> whether the key exists.
+<p>Retrieves the value at <tt class="docutils literal"><span class="pre">c[key]</span></tt>. If <tt class="docutils literal"><span class="pre">key</span></tt> is not in <tt class="docutils literal"><span class="pre">t</span></tt>, the <tt class="docutils literal"><span class="pre">KeyError</span></tt> exception is raised. One can check with <tt class="docutils literal"><span class="pre">hasKey</span></tt> whether the key exists.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#[],CritBitTree[T],string_2">[] proc</a></li>
+<li><a class="reference external" href="#[]=,CritBitTree[T],string,T">[]= proc</a></li>
+</ul>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L189"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L291"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L189" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L291" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[],CritBitTree[T],string_2"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%2CCritBitTree%5BT%5D%2Cstring_2"><span class="Identifier">`[]`</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-retrieves the value at <tt class="docutils literal"><span class="pre">c[key]</span></tt>. The value can be modified. If <tt class="docutils literal"><span class="pre">key</span></tt> is not in <tt class="docutils literal"><span class="pre">t</span></tt>, the <tt class="docutils literal"><span class="pre">KeyError</span></tt> exception is raised.
+<p>Retrieves the value at <tt class="docutils literal"><span class="pre">c[key]</span></tt>. The value can be modified. If <tt class="docutils literal"><span class="pre">key</span></tt> is not in <tt class="docutils literal"><span class="pre">t</span></tt>, the <tt class="docutils literal"><span class="pre">KeyError</span></tt> exception is raised.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#[],CritBitTree[T],string">[] proc</a></li>
+<li><a class="reference external" href="#[]=,CritBitTree[T],string,T">[]= proc</a></li>
+</ul>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L195"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L301"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L195" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L301" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$,CritBitTree[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%24%2CCritBitTree%5BT%5D"><span class="Identifier">`$`</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
 <dd>
 
-turns <tt class="docutils literal"><span class="pre">c</span></tt> into a string representation. Example outputs: <tt class="docutils literal"><span class="pre">{keyA: value, keyB: value}</span></tt>, <tt class="docutils literal"><span class="pre">{:}</span></tt> If <tt class="docutils literal"><span class="pre">T</span></tt> is void the outputs look like: <tt class="docutils literal"><span class="pre">{keyA, keyB}</span></tt>, <tt class="docutils literal"><span class="pre">{}</span></tt>.
+Turns <tt class="docutils literal"><span class="pre">c</span></tt> into a string representation. Example outputs: <tt class="docutils literal"><span class="pre">{keyA: value, keyB: value}</span></tt>, <tt class="docutils literal"><span class="pre">{:}</span></tt> If <tt class="docutils literal"><span class="pre">T</span></tt> is void the outputs look like: <tt class="docutils literal"><span class="pre">{keyA, keyB}</span></tt>, <tt class="docutils literal"><span class="pre">{}</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L297"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L491"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L297" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L491" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="commonPrefixLen,CritBitTree[T]"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#commonPrefixLen%2CCritBitTree%5BT%5D"><span class="Identifier">commonPrefixLen</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+Returns longest common prefix length of all keys of <tt class="docutils literal"><span class="pre">c</span></tt>. If <tt class="docutils literal"><span class="pre">c</span></tt> is empty, returns 0.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">commonPrefixLen</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">0</span><span class="Whitespace">
+</span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">commonPrefixLen</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">4</span><span class="Whitespace">
+</span><span class="Identifier">incl</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">commonPrefixLen</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">3</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L521"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L521" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -409,99 +535,163 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#keys.i%2CCritBitTree%5BT%5D"><span class="Identifier">keys</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
 <dd>
 
-yields all keys in lexicographical order.
+Yields all keys in lexicographical order.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">keys</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Keyword">for</span><span class="Whitespace"> </span><span class="Identifier">key</span><span class="Whitespace"> </span><span class="Keyword">in</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">keys</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">keys</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">key</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">keys</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L213"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L323"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L213" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L323" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="values.i,CritBitTree[T]"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#values.i%2CCritBitTree%5BT%5D"><span class="Identifier">values</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span></pre></dt>
 <dd>
 
-yields all values of <tt class="docutils literal"><span class="pre">c</span></tt> in the lexicographical order of the corresponding keys.
+Yields all values of <tt class="docutils literal"><span class="pre">c</span></tt> in the lexicographical order of the corresponding keys.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">vals</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Keyword">for</span><span class="Whitespace"> </span><span class="Identifier">val</span><span class="Whitespace"> </span><span class="Keyword">in</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">values</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">vals</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">val</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">vals</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L217"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L336"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L217" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L336" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mvalues.i,CritBitTree[T]"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#mvalues.i%2CCritBitTree%5BT%5D"><span class="Identifier">mvalues</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span></pre></dt>
 <dd>
 
-yields all values of <tt class="docutils literal"><span class="pre">c</span></tt> in the lexicographical order of the corresponding keys. The values can be modified.
+<p>Yields all values of <tt class="docutils literal"><span class="pre">c</span></tt> in the lexicographical order of the corresponding keys. The values can be modified.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#values.i,CritBitTree[T]">values iterator</a></li>
+</ul>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L222"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L350"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L222" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L350" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="items.i,CritBitTree[T]"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#items.i%2CCritBitTree%5BT%5D"><span class="Identifier">items</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
 <dd>
 
-yields all keys in lexicographical order.
+Yields all keys in lexicographical order.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">keys</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Keyword">for</span><span class="Whitespace"> </span><span class="Identifier">key</span><span class="Whitespace"> </span><span class="Keyword">in</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">items</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">keys</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">key</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">keys</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L227"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L358"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L227" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L358" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pairs.i,CritBitTree[T]"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#pairs.i%2CCritBitTree%5BT%5D"><span class="Identifier">pairs</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">]</span></pre></dt>
 <dd>
 
-yields all (key, value)-pairs of <tt class="docutils literal"><span class="pre">c</span></tt>.
+Yields all (key, value)-pairs of <tt class="docutils literal"><span class="pre">c</span></tt>.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">ps</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Keyword">tuple</span><span class="Punctuation">[</span><span class="Identifier">key</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">string</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">val</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Keyword">for</span><span class="Whitespace"> </span><span class="Identifier">p</span><span class="Whitespace"> </span><span class="Keyword">in</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">pairs</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">ps</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">p</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">ps</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">@</span><span class="Punctuation">[</span><span class="Punctuation">(</span><span class="Identifier">key</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">val</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="Identifier">key</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">val</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Punctuation">)</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L231"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L371"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L231" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L371" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mpairs.i,CritBitTree[T]"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#mpairs.i%2CCritBitTree%5BT%5D"><span class="Identifier">mpairs</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Other">]</span></pre></dt>
 <dd>
 
-yields all (key, value)-pairs of <tt class="docutils literal"><span class="pre">c</span></tt>. The yielded values can be modified.
+<p>Yields all (key, value)-pairs of <tt class="docutils literal"><span class="pre">c</span></tt>. The yielded values can be modified.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#pairs.i,CritBitTree[T]">pairs iterator</a></li>
+</ul>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L235"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L384"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L235" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L384" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="itemsWithPrefix.i,CritBitTree[T],string"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#itemsWithPrefix.i%2CCritBitTree%5BT%5D%2Cstring"><span class="Identifier">itemsWithPrefix</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">prefix</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">longestMatch</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
 <dd>
 
-yields all keys starting with <tt class="docutils literal"><span class="pre">prefix</span></tt>. If <tt class="docutils literal"><span class="pre">longestMatch</span></tt> is true, the longest match is returned, it doesn't have to be a complete match then.
+Yields all keys starting with <tt class="docutils literal"><span class="pre">prefix</span></tt>. If <tt class="docutils literal"><span class="pre">longestMatch</span></tt> is true, the longest match is returned, it doesn't have to be a complete match then.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">43</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">keys</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Keyword">for</span><span class="Whitespace"> </span><span class="Identifier">key</span><span class="Whitespace"> </span><span class="Keyword">in</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">itemsWithPrefix</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">keys</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">key</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">keys</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L255"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L407"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L255" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L407" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="keysWithPrefix.i,CritBitTree[T],string"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#keysWithPrefix.i%2CCritBitTree%5BT%5D%2Cstring"><span class="Identifier">keysWithPrefix</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">prefix</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">longestMatch</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
 <dd>
 
-yields all keys starting with <tt class="docutils literal"><span class="pre">prefix</span></tt>.
+Yields all keys starting with <tt class="docutils literal"><span class="pre">prefix</span></tt>.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">43</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">keys</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Keyword">for</span><span class="Whitespace"> </span><span class="Identifier">key</span><span class="Whitespace"> </span><span class="Keyword">in</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">keysWithPrefix</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">keys</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">key</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">keys</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L262"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L423"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L262" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L423" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="valuesWithPrefix.i,CritBitTree[T],string"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#valuesWithPrefix.i%2CCritBitTree%5BT%5D%2Cstring"><span class="Identifier">valuesWithPrefix</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="critbits.html#CritBitTree"><span class="Identifier">CritBitTree</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">prefix</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">longestMatch</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span></pre></dt>
 <dd>
 
-yields all values of <tt class="docutils literal"><span class="pre">c</span></tt> starting with <tt class="docutils literal"><span class="pre">prefix</span></tt> of the corresponding keys.
+Yields all values of <tt class="docutils literal"><span class="pre">c</span></tt> starting with <tt class="docutils literal"><span class="pre">prefix</span></tt> of the corresponding keys.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">43</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">vals</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Keyword">for</span><span class="Whitespace"> </span><span class="Identifier">val</span><span class="Whitespace"> </span><span class="Keyword">in</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">valuesWithPrefix</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">vals</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">val</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">vals</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">42</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">43</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L268"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L438"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L268" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L438" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mvaluesWithPrefix.i,CritBitTree[T],string"></a>
@@ -509,11 +699,15 @@ class="link-seesrc" target="_blank">Source</a>
                              <span class="Identifier">longestMatch</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span></pre></dt>
 <dd>
 
-yields all values of <tt class="docutils literal"><span class="pre">c</span></tt> starting with <tt class="docutils literal"><span class="pre">prefix</span></tt> of the corresponding keys. The values can be modified.
+<p>Yields all values of <tt class="docutils literal"><span class="pre">c</span></tt> starting with <tt class="docutils literal"><span class="pre">prefix</span></tt> of the corresponding keys. The values can be modified.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#valuesWithPrefix.i,CritBitTree[T],string">valuesWithPrefix iterator</a></li>
+</ul>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L275"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L454"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L275" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L454" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pairsWithPrefix.i,CritBitTree[T],string"></a>
@@ -521,11 +715,19 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">]</span></pre></dt>
 <dd>
 
-yields all (key, value)-pairs of <tt class="docutils literal"><span class="pre">c</span></tt> starting with <tt class="docutils literal"><span class="pre">prefix</span></tt>.
+Yields all (key, value)-pairs of <tt class="docutils literal"><span class="pre">c</span></tt> starting with <tt class="docutils literal"><span class="pre">prefix</span></tt>.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">CritBitTree</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Whitespace">
+</span><span class="Identifier">c</span><span class="Punctuation">[</span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="DecNumber">43</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">ps</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Keyword">tuple</span><span class="Punctuation">[</span><span class="Identifier">key</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">string</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">val</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Keyword">for</span><span class="Whitespace"> </span><span class="Identifier">p</span><span class="Whitespace"> </span><span class="Keyword">in</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">pairsWithPrefix</span><span class="Punctuation">(</span><span class="StringLit">&quot;key&quot;</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">ps</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Identifier">p</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">ps</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Operator">@</span><span class="Punctuation">[</span><span class="Punctuation">(</span><span class="Identifier">key</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="StringLit">&quot;key1&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">val</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="Identifier">key</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="StringLit">&quot;key2&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">val</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="DecNumber">43</span><span class="Punctuation">)</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L282"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L464"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L282" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L464" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mpairsWithPrefix.i,CritBitTree[T],string"></a>
@@ -533,11 +735,15 @@ class="link-seesrc" target="_blank">Source</a>
                             <span class="Identifier">longestMatch</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">key</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Other">]</span></pre></dt>
 <dd>
 
-yields all (key, value)-pairs of <tt class="docutils literal"><span class="pre">c</span></tt> starting with <tt class="docutils literal"><span class="pre">prefix</span></tt>. The yielded values can be modified.
+<p>Yields all (key, value)-pairs of <tt class="docutils literal"><span class="pre">c</span></tt> starting with <tt class="docutils literal"><span class="pre">prefix</span></tt>. The yielded values can be modified.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#pairsWithPrefix.i,CritBitTree[T],string">pairsWithPrefix iterator</a></li>
+</ul>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L289"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/critbits.nim#L480"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L289" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/critbits.nim#L480" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -550,7 +756,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:19:19 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 03:21:40 UTC</small>
       </div>
     </div>
   </div>

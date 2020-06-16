@@ -13,6 +13,7 @@
 # included from testament.nim
 
 import important_packages
+import std/private/nimbleutils
 
 const
   specialCategories = [
@@ -29,12 +30,11 @@ const
     "lib",
     "longgc",
     "manyloc",
-    "nimble-packages",
+    "nimble-packages-1",
+    "nimble-packages-2",
     "niminaction",
-    "rodfiles",
     "threads",
     "untestable",
-    "stdlib",
     "testdata",
     "nimcache",
     "coroutines",
@@ -448,9 +448,18 @@ let
   nimbleExe = findExe("nimble")
   packageIndex = nimbleDir / "packages_official.json"
 
-iterator listPackages(): tuple[name, url, cmd: string, hasDeps: bool] =
+type
+  PkgPart = enum
+    ppOne
+    ppTwo
+
+iterator listPackages(part: PkgPart): tuple[name, url, cmd: string, hasDeps: bool] =
   let packageList = parseFile(packageIndex)
-  for n, cmd, hasDeps, url in important_packages.packages.items:
+  let importantList =
+    case part
+    of ppOne: important_packages.packages1
+    of ppTwo: important_packages.packages2
+  for n, cmd, hasDeps, url in importantList.items:
     if url.len != 0:
       yield (n, url, cmd, hasDeps)
     else:
@@ -471,7 +480,7 @@ proc makeSupTest(test, options: string, cat: Category): TTest =
   result.options = options
   result.startTime = epochTime()
 
-proc testNimblePackages(r: var TResults; cat: Category; packageFilter: string) =
+proc testNimblePackages(r: var TResults; cat: Category; packageFilter: string, part: PkgPart) =
   if nimbleExe == "":
     echo "[Warning] - Cannot run nimble tests: Nimble binary not found."
     return
@@ -483,7 +492,7 @@ proc testNimblePackages(r: var TResults; cat: Category; packageFilter: string) =
   let packagesDir = "pkgstemp"
   var errors = 0
   try:
-    for name, url, cmd, hasDep in listPackages():
+    for name, url, cmd, hasDep in listPackages(part):
       if packageFilter notin name:
         continue
       inc r.total
@@ -492,9 +501,9 @@ proc testNimblePackages(r: var TResults; cat: Category; packageFilter: string) =
       if not existsDir(buildPath):
         if hasDep:
           let installName = if url.len != 0: url else: name
-          let (nimbleCmdLine, nimbleOutput, nimbleStatus) = execCmdEx2("nimble", ["install", "-y", installName])
-          if nimbleStatus != QuitSuccess:
-            let message = "nimble install failed:\n$ " & nimbleCmdLine & "\n" & nimbleOutput
+          var message: string
+          if not actionRetry(maxRetry = 3, backoffDuration = 1.0,
+            (proc(): bool = nimbleInstall(installName, message))):
             r.addResult(test, targetC, "", message, reInstallFailed)
             continue
 
@@ -545,7 +554,7 @@ proc processSingleTest(r: var TResults, cat: Category, options, test: string) =
   if existsFile(test):
     testSpec r, makeTest(test, options, cat), {target}
   else:
-    echo "[Warning] - ", test, " test does not exist"
+    doAssert false, test & " test does not exist"
 
 proc isJoinableSpec(spec: TSpec): bool =
   result = not spec.sortoutput and
@@ -563,6 +572,9 @@ proc isJoinableSpec(spec: TSpec): bool =
     spec.outputCheck != ocSubstr and
     spec.ccodeCheck.len == 0 and
     (spec.targets == {} or spec.targets == {targetC})
+  if result:
+    if spec.file.readFile.contains "when isMainModule":
+      result = false
 
 proc norm(s: var string) =
   while true:
@@ -574,6 +586,13 @@ proc norm(s: var string) =
 proc quoted(a: string): string =
   # todo: consider moving to system.nim
   result.addQuoted(a)
+
+proc normalizeExe(file: string): string =
+  # xxx common pattern, should be exposed in std/os, even if simple (error prone)
+  when defined(posix):
+    if file.len == 0: ""
+    elif DirSep in file: file else: "./" & file
+  else: file
 
 proc runJoinedTest(r: var TResults, cat: Category, testsDir: string) =
   ## returns a list of tests that have problems
@@ -610,26 +629,24 @@ proc runJoinedTest(r: var TResults, cat: Category, testsDir: string) =
 
   for i, runSpec in specs:
     let file = runSpec.file
-    let file2 = outDir / ("megatest_" & $i & ".nim")
+    let file2 = outDir / ("megatest_$1.nim" % $i)
     # `include` didn't work with `trecmod2.nim`, so using `import`
-    let code = "echo \"" & marker & "\", " & quoted(file) & "\n"
+    let code = "echo \"$1\", $2\n" % [marker, quoted(file)]
     createDir(file2.parentDir)
     writeFile(file2, code)
-    megatest.add "import " & quoted(file2) & "\n"
-    megatest.add "import " & quoted(file) & "\n"
+    megatest.add "import $1\nimport $2\n" % [quoted(file2), quoted(file)]
 
-  writeFile("megatest.nim", megatest)
+  let megatestFile = testsDir / "megatest.nim" # so it uses testsDir / "config.nims"
+  writeFile(megatestFile, megatest)
 
-  let args = ["c", "--nimCache:" & outDir, "-d:testing", "--listCmd",
-              "--listFullPaths:off", "--excessiveStackTrace:off", "megatest.nim"]
-
+  let root = getCurrentDir()
+  let args = ["c", "--nimCache:" & outDir, "-d:testing", "--listCmd", "--path:" & root, megatestFile]
   var (cmdLine, buf, exitCode) = execCmdEx2(command = compilerPrefix, args = args, input = "")
   if exitCode != 0:
-    echo "$ ", cmdLine
-    echo buf.string
+    echo "$ " & cmdLine & "\n" & buf.string
     quit("megatest compilation failed")
 
-  (buf, exitCode) = execCmdEx("./megatest")
+  (buf, exitCode) = execCmdEx(megatestFile.changeFileExt(ExeExt).normalizeExe)
   if exitCode != 0:
     echo buf.string
     quit("megatest execution failed")
@@ -652,7 +669,7 @@ proc runJoinedTest(r: var TResults, cat: Category, testsDir: string) =
   else:
     echo "output OK"
     removeFile("outputGotten.txt")
-    removeFile("megatest.nim")
+    removeFile(megatestFile)
   #testSpec r, makeTest("megatest", options, cat)
 
 # ---------------------------------------------------------------------------
@@ -661,10 +678,6 @@ proc processCategory(r: var TResults, cat: Category,
                      options, testsDir: string,
                      runJoinableTests: bool) =
   case cat.string.normalize
-  of "rodfiles":
-    when false:
-      compileRodFiles(r, cat, options)
-      runRodFiles(r, cat, options)
   of "ic":
     when false:
       icTests(r, testsDir, cat, options)
@@ -700,8 +713,10 @@ proc processCategory(r: var TResults, cat: Category,
     compileExample(r, "examples/*.nim", options, cat)
     compileExample(r, "examples/gtk/*.nim", options, cat)
     compileExample(r, "examples/talk/*.nim", options, cat)
-  of "nimble-packages":
-    testNimblePackages(r, cat, options)
+  of "nimble-packages-1":
+    testNimblePackages(r, cat, options, ppOne)
+  of "nimble-packages-2":
+    testNimblePackages(r, cat, options, ppTwo)
   of "niminaction":
     testNimInAction(r, cat, options)
   of "untestable":

@@ -141,6 +141,7 @@ proc genSetNode(p: BProc, n: PNode): Rope =
     result = genRawSetData(cs, size)
 
 proc getStorageLoc(n: PNode): TStorageLoc =
+  ## deadcode
   case n.kind
   of nkSym:
     case n.sym.kind
@@ -821,7 +822,7 @@ proc genFieldCheck(p: BProc, e: PNode, obj: Rope, field: PSym) =
     v.r.add(".")
     v.r.add(disc.sym.loc.r)
     genInExprAux(p, it, u, v, test)
-    let msg = genFieldError(field, disc.sym)
+    let msg = genFieldDefect(field, disc.sym)
     let strLit = genStringLiteral(p.module, newStrNode(nkStrLit, msg))
     if op.magic == mNot:
       linefmt(p, cpsStmts,
@@ -1303,9 +1304,10 @@ proc genNewSeq(p: BProc, e: PNode) =
   initLocExpr(p, e[2], b)
   if optSeqDestructors in p.config.globalOptions:
     let seqtype = skipTypes(e[1].typ, abstractVarRange)
-    linefmt(p, cpsStmts, "$1.len = $2; $1.p = ($4*) #newSeqPayload($2, sizeof($3));$n",
-      [a.rdLoc, b.rdLoc, getTypeDesc(p.module, seqtype.lastSon),
-      getSeqPayloadType(p.module, seqtype)])
+    linefmt(p, cpsStmts, "$1.len = $2; $1.p = ($4*) #newSeqPayload($2, sizeof($3), NIM_ALIGNOF($3));$n",
+      [a.rdLoc, b.rdLoc,
+       getTypeDesc(p.module, seqtype.lastSon),
+       getSeqPayloadType(p.module, seqtype)])
   else:
     let lenIsZero = optNilSeqs notin p.options and
       e[2].kind == nkIntLit and e[2].intVal == 0
@@ -1318,9 +1320,10 @@ proc genNewSeqOfCap(p: BProc; e: PNode; d: var TLoc) =
   initLocExpr(p, e[1], a)
   if optSeqDestructors in p.config.globalOptions:
     if d.k == locNone: getTemp(p, e.typ, d, needsInit=false)
-    linefmt(p, cpsStmts, "$1.len = 0; $1.p = ($4*) #newSeqPayload($2, sizeof($3));$n",
+    linefmt(p, cpsStmts, "$1.len = 0; $1.p = ($4*) #newSeqPayload($2, sizeof($3), NIM_ALIGNOF($3));$n",
       [d.rdLoc, a.rdLoc, getTypeDesc(p.module, seqtype.lastSon),
-      getSeqPayloadType(p.module, seqtype)])
+      getSeqPayloadType(p.module, seqtype),
+    ])
   else:
     putIntoDest(p, d, e, ropecg(p.module,
                 "($1)#nimNewSeqOfCap($2, $3)", [
@@ -1427,7 +1430,7 @@ proc genSeqConstr(p: BProc, n: PNode, d: var TLoc) =
   let l = intLiteral(n.len)
   if optSeqDestructors in p.config.globalOptions:
     let seqtype = n.typ
-    linefmt(p, cpsStmts, "$1.len = $2; $1.p = ($4*) #newSeqPayload($2, sizeof($3));$n",
+    linefmt(p, cpsStmts, "$1.len = $2; $1.p = ($4*) #newSeqPayload($2, sizeof($3), NIM_ALIGNOF($3));$n",
       [rdLoc dest[], l, getTypeDesc(p.module, seqtype.lastSon),
       getSeqPayloadType(p.module, seqtype)])
   else:
@@ -1458,7 +1461,7 @@ proc genArrToSeq(p: BProc, n: PNode, d: var TLoc) =
   let L = toInt(lengthOrd(p.config, n[1].typ))
   if optSeqDestructors in p.config.globalOptions:
     let seqtype = n.typ
-    linefmt(p, cpsStmts, "$1.len = $2; $1.p = ($4*) #newSeqPayload($2, sizeof($3));$n",
+    linefmt(p, cpsStmts, "$1.len = $2; $1.p = ($4*) #newSeqPayload($2, sizeof($3), NIM_ALIGNOF($3));$n",
       [rdLoc d, L, getTypeDesc(p.module, seqtype.lastSon),
       getSeqPayloadType(p.module, seqtype)])
   else:
@@ -2226,9 +2229,7 @@ proc genMagicExpr(p: BProc, e: PNode, d: var TLoc, op: TMagic) =
     putIntoDest(p, d, e, "((NI)sizeof($1))" % [getTypeDesc(p.module, t)])
   of mAlignOf:
     let t = e[1].typ.skipTypes({tyTypeDesc})
-    if not p.module.compileToCpp:
-      p.module.includeHeader("<stdalign.h>")
-    putIntoDest(p, d, e, "((NI)alignof($1))" % [getTypeDesc(p.module, t)])
+    putIntoDest(p, d, e, "((NI)NIM_ALIGNOF($1))" % [getTypeDesc(p.module, t)])
   of mOffsetOf:
     var dotExpr: PNode
     block findDotExpr:
@@ -2452,6 +2453,8 @@ proc genStmtList(p: BProc, n: PNode) =
   genStmtListExprImpl:
     genStmts(p, n[^1])
 
+from parampatterns import isLValue
+
 proc upConv(p: BProc, n: PNode, d: var TLoc) =
   var a: TLoc
   initLocExpr(p, n[0], a)
@@ -2470,7 +2473,11 @@ proc upConv(p: BProc, n: PNode, d: var TLoc) =
       linefmt(p, cpsStmts, "if (!#isObj($1, $2)){ #raiseObjectConversionError(); $3}$n",
               [r, checkFor, raiseInstr(p)])
   if n[0].typ.kind != tyObject:
-    putIntoDest(p, d, n,
+    if n.isLValue:
+      putIntoDest(p, d, n,
+                "(*(($1*) (&($2))))" % [getTypeDesc(p.module, n.typ), rdLoc(a)], a.storage)
+    else:
+      putIntoDest(p, d, n,
                 "(($1) ($2))" % [getTypeDesc(p.module, n.typ), rdLoc(a)], a.storage)
   else:
     putIntoDest(p, d, n, "(*($1*) ($2))" %

@@ -22,7 +22,9 @@ type
     preferGenericArg,
     preferTypeName,
     preferResolved, # fully resolved symbols
-    preferMixed, # show symbol + resolved symbols if it differs, eg: seq[cint{int32}, float]
+    preferMixed,
+      # most useful, shows: symbol + resolved symbols if it differs, eg:
+      # tuple[a: MyInt{int}, b: float]
 
 proc typeToString*(typ: PType; prefer: TPreferedDesc = preferName): string
 template `$`*(typ: PType): string = typeToString(typ)
@@ -121,6 +123,13 @@ proc isIntLit*(t: PType): bool {.inline.} =
 proc isFloatLit*(t: PType): bool {.inline.} =
   result = t.kind == tyFloat and t.n != nil and t.n.kind == nkFloatLit
 
+proc addDeclaredLoc(result: var string, conf: ConfigRef; sym: PSym) =
+  result.add " [declared in " & conf$sym.info & "]"
+
+proc addTypeHeader*(result: var string, conf: ConfigRef; typ: PType; prefer: TPreferedDesc = preferMixed; getDeclarationPath = true) =
+  result.add typeToString(typ, prefer)
+  if getDeclarationPath: result.addDeclaredLoc(conf, typ.sym)
+
 proc getProcHeader*(conf: ConfigRef; sym: PSym; prefer: TPreferedDesc = preferName; getDeclarationPath = true): string =
   assert sym != nil
   # consider using `skipGenericOwner` to avoid fun2.fun2 when fun2 is generic
@@ -140,10 +149,7 @@ proc getProcHeader*(conf: ConfigRef; sym: PSym; prefer: TPreferedDesc = preferNa
     result.add(')')
     if n[0].typ != nil:
       result.add(": " & typeToString(n[0].typ, prefer))
-  if getDeclarationPath:
-    result.add " [declared in "
-    result.add(conf$sym.info)
-    result.add "]"
+  if getDeclarationPath: result.addDeclaredLoc(conf, sym)
 
 proc elemType*(t: PType): PType =
   assert(t != nil)
@@ -161,7 +167,7 @@ proc enumHasHoles*(t: PType): bool =
 proc isOrdinalType*(t: PType, allowEnumWithHoles: bool = false): bool =
   assert(t != nil)
   const
-    baseKinds = {tyChar,tyInt..tyInt64,tyUInt..tyUInt64,tyBool,tyEnum}
+    baseKinds = {tyChar, tyInt..tyInt64, tyUInt..tyUInt64, tyBool, tyEnum}
     parentKinds = {tyRange, tyOrdinal, tyGenericInst, tyAlias, tySink, tyDistinct}
   result = (t.kind in baseKinds and (not t.enumHasHoles or allowEnumWithHoles)) or
     (t.kind in parentKinds and isOrdinalType(t.lastSon, allowEnumWithHoles))
@@ -247,7 +253,7 @@ proc searchTypeForAux(t: PType, predicate: TTypePredicate,
   else:
     discard
 
-proc searchTypeFor(t: PType, predicate: TTypePredicate): bool =
+proc searchTypeFor*(t: PType, predicate: TTypePredicate): bool =
   var marker = initIntSet()
   result = searchTypeForAux(t, predicate, marker)
 
@@ -581,29 +587,39 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
       if t.n == nil:
         result = "unknown"
       else:
-        result = "type(" & renderTree(t.n) & ")"
+        result = "typeof(" & renderTree(t.n) & ")"
     of tyArray:
-      if t[0].kind == tyRange:
-        result = "array[" & rangeToStr(t[0].n) & ", " &
-            typeToString(t[1]) & ']'
-      else:
-        result = "array[" & typeToString(t[0]) & ", " &
-            typeToString(t[1]) & ']'
+      result = "array"
+      if t.len > 0:
+        if t[0].kind == tyRange:
+          result &= "[" & rangeToStr(t[0].n) & ", " &
+              typeToString(t[1]) & ']'
+        else:
+          result &= "[" & typeToString(t[0]) & ", " &
+              typeToString(t[1]) & ']'
     of tyUncheckedArray:
-      result = "UncheckedArray[" & typeToString(t[0]) & ']'
+      result = "UncheckedArray"
+      if t.len > 0:
+        result &= "[" & typeToString(t[0]) & ']'
     of tySequence:
       if t.sym != nil and prefer != preferResolved:
         result = t.sym.name.s
       else:
-        result = "seq[" & typeToString(t[0]) & ']'
-    of tyOpt:
-      result = "opt[" & typeToString(t[0]) & ']'
+        result = "seq"
+        if t.len > 0:
+          result &= "[" & typeToString(t[0]) & ']'
     of tyOrdinal:
-      result = "ordinal[" & typeToString(t[0]) & ']'
+      result = "ordinal"
+      if t.len > 0:
+        result &= "[" & typeToString(t[0]) & ']'
     of tySet:
-      result = "set[" & typeToString(t[0]) & ']'
+      result = "set"
+      if t.len > 0:
+        result &= "[" & typeToString(t[0]) & ']'
     of tyOpenArray:
-      result = "openArray[" & typeToString(t[0]) & ']'
+      result = "openArray"
+      if t.len > 0:
+        result &= "[" & typeToString(t[0]) & ']'
     of tyDistinct:
       result = "distinct " & typeToString(t[0],
         if prefer == preferModuleInfo: preferModuleInfo else: preferTypeName)
@@ -618,7 +634,7 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
           if i < t.n.len - 1: result.add(", ")
         result.add(']')
       elif t.len == 0:
-        result = "tuple[]"
+        result = "tuple"
       else:
         if prefer == preferTypeName: result = "("
         else: result = "tuple of ("
@@ -1130,7 +1146,7 @@ proc sameTypeAux(x, y: PType, c: var TSameTypeClosure): bool =
   of tyGenericInvocation, tyGenericBody, tySequence, tyOpenArray, tySet, tyRef,
      tyPtr, tyVar, tyLent, tySink, tyUncheckedArray, tyArray, tyProc, tyVarargs,
      tyOrdinal, tyCompositeTypeClass, tyUserTypeClass, tyUserTypeClassInst,
-     tyAnd, tyOr, tyNot, tyAnything, tyOpt, tyOwned:
+     tyAnd, tyOr, tyNot, tyAnything, tyOwned:
     cycleCheck()
     if a.kind == tyUserTypeClass and a.n != nil: return a.n == b.n
     result = sameChildrenAux(a, b, c)
@@ -1153,6 +1169,7 @@ proc sameTypeAux(x, y: PType, c: var TSameTypeClosure): bool =
     cycleCheck()
     result = sameTypeAux(a.lastSon, b.lastSon, c)
   of tyNone: result = false
+  of tyOptDeprecated: doAssert false
 
 proc sameBackendType*(x, y: PType): bool =
   var c = initSameTypeClosure()
@@ -1226,6 +1243,8 @@ type
     taConcept,
     taIsOpenArray,
     taNoUntyped
+    taIsTemplateOrMacro
+    taProcContextIsNotMacro
 
   TTypeAllowedFlags* = set[TTypeAllowedFlag]
 
@@ -1287,18 +1306,24 @@ proc typeAllowedAux(marker: var IntSet, typ: PType, kind: TSymKind,
         if kind notin {skParam, skResult}: result = t
         else: result = typeAllowedAux(marker, t2, kind, flags)
   of tyProc:
-    if isInlineIterator(typ) and kind in {skVar, skLet, skConst, skParam, skResult}:
-      # only closure iterators my be assigned to anything.
+    if kind in {skVar, skLet, skConst} and taIsTemplateOrMacro in flags:
       result = t
-    let f = if kind in {skProc, skFunc}: flags+{taNoUntyped} else: flags
-    for i in 1..<t.len:
-      if result != nil: break
-      result = typeAllowedAux(marker, t[i], skParam, f-{taIsOpenArray})
-    if result.isNil and t[0] != nil:
-      result = typeAllowedAux(marker, t[0], skResult, flags)
+    else:
+      if isInlineIterator(typ) and kind in {skVar, skLet, skConst, skParam, skResult}:
+        # only closure iterators may be assigned to anything.
+        result = t
+      let f = if kind in {skProc, skFunc}: flags+{taNoUntyped} else: flags
+      for i in 1..<t.len:
+        if result != nil: break
+        result = typeAllowedAux(marker, t[i], skParam, f-{taIsOpenArray})
+      if result.isNil and t[0] != nil:
+        result = typeAllowedAux(marker, t[0], skResult, flags)
   of tyTypeDesc:
-    # XXX: This is still a horrible idea...
-    result = nil
+    if kind in {skVar, skLet, skConst} and taProcContextIsNotMacro in flags:
+      result = t
+    else:
+      # XXX: This is still a horrible idea...
+      result = nil
   of tyUntyped, tyTyped:
     if kind notin {skParam, skResult} or taNoUntyped in flags: result = t
   of tyStatic:
@@ -1337,13 +1362,15 @@ proc typeAllowedAux(marker: var IntSet, typ: PType, kind: TSymKind,
       result = t
     else:
       result = typeAllowedAux(marker, lastSon(t), kind, flags-{taHeap})
-  of tySequence, tyOpt:
+  of tySequence:
     if t[0].kind != tyEmpty:
       result = typeAllowedAux(marker, t[0], kind, flags+{taHeap})
     elif kind in {skVar, skLet}:
       result = t[0]
   of tyArray:
-    if t[1].kind != tyEmpty:
+    if t[1].kind == tyTypeDesc:
+      result = t[1]
+    elif t[1].kind != tyEmpty:
       result = typeAllowedAux(marker, t[1], kind, flags)
     elif kind in {skVar, skLet}:
       result = t[1]
@@ -1378,6 +1405,7 @@ proc typeAllowedAux(marker: var IntSet, typ: PType, kind: TSymKind,
       result = typeAllowedAux(marker, t.lastSon, kind, flags+{taHeap})
     else:
       result = t
+  of tyOptDeprecated: doAssert false
 
 proc typeAllowed*(t: PType, kind: TSymKind; flags: TTypeAllowedFlags = {}): PType =
   # returns 'nil' on success and otherwise the part of the type that is
@@ -1648,6 +1676,17 @@ proc isException*(t: PType): bool =
   var t = t.skipTypes(abstractInst)
   while t.kind == tyObject:
     if t.sym != nil and t.sym.magic == mException: return true
+    if t[0] == nil: break
+    t = skipTypes(t[0], abstractPtrs)
+  return false
+
+proc isDefectException*(t: PType): bool =
+  var t = t.skipTypes(abstractPtrs)
+  while t.kind == tyObject:
+    if t.sym != nil and t.sym.owner != nil and
+        sfSystemModule in t.sym.owner.flags and
+        t.sym.name.s == "Defect":
+      return true
     if t[0] == nil: break
     t = skipTypes(t[0], abstractPtrs)
   return false

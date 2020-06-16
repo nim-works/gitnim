@@ -12,9 +12,8 @@
 ##
 ## Unstable API.
 
+import std/private/since
 export system.`$` # for backward compatibility
-
-include "system/inclrtl"
 
 proc name*(t: typedesc): string {.magic: "TypeTrait".}
   ## Returns the name of the given type.
@@ -48,7 +47,7 @@ proc genericHead*(t: typedesc): typedesc {.magic: "TypeTrait".}
   ## .. code-block:: nim
   ##   type
   ##     Functor[A] = concept f
-  ##       type MatchedGenericType = genericHead(f.type)
+  ##       type MatchedGenericType = genericHead(typeof(f))
   ##         # `f` will be a value of a type such as `Option[T]`
   ##         # `MatchedGenericType` will become the `Option` type
 
@@ -59,7 +58,7 @@ proc stripGenericParams*(t: typedesc): typedesc {.magic: "TypeTrait".}
   ## them unmodified.
 
 proc supportsCopyMem*(t: typedesc): bool {.magic: "TypeTrait".}
-  ## This trait returns true iff the type ``t`` is safe to use for
+  ## This trait returns true if the type ``t`` is safe to use for
   ## `copyMem`:idx:.
   ##
   ## Other languages name a type like these `blob`:idx:.
@@ -79,25 +78,22 @@ since (1, 1):
       doAssert 12.MyInt.distinctBase == 12
     distinctBase(type(a))(a)
 
-proc tupleLen*(T: typedesc[tuple]): int {.magic: "TypeTrait", since: (1, 1).}
-  ## Return number of elements of `T`
+  proc tupleLen*(T: typedesc[tuple]): int {.magic: "TypeTrait".}
+    ## Return number of elements of `T`
 
-since (1, 1):
   template tupleLen*(t: tuple): int =
     ## Return number of elements of `t`
     tupleLen(type(t))
 
-since (1, 1):
   template get*(T: typedesc[tuple], i: static int): untyped =
     ## Return `i`\th element of `T`
     # Note: `[]` currently gives: `Error: no generic parameters allowed for ...`
     type(default(T)[i])
 
-  type StaticParam*[value] = object
+  type StaticParam*[value: static type] = object
     ## used to wrap a static value in `genericParams`
 
-# NOTE: See https://github.com/nim-lang/Nim/issues/13758 - `import std/macros` does not work on OpenBSD
-import macros
+import std/macros
 
 macro genericParamsImpl(T: typedesc): untyped =
   # auxiliary macro needed, can't do it directly in `genericParams`
@@ -118,17 +114,16 @@ macro genericParamsImpl(T: typedesc): untyped =
           let ai = impl[i]
           var ret: NimNode
           case ai.typeKind
-          of ntyStatic:
-            since (1, 1):
-              ret = newTree(nnkBracketExpr, @[bindSym"StaticParam", ai])
           of ntyTypeDesc:
             ret = ai
+          of ntyStatic: doAssert false
           else:
-            assert false, $(ai.typeKind, ai.kind)
+            since (1, 1):
+              ret = newTree(nnkBracketExpr, @[bindSym"StaticParam", ai])
           result.add ret
         break
       else:
-        error "wrong kind: " & $impl.kind
+        error "wrong kind: " & $impl.kind, impl
 
 since (1, 1):
   template genericParams*(T: typedesc): untyped =
