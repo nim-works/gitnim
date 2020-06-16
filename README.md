@@ -55,8 +55,7 @@ git tag -a "some alias"
 
 ## Contributing
 
-If you're reading this, you're pretty close to the source. Send a PR with a
-great new feature!
+https://github.com/disruptek/gitnim
 
 ## License
 MIT
