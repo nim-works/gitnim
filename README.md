@@ -33,12 +33,6 @@ git nim 1.3.5
 
 <summary>Advanced Usage</summary>
 
-### Creating Your Own Nim Distribution
-
-```bash
-git checkout -b "myDistro"
-```
-
 ### Publishing Your Nim Distribution
 
 ```bash
@@ -50,7 +44,6 @@ git push --set-upstream "my github remote" "my branch"
 ```bash
 git tag -a "some alias"
 ```
-
 </details>
 
 ## Contributing
