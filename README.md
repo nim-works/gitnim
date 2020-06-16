@@ -6,7 +6,7 @@ choosenim for choosey nimions
 Make a shallow clone of this repository.
 
 ```bash
-git clone --depth 1 https://github.com/disruptek/git-nim
+git clone --depth 1 https://github.com/disruptek/gitnim
 ```
 
 Add `bin` to your `$PATH`.
