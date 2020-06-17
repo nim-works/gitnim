@@ -3,20 +3,17 @@ choosenim for choosey nimions
 
 ## Installation
 
-Clone this repository.
-
+Clone repository.
 ```bash
 git clone https://github.com/disruptek/gitnim
 ```
 
 Add `bin` to `$PATH`.
-
 ```bash
 export PATH=`pwd`/gitnim/bin:$PATH
 ```
 
 Build `gitnim`.
-
 ```bash
 cd gitnim
 nim c gitnim/gitnim.nim
