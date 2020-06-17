@@ -9,8 +9,15 @@ import cutelog
 
 const
   defaultProcess = {poStdErrToStdOut, poParentStreams}
-  envURL {.strdefine.}: string = "GITNIM_URL"
-  URL {.strdefine.}: string = getEnv(envURL)
+  envURL: string = "GITNIM_URL"
+  embURL: string = staticExec"git remote get-url origin"
+  URL {.strdefine.}: string = getEnv(envURL, embURL)
+
+static:
+  hint "gitnim uses following url by default:"
+  hint URL
+  hint "via setting the $GITNIM_URL, or"
+  hint "via passing --define:URL=\"...\""
 
 type
   RunOutput = object
@@ -20,10 +27,9 @@ type
 
 macro repo(): untyped =
   let getEnv = bindSym"getEnv"
-  echo $typeof(getEnv)
-  result = getEnv.newCall("GITNIM_URL".newLit, "goats".newLit)
+  result = getEnv.newCall(envURL.newLit, URL.newLit)
 
-template crash(why: string) =
+template crash(why: string) {.used.} =
   error why
   quit 1
 
@@ -34,7 +40,8 @@ proc run(exe: string; args: openArray[string];
     command = findExe(exe)
     arguments: seq[string]
     opts = options
-  for a in args: arguments.add a
+  for a in args:
+    arguments.add a
   block ran:
     if command == "":
       result = RunOutput(output: &"unable to find {exe} in path")
@@ -57,14 +64,6 @@ proc run(exe: string; args: openArray[string];
         output = execProcess(command, $getAppDir(),
                              args = arguments, options = opts)
       result = RunOutput(ok: true, output: output)
-      when false:
-        # the user wants to capture output
-        command &= " " & quoteShellCommand(arguments)
-        when defined(debug):
-          debug command
-        let
-          (output, code) = execCmdEx(command, opts)
-        result = RunOutput(output: output, ok: code == 0)
 
     # for utility, also return the arguments we used
     result.arguments = arguments
@@ -87,8 +86,8 @@ when isMainModule:
     logger = newCuteConsoleLogger()
   addHandler logger
 
-  info "gitnim on ", repo()
-  git "fetch --all".split
+  info "gitnim on " & repo()
+  discard git("fetch --all".split, {poStdErrToStdOut})
   info git("branch --list".split, {poStdErrToStdOut})
 
   if paramCount() > 0:
