@@ -3,10 +3,14 @@ choosenim for choosey nimions
 
 ## Installation
 
-Clone this repository.
-
+Clone repository.
 ```bash
 git clone https://github.com/disruptek/gitnim
+```
+
+Clone submodules.
+```bash
+git submodule update --recursive --remote --init .
 ```
 
 Add `bin` to `$PATH`.
