@@ -88,8 +88,9 @@ when isMainModule:
 
   info "gitnim on " & repo()
   discard git("fetch --all".split, {poStdErrToStdOut})
-  info git("branch --list".split, {poStdErrToStdOut})
 
-  if paramCount() > 0:
+  if paramCount() == 0:
+    info git("branch --all --verbose --color".split, {poStdErrToStdOut})
+  else:
     git ["checkout", paramStr(1)]
     info nim ["--version"]
