@@ -8,19 +8,12 @@ Clone repository.
 git clone https://github.com/disruptek/gitnim
 ```
 
-Clone submodules.
-```bash
-git submodule update --recursive --remote --init .
-```
-
 Add `bin` to `$PATH`.
-
 ```bash
 export PATH=`pwd`/gitnim/bin:$PATH
 ```
 
 Build `gitnim`.
-
 ```bash
 cd gitnim
 nim c gitnim/gitnim.nim
