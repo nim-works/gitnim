@@ -29,9 +29,7 @@ Choose a release:
 git nim 1.3.5
 ```
 
-<details>
-
-<summary>Advanced Usage</summary>
+## Advanced Usage
 
 ### Creating Your Own Nim Distribution
 
@@ -51,11 +49,9 @@ git push --set-upstream "my github remote" "my branch"
 git tag -a "some alias"
 ```
 
-</details>
-
 ## Contributing
 
-https://github.com/disruptek/gitnim
+[https://github.com/disruptek/gitnim](https://github.com/disruptek/gitnim)
 
 ## License
 MIT
