@@ -86,7 +86,7 @@ when isMainModule:
     logger = newCuteConsoleLogger()
   addHandler logger
 
-  info "gitnim on " & repo()
+  info "gitnim on " & repo() & " for Nim " & NimVersion
   discard git("fetch --all".split, {poStdErrToStdOut})
 
   if paramCount() == 0:
