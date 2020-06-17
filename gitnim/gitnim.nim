@@ -91,6 +91,7 @@ when isMainModule:
 
   if paramCount() == 0:
     info git("branch --all --verbose --color".split, {poStdErrToStdOut})
+    info git("tag --list -n1 --color".split, {poStdErrToStdOut})
   else:
     git ["checkout", paramStr(1)]
     info nim ["--version"]
