@@ -27,19 +27,6 @@ template crash(why: string) =
   error why
   quit 1
 
-when false:
-  proc run(exe: string; args: openArray[string]; opts = defaultProcess): string =
-    let exe = findExe(exe)
-    info "run ", exe, " ", $args
-    let
-      (output, code) = execCmdEx(exe & " " & quoteShellCommand(args))
-    var
-      p = startProcess(exe, $getAppDir(), args, nil, opts)
-    if waitForExit(p) != 0:
-      crash exe & "failed"
-    else:
-      result = ""
-
 proc run(exe: string; args: openArray[string];
          options = defaultProcess): RunOutput =
   ## run a program with arguments
@@ -102,7 +89,7 @@ when isMainModule:
 
   info "gitnim on ", repo()
   git "fetch --all".split
-  info git("tag --list".split, {poStdErrToStdOut})
+  info git("branch --list".split, {poStdErrToStdOut})
 
   if paramCount() > 0:
     git ["checkout", paramStr(1)]
