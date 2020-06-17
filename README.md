@@ -1,4 +1,4 @@
-# gitnim linux-amd64
+# [gitnim linux-amd64](https://gitnim.com/)
 choosenim for choosey nimions
 
 ## Installation
