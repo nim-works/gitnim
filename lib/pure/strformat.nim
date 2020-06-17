@@ -523,11 +523,10 @@ template formatValue(result: var string; value: char; specifier: string) =
 template formatValue(result: var string; value: cstring; specifier: string) =
   result.add value
 
-proc strformatImpl(pattern: NimNode; openChar, closeChar: char): NimNode =
+macro `&`*(pattern: string): untyped =
+  ## For a specification of the ``&`` macro, see the module level documentation.
   if pattern.kind notin {nnkStrLit..nnkTripleStrLit}:
     error "string formatting (fmt(), &) only works with string literals", pattern
-  if openChar == ':' or closeChar == ':':
-    error "openChar and closeChar must not be ':'"
   let f = pattern.strVal
   var i = 0
   let res = genSym(nskVar, "fmtRes")
@@ -540,18 +539,18 @@ proc strformatImpl(pattern: NimNode; openChar, closeChar: char): NimNode =
                                      newLit(f.len + expectedGrowth)))
   var strlit = ""
   while i < f.len:
-    if f[i] == openChar:
+    if f[i] == '{':
       inc i
-      if f[i] == openChar:
+      if f[i] == '{':
         inc i
-        strlit.add openChar
+        strlit.add '{'
       else:
         if strlit.len > 0:
           result.add newCall(bindSym"add", res, newLit(strlit))
           strlit = ""
 
         var subexpr = ""
-        while i < f.len and f[i] != closeChar and f[i] != ':':
+        while i < f.len and f[i] != '}' and f[i] != ':':
           subexpr.add f[i]
           inc i
         var x: NimNode
@@ -567,17 +566,17 @@ proc strformatImpl(pattern: NimNode; openChar, closeChar: char): NimNode =
         var options = ""
         if f[i] == ':':
           inc i
-          while i < f.len and f[i] != closeChar:
+          while i < f.len and f[i] != '}':
             options.add f[i]
             inc i
-        if f[i] == closeChar:
+        if f[i] == '}':
           inc i
         else:
           doAssert false, "invalid format string: missing '}'"
         result.add newCall(formatSym, res, x, newLit(options))
-    elif f[i] == closeChar:
-      if f[i+1] == closeChar:
-        strlit.add closeChar
+    elif f[i] == '}':
+      if f[i+1] == '}':
+        strlit.add '}'
         inc i, 2
       else:
         doAssert false, "invalid format string: '}' instead of '}}'"
@@ -591,20 +590,10 @@ proc strformatImpl(pattern: NimNode; openChar, closeChar: char): NimNode =
   when defined(debugFmtDsl):
     echo repr result
 
-macro `&`*(pattern: string): untyped = strformatImpl(pattern, '{', '}')
-  ## For a specification of the ``&`` macro, see the module level documentation.
-
-macro fmt*(pattern: string): untyped = strformatImpl(pattern, '{', '}')
+template fmt*(pattern: string): untyped =
   ## An alias for ``&``.
-
-macro fmt*(pattern: string; openChar, closeChar: char): untyped =
-  ## Use ``openChar`` instead of '{' and ``closeChar`` instead of '}'
-  runnableExamples:
-    let testInt = 123
-    doAssert "<testInt>".fmt('<', '>') == "123"
-    doAssert """(()"foo" & "bar"())""".fmt(')', '(') == "(foobar)"
-    doAssert """ ""{"123+123"}"" """.fmt('"', '"') == " \"{246}\" "
-  strformatImpl(pattern, openChar.intVal.char, closeChar.intVal.char)
+  bind `&`
+  &pattern
 
 when isMainModule:
   template check(actual, expected: string) =
@@ -693,6 +682,7 @@ when isMainModule:
   check &"{123.456:1g}", "123.456"
   check &"{123.456:.1f}", "123.5"
   check &"{123.456:.0f}", "123."
+  #check &"{123.456:.0f}", "123."
   check &"{123.456:>9.3f}", "  123.456"
   check &"{123.456:9.3f}", "  123.456"
   check &"{123.456:>9.4f}", " 123.4560"
@@ -743,6 +733,8 @@ when isMainModule:
   # bug #11092
   check &"{high(int64)}", "9223372036854775807"
   check &"{low(int64)}", "-9223372036854775808"
+
+  import json
 
   doAssert fmt"{'a'} {'b'}" == "a b"
 

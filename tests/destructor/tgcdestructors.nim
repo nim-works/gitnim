@@ -1,5 +1,5 @@
 discard """
-  cmd: '''nim c -d:nimAllocStats --newruntime $file'''
+  cmd: '''nim c --newruntime $file'''
   output: '''hi
 ho
 ha
@@ -10,9 +10,10 @@ a: @[4, 2, 3]
 0
 30
 true
-(allocCount: 40, deallocCount: 40)'''
+40 40'''
 """
 
+import allocators
 include system / ansi_c
 
 proc main =
@@ -200,4 +201,7 @@ proc takeAinArray =
 takeAinArray()
 echo ga == "foo"
 
-echo getAllocStats()
+
+#echo s
+let (a, d) = allocCounters()
+discard cprintf("%ld %ld\n", a, d)

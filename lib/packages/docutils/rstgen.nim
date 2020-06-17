@@ -401,14 +401,11 @@ proc hash(x: IndexEntry): Hash =
   result = result !& x.linkDesc.hash
   result = !$result
 
-when defined(gcDestructors):
-  template `<-`(a, b: var IndexEntry) = a = move(b)
-else:
-  proc `<-`(a: var IndexEntry, b: IndexEntry) =
-    shallowCopy a.keyword, b.keyword
-    shallowCopy a.link, b.link
-    shallowCopy a.linkTitle, b.linkTitle
-    shallowCopy a.linkDesc, b.linkDesc
+proc `<-`(a: var IndexEntry, b: IndexEntry) =
+  shallowCopy a.keyword, b.keyword
+  shallowCopy a.link, b.link
+  shallowCopy a.linkTitle, b.linkTitle
+  shallowCopy a.linkDesc, b.linkDesc
 
 proc sortIndex(a: var openArray[IndexEntry]) =
   # we use shellsort here; fast and simple
@@ -1115,10 +1112,10 @@ proc renderRstToOut(d: PDoc, n: PRstNode, result: var string) =
       "\\href{$2}{$1}", [tmp0, tmp1])
   of rnDirArg, rnRaw: renderAux(d, n, result)
   of rnRawHtml:
-    if d.target != outLatex and not lastSon(n).isNil:
+    if d.target != outLatex:
       result.add addNodes(lastSon(n))
   of rnRawLatex:
-    if d.target == outLatex and not lastSon(n).isNil:
+    if d.target == outLatex:
       result.add addNodes(lastSon(n))
 
   of rnImage, rnFigure: renderImage(d, n, result)

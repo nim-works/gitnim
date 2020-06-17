@@ -19,7 +19,7 @@ else:
 proc foo() {.async.} =
     echo "hi"
     var s = epochTime()
-    await sleepAsync(200)
+    await sleepAsync(500)
     var e = epochTime()
     doAssert(e - s > 0.1)
     echo "bye"

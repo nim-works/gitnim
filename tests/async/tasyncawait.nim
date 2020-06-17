@@ -1,13 +1,13 @@
 discard """
-  output: "2000"
+  output: "5000"
 """
 import asyncdispatch, asyncnet, nativesockets, net, strutils, os
 
 var msgCount = 0
 
 const
-  swarmSize = 40
-  messagesToSend = 50
+  swarmSize = 50
+  messagesToSend = 100
 
 var clientCount = 0
 

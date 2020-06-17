@@ -1,13 +1,14 @@
 discard """
-  cmd: '''nim c -d:nimAllocStats --newruntime $file'''
+  cmd: '''nim c --newruntime $file'''
   output: '''a b
 70
 hello
 hello
 hello
-(allocCount: 4, deallocCount: 4)'''
+2 2  alloc/dealloc pairs: 0'''
 """
 
+import core / allocators
 import system / ansi_c
 
 proc main(): owned(proc()) =
@@ -43,20 +44,5 @@ ok0()
 var ok1 = say
 ok1()
 
-when false:
-  # bug #12443
-  func newStringIterator(s: string): owned(iterator(): char) =
-    result = iterator(): char =
-      var pos = 0
-      while pos < s.len:
-        yield s[pos]
-        inc pos
-
-  proc stringIter() =
-    let si = newStringIterator("foo")
-    for i in si():
-      echo i
-
-  stringIter()
-
-echo getAllocStats()
+let (a, d) = allocCounters()
+discard cprintf("%ld %ld  alloc/dealloc pairs: %ld\n", a, d, system.allocs)

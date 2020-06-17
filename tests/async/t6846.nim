@@ -6,6 +6,7 @@ discard """
 
 import asyncdispatch
 import asyncfile
+import times
 
 var asyncStdout = 1.AsyncFD.newAsyncFile()
 proc doStuff: Future[void] {.async.} =

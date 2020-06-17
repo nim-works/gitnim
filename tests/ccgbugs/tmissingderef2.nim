@@ -4,7 +4,7 @@ discard """
 
 # bug #5079
 
-import tables
+import tables, strutils
 
 type Test = ref object
   s: string

@@ -11,7 +11,7 @@
 
 import
   llstream, commands, os, strutils, msgs, lexer,
-  options, idents, wordrecg, strtabs, lineinfos, pathutils, scriptconfig
+  options, idents, wordrecg, strtabs, lineinfos, pathutils
 
 # ---------------- configuration file parser -----------------------------
 # we use Nim's scanner here to save space and work
@@ -114,7 +114,7 @@ proc parseDirective(L: var TLexer, tok: var TToken; config: ConfigRef; condStack
   ppGetTok(L, tok)            # skip @
   case whichKeyword(tok.ident)
   of wIf:
-    setLen(condStack, condStack.len + 1)
+    setLen(condStack, len(condStack) + 1)
     let res = evalppIf(L, tok, config)
     condStack[high(condStack)] = res
     if not res: jumpToDirective(L, tok, jdElseEndif, config, condStack)
@@ -169,38 +169,38 @@ proc parseAssignment(L: var TLexer, tok: var TToken;
   confTok(L, tok, config, condStack)             # skip symbol
   var val = ""
   while tok.tokType == tkDot:
-    s.add('.')
+    add(s, '.')
     confTok(L, tok, config, condStack)
     checkSymbol(L, tok)
-    s.add($tok)
+    add(s, $tok)
     confTok(L, tok, config, condStack)
   if tok.tokType == tkBracketLe:
     # BUGFIX: val, not s!
     confTok(L, tok, config, condStack)
     checkSymbol(L, tok)
-    val.add('[')
-    val.add($tok)
+    add(val, '[')
+    add(val, $tok)
     confTok(L, tok, config, condStack)
     if tok.tokType == tkBracketRi: confTok(L, tok, config, condStack)
     else: lexMessage(L, errGenerated, "expected closing ']'")
-    val.add(']')
+    add(val, ']')
   let percent = tok.ident != nil and tok.ident.s == "%="
   if tok.tokType in {tkColon, tkEquals} or percent:
-    if val.len > 0: val.add(':')
+    if len(val) > 0: add(val, ':')
     confTok(L, tok, config, condStack)           # skip ':' or '=' or '%'
     checkSymbol(L, tok)
-    val.add($tok)
+    add(val, $tok)
     confTok(L, tok, config, condStack)           # skip symbol
     if tok.tokType in {tkColon, tkEquals}:
-      val.add($tok) # add the :
+      add(val, $tok) # add the :
       confTok(L, tok, config, condStack)           # skip symbol
       checkSymbol(L, tok)
-      val.add($tok) # add the token after it
+      add(val, $tok) # add the token after it
       confTok(L, tok, config, condStack)           # skip symbol
     while tok.ident != nil and tok.ident.s == "&":
       confTok(L, tok, config, condStack)
       checkSymbol(L, tok)
-      val.add($tok)
+      add(val, $tok)
       confTok(L, tok, config, condStack)
   if percent:
     processSwitch(s, strtabs.`%`(val, config.configVars,
@@ -222,7 +222,7 @@ proc readConfigFile*(filename: AbsoluteFile; cache: IdentCache;
     var condStack: seq[bool] = @[]
     confTok(L, tok, config, condStack)           # read in the first token
     while tok.tokType != tkEof: parseAssignment(L, tok, config, condStack)
-    if condStack.len > 0: lexMessage(L, errGenerated, "expected @end")
+    if len(condStack) > 0: lexMessage(L, errGenerated, "expected @end")
     closeLexer(L)
     return true
 
@@ -246,33 +246,18 @@ proc loadConfigs*(cfg: RelativeFile; cache: IdentCache; conf: ConfigRef) =
   template readConfigFile(path) =
     let configPath = path
     if readConfigFile(configPath, cache, conf):
-      configFiles.add(configPath)
-
-  template runNimScriptIfExists(path: AbsoluteFile) =
-    let p = path # eval once
-    if fileExists(p):
-      configFiles.add(p)
-      runNimScript(cache, p, freshDefines = false, conf)
+      add(configFiles, configPath)
 
   if optSkipSystemConfigFile notin conf.globalOptions:
     readConfigFile(getSystemConfigPath(conf, cfg))
 
-    if cfg == DefaultConfig:
-      runNimScriptIfExists(getSystemConfigPath(conf, DefaultConfigNims))
-
   if optSkipUserConfigFile notin conf.globalOptions:
     readConfigFile(getUserConfigPath(cfg))
-
-    if cfg == DefaultConfig:
-      runNimScriptIfExists(getUserConfigPath(DefaultConfigNims))
 
   let pd = if not conf.projectPath.isEmpty: conf.projectPath else: AbsoluteDir(getCurrentDir())
   if optSkipParentConfigFiles notin conf.globalOptions:
     for dir in parentDirs(pd.string, fromRoot=true, inclusive=false):
       readConfigFile(AbsoluteDir(dir) / cfg)
-
-      if cfg == DefaultConfig:
-        runNimScriptIfExists(AbsoluteDir(dir) / DefaultConfigNims)
 
   if optSkipProjConfigFile notin conf.globalOptions:
     readConfigFile(pd / cfg)
@@ -284,20 +269,6 @@ proc loadConfigs*(cfg: RelativeFile; cache: IdentCache; conf: ConfigRef) =
         projectConfig = changeFileExt(conf.projectFull, "nim.cfg")
       readConfigFile(projectConfig)
 
-    if cfg == DefaultConfig:
-      runNimScriptIfExists(pd / DefaultConfigNims)
-
   for filename in configFiles:
     # delayed to here so that `hintConf` is honored
     rawMessage(conf, hintConf, filename.string)
-
-  block:
-    let scriptFile = conf.projectFull.changeFileExt("nims")
-    if conf.command != "nimsuggest":
-      runNimScriptIfExists(scriptFile)
-    else:
-      if scriptFile != conf.projectFull:
-        runNimScriptIfExists(scriptFile)
-      else:
-        # 'nimsuggest foo.nims' means to just auto-complete the NimScript file
-        discard

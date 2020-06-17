@@ -16,11 +16,11 @@ proc emulatedThreadVars(conf: ConfigRef): bool =
   result = {optThreads, optTlsEmulation} <= conf.globalOptions
 
 proc accessThreadLocalVar(p: BProc, s: PSym) =
-  if emulatedThreadVars(p.config) and threadVarAccessed notin p.flags:
-    p.flags.incl threadVarAccessed
+  if emulatedThreadVars(p.config) and not p.threadVarAccessed:
+    p.threadVarAccessed = true
     incl p.module.flags, usesThreadVars
-    p.procSec(cpsLocals).addf("\tNimThreadVars* NimTV_;$n", [])
-    p.procSec(cpsInit).add(
+    addf(p.procSec(cpsLocals), "\tNimThreadVars* NimTV_;$n", [])
+    add(p.procSec(cpsInit),
       ropecg(p.module, "\tNimTV_ = (NimThreadVars*) #GetThreadLocalVars();$n", []))
 
 proc declareThreadVar(m: BModule, s: PSym, isExtern: bool) =
@@ -30,25 +30,23 @@ proc declareThreadVar(m: BModule, s: PSym, isExtern: bool) =
     # allocator for it :-(
     if not containsOrIncl(m.g.nimtvDeclared, s.id):
       m.g.nimtvDeps.add(s.loc.t)
-      m.g.nimtv.addf("$1 $2;$n", [getTypeDesc(m, s.loc.t), s.loc.r])
+      addf(m.g.nimtv, "$1 $2;$n", [getTypeDesc(m, s.loc.t), s.loc.r])
   else:
-    if isExtern: m.s[cfsVars].add("extern ")
-    elif lfExportLib in s.loc.flags: m.s[cfsVars].add("N_LIB_EXPORT_VAR ")
-    else: m.s[cfsVars].add("N_LIB_PRIVATE ")
-    if optThreads in m.config.globalOptions: m.s[cfsVars].add("NIM_THREADVAR ")
-    m.s[cfsVars].add(getTypeDesc(m, s.loc.t))
-    m.s[cfsVars].addf(" $1;$n", [s.loc.r])
+    if isExtern: add(m.s[cfsVars], "extern ")
+    if optThreads in m.config.globalOptions: add(m.s[cfsVars], "NIM_THREADVAR ")
+    add(m.s[cfsVars], getTypeDesc(m, s.loc.t))
+    addf(m.s[cfsVars], " $1;$n", [s.loc.r])
 
 proc generateThreadLocalStorage(m: BModule) =
   if m.g.nimtv != nil and (usesThreadVars in m.flags or sfMainModule in m.module.flags):
     for t in items(m.g.nimtvDeps): discard getTypeDesc(m, t)
-    m.s[cfsSeqTypes].addf("typedef struct {$1} NimThreadVars;$n", [m.g.nimtv])
+    addf(m.s[cfsSeqTypes], "typedef struct {$1} NimThreadVars;$n", [m.g.nimtv])
 
 proc generateThreadVarsSize(m: BModule) =
   if m.g.nimtv != nil:
     let externc = if m.config.cmd == cmdCompileToCpp or
                        sfCompileToCpp in m.module.flags: "extern \"C\" "
                   else: ""
-    m.s[cfsProcs].addf(
+    addf(m.s[cfsProcs],
       "$#NI NimThreadVarsSize(){return (NI)sizeof(NimThreadVars);}$n",
       [externc.rope])

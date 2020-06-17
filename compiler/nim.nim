@@ -93,12 +93,12 @@ proc handleCmdLine(cache: IdentCache; conf: ConfigRef) =
 
   self.processCmdLineAndProjectPath(conf)
   if not self.loadConfigsAndRunMainCommand(cache, conf): return
-  if conf.hasHint(hintGCStats): echo(GC_getStatistics())
+  if optHints in conf.options and hintGCStats in conf.notes: echo(GC_getStatistics())
   #echo(GC_getStatistics())
   if conf.errorCounter != 0: return
   when hasTinyCBackend:
     if conf.cmd == cmdRun:
-      tccgen.run(conf, conf.arguments)
+      tccgen.run(conf.arguments)
   if optRun in conf.globalOptions:
     var ex = quoteShell conf.absOutFile
     if conf.cmd == cmdCompileToJS:

@@ -10,7 +10,7 @@
 ## Include for the tester that contains test suites that test special features
 ## of the compiler.
 
-# included from testament.nim
+# included from tester.nim
 
 import important_packages
 
@@ -40,8 +40,7 @@ const
     "coroutines",
     "osproc",
     "shouldfail",
-    "dir with space",
-    "destructor"
+    "dir with space"
   ]
 
 proc isTestFile*(file: string): bool =
@@ -128,9 +127,6 @@ proc runBasicDLLTest(c, r: var TResults, cat: Category, options: string) =
   var test3 = makeTest("lib/nimhcr.nim", options & " --outdir:tests/dll" & rpath, cat)
   test3.spec.action = actionCompile
   testSpec c, test3
-  var test4 = makeTest("tests/dll/visibility.nim", options & " --app:lib" & rpath, cat)
-  test4.spec.action = actionCompile
-  testSpec c, test4
 
   # windows looks in the dir of the exe (yay!):
   when not defined(Windows):
@@ -144,7 +140,6 @@ proc runBasicDLLTest(c, r: var TResults, cat: Category, options: string) =
 
   testSpec r, makeTest("tests/dll/client.nim", options & " --threads:on" & rpath, cat)
   testSpec r, makeTest("tests/dll/nimhcr_unit.nim", options & rpath, cat)
-  testSpec r, makeTest("tests/dll/visibility.nim", options & rpath, cat)
 
   if "boehm" notin options:
     # force build required - see the comments in the .nim file for more details
@@ -169,15 +164,18 @@ proc dllTests(r: var TResults, cat: Category, options: string) =
 # ------------------------------ GC tests -------------------------------------
 
 proc gcTests(r: var TResults, cat: Category, options: string) =
+  template testWithNone(filename: untyped) =
+    testSpec r, makeTest("tests/gc" / filename, options &
+                  " --gc:none", cat)
+    testSpec r, makeTest("tests/gc" / filename, options &
+                  " -d:release --gc:none", cat)
+
   template testWithoutMs(filename: untyped) =
     testSpec r, makeTest("tests/gc" / filename, options, cat)
     testSpec r, makeTest("tests/gc" / filename, options &
+                  " -d:release", cat)
+    testSpec r, makeTest("tests/gc" / filename, options &
                   " -d:release -d:useRealtimeGC", cat)
-    when filename != "gctest":
-      testSpec r, makeTest("tests/gc" / filename, options &
-                    " --gc:orc", cat)
-      testSpec r, makeTest("tests/gc" / filename, options &
-                    " --gc:orc -d:release", cat)
 
   template testWithoutBoehm(filename: untyped) =
     testWithoutMs filename
@@ -185,7 +183,6 @@ proc gcTests(r: var TResults, cat: Category, options: string) =
                   " --gc:markAndSweep", cat)
     testSpec r, makeTest("tests/gc" / filename, options &
                   " -d:release --gc:markAndSweep", cat)
-
   template test(filename: untyped) =
     testWithoutBoehm filename
     when not defined(windows) and not defined(android):
@@ -203,6 +200,7 @@ proc gcTests(r: var TResults, cat: Category, options: string) =
   test "gcleak"
   test "gcleak2"
   testWithoutBoehm "gctest"
+  testWithNone "gctest"
   test "gcleak3"
   test "gcleak4"
   # Disabled because it works and takes too long to run:
@@ -260,10 +258,9 @@ proc asyncTests(r: var TResults, cat: Category, options: string) =
 # ------------------------- debugger tests ------------------------------------
 
 proc debuggerTests(r: var TResults, cat: Category, options: string) =
-  if fileExists("tools/nimgrep.nim"):
-    var t = makeTest("tools/nimgrep", options & " --debugger:on", cat)
-    t.spec.action = actionCompile
-    testSpec r, t
+  var t = makeTest("tools/nimgrep", options & " --debugger:on", cat)
+  t.spec.action = actionCompile
+  testSpec r, t
 
 # ------------------------- JS tests ------------------------------------------
 
@@ -325,44 +322,40 @@ proc testNimInAction(r: var TResults, cat: Category, options: string) =
     "niminaction/Chapter8/sdl/sdl_test"
     ]
 
-  when false:
-    # Verify that the files have not been modified. Death shall fall upon
-    # whoever edits these hashes without dom96's permission, j/k. But please only
-    # edit when making a conscious breaking change, also please try to make your
-    # commit message clear and notify me so I can easily compile an errata later.
-    # ---------------------------------------------------------
-    # Hash-checks are disabled for Nim 1.1 and beyond
-    # since we needed to fix the deprecated unary '<' operator.
-    const refHashes = @[
-      "51afdfa84b3ca3d810809d6c4e5037ba",
-      "30f07e4cd5eaec981f67868d4e91cfcf",
-      "d14e7c032de36d219c9548066a97e846",
-      "b335635562ff26ec0301bdd86356ac0c",
-      "6c4add749fbf50860e2f523f548e6b0e",
-      "76de5833a7cc46f96b006ce51179aeb1",
-      "705eff79844e219b47366bd431658961",
-      "a1e87b881c5eb161553d119be8b52f64",
-      "2d706a6ec68d2973ec7e733e6d5dce50",
-      "c11a013db35e798f44077bc0763cc86d",
-      "3e32e2c5e9a24bd13375e1cd0467079c",
-      "a5452722b2841f0c1db030cf17708955",
-      "dc6c45eb59f8814aaaf7aabdb8962294",
-      "69d208d281a2e7bffd3eaf4bab2309b1",
-      "ec05666cfb60211bedc5e81d4c1caf3d",
-      "da520038c153f4054cb8cc5faa617714",
-      "59906c8cd819cae67476baa90a36b8c1",
-      "9a8fe78c588d08018843b64b57409a02",
-      "8b5d28e985c0542163927d253a3e4fc9",
-      "783299b98179cc725f9c46b5e3b5381f",
-      "1a2b3fba1187c68d6a9bfa66854f3318",
-      "391ff57b38d9ea6f3eeb3fe69ab539d3"
-    ]
-    for i, test in tests:
-      let filename = testsDir / test.addFileExt("nim")
-      let testHash = getMD5(readFile(filename).string)
-      doAssert testHash == refHashes[i], "Nim in Action test " & filename &
-          " was changed: " & $(i: i, testHash: testHash, refHash: refHashes[i])
+  # Verify that the files have not been modified. Death shall fall upon
+  # whoever edits these hashes without dom96's permission, j/k. But please only
+  # edit when making a conscious breaking change, also please try to make your
+  # commit message clear and notify me so I can easily compile an errata later.
+  const refHashes = @[
+    "51afdfa84b3ca3d810809d6c4e5037ba",
+    "30f07e4cd5eaec981f67868d4e91cfcf",
+    "d14e7c032de36d219c9548066a97e846",
+    "b335635562ff26ec0301bdd86356ac0c",
+    "6c4add749fbf50860e2f523f548e6b0e",
+    "76de5833a7cc46f96b006ce51179aeb1",
+    "705eff79844e219b47366bd431658961",
+    "a1e87b881c5eb161553d119be8b52f64",
+    "2d706a6ec68d2973ec7e733e6d5dce50",
+    "c11a013db35e798f44077bc0763cc86d",
+    "3e32e2c5e9a24bd13375e1cd0467079c",
+    "a5452722b2841f0c1db030cf17708955",
+    "dc6c45eb59f8814aaaf7aabdb8962294",
+    "69d208d281a2e7bffd3eaf4bab2309b1",
+    "ec05666cfb60211bedc5e81d4c1caf3d",
+    "da520038c153f4054cb8cc5faa617714",
+    "59906c8cd819cae67476baa90a36b8c1",
+    "9a8fe78c588d08018843b64b57409a02",
+    "8b5d28e985c0542163927d253a3e4fc9",
+    "783299b98179cc725f9c46b5e3b5381f",
+    "1a2b3fba1187c68d6a9bfa66854f3318",
+    "391ff57b38d9ea6f3eeb3fe69ab539d3"
+  ]
 
+  for i, test in tests:
+    let filename = testsDir / test.addFileExt("nim")
+    let testHash = getMD5(readFile(filename).string)
+    doAssert testHash == refHashes[i], "Nim in Action test " & filename &
+        " was changed: " & $(i: i, testHash: testHash, refHash: refHashes[i])
   # Run the tests.
   for testfile in tests:
     test "tests/" & testfile & ".nim"
@@ -449,8 +442,10 @@ let
   packageIndex = nimbleDir / "packages_official.json"
 
 iterator listPackages(): tuple[name, url, cmd: string, hasDeps: bool] =
+  let defaultCmd = "nimble test"
   let packageList = parseFile(packageIndex)
   for n, cmd, hasDeps, url in important_packages.packages.items:
+    let cmd = if cmd.len == 0: defaultCmd else: cmd
     if url.len != 0:
       yield (n, url, cmd, hasDeps)
     else:
@@ -471,7 +466,7 @@ proc makeSupTest(test, options: string, cat: Category): TTest =
   result.options = options
   result.startTime = epochTime()
 
-proc testNimblePackages(r: var TResults; cat: Category; packageFilter: string) =
+proc testNimblePackages(r: var TResults, cat: Category) =
   if nimbleExe == "":
     echo "[Warning] - Cannot run nimble tests: Nimble binary not found."
     return
@@ -484,8 +479,6 @@ proc testNimblePackages(r: var TResults; cat: Category; packageFilter: string) =
   var errors = 0
   try:
     for name, url, cmd, hasDep in listPackages():
-      if packageFilter notin name:
-        continue
       inc r.total
       var test = makeSupTest(url, "", cat)
       let buildPath = packagesDir / name
@@ -701,7 +694,7 @@ proc processCategory(r: var TResults, cat: Category,
     compileExample(r, "examples/gtk/*.nim", options, cat)
     compileExample(r, "examples/talk/*.nim", options, cat)
   of "nimble-packages":
-    testNimblePackages(r, cat, options)
+    testNimblePackages(r, cat)
   of "niminaction":
     testNimInAction(r, cat, options)
   of "untestable":
@@ -729,22 +722,12 @@ proc processCategory(r: var TResults, cat: Category,
 
 proc processPattern(r: var TResults, pattern, options: string; simulate: bool) =
   var testsRun = 0
-  if dirExists(pattern):
-    for k, name in walkDir(pattern):
-      if k in {pcFile, pcLinkToFile} and name.endsWith(".nim"):
-        if simulate:
-          echo "Detected test: ", name
-        else:
-          var test = makeTest(name, options, Category"pattern")
-          testSpec r, test
-        inc testsRun
-  else:
-    for name in walkPattern(pattern):
-      if simulate:
-        echo "Detected test: ", name
-      else:
-        var test = makeTest(name, options, Category"pattern")
-        testSpec r, test
-      inc testsRun
+  for name in walkPattern(pattern):
+    if simulate:
+      echo "Detected test: ", name
+    else:
+      var test = makeTest(name, options, Category"pattern")
+      testSpec r, test
+    inc testsRun
   if testsRun == 0:
     echo "no tests were found for pattern: ", pattern

@@ -10,7 +10,7 @@ type
   PModule = ref Module
 
   Node = object
-    owner* {.cursor.}: PModule
+    owner*: PModule
     data*: array[0..200, char] # some fat to drain memory faster
     id: int
 

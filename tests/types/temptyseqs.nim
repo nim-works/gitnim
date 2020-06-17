@@ -75,16 +75,16 @@ varargso("foo", "bar", "baz")
 
 type
   Flago = enum
-    tfRequiresInit, tfNotNil
+    tfNeedsInit, tfNotNil
 
-var s: set[Flago] = {tfRequiresInit}
+var s: set[Flago] = {tfNeedsInit}
 
-if {tfRequiresInit, tfNotNil} * s != {}:
+if {tfNeedsInit, tfNotNil} * s != {}:
   echo "yes"
 else:
   echo "no"
 
-if {tfRequiresInit, tfNotNil} * s <= {tfNotNil}:
+if {tfNeedsInit, tfNotNil} * s <= {tfNotNil}:
   echo "yes"
 else:
   echo "no"

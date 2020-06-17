@@ -22,7 +22,7 @@ end
 """
 
 
-import sequtils, strutils
+import algorithm, math, sequtils, strutils
 
 
 block t338:

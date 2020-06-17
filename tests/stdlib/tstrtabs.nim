@@ -82,7 +82,6 @@ key_7: value7
 key_80: value80
 key_8: value8
 key_9: value9
-length of table 0
 length of table 81
 value1 = value2
 '''
@@ -100,5 +99,3 @@ for key, val in pairs(tab):
 writeLine(stdout, "length of table ", $tab.len)
 
 writeLine(stdout, `%`("$key1 = $key2", tab, {useEnvironment}))
-tab.clear
-writeLine(stdout, "length of table ", $tab.len)

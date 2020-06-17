@@ -1,6 +1,5 @@
 discard """
-  output: '''uint
-1'''
+  output: '''uint'''
 """
 
 # Tests unsigned literals and implicit conversion between uints and ints
@@ -61,7 +60,3 @@ discard $x0
 
 const x1 = cast[uint](-1)
 discard $(x1,)
-
-# bug 13698
-let n: csize = 1
-echo n.int32

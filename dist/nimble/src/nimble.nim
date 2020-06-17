@@ -3,13 +3,12 @@
 
 import system except TResult
 
-import os, tables, strtabs, json, algorithm, sets, uri, sugar, sequtils, osproc
+import os, tables, strtabs, json, algorithm, sets, uri, sugar, sequtils
 import std/options as std_opt
 
 import strutils except toLower
 from unicode import toLower
 from sequtils import toSeq
-from strformat import fmt
 
 import nimblepkg/packageinfo, nimblepkg/version, nimblepkg/tools,
        nimblepkg/download, nimblepkg/config, nimblepkg/common,
@@ -221,7 +220,7 @@ proc buildFromDir(
   options: Options
 ) =
   ## Builds a package as specified by ``pkgInfo``.
-  let binToBuild = options.getCompilationBinary(pkgInfo)
+  let binToBuild = options.getCompilationBinary()
   # Handle pre-`build` hook.
   let realDir = pkgInfo.getRealDir()
   cd realDir: # Make sure `execHook` executes the correct .nimble file.
@@ -251,14 +250,10 @@ proc buildFromDir(
     if not existsDir(outputDir):
       createDir(outputDir)
 
-    let input = realDir / bin.changeFileExt("nim")
-    # `quoteShell` would be more robust than `\"` (and avoid quoting when
-    # un-necessary) but would require changing `extractBin`
-    let cmd = "\"$#\" $# --noNimblePath $# $# $# \"$#\"" %
-            [getNimBin(), pkgInfo.backend, nimblePkgVersion,
-             join(args, " "), outputOpt, input]
     try:
-      doCmd(cmd, showCmd = true)
+      doCmd("\"" & getNimBin() & "\" $# --noNimblePath $# $# $# \"$#\"" %
+            [pkgInfo.backend, nimblePkgVersion, join(args, " "), outputOpt,
+             realDir / bin.changeFileExt("nim")])
       binariesBuilt.inc()
     except NimbleError:
       let currentExc = (ref NimbleError)(getCurrentException())
@@ -386,7 +381,7 @@ proc installFromDir(dir: string, requestedVer: VersionRange, options: Options,
                   options.action.passNimFlags
                 else:
                   @[]
-    buildFromDir(pkgInfo, paths, "-d:release" & flags, options)
+    buildFromDir(pkgInfo, paths, flags & "-d:release", options)
 
   let pkgDestDir = pkgInfo.getPkgDest(options)
   if existsDir(pkgDestDir) and existsFile(pkgDestDir / "nimblemeta.json"):
@@ -456,13 +451,11 @@ proc installFromDir(dir: string, requestedVer: VersionRange, options: Options,
   # processDeps).
   saveNimbleData(options)
 
-  # update package path to point to installed directory rather than the temp directory
-  pkgInfo.myPath = dest
-  pkgInfo.isInstalled = true
-
   # Return the dependencies of this package (mainly for paths).
   result.deps.add pkgInfo
   result.pkg = pkgInfo
+  result.pkg.isInstalled = true
+  result.pkg.myPath = dest
 
   display("Success:", pkgInfo.name & " installed successfully.",
           Success, HighPriority)
@@ -541,9 +534,9 @@ proc build(options: Options) =
   var args = options.getCompilationFlags()
   buildFromDir(pkgInfo, paths, args, options)
 
-proc execBackend(pkgInfo: PackageInfo, options: Options) =
+proc execBackend(options: Options) =
   let
-    bin = options.getCompilationBinary(pkgInfo).get()
+    bin = options.getCompilationBinary().get()
     binDotNim = bin.addFileExt("nim")
   if bin == "":
     raise newException(NimbleError, "You need to specify a file.")
@@ -731,11 +724,6 @@ proc dump(options: Options) =
   echo "backend: ", p.backend.escape
 
 proc init(options: Options) =
-  # Check whether the vcs is installed.
-  let vcsBin = options.action.vcsOption
-  if vcsBin != "" and findExe(vcsBin, true) == "":
-    raise newException(NimbleError, "Please install git or mercurial first")
-
   # Determine the package name.
   let pkgName =
     if options.action.projName != "":
@@ -869,17 +857,6 @@ js   - Compile using JavaScript backend.""",
     ),
     pkgRoot
   )
-
-  # Create a git or hg repo in the new nimble project.
-  if vcsBin != "":
-    let cmd = fmt"cd {pkgRoot} && {vcsBin} init"
-    let ret: tuple[output: string, exitCode: int] = execCmdEx(cmd)
-    if ret.exitCode != 0: quit ret.output
-
-    var ignoreFile = if vcsBin == "git": ".gitignore" else: ".hgignore"
-    var fd = open(joinPath(pkgRoot, ignoreFile), fmWrite)
-    fd.write(pkgName & "\n")
-    fd.close()
 
   display("Success:", "Package $# created successfully" % [pkgName], Success,
     HighPriority)
@@ -1076,21 +1053,17 @@ proc test(options: Options) =
       if options.continueTestsOnFailure:
         inc tests
         try:
-          execBackend(pkgInfo, optsCopy)
+          execBackend(optsCopy)
         except NimbleError:
           inc failures
       else:
-        execBackend(pkgInfo, optsCopy)
+        execBackend(optsCopy)
 
       let
         existsAfter = existsFile(binFileName)
         canRemove = not existsBefore and existsAfter
       if canRemove:
-        try:
-          removeFile(binFileName)
-        except OSError as exc:
-          display("Warning:", "Failed to delete " & binFileName & ": " &
-                  exc.msg, Warning, MediumPriority)
+        removeFile(binFileName)
 
   if failures == 0:
     display("Success:", "All tests passed", Success, HighPriority)
@@ -1119,25 +1092,25 @@ proc check(options: Options) =
 
 proc run(options: Options) =
   # Verify parameters.
-  var pkgInfo = getPkgInfo(getCurrentDir(), options)
-
-  let binary = options.getCompilationBinary(pkgInfo).get("")
+  let binary = options.getCompilationBinary().get("")
   if binary.len == 0:
     raiseNimbleError("Please specify a binary to run")
 
+  var pkgInfo = getPkgInfo(getCurrentDir(), options)
   if binary notin pkgInfo.bin:
     raiseNimbleError(
       "Binary '$#' is not defined in '$#' package." % [binary, pkgInfo.name]
     )
 
+  let binaryPath = pkgInfo.getOutputDir(binary)
+
   # Build the binary.
   build(options)
 
-  let binaryPath = pkgInfo.getOutputDir(binary) 
-  let cmd = quoteShellCommand(binaryPath & options.action.runFlags)
-  displayDebug("Executing", cmd)
-  cmd.execCmd.quit
+  # Now run it.
+  let args = options.action.runFlags.join(" ")
 
+  doCmd("$# $#" % [binaryPath, args], showOutput = true)
 
 proc doAction(options: var Options) =
   if options.showHelp:
@@ -1182,8 +1155,7 @@ proc doAction(options: var Options) =
   of actionRun:
     run(options)
   of actionCompile, actionDoc:
-    var pkgInfo = getPkgInfo(getCurrentDir(), options)
-    execBackend(pkgInfo, options)
+    execBackend(options)
   of actionInit:
     init(options)
   of actionPublish:

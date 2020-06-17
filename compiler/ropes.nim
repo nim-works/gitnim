@@ -79,7 +79,7 @@ proc len*(a: Rope): int =
 
 proc newRope(data: string = ""): Rope =
   new(result)
-  result.L = -data.len
+  result.L = -len(data)
   result.data = data
 
 when not compileOption("threads"):
@@ -157,7 +157,7 @@ proc `&`*(a: string, b: Rope): Rope =
 
 proc `&`*(a: openArray[Rope]): Rope =
   ## the concatenation operator for an openarray of ropes.
-  for i in 0..high(a): result = result & a[i]
+  for i in 0 .. high(a): result = result & a[i]
 
 proc add*(a: var Rope, b: Rope) =
   ## adds `b` to the rope `a`.
@@ -202,29 +202,30 @@ proc `$`*(r: Rope): string =
   ## converts a rope back to a string.
   result = newString(r.len)
   setLen(result, 0)
-  for s in leaves(r): result.add(s)
+  for s in leaves(r): add(result, s)
 
 proc ropeConcat*(a: varargs[Rope]): Rope =
   # not overloaded version of concat to speed-up `rfmt` a little bit
-  for i in 0..high(a): result = result & a[i]
+  for i in 0 .. high(a): result = result & a[i]
 
 proc prepend*(a: var Rope, b: Rope) = a = b & a
 proc prepend*(a: var Rope, b: string) = a = b & a
 
 proc runtimeFormat*(frmt: FormatStr, args: openArray[Rope]): Rope =
   var i = 0
+  var length = len(frmt)
   result = nil
   var num = 0
-  while i < frmt.len:
+  while i < length:
     if frmt[i] == '$':
       inc(i)                  # skip '$'
       case frmt[i]
       of '$':
-        result.add("$")
+        add(result, "$")
         inc(i)
       of '#':
         inc(i)
-        result.add(args[num])
+        add(result, args[num])
         inc(num)
       of '0'..'9':
         var j = 0
@@ -236,7 +237,7 @@ proc runtimeFormat*(frmt: FormatStr, args: openArray[Rope]): Rope =
         if j > high(args) + 1:
           doAssert false, "invalid format string: " & frmt
         else:
-          result.add(args[j-1])
+          add(result, args[j-1])
       of '{':
         inc(i)
         var j = 0
@@ -251,21 +252,21 @@ proc runtimeFormat*(frmt: FormatStr, args: openArray[Rope]): Rope =
         if j > high(args) + 1:
           doAssert false, "invalid format string: " & frmt
         else:
-          result.add(args[j-1])
+          add(result, args[j-1])
       of 'n':
-        result.add("\n")
+        add(result, "\n")
         inc(i)
       of 'N':
-        result.add("\n")
+        add(result, "\n")
         inc(i)
       else:
         doAssert false, "invalid format string: " & frmt
     var start = i
-    while i < frmt.len:
+    while i < length:
       if frmt[i] != '$': inc(i)
       else: break
     if i - 1 >= start:
-      result.add(substr(frmt, start, i - 1))
+      add(result, substr(frmt, start, i - 1))
   assert(ropeInvariant(result))
 
 proc `%`*(frmt: static[FormatStr], args: openArray[Rope]): Rope =
@@ -273,7 +274,7 @@ proc `%`*(frmt: static[FormatStr], args: openArray[Rope]): Rope =
 
 template addf*(c: var Rope, frmt: FormatStr, args: openArray[Rope]) =
   ## shortcut for ``add(c, frmt % args)``.
-  c.add(frmt % args)
+  add(c, frmt % args)
 
 when true:
   template `~`*(r: string): Rope = r % []
@@ -300,8 +301,9 @@ proc equalsFile*(r: Rope, f: File): bool =
 
   for s in leaves(r):
     var spos = 0
-    rtotal += s.len
-    while spos < s.len:
+    let slen = s.len
+    rtotal += slen
+    while spos < slen:
       if bpos == blen:
         # Read more data
         bpos = 0
@@ -310,7 +312,7 @@ proc equalsFile*(r: Rope, f: File): bool =
         if blen == 0:  # no more data in file
           result = false
           return
-      let n = min(blen - bpos, s.len - spos)
+      let n = min(blen - bpos, slen - spos)
       # TODO There's gotta be a better way of comparing here...
       if not equalMem(addr(buf[bpos]), cast[pointer](cast[int](cstring(s))+spos), n):
         result = false

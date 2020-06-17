@@ -112,14 +112,35 @@ proc hash*[T: proc](x: T): Hash {.inline.} =
   else:
     result = hash(pointer(x))
 
-proc hash*[T: Ordinal](x: T): Hash {.inline.} =
+proc hash*(x: int): Hash {.inline.} =
   ## Efficient hashing of integers.
-  cast[Hash](ord(x))
+  result = x
+
+proc hash*(x: int64): Hash {.inline.} =
+  ## Efficient hashing of `int64` integers.
+  result = cast[int](x)
+
+proc hash*(x: uint): Hash {.inline.} =
+  ## Efficient hashing of unsigned integers.
+  result = cast[int](x)
+
+proc hash*(x: uint64): Hash {.inline.} =
+  ## Efficient hashing of `uint64` integers.
+  result = cast[int](x)
+
+proc hash*(x: char): Hash {.inline.} =
+  ## Efficient hashing of characters.
+  result = ord(x)
+
+proc hash*[T: Ordinal](x: T): Hash {.inline.} =
+  ## Efficient hashing of other ordinal types (e.g. enums).
+  result = ord(x)
 
 proc hash*(x: float): Hash {.inline.} =
   ## Efficient hashing of floats.
-  var y = x + 0.0 # for denormalization
-  result = hash(cast[ptr Hash](addr(y))[])
+  var y = x + 1.0
+  result = cast[ptr Hash](addr(y))[]
+
 
 # Forward declarations before methods that hash containers. This allows
 # containers to contain other containers
@@ -127,7 +148,7 @@ proc hash*[A](x: openArray[A]): Hash
 proc hash*[A](x: set[A]): Hash
 
 
-when defined(js):
+when defined(JS):
   proc imul(a, b: uint32): uint32 =
     # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul
     let mask = 0xffff'u32
@@ -162,7 +183,7 @@ proc murmurHash(x: openArray[byte]): Hash =
   # body
   while i < n * stepSize:
     var k1: uint32
-    when defined(js) or defined(sparc) or defined(sparc64):
+    when defined(js):
       var j = stepSize
       while j > 0:
         dec j
@@ -243,7 +264,7 @@ proc hash*(x: cstring): Hash =
       inc i
     result = !$result
   else:
-    when not defined(js) and defined(nimToOpenArrayCString):
+    when not defined(JS) and defined(nimToOpenArrayCString):
       murmurHash(toOpenArrayByte(x, 0, x.high))
     else:
       let xx = $x

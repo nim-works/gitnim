@@ -57,8 +57,7 @@ when defined(js):
 else:
   {.pragma: rtlFunc, rtl.}
   import os
-
-include "system/inclrtl"
+  include "system/inclrtl"
 
 type
   StringTableMode* = enum ## Describes the tables operation mode.
@@ -309,7 +308,7 @@ proc getValue(t: StringTableRef, flags: set[FormatFlag], key: string): string =
 
 proc clear*(s: StringTableRef, mode: StringTableMode) {.
   rtlFunc, extern: "nst$1".} =
-  ## Resets a string table to be empty again, perhaps altering the mode.
+  ## Resets a string table to be empty again.
   ##
   ## See also:
   ## * `del proc <#del,StringTableRef,string>`_ for removing a key from the table
@@ -324,10 +323,6 @@ proc clear*(s: StringTableRef, mode: StringTableMode) {.
   s.data.setLen(startSize)
   for i in 0..<s.data.len:
     s.data[i].hasValue = false
-
-proc clear*(s: StringTableRef) {.since: (1, 1).} =
-  ## Resets a string table to be empty again without changing the mode.
-  s.clear(s.mode)
 
 proc del*(t: StringTableRef, key: string) =
   ## Removes `key` from `t`.
@@ -365,8 +360,6 @@ proc del*(t: StringTableRef, key: string) =
             break
         when defined(js):
           t.data[j] = t.data[i]
-        elif defined(gcDestructors):
-          t.data[j] = move t.data[i]
         else:
           shallowCopy(t.data[j], t.data[i]) # data[j] will be marked EMPTY next loop
 

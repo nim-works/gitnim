@@ -17,7 +17,6 @@ import strutils, intsets, tables, ropes, db_sqlite, msgs, options,
 ## - Dependency computation should use *signature* hashes in order to
 ##   avoid recompiling dependent modules.
 ## - Patch the rest of the compiler to do lazy loading of proc bodies.
-## - serialize the AST in a smarter way (avoid storing some ASTs twice!)
 
 template db(): DbConn = g.incr.db
 
@@ -157,31 +156,31 @@ proc encodeNode(g: ModuleGraph; fInfo: TLineInfo, n: PNode,
     encodeVInt(n.sym.id, result)
     pushSym(w, n.sym)
   else:
-    for i in 0..<n.len:
-      encodeNode(g, n.info, n[i], result)
-  result.add(')')
+    for i in 0 ..< len(n):
+      encodeNode(g, n.info, n.sons[i], result)
+  add(result, ')')
 
 proc encodeLoc(g: ModuleGraph; loc: TLoc, result: var string) =
   var oldLen = result.len
   result.add('<')
   if loc.k != low(loc.k): encodeVInt(ord(loc.k), result)
   if loc.storage != low(loc.storage):
-    result.add('*')
+    add(result, '*')
     encodeVInt(ord(loc.storage), result)
   if loc.flags != {}:
-    result.add('$')
+    add(result, '$')
     encodeVInt(cast[int32](loc.flags), result)
   if loc.lode != nil:
-    result.add('^')
-    encodeNode(g, unknownLineInfo, loc.lode, result)
+    add(result, '^')
+    encodeNode(g, unknownLineInfo(), loc.lode, result)
   if loc.r != nil:
-    result.add('!')
+    add(result, '!')
     encodeStr($loc.r, result)
   if oldLen + 1 == result.len:
     # no data was necessary, so remove the '<' again:
     setLen(result, oldLen)
   else:
-    result.add('>')
+    add(result, '>')
 
 proc encodeType(g: ModuleGraph, t: PType, result: var string) =
   if t == nil:
@@ -192,73 +191,73 @@ proc encodeType(g: ModuleGraph, t: PType, result: var string) =
   if t.kind == tyForward: internalError(g.config, "encodeType: tyForward")
   # for the new rodfile viewer we use a preceding [ so that the data section
   # can easily be disambiguated:
-  result.add('[')
+  add(result, '[')
   encodeVInt(ord(t.kind), result)
-  result.add('+')
+  add(result, '+')
   encodeVInt(t.uniqueId, result)
   if t.id != t.uniqueId:
-    result.add('+')
+    add(result, '+')
     encodeVInt(t.id, result)
   if t.n != nil:
-    encodeNode(g, unknownLineInfo, t.n, result)
+    encodeNode(g, unknownLineInfo(), t.n, result)
   if t.flags != {}:
-    result.add('$')
+    add(result, '$')
     encodeVInt(cast[int32](t.flags), result)
   if t.callConv != low(t.callConv):
-    result.add('?')
+    add(result, '?')
     encodeVInt(ord(t.callConv), result)
   if t.owner != nil:
-    result.add('*')
+    add(result, '*')
     encodeVInt(t.owner.id, result)
     pushSym(w, t.owner)
   if t.sym != nil:
-    result.add('&')
+    add(result, '&')
     encodeVInt(t.sym.id, result)
     pushSym(w, t.sym)
   if t.size != - 1:
-    result.add('/')
+    add(result, '/')
     encodeVBiggestInt(t.size, result)
   if t.align != 2:
-    result.add('=')
+    add(result, '=')
     encodeVInt(t.align, result)
   if t.lockLevel.ord != UnspecifiedLockLevel.ord:
-    result.add('\14')
+    add(result, '\14')
     encodeVInt(t.lockLevel.int16, result)
   if t.paddingAtEnd != 0:
-    result.add('\15')
+    add(result, '\15')
     encodeVInt(t.paddingAtEnd, result)
   for a in t.attachedOps:
-    result.add('\16')
+    add(result, '\16')
     if a == nil:
       encodeVInt(-1, result)
     else:
       encodeVInt(a.id, result)
       pushSym(w, a)
   for i, s in items(t.methods):
-    result.add('\19')
+    add(result, '\19')
     encodeVInt(i, result)
-    result.add('\20')
+    add(result, '\20')
     encodeVInt(s.id, result)
     pushSym(w, s)
   encodeLoc(g, t.loc, result)
   if t.typeInst != nil:
-    result.add('\21')
+    add(result, '\21')
     encodeVInt(t.typeInst.uniqueId, result)
     pushType(w, t.typeInst)
-  for i in 0..<t.len:
-    if t[i] == nil:
-      result.add("^()")
+  for i in 0 ..< len(t):
+    if t.sons[i] == nil:
+      add(result, "^()")
     else:
-      result.add('^')
-      encodeVInt(t[i].uniqueId, result)
-      pushType(w, t[i])
+      add(result, '^')
+      encodeVInt(t.sons[i].uniqueId, result)
+      pushType(w, t.sons[i])
 
 proc encodeLib(g: ModuleGraph, lib: PLib, info: TLineInfo, result: var string) =
-  result.add('|')
+  add(result, '|')
   encodeVInt(ord(lib.kind), result)
-  result.add('|')
+  add(result, '|')
   encodeStr($lib.name, result)
-  result.add('|')
+  add(result, '|')
   encodeNode(g, info, lib.path, result)
 
 proc encodeInstantiations(g: ModuleGraph; s: seq[PInstantiation];
@@ -317,8 +316,8 @@ proc encodeSym(g: ModuleGraph, s: PSym, result: var string) =
   encodeLoc(g, s.loc, result)
   if s.annex != nil: encodeLib(g, s.annex, s.info, result)
   if s.constraint != nil:
-    result.add('#')
-    encodeNode(g, unknownLineInfo, s.constraint, result)
+    add(result, '#')
+    encodeNode(g, unknownLineInfo(), s.constraint, result)
   case s.kind
   of skType, skGenericParam:
     for t in s.typeInstCache:
@@ -605,7 +604,7 @@ proc loadType(g; id: int; info: TLineInfo): PType =
     result.id = result.uniqueId
   # here this also avoids endless recursion for recursive type
   g.incr.r.types.add(result.uniqueId, result)
-  if b.s[b.pos] == '(': result.n = decodeNode(g, b, unknownLineInfo)
+  if b.s[b.pos] == '(': result.n = decodeNode(g, b, unknownLineInfo())
   if b.s[b.pos] == '$':
     inc(b.pos)
     result.flags = cast[TTypeFlags](int32(decodeVInt(b.s, b.pos)))
@@ -667,7 +666,7 @@ proc loadType(g; id: int; info: TLineInfo): PType =
       rawAddSon(result, nil)
     else:
       let d = decodeVInt(b.s, b.pos)
-      result.sons.add loadType(g, d, info)
+      rawAddSon(result, loadType(g, d, info))
 
 proc decodeLib(g; b; info: TLineInfo): PLib =
   result = nil
@@ -719,8 +718,10 @@ proc loadSymFromBlob(g; b; info: TLineInfo): PSym =
   else:
     internalError(g.config, info, "decodeSym: no ident")
   #echo "decoding: {", ident.s
-  result = PSym(id: id, kind: k, name: ident)
-  # read the rest of the symbol description:
+  new(result)
+  result.id = id
+  result.kind = k
+  result.name = ident         # read the rest of the symbol description:
   g.incr.r.syms.add(result.id, result)
   if b.s[b.pos] == '^':
     inc(b.pos)
@@ -750,7 +751,7 @@ proc loadSymFromBlob(g; b; info: TLineInfo): PSym =
   result.annex = decodeLib(g, b, info)
   if b.s[b.pos] == '#':
     inc(b.pos)
-    result.constraint = decodeNode(g, b, unknownLineInfo)
+    result.constraint = decodeNode(g, b, unknownLineInfo())
   case result.kind
   of skType, skGenericParam:
     while b.s[b.pos] == '\14':
@@ -850,8 +851,6 @@ proc replay(g: ModuleGraph; module: PSym; n: PNode) =
         extccomp.addLinkOption(g.config, n[1].strVal)
       of "passc":
         extccomp.addCompileOption(g.config, n[1].strVal)
-      of "localpassc":
-        extccomp.addLocalCompileOption(g.config, n[1].strVal, toFullPathConsiderDirty(g.config, module.info.fileIndex))
       of "cppdefine":
         options.cppDefine(g.config, n[1].strVal)
       of "inc":

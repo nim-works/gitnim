@@ -19,7 +19,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/lib/nim
       docdir=/usr/share/nim/doc
       datadir=/usr/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.2"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.0.7"
       ;;
     "/usr/local/bin")
       bindir=/usr/local/bin
@@ -27,7 +27,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/local/lib/nim
       docdir=/usr/local/share/nim/doc
       datadir=/usr/local/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.2"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.0.7"
       ;;
     "/opt")
       bindir="/opt/nim/bin"
@@ -35,7 +35,7 @@ if [ $# -eq 1 ] ; then
       libdir="/opt/nim/lib"
       docdir="/opt/nim/doc"
       datadir="/opt/nim/data"
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.2"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.0.7"
       ;;
     *)
       bindir="$1/nim/bin"
@@ -50,7 +50,6 @@ if [ $# -eq 1 ] ; then
 
   rm -f $bindir/nim
   rm -f $bindir/nim-gdb
-  rm -f $bindir/nim-gdb.bash
   rm -f $configdir/nim.cfg
   rm -f $configdir/nimdoc.cfg
   rm -f $configdir/nimdoc.tex.cfg
@@ -69,7 +68,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/ccgexprs.nim
     rm -f $nimbleDir/compiler/ccgliterals.nim
     rm -f $nimbleDir/compiler/ccgmerge.nim
-    rm -f $nimbleDir/compiler/ccgreset.nim
     rm -f $nimbleDir/compiler/ccgstmts.nim
     rm -f $nimbleDir/compiler/ccgthreadvars.nim
     rm -f $nimbleDir/compiler/ccgtrav.nim
@@ -82,6 +80,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/cmdlinehelper.nim
     rm -f $nimbleDir/compiler/commands.nim
     rm -f $nimbleDir/compiler/condsyms.nim
+    rm -f $nimbleDir/compiler/configuration.nim
     rm -f $nimbleDir/compiler/debuginfo.nim
     rm -f $nimbleDir/compiler/depends.nim
     rm -f $nimbleDir/compiler/dfa.nim
@@ -181,9 +180,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/semtypinst.nim
     rm -f $nimbleDir/compiler/sighashes.nim
     rm -f $nimbleDir/compiler/sigmatch.nim
-    rm -f $nimbleDir/compiler/sinkparameter_inference.nim
     rm -f $nimbleDir/compiler/sizealignoffsetimpl.nim
-    rm -f $nimbleDir/compiler/sourcemap.nim
     rm -f $nimbleDir/compiler/spawn.nim
     rm -f $nimbleDir/compiler/suggest.nim
     rm -f $nimbleDir/compiler/syntaxes.nim
@@ -205,7 +202,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/writetracking.nim
     rm -f $nimbleDir/doc/basicopt.txt
     rm -f $nimbleDir/doc/advopt.txt
-    rm -f $nimbleDir/doc/nimdoc.css
   rm -f $nimbleDir/compiler.nimble
 
   echo "deinstallation successful"

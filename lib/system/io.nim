@@ -38,18 +38,12 @@ type
 
 # text file handling:
 when not defined(nimscript) and not defined(js):
-  # duplicated between io and ansi_c
-  const stdioUsesMacros = (defined(osx) or defined(freebsd) or defined(dragonfly)) and not defined(emscripten)
-  const stderrName = when stdioUsesMacros: "__stderrp" else: "stderr"
-  const stdoutName = when stdioUsesMacros: "__stdoutp" else: "stdout"
-  const stdinName = when stdioUsesMacros: "__stdinp" else: "stdin"
-
   var
-    stdin* {.importc: stdinName, header: "<stdio.h>".}: File
+    stdin* {.importc: "stdin", header: "<stdio.h>".}: File
       ## The standard input stream.
-    stdout* {.importc: stdoutName, header: "<stdio.h>".}: File
+    stdout* {.importc: "stdout", header: "<stdio.h>".}: File
       ## The standard output stream.
-    stderr* {.importc: stderrName, header: "<stdio.h>".}: File
+    stderr* {.importc: "stderr", header: "<stdio.h>".}: File
       ## The standard error stream.
 
 when defined(useStdoutAsStdmsg):
@@ -92,11 +86,11 @@ proc c_feof(f: File): cint {.
   importc: "feof", header: "<stdio.h>".}
 
 when not declared(c_fwrite):
-  proc c_fwrite(buf: pointer, size, n: csize_t, f: File): cint {.
+  proc c_fwrite(buf: pointer, size, n: csize, f: File): cint {.
     importc: "fwrite", header: "<stdio.h>".}
 
 # C routine that is used here:
-proc c_fread(buf: pointer, size, n: csize_t, f: File): csize_t {.
+proc c_fread(buf: pointer, size, n: csize, f: File): csize {.
   importc: "fread", header: "<stdio.h>", tags: [ReadIOEffect].}
 when defined(windows):
   when not defined(amd64):
@@ -116,7 +110,7 @@ else:
     importc: "ftello", header: "<stdio.h>", tags: [].}
 proc c_ferror(f: File): cint {.
   importc: "ferror", header: "<stdio.h>", tags: [].}
-proc c_setvbuf(f: File, buf: pointer, mode: cint, size: csize_t): cint {.
+proc c_setvbuf(f: File, buf: pointer, mode: cint, size: csize): cint {.
   importc: "setvbuf", header: "<stdio.h>", tags: [].}
 
 proc c_fprintf(f: File, frmt: cstring): cint {.
@@ -145,7 +139,6 @@ proc strerror(errnum: cint): cstring {.importc, header: "<string.h>".}
 when not defined(NimScript):
   var
     errno {.importc, header: "<errno.h>".}: cint ## error variable
-    EINTR {.importc: "EINTR", header: "<errno.h>".}: cint
 
 proc checkErr(f: File) =
   when not defined(NimScript):
@@ -163,7 +156,7 @@ proc readBuffer*(f: File, buffer: pointer, len: Natural): int {.
   ## reads `len` bytes into the buffer pointed to by `buffer`. Returns
   ## the actual number of bytes that have been read which may be less than
   ## `len` (if not as many bytes are remaining), but not greater.
-  result = cast[int](c_fread(buffer, 1, cast[csize_t](len), f))
+  result = c_fread(buffer, 1, len, f)
   if result != len: checkErr(f)
 
 proc readBytes*(f: File, a: var openArray[int8|uint8], start, len: Natural): int {.
@@ -195,7 +188,7 @@ proc writeBuffer*(f: File, buffer: pointer, len: Natural): int {.
   ## writes the bytes of buffer pointed to by the parameter `buffer` to the
   ## file `f`. Returns the number of actual written bytes, which may be less
   ## than `len` in case of an error.
-  result = cast[int](c_fwrite(buffer, 1, cast[csize_t](len), f))
+  result = c_fwrite(buffer, 1, len, f)
   checkErr(f)
 
 proc writeBytes*(f: File, a: openArray[int8|uint8], start, len: Natural): int {.
@@ -306,7 +299,7 @@ proc readLine*(f: File, line: var TaintedString): bool {.tags: [ReadIOEffect],
   ## character(s) are not part of the returned string. Returns ``false``
   ## if the end of the file has been reached, ``true`` otherwise. If
   ## ``false`` is returned `line` contains no new data.
-  proc c_memchr(s: pointer, c: cint, n: csize_t): pointer {.
+  proc c_memchr(s: pointer, c: cint, n: csize): pointer {.
     importc: "memchr", header: "<string.h>".}
 
   var pos = 0
@@ -320,21 +313,9 @@ proc readLine*(f: File, line: var TaintedString): bool {.tags: [ReadIOEffect],
     # fgets doesn't append an \L
     for i in 0..<sp: line.string[pos+i] = '\L'
 
-    var fgetsSuccess: bool
-    while true:
-      # fixes #9634; this pattern may need to be abstracted as a template if reused;
-      # likely other io procs need this for correctness.
-      fgetsSuccess = c_fgets(addr line.string[pos], sp.cint, f) != nil
-      if fgetsSuccess: break
-      when not defined(NimScript):
-        if errno == EINTR:
-          errno = 0
-          c_clearerr(f)
-          continue
-      checkErr(f)
-      break
-
-    let m = c_memchr(addr line.string[pos], '\L'.ord, cast[csize_t](sp))
+    var fgetsSuccess = c_fgets(addr line.string[pos], sp.cint, f) != nil
+    if not fgetsSuccess: checkErr(f)
+    let m = c_memchr(addr line.string[pos], '\L'.ord, sp)
     if m != nil:
       # \l found: Could be our own or the one by fgets, in any case, we're done
       var last = cast[ByteAddress](m) - cast[ByteAddress](addr line.string[0])
@@ -544,7 +525,7 @@ proc open*(f: var File, filename: string,
   ##
   ## Default mode is readonly. Returns true iff the file could be opened.
   ## This throws no exception if the file could not be opened.
-  var p = fopen(filename, FormatOpen[mode])
+  var p: pointer = fopen(filename, FormatOpen[mode])
   if p != nil:
     when defined(posix) and not defined(nimscript):
       # How `fopen` handles opening a directory is not specified in ISO C and
@@ -558,7 +539,7 @@ proc open*(f: var File, filename: string,
     result = true
     f = cast[File](p)
     if bufSize > 0 and bufSize <= high(cint).int:
-      discard c_setvbuf(f, nil, IOFBF, cast[csize_t](bufSize))
+      discard c_setvbuf(f, nil, IOFBF, bufSize.cint)
     elif bufSize == 0:
       discard c_setvbuf(f, nil, IONBF, 0)
 
@@ -569,13 +550,15 @@ proc reopen*(f: File, filename: string, mode: FileMode = fmRead): bool {.
   ## file variables.
   ##
   ## Default mode is readonly. Returns true iff the file could be reopened.
-  result = freopen(filename, FormatOpen[mode], f) != nil
+  var p: pointer = freopen(filename, FormatOpen[mode], f)
+  result = p != nil
 
 proc open*(f: var File, filehandle: FileHandle,
            mode: FileMode = fmRead): bool {.tags: [], raises: [], benign.} =
   ## Creates a ``File`` from a `filehandle` with given `mode`.
   ##
   ## Default mode is readonly. Returns true iff the file could be opened.
+
   f = c_fdopen(filehandle, FormatOpen[mode])
   result = f != nil
 
@@ -602,7 +585,7 @@ proc getFilePos*(f: File): int64 {.benign.} =
 
 proc getFileSize*(f: File): int64 {.tags: [ReadIOEffect], benign.} =
   ## retrieves the file size (in bytes) of `f`.
-  let oldPos = getFilePos(f)
+  var oldPos = getFilePos(f)
   discard c_fseek(f, 0, 2) # seek the end of the file
   result = getFilePos(f)
   setFilePos(f, oldPos)
@@ -632,7 +615,7 @@ when declared(stdout):
       android_log_print(ANDROID_LOG_VERBOSE, "nim", s)
     else:
       # flockfile deadlocks some versions of Android 5.x.x
-      when not defined(windows) and not defined(android) and not defined(nintendoswitch) and hostOS != "any":
+      when not defined(windows) and not defined(android) and not defined(nintendoswitch):
         proc flockfile(f: File) {.importc, nodecl.}
         proc funlockfile(f: File) {.importc, nodecl.}
         flockfile(stdout)
@@ -642,11 +625,11 @@ when declared(stdout):
         when defined(windows):
           writeWindows(stdout, s)
         else:
-          discard c_fwrite(s.cstring, cast[csize_t](s.len), 1, stdout)
+          discard c_fwrite(s.cstring, s.len, 1, stdout)
       const linefeed = "\n"
       discard c_fwrite(linefeed.cstring, linefeed.len, 1, stdout)
       discard c_fflush(stdout)
-      when not defined(windows) and not defined(android) and not defined(nintendoswitch) and hostOS != "any":
+      when not defined(windows) and not defined(android) and not defined(nintendoswitch):
         funlockfile(stdout)
       when defined(windows) and compileOption("threads"):
         releaseSys echoLock
@@ -659,7 +642,7 @@ when defined(windows) and not defined(nimscript):
     importc: when defined(bcc): "setmode" else: "_setmode",
     header: "<io.h>".}
   var
-    O_BINARY {.importc: "_O_BINARY", header: "<fcntl.h>".}: cint
+    O_BINARY {.importc: "_O_BINARY", header:"<fcntl.h>".}: cint
 
   # we use binary mode on Windows:
   c_setmode(c_fileno(stdin), O_BINARY)
@@ -686,7 +669,7 @@ proc readFile*(filename: string): TaintedString {.tags: [ReadIOEffect], benign.}
   var f: File
   if open(f, filename):
     try:
-      result = readAll(f)
+      result = readAll(f).TaintedString
     finally:
       close(f)
   else:
@@ -705,18 +688,6 @@ proc writeFile*(filename, content: string) {.tags: [WriteIOEffect], benign.} =
   else:
     sysFatal(IOError, "cannot open: " & filename)
 
-proc writeFile*(filename: string, content: openArray[byte]) {.since: (1, 1).} =
-  ## Opens a file named `filename` for writing. Then writes the
-  ## `content` completely to the file and closes the file afterwards.
-  ## Raises an IO exception in case of an error.
-  var f: File
-  if open(f, filename, fmWrite):
-    try:
-      f.writeBuffer(unsafeAddr content[0], content.len)
-    finally:
-      close(f)
-  else:
-    raise newException(IOError, "cannot open: " & filename)
 
 proc readLines*(filename: string, n: Natural): seq[TaintedString] =
   ## read `n` lines from the file named `filename`. Raises an IO exception
@@ -735,7 +706,7 @@ proc readLines*(filename: string, n: Natural): seq[TaintedString] =
   else:
     sysFatal(IOError, "cannot open: " & filename)
 
-template readLines*(filename: string): seq[TaintedString] {.deprecated: "use readLines with two arguments".} =
+proc readLines*(filename: string): seq[TaintedString] {.deprecated: "use readLines with two arguments".} =
   readLines(filename, 1)
 
 iterator lines*(filename: string): TaintedString {.tags: [ReadIOEffect].} =
@@ -753,11 +724,9 @@ iterator lines*(filename: string): TaintedString {.tags: [ReadIOEffect].} =
   ##       buffer.add(line.replace("a", "0") & '\x0A')
   ##     writeFile(filename, buffer)
   var f = open(filename, bufSize=8000)
-  try:
-    var res = TaintedString(newStringOfCap(80))
-    while f.readLine(res): yield res
-  finally:
-    close(f)
+  defer: close(f)
+  var res = TaintedString(newStringOfCap(80))
+  while f.readLine(res): yield res
 
 iterator lines*(f: File): TaintedString {.tags: [ReadIOEffect].} =
   ## Iterate over any line in the file `f`.

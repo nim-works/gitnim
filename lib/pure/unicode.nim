@@ -20,6 +20,9 @@
 ## * `unidecode module <unidecode.html>`_
 ## * `encodings module <encodings.html>`_
 
+
+{.deadCodeElim: on.} # dce option deprecated
+
 include "system/inclrtl"
 
 type
@@ -698,7 +701,7 @@ proc capitalize*(s: string): string {.noSideEffect, procvar,
     doAssert capitalize("βeta") == "Βeta"
 
   if len(s) == 0:
-    return ""
+    return s
   var
     rune: Rune
     i = 0
@@ -911,12 +914,12 @@ proc size*(r: Rune): int {.noSideEffect.} =
     doAssert size(a[1]) == 2
 
   let v = r.uint32
-  if v <= 0x007F'u32: result = 1
-  elif v <= 0x07FF'u32: result = 2
-  elif v <= 0xFFFF'u32: result = 3
-  elif v <= 0x1FFFFF'u32: result = 4
-  elif v <= 0x3FFFFFF'u32: result = 5
-  elif v <= 0x7FFFFFFF'u32: result = 6
+  if v <= 0x007F: result = 1
+  elif v <= 0x07FF: result = 2
+  elif v <= 0xFFFF: result = 3
+  elif v <= 0x1FFFFF: result = 4
+  elif v <= 0x3FFFFFF: result = 5
+  elif v <= 0x7FFFFFFF: result = 6
   else: result = 1
 
 # --------- Private templates for different split separators -----------

@@ -52,7 +52,7 @@ proc generateTestResultPanelPartial(outfile: File, testResultRow: JsonNode) =
     trId, name, target, category, action, resultDescription,
     timestamp, result, resultSign, panelCtxClass, textCtxClass, bgCtxClass
   )
-  if expected.isEmptyOrWhitespace() and gotten.isEmptyOrWhitespace():
+  if expected.isNilOrWhitespace() and gotten.isNilOrWhitespace():
     outfile.generateHtmlTestresultOutputNone()
   else:
     outfile.generateHtmlTestresultOutputDetails(

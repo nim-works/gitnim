@@ -15,7 +15,7 @@ type MyArray = array[1, int]
 proc changeArray(a: var MyArray) =
     a = [123]
 
-var a: MyArray
+var a : MyArray
 changeArray(a)
 echo a[0]
 
@@ -35,7 +35,7 @@ block:
         ary2: array[3, int]
 
     let ary1 = [1, 2, 3]
-    var obj = TestObj(ary2: ary1)
+    var obj = TestObj(ary2:ary1)
 
     obj.ary2[1] = 9
 

@@ -86,6 +86,9 @@ const
 
 include setimpl
 
+proc rightSize*(count: Natural): int {.inline.}
+
+
 # ---------------------------------------------------------------------
 # ------------------------------ HashSet ------------------------------
 # ---------------------------------------------------------------------
@@ -590,6 +593,15 @@ proc `$`*[A](s: HashSet[A]): string =
   ##   # --> {no, esc'aping, is " provided}
   dollarImpl()
 
+proc rightSize*(count: Natural): int {.inline.} =
+  ## Return the value of `initialSize` to support `count` items.
+  ##
+  ## If more items are expected to be added, simply add that
+  ## expected extra amount to the parameter before calling this.
+  ##
+  ## Internally, we want `mustRehash(rightSize(x), x) == false`.
+  result = nextPowerOfTwo(count * 3 div 2 + 4)
+
 
 proc initSet*[A](initialSize = defaultInitialSize): HashSet[A] {.deprecated:
      "Deprecated since v0.20, use 'initHashSet'".} = initHashSet[A](initialSize)
@@ -1007,9 +1019,9 @@ when isMainModule and not defined(release):
       # --> {1, 3, 5}
 
     block toSeqAndString:
-      var a = toHashSet([2, 7, 5])
+      var a = toHashSet([2, 4, 5])
       var b = initHashSet[int]()
-      for x in [2, 7, 5]: b.incl(x)
+      for x in [2, 4, 5]: b.incl(x)
       assert($a == $b)
       #echo a
       #echo toHashSet(["no", "esc'aping", "is \" provided"])
@@ -1134,19 +1146,10 @@ when isMainModule and not defined(release):
       b.incl(2)
       assert b.len == 1
 
-    block:
-      type FakeTable = object
-        dataLen: int
-        counter: int
-        countDeleted: int
-
-      var t: FakeTable
-      for i in 0 .. 32:
-        var s = rightSize(i)
-        t.dataLen = s
-        t.counter = i
-        doAssert s > i and not mustRehash(t),
-          "performance issue: rightSize() will not elide enlarge() at: " & $i
+    for i in 0 .. 32:
+      var s = rightSize(i)
+      if s <= i or mustRehash(s, i):
+        echo "performance issue: rightSize() will not elide enlarge() at ", i
 
     block missingOrExcl:
       var s = toOrderedSet([2, 3, 6, 7])

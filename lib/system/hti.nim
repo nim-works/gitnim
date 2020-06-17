@@ -87,7 +87,7 @@ type
     ntfEnumHole = 2    # enum has holes and thus `$` for them needs the slow
                        # version
   TNimType {.compilerproc.} = object
-    when defined(gcHooks):
+    when defined(gcDestructors):
       head*: pointer
     size*: int
     kind: TNimKind
@@ -103,7 +103,7 @@ type
       instances: int # count the number of instances
       sizes: int # sizes of all instances in bytes
 
-when defined(gcHooks):
+when defined(gcDestructors):
   type
     PNimType* = ptr TNimType
 else:

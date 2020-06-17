@@ -28,9 +28,9 @@ template reject(x) =
 
 import macros
 
-macro skipElse(n: untyped): untyped = n[0]
+macro skipElse(n: untyped): typed = n[0]
 
-template acceptWithCovariance(x, otherwise): untyped =
+template acceptWithCovariance(x, otherwise): typed =
   when nimEnableCovariance:
     x
   else:
@@ -79,16 +79,16 @@ proc wantsCovariantSeq2(s: seq[AnimalRef]) =
 proc wantsCovariantSeq3(s: seq[RefAlias[Animal]]) =
   for a in s: echo a.x
 
-proc wantsCovariantOpenArray(s: openarray[ref Animal]) =
+proc wantsCovariantOperArray(s: openarray[ref Animal]) =
   for a in s: echo a.x
 
-proc modifiesCovariantOpenArray(s: var openarray[ref Animal]) =
+proc modifiesCovariantOperArray(s: var openarray[ref Animal]) =
   for a in s: echo a.x
 
-proc modifiesDerivedOpenArray(s: var openarray[ref Dog]) =
+proc modifiesDerivedOperArray(s: var openarray[ref Dog]) =
   for a in s: echo a.x
 
-proc wantsNonCovariantOpenArray(s: openarray[Animal]) =
+proc wantsNonCovariantOperArray(s: openarray[Animal]) =
   for a in s: echo a.x
 
 proc wantsCovariantArray(s: array[2, ref Animal]) =
@@ -199,15 +199,15 @@ accept:
   wantsCovariantSeq3(@[AnimalRef(cat), dog])
   wantsCovariantSeq3(@[cat, dog])
 
-  wantsCovariantOpenArray([cat, dog])
+  wantsCovariantOperArray([cat, dog])
 
 acceptWithCovariance:
   wantsCovariantSeq1(@[cat, cat])
   wantsCovariantSeq2(@[dog, makeDerivedRef("dog X")])
   # XXX: wantsCovariantSeq3(@[cat, cat])
 
-  wantsCovariantOpenArray(@[cat, cat])
-  wantsCovariantOpenArray([dog, dog])
+  wantsCovariantOperArray(@[cat, cat])
+  wantsCovariantOperArray([dog, dog])
 else:
   echo "cat"
   echo "cat"
@@ -226,7 +226,7 @@ accept:
   modifiesDerivedArray(dogRefsArray)
   modifiesDerivedSeq(dogRefs)
 
-reject modifiesCovariantSeqd(ogRefs)
+reject modifiesCovariantSeq(dogRefs)
 reject modifiesCovariantSeq(addr(dogRefs))
 reject modifiesCovariantSeq(dogRefs.addr)
 
@@ -245,19 +245,19 @@ when false:
   wantsNonCovariantArray animalValuesArray
 
 reject wantsNonCovariantSeq(dogRefs)
-reject modifiesCovariantOpenArray(dogRefs)
+reject modifiesCovariantOperArray(dogRefs)
 reject wantsNonCovariantArray(dogRefsArray)
 reject wantsNonCovariantSeq(dogValues)
 reject wantsNonCovariantArray(dogValuesArray)
 reject modifiesValueArray()
 
-modifiesDerivedOpenArray dogRefs
-reject modifiesDerivedOpenArray(dogValues)
-reject modifiesDerivedOpenArray(animalRefs)
+modifiesDerivedOperArray dogRefs
+reject modifiesDerivedOperArray(dogValues)
+reject modifiesDerivedOperArray(animalRefs)
 
-reject wantsNonCovariantOpenArray(animalRefs)
-reject wantsNonCovariantOpenArray(dogRefs)
-reject wantsNonCovariantOpenArray(dogValues)
+reject wantsNonCovariantOperArray(animalRefs)
+reject wantsNonCovariantOperArray(dogRefs)
+reject wantsNonCovariantOperArray(dogValues)
 
 var animalRefSeq: seq[ref Animal]
 
@@ -300,12 +300,12 @@ template <class T> struct ARR { typedef T DataType[2]; DataType data; };
 """.}
 
 type
-  MyPtr[out T] {.importcpp: "'0 *"}  = object
+  MyPtr {.importcpp: "'0 *"} [out T] = object
 
-  MySeq[out T] {.importcpp: "ARR<'0>", nodecl}  = object
+  MySeq {.importcpp: "ARR<'0>", nodecl} [out T] = object
     data: array[2, T]
 
-  MyAction[in T] {.importcpp: "FN<'0>::type"}  = object
+  MyAction {.importcpp: "FN<'0>::type"} [in T] = object
 
 var
   cAnimal: MyPtr[Animal]
@@ -415,3 +415,4 @@ reject usesAddressOfAnimalRefSeq(addr cAnimalValues)
 reject usesAddressOfAnimalRefSeq(addr cDogValues)
 accept usesAddressOfAnimalRefSeq(addr cAnimals)
 reject usesAddressOfAnimalRefSeq(addr cDogs)
+

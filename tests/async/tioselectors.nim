@@ -13,7 +13,7 @@ template processTest(t, x: untyped) =
 when defined(macosx):
   echo "All tests passed!"
 elif not defined(windows):
-  import os, posix, nativesockets
+  import os, posix, nativesockets, times
 
   when ioselSupportedPlatform:
     import osproc
@@ -445,7 +445,7 @@ elif not defined(windows):
       var
         thr: array[0..7, Thread[SelectEvent]]
       var selector = newSelector[int]()
-      var sock = createNativeSocket()
+      var sock = newNativeSocket()
       var event = newSelectEvent()
       for i in 0..high(thr):
         createThread(thr[i], event_wait_thread, event)
@@ -475,7 +475,7 @@ else:
 
   proc socket_notification_test(): bool =
     proc create_test_socket(): SocketHandle =
-      var sock = createNativeSocket()
+      var sock = newNativeSocket()
       setBlocking(sock, false)
       result = sock
 

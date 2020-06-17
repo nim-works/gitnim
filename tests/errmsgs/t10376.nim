@@ -1,5 +1,5 @@
 discard """
-  errormsg: "finalizer must be a direct reference to a proc"
+  errormsg: "finalizer must be a direct reference to a procedure"
   line: 29
 """
 

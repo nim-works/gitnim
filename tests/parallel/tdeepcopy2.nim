@@ -1,9 +1,7 @@
 discard """
-  output: '''
+  output: '''called deepCopy for int
 called deepCopy for int
-called deepCopy for int
-done999 999
-'''
+done999 999'''
 """
 
 import threadpool

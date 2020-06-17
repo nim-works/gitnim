@@ -20,8 +20,12 @@ mygeneric2 destroyed
 ----
 ----
 myobj destroyed
+myobj destroyed
+myobj destroyed
+myobj destroyed
 mygeneric1 destroyed
 ---
+myobj destroyed
 myobj destroyed
 myobj destroyed
 '''
@@ -33,10 +37,8 @@ type
     p: pointer
 
 proc `=destroy`(o: var TMyObj) =
-  if o.p != nil:
-    dealloc o.p
-    o.p = nil
-    echo "myobj destroyed"
+  if o.p != nil: dealloc o.p
+  echo "myobj destroyed"
 
 type
   TMyGeneric1[T] = object

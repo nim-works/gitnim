@@ -4,7 +4,7 @@ output: '''
 (BracketExpr (Sym "typeDesc") (Sym "User"))
 '''
 """
-import macros
+import strutils, macros
 
 type
   Model = object of RootObj

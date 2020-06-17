@@ -4,13 +4,12 @@ discard """
 Hi derived!
 hello
 '''
-  disabled: true
 """
 
 
 # tmultim1
 type
-  Expression {.inheritable.} = ref object
+  Expression = ref object {.inheritable.}
   Literal = ref object of Expression
     x: int
   PlusExpr = ref object of Expression

@@ -27,7 +27,7 @@ when defined(windows):
 else:
   import posix
 
-when defined(linux) and defined(useClone):
+when defined(linux):
   import linux
 
 type
@@ -293,7 +293,6 @@ proc errorHandle*(p: Process): FileHandle {.rtl, extern: "nosp$1",
 proc countProcessors*(): int {.rtl, extern: "nosp$1".} =
   ## Returns the number of the processors/cores the machine has.
   ## Returns 0 if it cannot be detected.
-  ## It is implemented just calling `cpuinfo.countProcessors`.
   result = cpuinfo.countProcessors()
 
 proc execProcesses*(cmds: openArray[string],
@@ -622,7 +621,7 @@ when defined(Windows) and not defined(useNimRtl):
     when useWinUnicode:
       var tmp = newWideCString(cmdl)
       var ee =
-        if e.str.isNil: newWideCString(cstring(nil))
+        if e.str.isNil: nil
         else: newWideCString(e.str, e.len)
       var wwd = newWideCString(wd)
       var flags = NORMAL_PRIORITY_CLASS or CREATE_UNICODE_ENVIRONMENT
@@ -831,10 +830,10 @@ elif not defined(useNimRtl):
   else:
     proc startProcessAuxFork(data: StartProcessData): Pid {.
       tags: [ExecIOEffect, ReadEnvEffect, ReadDirEffect, RootEffect], gcsafe.}
-    {.push stacktrace: off, profiler: off.}
-    proc startProcessAfterFork(data: ptr StartProcessData) {.
-      tags: [ExecIOEffect, ReadEnvEffect, ReadDirEffect, RootEffect], cdecl, gcsafe.}
-    {.pop.}
+  {.push stacktrace: off, profiler: off.}
+  proc startProcessAfterFork(data: ptr StartProcessData) {.
+    tags: [ExecIOEffect, ReadEnvEffect, ReadDirEffect, RootEffect], cdecl, gcsafe.}
+  {.pop.}
 
   proc startProcess(command: string, workingDir: string = "",
       args: openArray[string] = [], env: StringTableRef = nil,
@@ -851,17 +850,17 @@ elif not defined(useNimRtl):
          pipe(pStderr) != 0'i32:
         raiseOSError(osLastError())
 
-    var data: StartProcessData
+    var sysCommand: string
     var sysArgsRaw: seq[string]
     if poEvalCommand in options:
       const useShPath {.strdefine.} =
         when not defined(android): "/bin/sh"
         else: "/system/bin/sh"
-      data.sysCommand = useShPath
-      sysArgsRaw = @[data.sysCommand, "-c", command]
+      sysCommand = useShPath
+      sysArgsRaw = @[sysCommand, "-c", command]
       assert args.len == 0, "`args` has to be empty when using poEvalCommand."
     else:
-      data.sysCommand = command
+      sysCommand = command
       sysArgsRaw = @[command]
       for arg in args.items:
         sysArgsRaw.add arg
@@ -878,6 +877,8 @@ elif not defined(useNimRtl):
 
     defer: deallocCStringArray(sysEnv)
 
+    var data: StartProcessData
+    shallowCopy(data.sysCommand, sysCommand)
     data.sysArgs = sysArgs
     data.sysEnv = sysEnv
     data.pStdin = pStdin
@@ -896,7 +897,7 @@ elif not defined(useNimRtl):
 
     # Parent process. Copy process information.
     if poEchoCmd in options:
-      echo(command, " ", join(args, " "))
+      when declared(echo): echo(command, " ", join(args, " "))
     result.id = pid
     result.exitFlag = false
 
@@ -1008,57 +1009,56 @@ elif not defined(useNimRtl):
 
       return pid
 
-    {.push stacktrace: off, profiler: off.}
-    proc startProcessFail(data: ptr StartProcessData) =
-      var error: cint = errno
-      discard write(data.pErrorPipe[writeIdx], addr error, sizeof(error))
-      exitnow(1)
+  {.push stacktrace: off, profiler: off.}
+  proc startProcessFail(data: ptr StartProcessData) =
+    var error: cint = errno
+    discard write(data.pErrorPipe[writeIdx], addr error, sizeof(error))
+    exitnow(1)
 
-    when not defined(uClibc) and (not defined(linux) or defined(android)) and
-         not defined(haiku):
-      var environ {.importc.}: cstringArray
+  when not defined(uClibc) and (not defined(linux) or defined(android)):
+    var environ {.importc.}: cstringArray
 
-    proc startProcessAfterFork(data: ptr StartProcessData) =
-      # Warning: no GC here!
-      # Or anything that touches global structures - all called nim procs
-      # must be marked with stackTrace:off. Inspect C code after making changes.
-      if not (poParentStreams in data.options):
-        discard close(data.pStdin[writeIdx])
-        if dup2(data.pStdin[readIdx], readIdx) < 0:
+  proc startProcessAfterFork(data: ptr StartProcessData) =
+    # Warning: no GC here!
+    # Or anything that touches global structures - all called nim procs
+    # must be marked with stackTrace:off. Inspect C code after making changes.
+    if not (poParentStreams in data.options):
+      discard close(data.pStdin[writeIdx])
+      if dup2(data.pStdin[readIdx], readIdx) < 0:
+        startProcessFail(data)
+      discard close(data.pStdout[readIdx])
+      if dup2(data.pStdout[writeIdx], writeIdx) < 0:
+        startProcessFail(data)
+      discard close(data.pStderr[readIdx])
+      if (poStdErrToStdOut in data.options):
+        if dup2(data.pStdout[writeIdx], 2) < 0:
           startProcessFail(data)
-        discard close(data.pStdout[readIdx])
-        if dup2(data.pStdout[writeIdx], writeIdx) < 0:
-          startProcessFail(data)
-        discard close(data.pStderr[readIdx])
-        if (poStdErrToStdOut in data.options):
-          if dup2(data.pStdout[writeIdx], 2) < 0:
-            startProcessFail(data)
-        else:
-          if dup2(data.pStderr[writeIdx], 2) < 0:
-            startProcessFail(data)
-
-      if data.workingDir.len > 0:
-        if chdir(data.workingDir) < 0:
-          startProcessFail(data)
-
-      discard close(data.pErrorPipe[readIdx])
-      discard fcntl(data.pErrorPipe[writeIdx], F_SETFD, FD_CLOEXEC)
-
-      if (poUsePath in data.options):
-        when defined(uClibc) or defined(linux) or defined(haiku):
-          # uClibc environment (OpenWrt included) doesn't have the full execvpe
-          let exe = findExe(data.sysCommand)
-          discard execve(exe, data.sysArgs, data.sysEnv)
-        else:
-          # MacOSX doesn't have execvpe, so we need workaround.
-          # On MacOSX we can arrive here only from fork, so this is safe:
-          environ = data.sysEnv
-          discard execvp(data.sysCommand, data.sysArgs)
       else:
-        discard execve(data.sysCommand, data.sysArgs, data.sysEnv)
+        if dup2(data.pStderr[writeIdx], 2) < 0:
+          startProcessFail(data)
 
-      startProcessFail(data)
-    {.pop.}
+    if data.workingDir.len > 0:
+      if chdir(data.workingDir) < 0:
+        startProcessFail(data)
+
+    discard close(data.pErrorPipe[readIdx])
+    discard fcntl(data.pErrorPipe[writeIdx], F_SETFD, FD_CLOEXEC)
+
+    if (poUsePath in data.options):
+      when defined(uClibc) or defined(linux):
+        # uClibc environment (OpenWrt included) doesn't have the full execvpe
+        let exe = findExe(data.sysCommand)
+        discard execve(exe, data.sysArgs, data.sysEnv)
+      else:
+        # MacOSX doesn't have execvpe, so we need workaround.
+        # On MacOSX we can arrive here only from fork, so this is safe:
+        environ = data.sysEnv
+        discard execvp(data.sysCommand, data.sysArgs)
+    else:
+      discard execve(data.sysCommand, data.sysArgs, data.sysEnv)
+
+    startProcessFail(data)
+  {.pop.}
 
   proc close(p: Process) =
     if poParentStreams notin p.options:

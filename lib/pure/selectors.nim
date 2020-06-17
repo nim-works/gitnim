@@ -27,7 +27,7 @@
 ##
 ## TODO: ``/dev/poll``, ``event ports`` and filesystem events.
 
-import os, nativesockets
+import os, strutils, nativesockets
 
 const hasThreadSupport = compileOption("threads") and defined(threadsafe)
 
@@ -230,7 +230,6 @@ when defined(nimdoc):
     ## For *poll* and *select* selectors ``-1`` is returned.
 
 else:
-  import strutils
   when hasThreadSupport:
     import locks
 

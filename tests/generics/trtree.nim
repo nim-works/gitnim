@@ -4,10 +4,7 @@ discard """
   target: "c"
   joinable: false
 disabled: 32bit
-  cmd: "nim c --gc:arc $file"
 """
-
-# bug #13110: This test failed with --gc:arc.
 
 # this test wasn't written for 32 bit
 # don't join because the code is too messy.
@@ -72,20 +69,20 @@ proc newRStarTree*[M, D: Dim; RT, LT](minFill: range[30 .. 50] = 40): RStarTree[
   result.root = newLeaf[M, D, RT, LT]()
 
 proc center(r: Box): auto =#BoxCenter[r.len, type(r[0].a)] =
-  var res: BoxCenter[r.len, type(r[0].a)]
+  var result: BoxCenter[r.len, type(r[0].a)]
   for i in 0 .. r.high:
     when r[0].a is SomeInteger:
-      res[i] = (r[i].a + r[i].b) div 2
+      result[i] = (r[i].a + r[i].b) div 2
     elif r[0].a is SomeFloat:
-      res[i] = (r[i].a + r[i].b) / 2
+      result[i] = (r[i].a + r[i].b) / 2
     else: assert false
-  return res
+  return result
 
 proc distance(c1, c2: BoxCenter): auto =
-  var res: type(c1[0])
+  var result: type(c1[0])
   for i in 0 .. c1.high:
-    res += (c1[i] - c2[i]) * (c1[i] - c2[i])
-  return res
+    result += (c1[i] - c2[i]) * (c1[i] - c2[i])
+  return result
 
 proc overlap(r1, r2: Box): auto =
   result = type(r1[0].a)(1)
@@ -175,6 +172,21 @@ proc chooseSubtree[M, D: Dim; RT, LT](t: RTree[M, D, RT, LT]; b: Box[D, RT]; lev
           i0 = i
           minLoss = loss
     n = nn.a[i0].n
+  return n
+
+proc chooseLeaf[M, D: Dim; RT, LT](t: RTree[M, D, RT, LT]; b: Box[D, RT]; level: int): H[M, D, RT, LT] =
+  assert level >= 0
+  var n = t.root
+  while n.level > level:
+    var j = -1 # selected index
+    var x: type(b[0].a)
+    let nn = Node[M, D, RT, LT](n)
+    for i in 0 ..< n.numEntries:
+      let h = enlargement(nn.a[i].b, b)
+      if j < 0 or h < x or (x == h and area(nn.a[i].b) < area(nn.a[j].b)):
+        x = h
+        j = i
+    n = nn.a[j].n
   return n
 
 proc pickSeeds[M, D: Dim; RT, LT](t: RTree[M, D, RT, LT]; n: Node[M, D, RT, LT] | Leaf[M, D, RT, LT]; bx: Box[D, RT]): (int, int) =
@@ -397,7 +409,12 @@ proc adjustTree[M, D: Dim; RT, LT](t: RTree[M, D, RT, LT]; l, ll: H[M, D, RT, LT
         nn = nil
       else:
         let h: N[M, D, RT, LT] = (b, nn)
-        nn = quadraticSplit(t, p, h)
+        if t of RStarTree[M, D, RT, LT]:
+          nn = overflowTreatment(RStarTree[M, D, RT, LT](t), p, h)
+        elif t of RTree[M, D, RT, LT]:
+          nn = quadraticSplit(RTree[M, D, RT, LT](t), p, h)
+        else:
+          assert false
     assert n == H[M, D, RT, LT](p)
     assert n != nil
     assert t.root != nil
@@ -510,7 +527,7 @@ proc findLeaf[M, D: Dim; RT, LT](t: RTree[M, D, RT, LT]; leaf: L[D, RT, LT]): Le
 proc condenseTree[M, D: Dim; RT, LT](t: RTree[M, D, RT, LT]; leaf: Leaf[M, D, RT, LT]) =
   var n: H[M, D, RT, LT] = leaf
   var q = newSeq[H[M, D, RT, LT]]()
-  var b: typeof(leaf.a[0].b)
+  var b: type(leaf.a[0].b)
   while n != t.root:
     let p = Node[M, D, RT, LT](n.parent)
     var i = 0
@@ -547,16 +564,18 @@ proc condenseTree[M, D: Dim; RT, LT](t: RTree[M, D, RT, LT]; leaf: Leaf[M, D, RT
           rsinsert(RStarTree[M, D, RT, LT](t), Node[M, D, RT, LT](n).a[i], n.level)
       else:
         assert false
-  else:
+  elif t of RTree[M, D, RT, LT]:
     for n in q:
       if n of Leaf[M, D, RT, LT]:
         for i in 0 ..< n.numEntries:
-          insert(t, Leaf[M, D, RT, LT](n).a[i])
+          insert(RTree[M, D, RT, LT](t), Leaf[M, D, RT, LT](n).a[i])
       elif n of Node[M, D, RT, LT]:
         for i in 0 ..< n.numEntries:
-          insert(t, Node[M, D, RT, LT](n).a[i], n.level)
+          insert(RTree[M, D, RT, LT](t), Node[M, D, RT, LT](n).a[i], n.level)
       else:
         assert false
+  else:
+    assert false
 
 proc delete*[M, D: Dim; RT, LT](t: RTree[M, D, RT, LT]; leaf: L[D, RT, LT]): bool {.discardable.} =
   let l = findLeaf(t, leaf)
@@ -637,4 +656,6 @@ proc test(n: int) =
       assert r.len == r2.len
       assert r.sorted(system.cmp) == r2.sorted(system.cmp)
 
-test(500)
+test(1500)
+
+# 651 lines

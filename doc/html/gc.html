@@ -17,8 +17,773 @@
 <link href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,500,600' rel='stylesheet' type='text/css'/>
 
 <!-- CSS -->
-<title>Nim's Memory Management</title>
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<title>Nim's Garbage Collector</title>
+<style type="text/css" >
+/*
+Stylesheet for use with Docutils/rst2html.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+
+Modified from Chad Skeeters' rst2html-style
+https://bitbucket.org/cskeeters/rst2html-style/
+
+Modified by Boyd Greenfield and narimiran
+*/
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%; }
+
+body {
+  font-family: "Lato", "Helvetica Neue", "HelveticaNeue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 1.125em;
+  line-height: 1.5;
+  color: #222;
+  background-color: #FCFCFC; }
+
+/* Skeleton grid */
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box; }
+
+.column,
+.columns {
+  width: 100%;
+  float: left;
+  box-sizing: border-box;
+  margin-left: 1%;
+}
+
+.column:first-child,
+.columns:first-child {
+  margin-left: 0; }
+
+.three.columns {
+  width: 19%; }
+
+.nine.columns {
+  width: 80.0%; }
+
+.twelve.columns {
+  width: 100%;
+  margin-left: 0; }
+
+@media screen and (max-width: 860px) {
+  .three.columns {
+    display: none;
+  }
+  .nine.columns {
+    width: 98.0%;
+  }
+  body {
+    font-size: 1em;
+    line-height: 1.35;
+  }
+}
+
+cite {
+  font-style: italic !important; }
+
+
+/* Nim search input */
+div#searchInputDiv {
+  margin-bottom: 1em;
+}
+input#searchInput {
+  width: 80%;
+}
+
+/*
+ * Some custom formatting for input forms.
+ * This also fixes input form colors on Firefox with a dark system theme on Linux.
+ */
+input {
+  -moz-appearance: none;
+  color: #333;
+  background-color: #f8f8f8;
+  border: 1px solid #aaa;
+  font-family: "Lato", "Helvetica Neue", "HelveticaNeue", Helvetica, Arial, sans-serif;
+  font-size: 0.9em;
+  padding: 6px;
+}
+input:focus {
+  border: 1px solid #1fa0eb;
+  box-shadow: 0 0 2px #1fa0eb;
+}
+
+/* Docgen styles */
+/* Links */
+a {
+  color: #07b;
+  text-decoration: none;
+}
+
+a span.Identifier {
+  text-decoration: underline;
+  text-decoration-color: #aab;
+}
+
+a.reference-toplevel {
+  font-weight: bold;
+}
+
+a.toc-backref {
+  text-decoration: none;
+  color: #222; }
+
+a.link-seesrc {
+  color: #607c9f;
+  font-size: 0.9em;
+  font-style: italic; }
+
+a:hover,
+a:focus {
+  color: #607c9f;
+  text-decoration: underline; }
+
+a:hover span.Identifier {
+  color: #607c9f;
+}
+
+
+sub,
+sup {
+  position: relative;
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline; }
+
+sup {
+  top: -0.5em; }
+
+sub {
+  bottom: -0.25em; }
+
+img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  vertical-align: middle;
+  border: 0;
+  -ms-interpolation-mode: bicubic; }
+
+@media print {
+  * {
+    color: black !important;
+    text-shadow: none !important;
+    background: transparent !important;
+    box-shadow: none !important; }
+
+  a,
+  a:visited {
+    text-decoration: underline; }
+
+  a[href]:after {
+    content: " (" attr(href) ")"; }
+
+  abbr[title]:after {
+    content: " (" attr(title) ")"; }
+
+  .ir a:after,
+  a[href^="javascript:"]:after,
+  a[href^="#"]:after {
+    content: ""; }
+
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid; }
+
+  thead {
+    display: table-header-group; }
+
+  tr,
+  img {
+    page-break-inside: avoid; }
+
+  img {
+    max-width: 100% !important; }
+
+  @page {
+    margin: 0.5cm; }
+
+  h1 {
+    page-break-before: always; }
+
+  h1.title {
+    page-break-before: avoid; }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3; }
+
+  h2,
+  h3 {
+    page-break-after: avoid; }
+}
+
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+small {
+  font-size: 85%; }
+
+strong {
+  font-weight: 600;
+  font-size: 0.95em;
+  color: #3c3c3c;
+}
+
+em {
+  font-style: italic; }
+
+h1 {
+  font-size: 1.8em;
+  font-weight: 400;
+  padding-bottom: .25em;
+  border-bottom: 1px solid #aaa;
+  margin-top: 2.5em;
+  margin-bottom: 1em;
+  line-height: 1.2em; }
+
+h1.title {
+  padding-bottom: 1em;
+  border-bottom: 0px;
+  font-size: 2.5em;
+  text-align: center;
+  font-weight: 900;
+  margin-top: 0.75em;
+  margin-bottom: 0em;
+}
+
+h2 {
+  font-size: 1.3em;
+  margin-top: 2em; }
+
+h2.subtitle {
+  text-align: center; }
+
+h3 {
+  font-size: 1.125em;
+  font-style: italic;
+  margin-top: 1.5em; }
+
+h4 {
+  font-size: 1.125em;
+  margin-top: 1em; }
+
+h5 {
+  font-size: 1.125em;
+  margin-top: 0.75em; }
+
+h6 {
+  font-size: 1.1em; }
+
+
+ul,
+ol {
+  padding: 0;
+  margin-top: 0.5em;
+  margin-left: 0.75em; }
+
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+  margin-bottom: 0;
+  margin-left: 1.25em; }
+
+li {
+    list-style-type: circle;
+}
+
+ul.simple-boot li {
+    list-style-type: none;
+    margin-left: 0em;
+    margin-bottom: 0.5em;
+}
+
+ol.simple > li, ul.simple > li {
+  margin-bottom: 0.25em;
+  margin-left: 0.4em }
+
+ul.simple.simple-toc > li {
+    margin-top: 1em;
+}
+
+ul.simple-toc {
+  list-style: none;
+  font-size: 0.9em;
+  margin-left: -0.3em;
+  margin-top: 1em; }
+
+ul.simple-toc > li {
+    list-style-type: none;
+}
+
+ul.simple-toc-section {
+  list-style-type: circle;
+  margin-left: 1em;
+  color: #6c9aae; }
+
+
+ol.arabic {
+  list-style: decimal; }
+
+ol.loweralpha {
+  list-style: lower-alpha; }
+
+ol.upperalpha {
+  list-style: upper-alpha; }
+
+ol.lowerroman {
+  list-style: lower-roman; }
+
+ol.upperroman {
+  list-style: upper-roman; }
+
+ul.auto-toc {
+  list-style-type: none; }
+
+
+dl {
+  margin-bottom: 1.5em; }
+
+dt {
+  margin-bottom: -0.5em;
+  margin-left: 0.0em; }
+
+dd {
+  margin-left: 2.0em;
+  margin-bottom: 3.0em;
+  margin-top: 0.5em; }
+
+
+hr {
+  margin: 2em 0;
+  border: 0;
+  border-top: 1px solid #aaa; }
+
+blockquote {
+  font-size: 0.9em;
+  font-style: italic;
+  padding-left: 0.5em;
+  margin-left: 0;
+  border-left: 5px solid #bbc;
+}
+
+.pre {
+  font-family: "Source Code Pro", Monaco, Menlo, Consolas, "Courier New", monospace;
+  font-weight: 500;
+  font-size: 0.85em;
+  background-color: #f0f3ff;
+  padding-left: 3px;
+  padding-right: 3px;
+  border-radius: 4px;
+}
+
+pre {
+  font-family: "Source Code Pro", Monaco, Menlo, Consolas, "Courier New", monospace;
+  color: #222;
+  font-weight: 500;
+  display: inline-block;
+  box-sizing: border-box;
+  min-width: 100%;
+  padding: 0.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  font-size: 0.85em;
+  white-space: pre !important;
+  overflow-y: hidden;
+  overflow-x: visible;
+  background-color: ghostwhite;
+  border: 1px solid #dde;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px; }
+
+.pre-scrollable {
+  max-height: 340px;
+  overflow-y: scroll; }
+
+
+/* Nim line-numbered tables */
+.line-nums-table {
+  width: 100%;
+  table-layout: fixed; }
+
+table.line-nums-table {
+  border-radius: 4px;
+  border: 1px solid #cccccc;
+  background-color: ghostwhite;
+  border-collapse: separate;
+  margin-top: 15px;
+  margin-bottom: 25px; }
+
+.line-nums-table tbody {
+  border: none; }
+
+.line-nums-table td pre {
+  border: none;
+  background-color: transparent; }
+
+.line-nums-table td.blob-line-nums {
+  width: 28px; }
+
+.line-nums-table td.blob-line-nums pre {
+  color: #b0b0b0;
+  -webkit-filter: opacity(75%);
+  text-align: right;
+  border-color: transparent;
+  background-color: transparent;
+  padding-left: 0px;
+  margin-left: 0px;
+  padding-right: 0px;
+  margin-right: 0px; }
+
+
+table {
+  max-width: 100%;
+  background-color: transparent;
+  margin-top: 0.5em;
+  margin-bottom: 1.5em;
+  border-collapse: collapse;
+  border-color: #ccc;
+  border-spacing: 0;
+  font-size: 0.9em;
+}
+
+table th, table td {
+  padding: 0px 0.5em 0px;
+}
+
+table th {
+  background-color: #e8e8e8;
+  font-weight: bold; }
+
+table th.docinfo-name {
+    background-color: transparent;
+}
+
+table tr:hover {
+  background-color: ghostwhite; }
+
+
+/* rst2html default used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0; }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 !important; }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 !important; }
+
+.last, .with-subtitle {
+  margin-bottom: 0 !important; }
+
+.hidden {
+  display: none; }
+
+blockquote.epigraph {
+  margin: 2em 5em; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em; }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden; }
+
+
+div.figure {
+  margin-left: 2em;
+  margin-right: 2em; }
+
+div.footer, div.header {
+  clear: both;
+  text-align: center;
+  color: #666;
+  font-size: smaller; }
+
+div.footer {
+    padding-top: 5em;
+}
+
+div.line-block {
+  display: block;
+  margin-top: 1em;
+  margin-bottom: 1em; }
+
+div.line-block div.line-block {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 1.5em; }
+
+div.topic {
+  margin: 2em; }
+
+div.search_results {
+  background-color: antiquewhite;
+  margin: 3em;
+  padding: 1em;
+  border: 1px solid #4d4d4d;
+}
+
+div#global-links ul {
+  margin-left: 0;
+  list-style-type: none;
+}
+
+div#global-links > simple-boot {
+    margin-left: 3em;
+}
+
+hr.docutils {
+  width: 75%; }
+
+img.align-left, .figure.align-left, object.align-left {
+  clear: left;
+  float: left;
+  margin-right: 1em; }
+
+img.align-right, .figure.align-right, object.align-right {
+  clear: right;
+  float: right;
+  margin-left: 1em; }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto; }
+
+.align-left {
+  text-align: left; }
+
+.align-center {
+  clear: both;
+  text-align: center; }
+
+.align-right {
+  text-align: right; }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit; }
+
+p.attribution {
+  text-align: right;
+  margin-left: 50%; }
+
+p.caption {
+  font-style: italic; }
+
+p.credits {
+  font-style: italic;
+  font-size: smaller; }
+
+p.label {
+  white-space: nowrap; }
+
+p.rubric {
+  font-weight: bold;
+  font-size: larger;
+  color: maroon;
+  text-align: center; }
+
+p.topic-title {
+  font-weight: bold; }
+
+pre.address {
+  margin-bottom: 0;
+  margin-top: 0;
+  font: inherit; }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em;
+  margin-right: 2em; }
+
+pre.code .ln {
+  color: grey; }
+
+/* line numbers */
+pre.code, code {
+  background-color: #eeeeee; }
+
+pre.code .comment, code .comment {
+  color: #5c6576; }
+
+pre.code .keyword, code .keyword {
+  color: #3B0D06;
+  font-weight: bold; }
+
+pre.code .literal.string, code .literal.string {
+  color: #0c5404; }
+
+pre.code .name.builtin, code .name.builtin {
+  color: #352b84; }
+
+pre.code .deleted, code .deleted {
+  background-color: #DEB0A1; }
+
+pre.code .inserted, code .inserted {
+  background-color: #A3D289; }
+
+span.classifier {
+  font-style: oblique; }
+
+span.classifier-delimiter {
+  font-weight: bold; }
+
+span.option {
+  white-space: nowrap; }
+
+span.problematic {
+  color: #b30000; }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80%; }
+
+span.DecNumber {
+  color: #252dbe; }
+
+span.BinNumber {
+  color: #252dbe; }
+
+span.HexNumber {
+  color: #252dbe; }
+
+span.OctNumber {
+  color: #252dbe; }
+
+span.FloatNumber {
+  color: #252dbe; }
+
+span.Identifier {
+  color: #222; }
+
+span.Keyword {
+  font-weight: 600;
+  color: #5e8f60; }
+
+span.StringLit {
+  color: #a4255b; }
+
+span.LongStringLit {
+  color: #a4255b; }
+
+span.CharLit {
+  color: #a4255b; }
+
+span.EscapeSequence {
+  color: black; }
+
+span.Operator {
+  color: black; }
+
+span.Punctuation {
+  color: black; }
+
+span.Comment, span.LongComment {
+  font-style: italic;
+  font-weight: 400;
+  color: #484a86; }
+
+span.RegularExpression {
+  color: darkviolet; }
+
+span.TagStart {
+  color: darkviolet; }
+
+span.TagEnd {
+  color: darkviolet; }
+
+span.Key {
+  color: #252dbe; }
+
+span.Value {
+  color: #252dbe; }
+
+span.RawData {
+  color: #a4255b; }
+
+span.Assembler {
+  color: #252dbe; }
+
+span.Preprocessor {
+  color: #252dbe; }
+
+span.Directive {
+  color: #252dbe; }
+
+span.Command, span.Rule, span.Hyperlink, span.Label, span.Reference,
+span.Other {
+  color: black; }
+
+/* Pop type, const, proc, and iterator defs in nim def blocks */
+dt pre > span.Identifier, dt pre > span.Operator {
+  color: #155da4;
+  font-weight: 700; }
+
+dt pre > span.Keyword ~ span.Identifier, dt pre > span.Identifier ~ span.Identifier,
+dt pre > span.Operator ~ span.Identifier, dt pre > span.Other ~ span.Identifier {
+  color: inherit;
+  font-weight: inherit; }
+
+/* Nim sprite for the footer (taken from main page favicon) */
+.nim-sprite {
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+  background-position: 0 0;
+  background-size: 16px 16px;
+  -webkit-filter: opacity(50%);
+  background-repeat: no-repeat;
+  background-image: url("data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AAAAAAUAAAAF////AP///wD///8A////AP///wD///8A////AP///wD///8A////AAAAAAIAAABbAAAAlQAAAKIAAACbAAAAmwAAAKIAAACVAAAAWwAAAAL///8A////AP///wD///8A////AAAAABQAAADAAAAAYwAAAA3///8A////AP///wD///8AAAAADQAAAGMAAADAAAAAFP///wD///8A////AP///wAAAACdAAAAOv///wD///8A////AP///wD///8A////AP///wD///8AAAAAOgAAAJ3///8A////AP///wAAAAAnAAAAcP///wAAAAAoAAAASv///wD///8A////AP///wAAAABKAAAAKP///wAAAABwAAAAJ////wD///8AAAAAgQAAABwAAACIAAAAkAAAAJMAAACtAAAAFQAAABUAAACtAAAAkwAAAJAAAACIAAAAHAAAAIH///8A////AAAAAKQAAACrAAAAaP///wD///8AAAAARQAAANIAAADSAAAARf///wD///8AAAAAaAAAAKsAAACk////AAAAADMAAACcAAAAnQAAABj///8A////AP///wAAAAAYAAAAGP///wD///8A////AAAAABgAAACdAAAAnAAAADMAAAB1AAAAwwAAAP8AAADpAAAAsQAAAE4AAAAb////AP///wAAAAAbAAAATgAAALEAAADpAAAA/wAAAMMAAAB1AAAAtwAAAOkAAAD/AAAA/wAAAP8AAADvAAAA3gAAAN4AAADeAAAA3gAAAO8AAAD/AAAA/wAAAP8AAADpAAAAtwAAAGUAAAA/AAAA3wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAADfAAAAPwAAAGX///8A////AAAAAEgAAADtAAAAvwAAAL0AAADGAAAA7wAAAO8AAADGAAAAvQAAAL8AAADtAAAASP///wD///8A////AP///wD///8AAAAAO////wD///8A////AAAAAIcAAACH////AP///wD///8AAAAAO////wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A//8AAP//AAD4HwAA7/cAAN/7AAD//wAAoYUAAJ55AACf+QAAh+EAAAAAAADAAwAA4AcAAP5/AAD//wAA//8AAA==");
+  margin-bottom: -5px; }
+
+span.pragmadots {
+  /* Position: relative frees us up to make the dots
+  look really nice without fucking up the layout and
+  causing bulging in the parent container */
+  position: relative;
+  /* 1px down looks slightly nicer */
+  top: 1px;
+  padding: 2px;
+  background-color: #e8e8e8;
+  border-radius: 4px;
+  margin: 0 2px;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+span.pragmadots:hover {
+  background-color: #DBDBDB;
+}
+span.pragmawrap {
+  display: none;
+}
+
+span.attachedType {
+  display: none;
+  visibility: hidden;
+}
+</style>
 
 <script type="text/javascript" src="dochack.js"></script>
 
@@ -33,37 +798,6 @@ function main() {
       event.target.parentNode.nextElementSibling.style.display = "inline";
     }
   }
-
-  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-  function switchTheme(e) {
-      if (e.target.checked) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          localStorage.setItem('theme', 'dark');
-      } else {
-          document.documentElement.setAttribute('data-theme', 'light');
-          localStorage.setItem('theme', 'light');
-      }
-  }
-
-  toggleSwitch.addEventListener('change', switchTheme, false);
-
-
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.setAttribute('data-theme', "dark");
-    toggleSwitch.checked = true;
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    document.documentElement.setAttribute('data-theme', "light");
-    toggleSwitch.checked = false;
-  } else {
-    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-    if (currentTheme) {
-      document.documentElement.setAttribute('data-theme', currentTheme);
-
-      if (currentTheme === 'dark') {
-        toggleSwitch.checked = true;
-      }
-    }
-  }
 }
 </script>
 
@@ -71,58 +805,59 @@ function main() {
 <body onload="main()">
 <div class="document" id="documentId">
   <div class="container">
-    <h1 class="title">Nim's Memory Management</h1>
+    <h1 class="title">Nim's Garbage Collector</h1>
     <table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Author:</th><td> Andreas Rumpf</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.2.2</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.0.7</td></tr>
 </tbody></table><blockquote><p>&quot;The road to hell is paved with good intentions.&quot;</p></blockquote>
 
-<h1 id="introduction">Introduction</h1><p>This document describes how the multi-paradigm memory management strategies work. How to tune the garbage collectors for your needs, like (soft) <span id="realtime-systems_1">realtime systems</span>, and how the memory management strategies that are not garbage collectors work.</p>
+<h1 id="introduction">Introduction</h1><p>This document describes how the GC works and how to tune it for (soft) <span id="realtime-systems_1">realtime systems</span>.</p>
+<p>The basic algorithm is <em>Deferred Reference Counting</em> with cycle detection. References on the stack are not counted for better performance (and easier C code generation). Cycle detection is currently done by a simple mark&amp;sweep GC that has to scan the full (thread local heap). <tt class="docutils literal"><span class="pre">--gc:v2</span></tt> replaces this with an incremental mark and sweep. That it is not production ready yet, however.</p>
+<p>The GC is only triggered in a memory allocation operation. It is not triggered by some timer and does not run in a background thread.</p>
+<p>To force a full collection call <tt class="docutils literal"><span class="pre">GC_fullCollect</span></tt>. Note that it is generally better to let the GC do its work and not enforce a full collection.</p>
 
-<h1 id="multiminusparadigm-memory-management-strategies">Multi-paradigm Memory Management Strategies</h1><p>To choose the memory management strategy use the <tt class="docutils literal"><span class="pre">--gc:</span></tt> switch.</p>
-<ul class="simple"><li><tt class="docutils literal"><span class="pre">--gc:refc</span></tt>. This is the default GC. It's a deferred reference counting based garbage collector with a simple Mark&amp;Sweep backup GC in order to collect cycles. Heaps are thread local.</li>
-<li><tt class="docutils literal"><span class="pre">--gc:markAndSweep</span></tt>. Simple Mark-And-Sweep based garbage collector. Heaps are thread local.</li>
-<li><tt class="docutils literal"><span class="pre">--gc:boehm</span></tt>. Boehm based garbage collector, it offers a shared heap.</li>
-<li><tt class="docutils literal"><span class="pre">--gc:go</span></tt>. Go's garbage collector, useful for interoperability with Go. Offers a shared heap.</li>
-<li><tt class="docutils literal"><span class="pre">--gc:arc</span></tt>. Plain reference counting with <a class="reference external" href="destructors.html#move-semantics">move semantic optimizations</a>, offers a shared heap. It offers deterministic performance for <span id="hard-realtime_1">hard realtime</span> systems. Reference cycles cause memory leaks, beware.</li>
-<li><tt class="docutils literal"><span class="pre">--gc:orc</span></tt>. Same as <tt class="docutils literal"><span class="pre">-gc:arc</span></tt> but adds a cycle collector based on &quot;trial deletion&quot;. Unforunately that makes its performance profile hard to reason about so it is less useful for hard realtime systems.</li>
-<li><tt class="docutils literal"><span class="pre">--gc:none</span></tt>. No memory management strategy nor garbage collector. Allocated memory is simply never freed. You should use <tt class="docutils literal"><span class="pre">--gc:arc</span></tt> instead.</li>
-</ul>
-<p>JavaScript's garbage collector is used for the <a class="reference external" href="backends.html#backends-the-javascript-target">JavaScript and NodeJS</a> compilation targets. The <a class="reference external" href="nims.html">NimScript</a> target uses the memory management strategy built into the Nim compiler.</p>
+<h1 id="cycle-collector">Cycle collector</h1><p>The cycle collector can be en-/disabled independently from the other parts of the GC with <tt class="docutils literal"><span class="pre">GC_enableMarkAndSweep</span></tt> and <tt class="docutils literal"><span class="pre">GC_disableMarkAndSweep</span></tt>.</p>
 
-<h1 id="tweaking-the-refc-gc">Tweaking the refc GC</h1>
-<h2 id="cycle-collector">Cycle collector</h2><p>The cycle collector can be en-/disabled independently from the other parts of the garbage collector with <tt class="docutils literal"><span class="pre">GC_enableMarkAndSweep</span></tt> and <tt class="docutils literal"><span class="pre">GC_disableMarkAndSweep</span></tt>.</p>
-
-<h2 id="soft-realtime-support">Soft realtime support</h2><p>To enable realtime support, the symbol <span id="userealtimegc_1">useRealtimeGC</span> needs to be defined via <tt class="docutils literal"><span class="pre">--define:useRealtimeGC</span></tt> (you can put this into your config file as well). With this switch the garbage collector supports the following operations:</p>
+<h1 id="realtime-support">Realtime support</h1><p>To enable realtime support, the symbol <span id="userealtimegc_1">useRealtimeGC</span> needs to be defined via <tt class="docutils literal"><span class="pre">--define:useRealtimeGC</span></tt> (you can put this into your config file as well). With this switch the GC supports the following operations:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">GC_setMaxPause</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">maxPauseInUs</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span>
 <span class="Keyword">proc</span> <span class="Identifier">GC_step</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">us</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">strongAdvice</span> <span class="Operator">=</span> <span class="Identifier">false</span><span class="Punctuation">,</span> <span class="Identifier">stackSize</span> <span class="Operator">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">)</span></pre><p>The unit of the parameters <tt class="docutils literal"><span class="pre">maxPauseInUs</span></tt> and <tt class="docutils literal"><span class="pre">us</span></tt> is microseconds.</p>
-<p>These two procs are the two modus operandi of the realtime garbage collector:</p>
+<p>These two procs are the two modus operandi of the realtime GC:</p>
 <p>(1) GC_SetMaxPause Mode</p>
-<blockquote><p>You can call <tt class="docutils literal"><span class="pre">GC_SetMaxPause</span></tt> at program startup and then each triggered garbage collector run tries to not take longer than <tt class="docutils literal"><span class="pre">maxPause</span></tt> time. However, it is possible (and common) that the work is nevertheless not evenly distributed as each call to <tt class="docutils literal"><span class="pre">new</span></tt> can trigger the garbage collector and thus take  <tt class="docutils literal"><span class="pre">maxPause</span></tt> time.</p></blockquote>
+<blockquote><p>You can call <tt class="docutils literal"><span class="pre">GC_SetMaxPause</span></tt> at program startup and then each triggered GC run tries to not take longer than <tt class="docutils literal"><span class="pre">maxPause</span></tt> time. However, it is possible (and common) that the work is nevertheless not evenly distributed as each call to <tt class="docutils literal"><span class="pre">new</span></tt> can trigger the GC and thus take  <tt class="docutils literal"><span class="pre">maxPause</span></tt> time.</p></blockquote>
 <p>(2) GC_step Mode</p>
-<blockquote><p>This allows the garbage collector to perform some work for up to <tt class="docutils literal"><span class="pre">us</span></tt> time. This is useful to call in a main loop to ensure the garbage collector can do its work. To bind all garbage collector activity to a <tt class="docutils literal"><span class="pre">GC_step</span></tt> call, deactivate the garbage collector with <tt class="docutils literal"><span class="pre">GC_disable</span></tt> at program startup. If <tt class="docutils literal"><span class="pre">strongAdvice</span></tt> is set to <tt class="docutils literal"><span class="pre">true</span></tt>, then the garbage collector will be forced to perform collection cycle. Otherwise, the garbage collector may decide not to do anything, if there is not much garbage to collect. You may also specify the current stack size via <tt class="docutils literal"><span class="pre">stackSize</span></tt> parameter. It can improve performance, when you know that there are no unique Nim references below certain point on the stack. Make sure the size you specify is greater than the potential worst case size.</p></blockquote>
-<p>These procs provide a &quot;best effort&quot; realtime guarantee; in particular the cycle collector is not aware of deadlines. Deactivate it to get more predictable realtime behaviour. Tests show that a 1ms max pause time will be met in almost all cases on modern CPUs (with the cycle collector disabled).</p>
+<blockquote><p>This allows the GC to perform some work for up to <tt class="docutils literal"><span class="pre">us</span></tt> time. This is useful to call in a main loop to ensure the GC can do its work. To bind all GC activity to a <tt class="docutils literal"><span class="pre">GC_step</span></tt> call, deactivate the GC with <tt class="docutils literal"><span class="pre">GC_disable</span></tt> at program startup. If <tt class="docutils literal"><span class="pre">strongAdvice</span></tt> is set to <tt class="docutils literal"><span class="pre">true</span></tt>, GC will be forced to perform collection cycle. Otherwise, GC may decide not to do anything, if there is not much garbage to collect. You may also specify the current stack size via <tt class="docutils literal"><span class="pre">stackSize</span></tt> parameter. It can improve performance, when you know that there are no unique Nim references below certain point on the stack. Make sure the size you specify is greater than the potential worst case size.</p></blockquote>
+<p>These procs provide a &quot;best effort&quot; realtime guarantee; in particular the cycle collector is not aware of deadlines yet. Deactivate it to get more predictable realtime behaviour. Tests show that a 2ms max pause time will be met in almost all cases on modern CPUs (with the cycle collector disabled).</p>
 
-<h2 id="time-measurement-with-garbage-collectors">Time measurement with garbage collectors</h2><p>The garbage collectors's way of measuring time uses (see <tt class="docutils literal"><span class="pre">lib/system/timers.nim</span></tt> for the implementation):</p>
+<h2 id="time-measurement">Time measurement</h2><p>The GC's way of measuring time uses (see <tt class="docutils literal"><span class="pre">lib/system/timers.nim</span></tt> for the implementation):</p>
 <ol class="simple"><li><tt class="docutils literal"><span class="pre">QueryPerformanceCounter</span></tt> and <tt class="docutils literal"><span class="pre">QueryPerformanceFrequency</span></tt> on Windows.</li>
 <li><tt class="docutils literal"><span class="pre">mach_absolute_time</span></tt> on Mac OS X.</li>
 <li><tt class="docutils literal"><span class="pre">gettimeofday</span></tt> on Posix systems.</li>
 </ol>
 <p>As such it supports a resolution of nanoseconds internally; however the API uses microseconds for convenience.</p>
-<p>Define the symbol <tt class="docutils literal"><span class="pre">reportMissedDeadlines</span></tt> to make the garbage collector output whenever it missed a deadline. The reporting will be enhanced and supported by the API in later versions of the collector.</p>
+<p>Define the symbol <tt class="docutils literal"><span class="pre">reportMissedDeadlines</span></tt> to make the GC output whenever it missed a deadline. The reporting will be enhanced and supported by the API in later versions of the collector.</p>
 
-<h2 id="tweaking-the-garbage-collector">Tweaking the garbage collector</h2><p>The collector checks whether there is still time left for its work after every <tt class="docutils literal"><span class="pre">workPackage</span></tt>'th iteration. This is currently set to 100 which means that up to 100 objects are traversed and freed before it checks again. Thus <tt class="docutils literal"><span class="pre">workPackage</span></tt> affects the timing granularity and may need to be tweaked in highly specialized environments or for older hardware.</p>
+<h2 id="tweaking-the-gc">Tweaking the GC</h2><p>The collector checks whether there is still time left for its work after every <tt class="docutils literal"><span class="pre">workPackage</span></tt>'th iteration. This is currently set to 100 which means that up to 100 objects are traversed and freed before it checks again. Thus <tt class="docutils literal"><span class="pre">workPackage</span></tt> affects the timing granularity and may need to be tweaked in highly specialized environments or for older hardware.</p>
 
-<h1 id="keeping-track-of-memory">Keeping track of memory</h1><p>If you need to pass around memory allocated by Nim to C, you can use the procs <tt class="docutils literal"><span class="pre">GC_ref</span></tt> and <tt class="docutils literal"><span class="pre">GC_unref</span></tt> to mark objects as referenced to avoid them being freed by the garbage collector. Other useful procs from <a class="reference external" href="system.html">system</a> you can use to keep track of memory are:</p>
-<ul class="simple"><li><tt class="docutils literal"><span class="pre">getTotalMem()</span></tt> Returns the amount of total memory managed by the garbage collector.</li>
-<li><tt class="docutils literal"><span class="pre">getOccupiedMem()</span></tt> Bytes reserved by the garbage collector and used by objects.</li>
-<li><tt class="docutils literal"><span class="pre">getFreeMem()</span></tt> Bytes reserved by the garbage collector and not in use.</li>
-<li><tt class="docutils literal"><span class="pre">GC_getStatistics()</span></tt> Garbage collector statistics as a human-readable string.</li>
+<h2 id="keeping-track-of-memory">Keeping track of memory</h2><p>If you need to pass around memory allocated by Nim to C, you can use the procs <tt class="docutils literal"><span class="pre">GC_ref</span></tt> and <tt class="docutils literal"><span class="pre">GC_unref</span></tt> to mark objects as referenced to avoid them being freed by the GC. Other useful procs from <a class="reference external" href="system.html">system</a> you can use to keep track of memory are:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">getTotalMem()</span></tt> Returns the amount of total memory managed by the GC.</li>
+<li><tt class="docutils literal"><span class="pre">getOccupiedMem()</span></tt> Bytes reserved by the GC and used by objects.</li>
+<li><tt class="docutils literal"><span class="pre">getFreeMem()</span></tt> Bytes reserved by the GC and not in use.</li>
 </ul>
 <p>These numbers are usually only for the running thread, not for the whole heap, with the exception of <tt class="docutils literal"><span class="pre">--gc:boehm</span></tt> and <tt class="docutils literal"><span class="pre">--gc:go</span></tt>.</p>
-<p>In addition to <tt class="docutils literal"><span class="pre">GC_ref</span></tt> and <tt class="docutils literal"><span class="pre">GC_unref</span></tt> you can avoid the garbage collector by manually allocating memory with procs like <tt class="docutils literal"><span class="pre">alloc</span></tt>, <tt class="docutils literal"><span class="pre">alloc0</span></tt>, <tt class="docutils literal"><span class="pre">allocShared</span></tt>, <tt class="docutils literal"><span class="pre">allocShared0</span></tt> or <tt class="docutils literal"><span class="pre">allocCStringArray</span></tt>. The garbage collector won't try to free them, you need to call their respective <em>dealloc</em> pairs (<tt class="docutils literal"><span class="pre">dealloc</span></tt>, <tt class="docutils literal"><span class="pre">deallocShared</span></tt>, <tt class="docutils literal"><span class="pre">deallocCStringArray</span></tt>, etc) when you are done with them or they will leak.</p>
+<p>In addition to <tt class="docutils literal"><span class="pre">GC_ref</span></tt> and <tt class="docutils literal"><span class="pre">GC_unref</span></tt> you can avoid the GC by manually allocating memory with procs like <tt class="docutils literal"><span class="pre">alloc</span></tt>, <tt class="docutils literal"><span class="pre">allocShared</span></tt>, or <tt class="docutils literal"><span class="pre">allocCStringArray</span></tt>. The GC won't try to free them, you need to call their respective <em>dealloc</em> pairs when you are done with them or they will leak.</p>
 
 <h1 id="heap-dump">Heap dump</h1><p>The heap dump feature is still in its infancy, but it already proved useful for us, so it might be useful for you. To get a heap dump, compile with <tt class="docutils literal"><span class="pre">-d:nimTypeNames</span></tt> and call <tt class="docutils literal"><span class="pre">dumpNumberOfInstances</span></tt> at a strategic place in your program. This produces a list of used types in your program and for every type the total amount of object instances for this type as well as the total amount of bytes these instances take up. This list is currently unsorted! You need to use external shell script hacking to sort it.</p>
-<p>The numbers count the number of objects in all garbage collector heaps, they refer to all running threads, not only to the current thread. (The current thread would be the thread that calls <tt class="docutils literal"><span class="pre">dumpNumberOfInstances</span></tt>.) This might change in later versions. </p>
+<p>The numbers count the number of objects in all GC heaps, they refer to all running threads, not only to the current thread. (The current thread would be the thread that calls <tt class="docutils literal"><span class="pre">dumpNumberOfInstances</span></tt>.) This might change in later versions.</p>
+
+<h2 id="garbage-collector-options">Garbage collector options</h2><p>You can choose which garbage collector to use when compiling source code, you can pass <tt class="docutils literal"><span class="pre">--gc:</span></tt> on the compile command with the choosed garbage collector.</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">--gc:refc</span></tt> Deferred <a class="reference external" href="https://en.wikipedia.org/wiki/Reference_counting">reference counting</a> with cycle detection, <a class="reference external" href="https://en.wikipedia.org/wiki/Heap_(programming)">thread local heap</a>, default.</li>
+<li><tt class="docutils literal"><span class="pre">--gc:markAndSweep</span></tt> <a class="reference external" href="https://en.wikipedia.org/wiki/Tracing_garbage_collection#Copying_vs._mark-and-sweep_vs._mark-and-don't-sweep">Mark-And-Sweep</a> based garbage collector, <a class="reference external" href="https://en.wikipedia.org/wiki/Heap_(programming)">thread local heap</a>.</li>
+<li><tt class="docutils literal"><span class="pre">--gc:boehm</span></tt> <a class="reference external" href="https://en.wikipedia.org/wiki/Boehm_garbage_collector">Boehm</a> based garbage collector, <a class="reference external" href="https://en.wikipedia.org/wiki/Tracing_garbage_collection#Stop-the-world_vs._incremental_vs._concurrent">stop-the-world</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Heap_(programming)">shared heap</a>.</li>
+<li><tt class="docutils literal"><span class="pre">--gc:go</span></tt> Go lang like garbage collector, <a class="reference external" href="https://en.wikipedia.org/wiki/Tracing_garbage_collection#Stop-the-world_vs._incremental_vs._concurrent">stop-the-world</a>, <a class="reference external" href="https://en.wikipedia.org/wiki/Heap_(programming)">shared heap</a>.</li>
+<li><tt class="docutils literal"><span class="pre">--gc:regions</span></tt> <a class="reference external" href="https://en.wikipedia.org/wiki/Memory_management#Stack_allocation">Stack</a> based garbage collector.</li>
+<li><tt class="docutils literal"><span class="pre">--gc:none</span></tt> No garbage collector.</li>
+</ul>
+<p>The same Nim code can be compiled to use any of the garbage collectors; the Nim syntax generally will not change from one garbage collector to another. No garbage collector is used for <a class="reference external" href="backends.html#backends-the-javascript-target">JavaScript and NodeJS</a> compilation targets. <a class="reference external" href="nims.html">NimScript</a> target uses Nim VM garbage collector.</p>
+<p>If you are new to Nim and just starting, the default garbage collector is balanced to fit most common use cases. </p>
 
 
 
@@ -130,7 +865,7 @@ function main() {
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 18:38:31 UTC</small>
+        <small>Made with Nim. Generated: 2020-06-17 02:41:07 UTC</small>
       </div>
     </div>
   </div>

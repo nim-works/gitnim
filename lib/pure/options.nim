@@ -58,12 +58,8 @@
 
 import typetraits
 
-when (NimMajor, NimMinor) >= (1, 1):
-  type
-    SomePointer = ref | ptr | pointer | proc
-else:
-  type
-    SomePointer = ref | ptr | pointer
+type
+  SomePointer = ref | ptr | pointer
 
 type
   Option*[T] = object
@@ -77,8 +73,8 @@ type
   UnpackError* = object of Defect
 
 
-proc option*[T](val: T): Option[T] {.inline.} =
-  ## Can be used to convert a pointer type (`ptr` or `ref` or `proc`) to an option type.
+proc option*[T](val: T): Option[T] =
+  ## Can be used to convert a pointer type (`ptr` or `ref`) to an option type.
   ## It converts `nil` to `None`.
   ##
   ## See also:
@@ -98,7 +94,7 @@ proc option*[T](val: T): Option[T] {.inline.} =
   when T isnot SomePointer:
     result.has = true
 
-proc some*[T](val: T): Option[T] {.inline.} =
+proc some*[T](val: T): Option[T] =
   ## Returns an `Option` that has the value `val`.
   ##
   ## See also:
@@ -121,7 +117,7 @@ proc some*[T](val: T): Option[T] {.inline.} =
     result.has = true
     result.val = val
 
-proc none*(T: typedesc): Option[T] {.inline.} =
+proc none*(T: typedesc): Option[T] =
   ## Returns an `Option` for this type that has no value.
   ##
   ## See also:
@@ -136,7 +132,7 @@ proc none*(T: typedesc): Option[T] {.inline.} =
   # the default is the none type
   discard
 
-proc none*[T]: Option[T] {.inline.} =
+proc none*[T]: Option[T] =
   ## Alias for `none(T) proc <#none,typedesc>`_.
   none(T)
 
@@ -167,7 +163,7 @@ proc isNone*[T](self: Option[T]): bool {.inline.} =
   else:
     not self.has
 
-proc get*[T](self: Option[T]): T {.inline.} =
+proc get*[T](self: Option[T]): T =
   ## Returns contents of an `Option`. If it is `None`, then an exception is
   ## thrown.
   ##
@@ -185,7 +181,7 @@ proc get*[T](self: Option[T]): T {.inline.} =
     raise newException(UnpackError, "Can't obtain a value from a `none`")
   self.val
 
-proc get*[T](self: Option[T], otherwise: T): T {.inline.} =
+proc get*[T](self: Option[T], otherwise: T): T =
   ## Returns the contents of the `Option` or an `otherwise` value if
   ## the `Option` is `None`.
   runnableExamples:
@@ -200,7 +196,7 @@ proc get*[T](self: Option[T], otherwise: T): T {.inline.} =
   else:
     otherwise
 
-proc get*[T](self: var Option[T]): var T {.inline.} =
+proc get*[T](self: var Option[T]): var T =
   ## Returns contents of the `var Option`. If it is `None`, then an exception
   ## is thrown.
   runnableExamples:
@@ -215,7 +211,7 @@ proc get*[T](self: var Option[T]): var T {.inline.} =
     raise newException(UnpackError, "Can't obtain a value from a `none`")
   return self.val
 
-proc map*[T](self: Option[T], callback: proc (input: T)) {.inline.} =
+proc map*[T](self: Option[T], callback: proc (input: T)) =
   ## Applies a `callback` function to the value of the `Option`, if it has one.
   ##
   ## See also:
@@ -239,7 +235,7 @@ proc map*[T](self: Option[T], callback: proc (input: T)) {.inline.} =
   if self.isSome:
     callback(self.val)
 
-proc map*[T, R](self: Option[T], callback: proc (input: T): R): Option[R] {.inline.} =
+proc map*[T, R](self: Option[T], callback: proc (input: T): R): Option[R] =
   ## Applies a `callback` function to the value of the `Option` and returns an
   ## `Option` containing the new value.
   ##
@@ -266,7 +262,7 @@ proc map*[T, R](self: Option[T], callback: proc (input: T): R): Option[R] {.inli
   else:
     none(R)
 
-proc flatten*[A](self: Option[Option[A]]): Option[A] {.inline.} =
+proc flatten*[A](self: Option[Option[A]]): Option[A] =
   ## Remove one level of structure in a nested `Option`.
   runnableExamples:
     let a = some(some(42))
@@ -278,7 +274,7 @@ proc flatten*[A](self: Option[Option[A]]): Option[A] {.inline.} =
     none(A)
 
 proc flatMap*[A, B](self: Option[A],
-                    callback: proc (input: A): Option[B]): Option[B] {.inline.} =
+                    callback: proc (input: A): Option[B]): Option[B] =
   ## Applies a `callback` function to the value of the `Option` and returns an
   ## `Option` containing the new value.
   ##
@@ -308,7 +304,7 @@ proc flatMap*[A, B](self: Option[A],
 
   map(self, callback).flatten()
 
-proc filter*[T](self: Option[T], callback: proc (input: T): bool): Option[T] {.inline.} =
+proc filter*[T](self: Option[T], callback: proc (input: T): bool): Option[T] =
   ## Applies a `callback` to the value of the `Option`.
   ##
   ## If the `callback` returns `true`, the option is returned as `Some`.
@@ -333,7 +329,7 @@ proc filter*[T](self: Option[T], callback: proc (input: T): bool): Option[T] {.i
   else:
     self
 
-proc `==`*(a, b: Option): bool {.inline.} =
+proc `==`*(a, b: Option): bool =
   ## Returns `true` if both `Option`s are `None`,
   ## or if they are both `Some` and have equal values.
   runnableExamples:
@@ -363,7 +359,7 @@ proc `$`*[T](self: Option[T]): string =
   else:
     result = "None[" & name(T) & "]"
 
-proc unsafeGet*[T](self: Option[T]): T {.inline.}=
+proc unsafeGet*[T](self: Option[T]): T =
   ## Returns the value of a `some`. Behavior is undefined for `none`.
   ##
   ## **Note:** Use it only when you are **absolutely sure** the value is present
@@ -486,11 +482,6 @@ when isMainModule:
 
       let tmp = option(intref)
       check(sizeof(tmp) == sizeof(ptr int))
-      
-      var prc = proc (x: int): int = x + 1
-      check(option(prc).isSome)
-      prc = nil
-      check(option(prc).isNone)
 
     test "none[T]":
       check(none[int]().isNone)
@@ -513,3 +504,4 @@ when isMainModule:
     test "Ref type with overloaded `==`":
       let p = some(RefPerson.new())
       check p.isSome
+

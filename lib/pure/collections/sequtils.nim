@@ -202,99 +202,36 @@ proc deduplicate*[T](s: openArray[T], isSorted: bool = false): seq[T] =
       for itm in items(s):
         if not result.contains(itm): result.add(itm)
 
-proc minIndex*[T](s: openArray[T]): int {.since: (1, 1).} =
-  ## Returns the index of the minimum value of `s`.
-  ## ``T`` needs to have a ``<`` operator.
+proc zip*[S, T](s1: openArray[S], s2: openArray[T]): seq[tuple[a: S, b: T]] =
+  ## Returns a new sequence with a combination of the two input containers.
+  ##
+  ## The input containers can be of different types.
+  ## If one container is shorter, the remaining items in the longer container
+  ## are discarded.
+  ##
+  ## For convenience you can access the returned tuples through the named
+  ## fields `a` and `b`.
+  ##
   runnableExamples:
     let
-      a = @[1, 2, 3, 4]
-      b = @[6, 5, 4, 3]
-      c = [2, -7, 8, -5]
-      d = "ziggy"
-    assert minIndex(a) == 0
-    assert minIndex(b) == 3
-    assert minIndex(c) == 1
-    assert minIndex(d) == 2
+      short = @[1, 2, 3]
+      long = @[6, 5, 4, 3, 2, 1]
+      words = @["one", "two", "three"]
+      letters = "abcd"
+      zip1 = zip(short, long)
+      zip2 = zip(short, words)
+      zip3 = zip(long, letters)
+    assert zip1 == @[(1, 6), (2, 5), (3, 4)]
+    assert zip2 == @[(1, "one"), (2, "two"), (3, "three")]
+    assert zip3 == @[(a: 6, b: 'a'), (a: 5, b: 'b'), (a: 4, b: 'c'),
+                     (a: 3, b: 'd')]
+    assert zip1[2].b == 4
+    assert zip2[2].b == "three"
 
-  for i in 1..high(s):
-    if s[i] < s[result]: result = i
-
-proc maxIndex*[T](s: openArray[T]): int {.since: (1, 1).} =
-  ## Returns the index of the maximum value of `s`.
-  ## ``T`` needs to have a ``<`` operator.
-  runnableExamples:
-    let
-      a = @[1, 2, 3, 4]
-      b = @[6, 5, 4, 3]
-      c = [2, -7, 8, -5]
-      d = "ziggy"
-    assert maxIndex(a) == 3
-    assert maxIndex(b) == 0
-    assert maxIndex(c) == 2
-    assert maxIndex(d) == 0
-
-  for i in 1..high(s):
-    if s[i] > s[result]: result = i
-
-
-template zipImpl(s1, s2, retType: untyped): untyped =
-  proc zip*[S, T](s1: openArray[S], s2: openArray[T]): retType =
-    ## Returns a new sequence with a combination of the two input containers.
-    ##
-    ## The input containers can be of different types.
-    ## If one container is shorter, the remaining items in the longer container
-    ## are discarded.
-    ##
-    ## **Note**: For Nim 1.0.x and older version, ``zip`` returned a seq of
-    ## named tuple with fields ``a`` and ``b``. For Nim versions 1.1.x and newer,
-    ## ``zip`` returns a seq of unnamed tuples.
-    runnableExamples:
-      let
-        short = @[1, 2, 3]
-        long = @[6, 5, 4, 3, 2, 1]
-        words = @["one", "two", "three"]
-        letters = "abcd"
-        zip1 = zip(short, long)
-        zip2 = zip(short, words)
-      assert zip1 == @[(1, 6), (2, 5), (3, 4)]
-      assert zip2 == @[(1, "one"), (2, "two"), (3, "three")]
-      assert zip1[2][0] == 3
-      assert zip2[1][1] == "two"
-      when (NimMajor, NimMinor) <= (1, 0):
-        let
-          zip3 = zip(long, letters)
-        assert zip3 == @[(a: 6, b: 'a'), (5, 'b'), (4, 'c'), (3, 'd')]
-        assert zip3[0].b == 'a'
-      else:
-        let
-          zip3: seq[tuple[num: int, letter: char]] = zip(long, letters)
-        assert zip3 == @[(6, 'a'), (5, 'b'), (4, 'c'), (3, 'd')]
-        assert zip3[0].letter == 'a'
-
-    var m = min(s1.len, s2.len)
-    newSeq(result, m)
-    for i in 0 ..< m:
-      result[i] = (s1[i], s2[i])
-
-when (NimMajor, NimMinor) <= (1, 0):
-  zipImpl(s1, s2, seq[tuple[a: S, b: T]])
-else:
-  zipImpl(s1, s2, seq[(S, T)])
-
-proc unzip*[S, T](s: openArray[(S, T)]): (seq[S], seq[T]) {.since: (1, 1).} =
-  ## Returns a tuple of two sequences split out from a sequence of 2-field tuples.
-  runnableExamples:
-    let
-      zipped = @[(1, 'a'), (2, 'b'), (3, 'c')]
-      unzipped1 = @[1, 2, 3]
-      unzipped2 = @['a', 'b', 'c']
-    assert zipped.unzip() == (unzipped1, unzipped2)
-    assert zip(unzipped1, unzipped2).unzip() == (unzipped1, unzipped2)
-  result[0] = newSeq[S](s.len)
-  result[1] = newSeq[T](s.len)
-  for i in 0..<s.len:
-    result[0][i] = s[i][0]
-    result[1][i] = s[i][1]
+  var m = min(s1.len, s2.len)
+  newSeq(result, m)
+  for i in 0 ..< m:
+    result[i] = (s1[i], s2[i])
 
 proc distribute*[T](s: seq[T], num: Positive, spread = true): seq[seq[T]] =
   ## Splits and distributes a sequence `s` into `num` sub-sequences.
@@ -480,10 +417,7 @@ proc keepIf*[T](s: var seq[T], pred: proc(x: T): bool {.closure.})
   for i in 0 ..< len(s):
     if pred(s[i]):
       if pos != i:
-        when defined(gcDestructors):
-          s[pos] = move(s[i])
-        else:
-          shallowCopy(s[pos], s[i])
+        shallowCopy(s[pos], s[i])
       inc(pos)
   setLen(s, pos)
 
@@ -497,17 +431,12 @@ proc delete*[T](s: var seq[T]; first, last: Natural) =
     var dest = @[1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1]
     dest.delete(3, 8)
     assert outcome == dest
-  doAssert first <= last
-  if first >= s.len:
-    return
+
   var i = first
   var j = min(len(s), last+1)
   var newLen = len(s)-j+i
   while i < newLen:
-    when defined(gcDestructors):
-      s[i] = move(s[j])
-    else:
-      s[i].shallowCopy(s[j])
+    s[i].shallowCopy(s[j])
     inc(i)
     inc(j)
   setLen(s, newLen)
@@ -532,10 +461,7 @@ proc insert*[T](dest: var seq[T], src: openArray[T], pos = 0) =
 
   # Move items after `pos` to the end of the sequence.
   while j >= pos:
-    when defined(gcDestructors):
-      dest[i] = move(dest[j])
-    else:
-      dest[i].shallowCopy(dest[j])
+    dest[i].shallowCopy(dest[j])
     dec(i)
     dec(j)
   # Insert items from `dest` into `dest` at `pos`
@@ -593,31 +519,9 @@ template keepItIf*(varSeq: seq, pred: untyped) =
     let it {.inject.} = varSeq[i]
     if pred:
       if pos != i:
-        when defined(gcDestructors):
-          varSeq[pos] = move(varSeq[i])
-        else:
-          shallowCopy(varSeq[pos], varSeq[i])
+        shallowCopy(varSeq[pos], varSeq[i])
       inc(pos)
   setLen(varSeq, pos)
-
-since (1, 1):
-  template countIt*(s, pred: untyped): int =
-    ## Returns a count of all the items that fulfilled the predicate.
-    ##
-    ## The predicate needs to be an expression using
-    ## the ``it`` variable for testing, like: ``countIt(@[1, 2, 3], it > 2)``.
-    ##
-    runnableExamples:
-      let numbers = @[-3, -2, -1, 0, 1, 2, 3, 4, 5, 6]
-      iterator iota(n: int): int =
-        for i in 0..<n: yield i
-      assert numbers.countIt(it < 0) == 3
-      assert countIt(iota(10), it < 2) == 2
-
-    var result = 0
-    for it {.inject.} in s:
-      if pred: result += 1
-    result
 
 proc all*[T](s: openArray[T], pred: proc(x: T): bool {.closure.}): bool =
   ## Iterates through a container and checks if every item fulfills the
@@ -943,6 +847,13 @@ template mapIt*(s: typed, op: untyped): untyped =
       result.add(op)
     result
 
+template mapIt*(s, typ, op: untyped): untyped {.error:
+  "Deprecated since v0.12; Use 'mapIt(seq1, op)' - without specifying the type of the returned sequence".} =
+  var result: seq[typ] = @[]
+  for it {.inject.} in items(s):
+    result.add(op)
+  result
+
 template applyIt*(varSeq, op: untyped) =
   ## Convenience template around the mutable ``apply`` proc to reduce typing.
   ##
@@ -1147,29 +1058,18 @@ when isMainModule:
       zip1 = zip(short, long)
       zip2 = zip(short, words)
       zip3 = zip(ashort, along)
+      zip4 = zip(ashort, awords)
+      zip5 = zip(ashort, words)
     assert zip1 == @[(1, 6), (2, 5), (3, 4)]
     assert zip2 == @[(1, "one"), (2, "two"), (3, "three")]
     assert zip3 == @[(1, 6), (2, 5), (3, 4)]
-    assert zip1[2][1] == 4
-    assert zip2[2][1] == "three"
-    assert zip3[2][1] == 4
-    when (NimMajor, NimMinor) <= (1, 0):
-      let
-        # In Nim 1.0.x and older, zip returned a seq of tuple strictly
-        # with fields named "a" and "b".
-        zipAb = zip(ashort, awords)
-      assert zipAb == @[(a: 1, b: "one"), (2, "two"), (3, "three")]
-      assert zipAb[2].b == "three"
-    else:
-      let
-        # As zip returns seq of anonymous tuples, they can be assigned
-        # to any variable that's a sequence of named tuples too.
-        zipXy: seq[tuple[x: int, y: string]] = zip(ashort, awords)
-        zipMn: seq[tuple[m: int, n: string]] = zip(ashort, words)
-      assert zipXy == @[(x: 1, y: "one"), (2, "two"), (3, "three")]
-      assert zipMn == @[(m: 1, n: "one"), (2, "two"), (3, "three")]
-      assert zipXy[2].y == "three"
-      assert zipMn[2].n == "three"
+    assert zip4 == @[(1, "one"), (2, "two"), (3, "three")]
+    assert zip5 == @[(1, "one"), (2, "two"), (3, "three")]
+    assert zip1[2].b == 4
+    assert zip2[2].b == "three"
+    assert zip3[2].b == 4
+    assert zip4[2].b == "three"
+    assert zip5[2].b == "three"
 
   block: # distribute tests
     let numbers = @[1, 2, 3, 4, 5, 6, 7]
@@ -1244,9 +1144,6 @@ when isMainModule:
     assert outcome == dest, """\
     Deleting range 3-9 from [1,1,1,2,2,2,2,2,2,1,1,1,1,1]
     is [1,1,1,1,1,1,1,1]"""
-    var x = @[1, 2, 3]
-    x.delete(100, 100)
-    assert x == @[1, 2, 3]
 
   block: # insert tests
     var dest = @[1, 1, 1, 1, 1, 1, 1, 1]
@@ -1319,10 +1216,10 @@ when isMainModule:
     block:
       let
         numeric = @[1, 2, 3, 4, 5, 6, 7, 8, 9]
-        oddNumbers = toSeq(filter(numeric) do (x: int) -> bool:
+        odd_numbers = toSeq(filter(numeric) do (x: int) -> bool:
           if x mod 2 == 1:
             result = true)
-      assert oddNumbers == @[1, 3, 5, 7, 9]
+      assert odd_numbers == @[1, 3, 5, 7, 9]
 
     block:
       doAssert [1, 2].toSeq == @[1, 2]

@@ -37,7 +37,7 @@ template checkIfInitialized() =
 
 template addImpl(enlarge) {.dirty.} =
   checkIfInitialized()
-  if mustRehash(t): enlarge(t)
+  if mustRehash(t.dataLen, t.counter): enlarge(t)
   var hc: Hash
   var j = rawGetDeep(t, key, hc)
   rawInsert(t, t.data, key, val, hc, j)
@@ -45,7 +45,7 @@ template addImpl(enlarge) {.dirty.} =
 
 template maybeRehashPutImpl(enlarge) {.dirty.} =
   checkIfInitialized()
-  if mustRehash(t):
+  if mustRehash(t.dataLen, t.counter):
     enlarge(t)
     index = rawGetKnownHC(t, key, hc)
   index = -1 - index                  # important to transform for mgetOrPutImpl
@@ -99,7 +99,7 @@ template delImplIdx(t, i) =
         when defined(js):
           t.data[j] = t.data[i]
         else:
-          t.data[j] = move(t.data[i]) # data[j] will be marked EMPTY next loop
+          shallowCopy(t.data[j], t.data[i]) # data[j] will be marked EMPTY next loop
 
 template delImpl() {.dirty.} =
   var hc: Hash
@@ -115,6 +115,7 @@ template clearImpl() {.dirty.} =
   t.counter = 0
 
 template ctAnd(a, b): bool =
+  # pending https://github.com/nim-lang/Nim/issues/13502
   when a:
     when b: true
     else: false
@@ -133,7 +134,7 @@ template initImpl(result: typed, size: int) =
 
 template insertImpl() = # for CountTable
   if t.dataLen == 0: initImpl(t, defaultInitialSize)
-  if mustRehash(t): enlarge(t)
+  if mustRehash(len(t.data), t.counter): enlarge(t)
   ctRawInsert(t, t.data, key, val)
   inc(t.counter)
 

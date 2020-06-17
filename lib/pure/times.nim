@@ -196,7 +196,7 @@ import strutils, math, options
 
 include "system/inclrtl"
 
-when defined(js):
+when defined(JS):
   import jscore
 
   # This is really bad, but overflow checks are broken badly for
@@ -232,7 +232,7 @@ elif defined(posix):
 
   when defined(macosx):
     proc gettimeofday(tp: var Timeval, unused: pointer = nil)
-      {.importc: "gettimeofday", header: "<sys/time.h>", sideEffect.}
+      {.importc: "gettimeofday", header: "<sys/time.h>".}
 
 elif defined(windows):
   import winlean, std/time_t
@@ -254,13 +254,12 @@ elif defined(windows):
       tm_yday*: cint  ## Day of year [0,365].
       tm_isdst*: cint ## Daylight Savings flag.
 
-  proc localtime(a1: var CTime): ptr Tm {.importc, header: "<time.h>", sideEffect.}
+  proc localtime(a1: var CTime): ptr Tm {.importc, header: "<time.h>".}
 
 type
   Month* = enum ## Represents a month. Note that the enum starts at ``1``,
                 ## so ``ord(month)`` will give the month number in the
                 ## range ``1..12``.
-    # mInvalid = (0, "Invalid") # intentionally left out so `items` works
     mJan = (1, "January")
     mFeb = "February"
     mMar = "March"
@@ -297,8 +296,7 @@ when defined(nimHasStyleChecks):
   {.pop.}
 
 type
-  MonthdayRange* = range[0..31]
-    ## 0 represents an invalid day of the month
+  MonthdayRange* = range[1..31]
   HourRange* = range[0..23]
   MinuteRange* = range[0..59]
   SecondRange* = range[0..60]
@@ -592,32 +590,9 @@ proc fromUnix*(unix: int64): Time
 
 proc toUnix*(t: Time): int64 {.benign, tags: [], raises: [], noSideEffect.} =
   ## Convert ``t`` to a unix timestamp (seconds since ``1970-01-01T00:00:00Z``).
-  ## See also `toUnixFloat` for subsecond resolution.
   runnableExamples:
     doAssert fromUnix(0).toUnix() == 0
   t.seconds
-
-proc fromUnixFloat(seconds: float): Time {.benign, tags: [], raises: [], noSideEffect.} =
-  ## Convert a unix timestamp in seconds to a `Time`; same as `fromUnix`
-  ## but with subsecond resolution.
-  runnableExamples:
-    doAssert fromUnixFloat(123456.0) == fromUnixFloat(123456)
-    doAssert fromUnixFloat(-123456.0) == fromUnixFloat(-123456)
-  let secs = seconds.floor
-  let nsecs = (seconds - secs) * 1e9
-  initTime(secs.int64, nsecs.NanosecondRange)
-
-proc toUnixFloat(t: Time): float {.benign, tags: [], raises: [].} =
-  ## Same as `toUnix` but using subsecond resolution.
-  runnableExamples:
-    let t = getTime()
-    # `<` because of rounding errors
-    doAssert abs(t.toUnixFloat().fromUnixFloat - t) < initDuration(nanoseconds = 1000)
-  t.seconds.float + t.nanosecond / convert(Seconds, Nanoseconds, 1)
-
-since((1, 1)):
-  export fromUnixFloat
-  export toUnixFloat
 
 proc fromWinTime*(win: int64): Time =
   ## Convert a Windows file time (100-nanosecond intervals since
@@ -639,19 +614,6 @@ proc isLeapYear*(year: int): bool =
     doAssert not isLeapYear(1900)
   year mod 4 == 0 and (year mod 100 != 0 or year mod 400 == 0)
 
-proc isLeapDay*(t: DateTime): bool {.since: (1,1).} =
-  ## returns whether `t` is a leap day, ie, Feb 29 in a leap year. This matters
-  ## as it affects time offset calculations.
-  runnableExamples:
-    let t = initDateTime(29, mFeb, 2020, 00, 00, 00, utc())
-    doAssert t.isLeapDay
-    doAssert t+1.years-1.years != t
-    let t2 = initDateTime(28, mFeb, 2020, 00, 00, 00, utc())
-    doAssert not t2.isLeapDay
-    doAssert t2+1.years-1.years == t2
-    doAssertRaises(Exception): discard initDateTime(29, mFeb, 2021, 00, 00, 00, utc())
-  t.year.isLeapYear and t.month == mFeb and t.monthday == 29
-
 proc getDaysInMonth*(month: Month, year: int): int =
   ## Get the number of days in ``month`` of ``year``.
   # http://www.dispersiondesign.com/articles/time/number_of_days_in_a_month
@@ -672,7 +634,7 @@ proc getDaysInYear*(year: int): int =
 
 proc assertValidDate(monthday: MonthdayRange, month: Month, year: int)
     {.inline.} =
-  assert monthday > 0 and monthday <= getDaysInMonth(month, year),
+  assert monthday <= getDaysInMonth(month, year),
     $year & "-" & intToStr(ord(month), 2) & "-" & $monthday &
       " is not a valid date"
 
@@ -1075,7 +1037,7 @@ proc zonedTimeFromAdjTime*(zone: Timezone, adjTime: Time): ZonedTime =
 
 proc `$`*(zone: Timezone): string =
   ## Returns the name of the timezone.
-  if zone != nil: result = zone.name
+  zone.name
 
 proc `==`*(zone1, zone2: Timezone): bool =
   ## Two ``Timezone``'s are considered equal if their name is equal.
@@ -1108,7 +1070,7 @@ proc toAdjTime(dt: DateTime): Time =
   seconds.inc dt.second
   result = initTime(seconds, dt.nanosecond)
 
-when defined(js):
+when defined(JS):
   proc localZonedTimeFromTime(time: Time): ZonedTime =
     let jsDate = newDate(time.seconds * 1000)
     let offset = jsDate.getTimezoneOffset() * secondsInMin
@@ -1238,7 +1200,7 @@ proc local*(t: Time): DateTime =
 
 proc getTime*(): Time {.tags: [TimeEffect], benign.} =
   ## Gets the current time as a ``Time`` with up to nanosecond resolution.
-  when defined(js):
+  when defined(JS):
     let millis = newDate().getTime()
     let seconds = convert(Milliseconds, Seconds, millis)
     let nanos = convert(Milliseconds, Nanoseconds,
@@ -1578,14 +1540,9 @@ proc `<=`*(a, b: DateTime): bool =
   ## Returns true if ``a`` happened before or at the same time as ``b``.
   return a.toTime <= b.toTime
 
-proc isDefault[T](a: T): bool =
-  system.`==`(a, default(T))
-
 proc `==`*(a, b: DateTime): bool =
   ## Returns true if ``a`` and ``b`` represent the same point in time.
-  if a.isDefault: b.isDefault
-  elif b.isDefault: false
-  else: a.toTime == b.toTime
+  return a.toTime == b.toTime
 
 proc isStaticInterval(interval: TimeInterval): bool =
   interval.years == 0 and interval.months == 0 and
@@ -2255,9 +2212,19 @@ proc parsePattern(input: string, pattern: FormatPattern, i: var int,
 
 proc toDateTime(p: ParsedTime, zone: Timezone, f: TimeFormat,
                 input: string): DateTime =
-  var year = p.year.get(0)
-  var month = p.month.get(1).Month
-  var monthday = p.monthday.get(1)
+  var month = mJan
+  var year: int
+  var monthday: int
+  # `now()` is an expensive call, so we avoid it when possible
+  (year, month, monthday) =
+    if p.year.isNone or p.month.isNone or p.monthday.isNone:
+      let n = now()
+      (p.year.get(n.year),
+        p.month.get(n.month.int).Month,
+        p.monthday.get(n.monthday))
+    else:
+      (p.year.get(), p.month.get().Month, p.monthday.get())
+
   year =
     case p.era
     of eraUnknown:
@@ -2474,7 +2441,7 @@ proc `$`*(dt: DateTime): string {.tags: [], raises: [], benign.} =
 
 proc `$`*(time: Time): string {.tags: [], raises: [], benign.} =
   ## Converts a `Time` value to a string representation. It will use the local
-  ## time zone and use the format ``yyyy-MM-dd'T'HH:mm:sszzz``.
+  ## time zone and use the format ``yyyy-MM-dd'T'HH-mm-sszzz``.
   runnableExamples:
     let dt = initDateTime(01, mJan, 1970, 00, 00, 00, local())
     let tm = dt.toTime()
@@ -2532,12 +2499,12 @@ proc toTimeInterval*(time: Time): TimeInterval
   initTimeInterval(dt.nanosecond, 0, 0, dt.second, dt.minute, dt.hour,
     dt.monthday, 0, dt.month.ord - 1, dt.year)
 
-when not defined(js):
+when not defined(JS):
   type
     Clock {.importc: "clock_t".} = distinct int
 
   proc getClock(): Clock
-      {.importc: "clock", header: "<time.h>", tags: [TimeEffect], used, sideEffect.}
+      {.importc: "clock", header: "<time.h>", tags: [TimeEffect], used.}
 
   var
     clocksPerSec {.importc: "CLOCKS_PER_SEC", nodecl, used.}: int
@@ -2593,7 +2560,7 @@ when not defined(js):
     else:
       {.error: "unknown OS".}
 
-when defined(js):
+when defined(JS):
   proc epochTime*(): float {.tags: [TimeEffect].} =
     newDate().getTime() / 1000
 
@@ -2698,7 +2665,7 @@ proc fractional*(dur: Duration): Duration {.inline, deprecated.} =
         nanoseconds = 9)
   initDuration(nanoseconds = dur.nanosecond)
 
-when not defined(js):
+when not defined(JS):
   proc unixTimeToWinTime*(time: CTime): int64
       {.deprecated: "Use toWinTime instead".} =
     ## Converts a UNIX `Time` (``time_t``) to a Windows file time
@@ -2719,12 +2686,14 @@ proc initInterval*(seconds, minutes, hours, days, months, years: int = 0):
   initTimeInterval(0, 0, 0, seconds, minutes, hours, days, 0, months, years)
 
 proc fromSeconds*(since1970: float): Time
-    {.tags: [], raises: [], benign, deprecated: "Use fromUnixFloat or fromUnix".} =
+    {.tags: [], raises: [], benign, deprecated.} =
   ## Takes a float which contains the number of seconds since the unix epoch and
   ## returns a time object.
   ##
   ## **Deprecated since v0.18.0:** use ``fromUnix`` instead
-  fromUnixFloat(since1970)
+  let nanos = ((since1970 - since1970.int64.float) *
+    convert(Seconds, Nanoseconds, 1).float).int
+  initTime(since1970.int64, nanos)
 
 proc fromSeconds*(since1970: int64): Time
     {.tags: [], raises: [], benign, deprecated.} =
@@ -2735,9 +2704,11 @@ proc fromSeconds*(since1970: int64): Time
   fromUnix(since1970)
 
 proc toSeconds*(time: Time): float
-    {.tags: [], raises: [], benign, deprecated: "Use toUnixFloat or toUnix".} =
-  ## Returns the time in seconds since the unix epoch, with subsecond resolution.
-  toUnixFloat(time)
+    {.tags: [], raises: [], benign, deprecated.} =
+  ## Returns the time in seconds since the unix epoch.
+  ##
+  ## **Deprecated since v0.18.0:** use ``toUnix`` instead
+  time.seconds.float + time.nanosecond / convert(Seconds, Nanoseconds, 1)
 
 proc getLocalTime*(time: Time): DateTime
     {.tags: [], raises: [], benign, deprecated.} =
@@ -2761,7 +2732,7 @@ proc getTimezone*(): int
   ##
   ## **Deprecated since v0.18.0:** use ``now().utcOffset`` to get the current
   ## utc offset (including DST).
-  when defined(js):
+  when defined(JS):
     return newDate().getTimezoneOffset() * 60
   elif defined(freebsd) or defined(netbsd) or defined(openbsd):
     # This is wrong since it will include DST offsets, but the behavior has

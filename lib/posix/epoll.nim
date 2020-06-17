@@ -7,6 +7,8 @@
 #    distribution, for details about the copyright.
 #
 
+{.deadCodeElim: on.}  # dce option deprecated
+
 from posix import SocketHandle
 
 const
@@ -21,7 +23,6 @@ const
   EPOLLWRBAND* = 0x00000200
   EPOLLMSG* = 0x00000400
   EPOLLRDHUP* = 0x00002000
-  EPOLLEXCLUSIVE* = 1 shl 28
   EPOLLWAKEUP* = 1 shl 29
   EPOLLONESHOT* = 1 shl 30
   EPOLLET* = 1 shl 31

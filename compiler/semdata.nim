@@ -63,7 +63,7 @@ type
       # to the user.
     efWantStmt, efAllowStmt, efDetermineType, efExplain,
     efAllowDestructor, efWantValue, efOperand, efNoSemCheck,
-    efNoEvaluateGeneric, efInCall, efFromHlo, efNoSem2Check,
+    efNoEvaluateGeneric, efInCall, efFromHlo,
     efNoUndeclared
       # Use this if undeclared identifiers should not raise an error during
       # overload resolution.
@@ -103,9 +103,6 @@ type
     semExpr*: proc (c: PContext, n: PNode, flags: TExprFlags = {}): PNode {.nimcall.}
     semTryExpr*: proc (c: PContext, n: PNode, flags: TExprFlags = {}): PNode {.nimcall.}
     semTryConstExpr*: proc (c: PContext, n: PNode): PNode {.nimcall.}
-    computeRequiresInit*: proc (c: PContext, t: PType): bool {.nimcall.}
-    hasUnresolvedArgs*: proc (c: PContext, n: PNode): bool
-
     semOperand*: proc (c: PContext, n: PNode, flags: TExprFlags = {}): PNode {.nimcall.}
     semConstBoolExpr*: proc (c: PContext, n: PNode): PNode {.nimcall.} # XXX bite the bullet
     semOverloadedCall*: proc (c: PContext, n, nOrig: PNode,
@@ -165,10 +162,11 @@ proc getCurrOwner*(c: PContext): PSym =
   result = c.graph.owners[^1]
 
 proc pushOwner*(c: PContext; owner: PSym) =
-  c.graph.owners.add(owner)
+  add(c.graph.owners, owner)
 
 proc popOwner*(c: PContext) =
-  if c.graph.owners.len > 0: setLen(c.graph.owners, c.graph.owners.len - 1)
+  var length = len(c.graph.owners)
+  if length > 0: setLen(c.graph.owners, length - 1)
   else: internalError(c.config, "popOwner")
 
 proc lastOptionEntry*(c: PContext): POptionEntry =
@@ -205,7 +203,7 @@ proc considerGenSyms*(c: PContext; n: PNode) =
       n.sym = s
   else:
     for i in 0..<n.safeLen:
-      considerGenSyms(c, n[i])
+      considerGenSyms(c, n.sons[i])
 
 proc newOptionEntry*(conf: ConfigRef): POptionEntry =
   new(result)
@@ -252,9 +250,11 @@ proc newContext*(graph: ModuleGraph; module: PSym): PContext =
   result.features = graph.config.features
 
 proc inclSym(sq: var seq[PSym], s: PSym) =
-  for i in 0..<sq.len:
+  var L = len(sq)
+  for i in 0 ..< L:
     if sq[i].id == s.id: return
-  sq.add s
+  setLen(sq, L + 1)
+  sq[L] = s
 
 proc addConverter*(c: PContext, conv: PSym) =
   inclSym(c.converters, conv)
@@ -274,12 +274,9 @@ proc addToLib*(lib: PLib, sym: PSym) =
 proc newTypeS*(kind: TTypeKind, c: PContext): PType =
   result = newType(kind, getCurrOwner(c))
 
-proc makePtrType*(owner: PSym, baseType: PType): PType =
-  result = newType(tyPtr, owner)
-  addSonSkipIntLit(result, baseType)
-
 proc makePtrType*(c: PContext, baseType: PType): PType =
-  makePtrType(getCurrOwner(c), baseType)
+  result = newTypeS(tyPtr, c)
+  addSonSkipIntLit(result, baseType)
 
 proc makeTypeWithModifier*(c: PContext,
                            modifier: TTypeKind,
@@ -410,8 +407,8 @@ proc makeRangeType*(c: PContext; first, last: BiggestInt;
                     info: TLineInfo; intType: PType = nil): PType =
   let intType = if intType != nil: intType else: getSysType(c.graph, info, tyInt)
   var n = newNodeI(nkRange, info)
-  n.add newIntTypeNode(first, intType)
-  n.add newIntTypeNode(last, intType)
+  addSon(n, newIntTypeNode(first, intType))
+  addSon(n, newIntTypeNode(last, intType))
   result = newTypeS(tyRange, c)
   result.n = n
   addSonSkipIntLit(result, intType) # basetype of range
@@ -428,16 +425,16 @@ proc illFormedAstLocal*(n: PNode; conf: ConfigRef) =
   localError(conf, n.info, errIllFormedAstX, renderTree(n, {renderNoComments}))
 
 proc checkSonsLen*(n: PNode, length: int; conf: ConfigRef) =
-  if n.len != length: illFormedAst(n, conf)
+  if len(n) != length: illFormedAst(n, conf)
 
 proc checkMinSonsLen*(n: PNode, length: int; conf: ConfigRef) =
-  if n.len < length: illFormedAst(n, conf)
+  if len(n) < length: illFormedAst(n, conf)
 
 proc isTopLevel*(c: PContext): bool {.inline.} =
   result = c.currentScope.depthLevel <= 2
 
 proc pushCaseContext*(c: PContext, caseNode: PNode) =
-  c.p.caseContext.add((caseNode, 0))
+  add(c.p.caseContext, (caseNode, 0))
 
 proc popCaseContext*(c: PContext) =
   discard pop(c.p.caseContext)

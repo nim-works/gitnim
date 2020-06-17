@@ -1,6 +1,6 @@
 discard """
-  errormsg: "cannot prove (i)..(i) disjoint from (i + 1)..(i + 1)"
-  line: 20
+  errormsg: "can prove: i + 1 > 30"
+  line: 21
 """
 
 import threadpool

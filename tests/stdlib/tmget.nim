@@ -104,7 +104,7 @@ block:
 import sets
 
 block:
-  var x = initHashSet[int]()
+  var x = initSet[int]()
   x.incl 5
   try:
     echo x[6]

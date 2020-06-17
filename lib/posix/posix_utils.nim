@@ -11,6 +11,8 @@
 
 # Where possible, contribute OS-independent procs in `os <os.html>`_ instead.
 
+{.deadCodeElim: on.}  # dce option deprecated
+
 import posix
 
 type Uname* = object
@@ -96,3 +98,4 @@ proc mkdtemp*(prefix: string): string =
   if mkdtemp(tmpl) == nil:
     raise newException(OSError, $strerror(errno))
   return $tmpl
+

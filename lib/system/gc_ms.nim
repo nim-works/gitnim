@@ -104,7 +104,7 @@ proc extGetCellType(c: pointer): PNimType {.compilerproc.} =
   # used for code generation concerning debugging
   result = usrToCell(c).typ
 
-proc unsureAsgnRef(dest: PPointer, src: pointer) {.inline, compilerproc.} =
+proc unsureAsgnRef(dest: PPointer, src: pointer) {.inline.} =
   dest[] = src
 
 proc internRefcount(p: pointer): int {.exportc: "getRefcount".} =
@@ -254,7 +254,7 @@ proc forAllChildren(cell: PCell, op: WalkOp) =
     of tyRef: # common case
       forAllChildrenAux(cellToUsr(cell), cell.typ.base, op)
     of tySequence:
-      when not defined(nimSeqsV2):
+      when not defined(gcDestructors):
         var d = cast[ByteAddress](cellToUsr(cell))
         var s = cast[PGenericSeq](d)
         if s != nil:
@@ -304,23 +304,21 @@ proc newObjRC1(typ: PNimType, size: int): pointer {.compilerRtl.} =
   zeroMem(result, size)
   when defined(memProfiler): nimProfile(size)
 
-when not defined(nimSeqsV2):
-  {.push overflowChecks: on.}
+when not defined(gcDestructors):
   proc newSeq(typ: PNimType, len: int): pointer {.compilerRtl.} =
     # `newObj` already uses locks, so no need for them here.
-    let size = len * typ.base.size + GenericSeqSize
+    let size = addInt(mulInt(len, typ.base.size), GenericSeqSize)
     result = newObj(typ, size)
     cast[PGenericSeq](result).len = len
     cast[PGenericSeq](result).reserved = len
     when defined(memProfiler): nimProfile(size)
 
   proc newSeqRC1(typ: PNimType, len: int): pointer {.compilerRtl.} =
-    let size = len * typ.base.size + GenericSeqSize
+    let size = addInt(mulInt(len, typ.base.size), GenericSeqSize)
     result = newObj(typ, size)
     cast[PGenericSeq](result).len = len
     cast[PGenericSeq](result).reserved = len
     when defined(memProfiler): nimProfile(size)
-  {.pop.}
 
   proc growObj(old: pointer, newsize: int, gch: var GcHeap): pointer =
     collectCT(gch, newsize + sizeof(Cell))

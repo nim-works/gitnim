@@ -5,7 +5,8 @@ discard """
 {a, b}'''
 """
 
-import macros
+import
+  macros, strutils
 
 macro outterMacro*(n, blck: untyped): untyped =
   let n = callsite()

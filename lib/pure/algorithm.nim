@@ -327,8 +327,8 @@ proc upperBound*[T](a: openArray[T], key: T): int = upperBound(a, key, cmp[T])
   ## * `lowerBound proc<#lowerBound,openArray[T],T>`_
 
 template `<-` (a, b) =
-  when defined(gcDestructors):
-    a = move b
+  when false:
+    a = b
   elif onlySafeCode:
     shallowCopy(a, b)
   else:
@@ -504,7 +504,7 @@ template sortedByIt*(seq1, op: untyped): untyped =
     # Nested sort
     assert people.sortedByIt((it.age, it.name)) == @[(name: "p2", age: 20),
        (name: "p3", age: 30), (name: "p4", age: 30), (name: "p1", age: 60)]
-  var result = sorted(seq1, proc(x, y: typeof(seq1[0])): int =
+  var result = sorted(seq1, proc(x, y: type(seq1[0])): int =
     var it {.inject.} = x
     let a = op
     it = y
@@ -589,7 +589,9 @@ proc product*[T](x: openArray[seq[T]]): seq[seq[T]] =
       indexes[index] -= 1
     for ni, i in indexes:
       next[ni] = x[ni][i]
-    result.add(next)
+    var res: seq[T]
+    shallowCopy(res, next)
+    result.add(res)
     index = 0
     indexes[index] -= 1
 

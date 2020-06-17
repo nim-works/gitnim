@@ -12,14 +12,7 @@ type
 proc makeObj(): TTestObj =
   result.x = "Hello"
 
-const numIter =
-  # see tests/gc/gcleak2.nim
-  when defined(boehmgc):
-    1_000
-  elif defined(gcMarkAndSweep): 10_000
-  else: 100_000
-
-for i in 1 .. numIter:
+for i in 1 .. 100_000:
   when defined(gcMarkAndSweep) or defined(boehmgc):
     GC_fullcollect()
   var obj = makeObj()

@@ -9,9 +9,10 @@ license       = "BSD"
 
 requires "nim >= 0.12.1"
 
-let
-  callNimble = getEnv("NIMBLE_TEST_BINARY_PATH")
-doAssert callNimble.len != 0, "NIMBLE_TEST_BINARY_PATH not set"
+when defined(windows):
+  let callNimble = "..\\..\\src\\nimble.exe"
+else:
+  let callNimble = "../../src/nimble"
 
 task recurse, "Level 1":
   echo 1

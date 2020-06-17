@@ -1,9 +1,10 @@
 discard """
-  cmd: '''nim c -d:nimAllocStats --newruntime $file'''
+  cmd: '''nim c --newruntime $file'''
   output: '''0
-(allocCount: 6, deallocCount: 6)'''
+3 3  alloc/dealloc pairs: 0'''
 """
 
+import core / allocators
 import system / ansi_c
 
 import random
@@ -96,6 +97,7 @@ proc main() =
       discard
   echo res
 
-dumpAllocStats:
-  main()
+main()
 
+let (a, d) = allocCounters()
+discard cprintf("%ld %ld  alloc/dealloc pairs: %ld\n", a, d, system.allocs)

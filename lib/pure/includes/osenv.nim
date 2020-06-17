@@ -3,8 +3,7 @@
 when not declared(os) and not declared(ospaths):
   {.error: "This is an include file for os.nim!".}
 
-when defined(windows):
-  from parseutils import skipIgnoreCase
+from parseutils import skipIgnoreCase
 
 proc c_getenv(env: cstring): cstring {.
   importc: "getenv", header: "<stdlib.h>".}
@@ -68,7 +67,7 @@ when defined(windows) and not defined(nimscript):
 
 else:
   const
-    useNSGetEnviron = (defined(macosx) and not defined(ios) and not defined(emscripten)) or defined(nimscript)
+    useNSGetEnviron = (defined(macosx) and not defined(ios)) or defined(nimscript)
 
   when useNSGetEnviron:
     # From the manual:
@@ -81,8 +80,6 @@ else:
     # at runtime.
     proc NSGetEnviron(): ptr cstringArray {.
       importc: "_NSGetEnviron", header: "<crt_externs.h>".}
-  elif defined(haiku):
-    var gEnv {.importc: "environ", header: "<stdlib.h>".}: cstringArray
   else:
     var gEnv {.importc: "environ".}: cstringArray
 

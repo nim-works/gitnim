@@ -1,5 +1,4 @@
 os:
-  - windows
   - linux
   - osx
 
@@ -8,17 +7,23 @@ language: c
 env:
   - BRANCH=0.19.6
   - BRANCH=0.20.2
-  - BRANCH=1.0.6
   # This is the latest working Nim version against which Nimble is being tested
-  - BRANCH=#ab525cc48abdbbbed1f772e58e9fe21474f70f07
+  - BRANCH=#2565d3d102efd21ba02ed1f3b96d892fe2637d2b
 
 cache:
   directories:
-    - "$HOME/.choosenim"
+    - "$HOME/.choosenim/toolchains/nim-0.19.6"
+    - "$HOME/.choosenim/toolchains/nim-0.20.2"
 
 install:
-  - curl https://gist.github.com/genotrance/fb53504a4fba88bc5201d3783df5c522/raw/travis.sh -LsSf -o travis.sh
-  - source travis.sh
+  - export CHOOSENIM_CHOOSE_VERSION=$BRANCH
+  - |
+      curl https://nim-lang.org/choosenim/init.sh -sSf > init.sh
+      sh init.sh -y
+
+before_script:
+  - export CHOOSENIM_NO_ANALYTICS=1
+  - export PATH=$HOME/.nimble/bin:$PATH
 
 script:
   - cd tests

@@ -7,7 +7,7 @@ import asyncdispatch
 doAssert(not hasPendingOperations())
 
 proc test() {.async.} =
-  await sleepAsync(50)
+  await sleepAsync(100)
 
 var f = test()
 while not f.finished:

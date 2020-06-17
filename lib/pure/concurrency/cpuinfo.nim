@@ -12,7 +12,10 @@
 include "system/inclrtl"
 
 when not defined(windows):
-  import posix
+  import strutils, posix, os
+
+when defined(linux):
+  import linux
 
 when defined(freebsd) or defined(macosx):
   {.emit:"#include <sys/types.h>".}
@@ -29,7 +32,7 @@ when defined(macosx) or defined(bsd):
     HW_AVAILCPU = 25
     HW_NCPU = 3
   proc sysctl(x: ptr array[0..3, cint], y: cint, z: pointer,
-              a: var csize_t, b: pointer, c: csize_t): cint {.
+              a: var csize, b: pointer, c: int): cint {.
               importc: "sysctl", nodecl.}
 
 when defined(genode):
@@ -73,9 +76,10 @@ proc countProcessors*(): int {.rtl, extern: "ncpi$1".} =
     var
       mib: array[0..3, cint]
       numCPU: int
+      len: csize
     mib[0] = CTL_HW
     mib[1] = HW_AVAILCPU
-    var len = sizeof(numCPU).csize_t
+    len = sizeof(numCPU)
     discard sysctl(addr(mib), 2, addr(numCPU), len, nil, 0)
     if numCPU < 1:
       mib[1] = HW_NCPU
@@ -95,8 +99,3 @@ proc countProcessors*(): int {.rtl, extern: "ncpi$1".} =
   else:
     result = sysconf(SC_NPROCESSORS_ONLN)
   if result <= 0: result = 0
-
-
-runnableExamples:
-  block:
-    doAssert countProcessors() > 0

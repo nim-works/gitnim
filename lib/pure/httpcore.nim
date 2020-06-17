@@ -97,7 +97,6 @@ const
   Http504* = HttpCode(504)
   Http505* = HttpCode(505)
 
-const httpNewLine* = "\c\L"
 const headerLimit* = 10_000
 
 proc newHttpHeaders*(): HttpHeaders =
@@ -106,15 +105,11 @@ proc newHttpHeaders*(): HttpHeaders =
 
 proc newHttpHeaders*(keyValuePairs:
     openArray[tuple[key: string, val: string]]): HttpHeaders =
-  new result
-  result.table = newTable[string, seq[string]]()
+  var pairs: seq[tuple[key: string, val: seq[string]]] = @[]
   for pair in keyValuePairs:
-    let key = pair.key.toLowerAscii()
-    if key in result.table:
-      result.table[key].add(pair.val)
-    else:
-      result.table[key] = @[pair.val]
-
+    pairs.add((pair.key.toLowerAscii(), @[pair.val]))
+  new result
+  result.table = newTable[string, seq[string]](pairs)
 
 proc `$`*(headers: HttpHeaders): string =
   return $headers.table
@@ -290,14 +285,7 @@ proc `$`*(code: HttpCode): string =
 
 proc `==`*(a, b: HttpCode): bool {.borrow.}
 
-proc `==`*(rawCode: string, code: HttpCode): bool
-          {.deprecated: "Deprecated since v1.2; use rawCode == $code instead".} =
-  ## Compare the string form of the status code with a HttpCode
-  ##
-  ## **Note**: According to HTTP/1.1 specification, the reason phrase is
-  ##           optional and should be ignored by the client, making this
-  ##           proc only suitable for comparing the ``HttpCode`` against the
-  ##           string form of itself.
+proc `==`*(rawCode: string, code: HttpCode): bool =
   return cmpIgnoreCase(rawCode, $code) == 0
 
 proc is2xx*(code: HttpCode): bool =

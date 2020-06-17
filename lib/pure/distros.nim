@@ -24,8 +24,6 @@
 ##     foreignDep "lbiblas-dev"
 ##     foreignDep "libvoodoo"
 ##
-##
-## See `packaging <packaging.html>`_ for hints on distributing Nim using OS packages.
 
 from strutils import contains, toLowerAscii
 
@@ -156,9 +154,7 @@ proc detectOsImpl(d: Distribution): bool =
   of Distribution.Posix: result = defined(posix)
   of Distribution.MacOSX: result = defined(macosx)
   of Distribution.Linux: result = defined(linux)
-  of Distribution.Ubuntu:
-    result = "Ubuntu" in release() or ("-" & $d & " ") in uname()
-  of Distribution.Gentoo, Distribution.FreeBSD,
+  of Distribution.Ubuntu, Distribution.Gentoo, Distribution.FreeBSD,
      Distribution.OpenBSD:
     result = ("-" & $d & " ") in uname()
   of Distribution.RedHat:

@@ -18,7 +18,772 @@
 
 <!-- CSS -->
 <title>Nim Compiler User Guide</title>
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<style type="text/css" >
+/*
+Stylesheet for use with Docutils/rst2html.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+
+Modified from Chad Skeeters' rst2html-style
+https://bitbucket.org/cskeeters/rst2html-style/
+
+Modified by Boyd Greenfield and narimiran
+*/
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%; }
+
+body {
+  font-family: "Lato", "Helvetica Neue", "HelveticaNeue", Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 1.125em;
+  line-height: 1.5;
+  color: #222;
+  background-color: #FCFCFC; }
+
+/* Skeleton grid */
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box; }
+
+.column,
+.columns {
+  width: 100%;
+  float: left;
+  box-sizing: border-box;
+  margin-left: 1%;
+}
+
+.column:first-child,
+.columns:first-child {
+  margin-left: 0; }
+
+.three.columns {
+  width: 19%; }
+
+.nine.columns {
+  width: 80.0%; }
+
+.twelve.columns {
+  width: 100%;
+  margin-left: 0; }
+
+@media screen and (max-width: 860px) {
+  .three.columns {
+    display: none;
+  }
+  .nine.columns {
+    width: 98.0%;
+  }
+  body {
+    font-size: 1em;
+    line-height: 1.35;
+  }
+}
+
+cite {
+  font-style: italic !important; }
+
+
+/* Nim search input */
+div#searchInputDiv {
+  margin-bottom: 1em;
+}
+input#searchInput {
+  width: 80%;
+}
+
+/*
+ * Some custom formatting for input forms.
+ * This also fixes input form colors on Firefox with a dark system theme on Linux.
+ */
+input {
+  -moz-appearance: none;
+  color: #333;
+  background-color: #f8f8f8;
+  border: 1px solid #aaa;
+  font-family: "Lato", "Helvetica Neue", "HelveticaNeue", Helvetica, Arial, sans-serif;
+  font-size: 0.9em;
+  padding: 6px;
+}
+input:focus {
+  border: 1px solid #1fa0eb;
+  box-shadow: 0 0 2px #1fa0eb;
+}
+
+/* Docgen styles */
+/* Links */
+a {
+  color: #07b;
+  text-decoration: none;
+}
+
+a span.Identifier {
+  text-decoration: underline;
+  text-decoration-color: #aab;
+}
+
+a.reference-toplevel {
+  font-weight: bold;
+}
+
+a.toc-backref {
+  text-decoration: none;
+  color: #222; }
+
+a.link-seesrc {
+  color: #607c9f;
+  font-size: 0.9em;
+  font-style: italic; }
+
+a:hover,
+a:focus {
+  color: #607c9f;
+  text-decoration: underline; }
+
+a:hover span.Identifier {
+  color: #607c9f;
+}
+
+
+sub,
+sup {
+  position: relative;
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline; }
+
+sup {
+  top: -0.5em; }
+
+sub {
+  bottom: -0.25em; }
+
+img {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  vertical-align: middle;
+  border: 0;
+  -ms-interpolation-mode: bicubic; }
+
+@media print {
+  * {
+    color: black !important;
+    text-shadow: none !important;
+    background: transparent !important;
+    box-shadow: none !important; }
+
+  a,
+  a:visited {
+    text-decoration: underline; }
+
+  a[href]:after {
+    content: " (" attr(href) ")"; }
+
+  abbr[title]:after {
+    content: " (" attr(title) ")"; }
+
+  .ir a:after,
+  a[href^="javascript:"]:after,
+  a[href^="#"]:after {
+    content: ""; }
+
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid; }
+
+  thead {
+    display: table-header-group; }
+
+  tr,
+  img {
+    page-break-inside: avoid; }
+
+  img {
+    max-width: 100% !important; }
+
+  @page {
+    margin: 0.5cm; }
+
+  h1 {
+    page-break-before: always; }
+
+  h1.title {
+    page-break-before: avoid; }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3; }
+
+  h2,
+  h3 {
+    page-break-after: avoid; }
+}
+
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+small {
+  font-size: 85%; }
+
+strong {
+  font-weight: 600;
+  font-size: 0.95em;
+  color: #3c3c3c;
+}
+
+em {
+  font-style: italic; }
+
+h1 {
+  font-size: 1.8em;
+  font-weight: 400;
+  padding-bottom: .25em;
+  border-bottom: 1px solid #aaa;
+  margin-top: 2.5em;
+  margin-bottom: 1em;
+  line-height: 1.2em; }
+
+h1.title {
+  padding-bottom: 1em;
+  border-bottom: 0px;
+  font-size: 2.5em;
+  text-align: center;
+  font-weight: 900;
+  margin-top: 0.75em;
+  margin-bottom: 0em;
+}
+
+h2 {
+  font-size: 1.3em;
+  margin-top: 2em; }
+
+h2.subtitle {
+  text-align: center; }
+
+h3 {
+  font-size: 1.125em;
+  font-style: italic;
+  margin-top: 1.5em; }
+
+h4 {
+  font-size: 1.125em;
+  margin-top: 1em; }
+
+h5 {
+  font-size: 1.125em;
+  margin-top: 0.75em; }
+
+h6 {
+  font-size: 1.1em; }
+
+
+ul,
+ol {
+  padding: 0;
+  margin-top: 0.5em;
+  margin-left: 0.75em; }
+
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+  margin-bottom: 0;
+  margin-left: 1.25em; }
+
+li {
+    list-style-type: circle;
+}
+
+ul.simple-boot li {
+    list-style-type: none;
+    margin-left: 0em;
+    margin-bottom: 0.5em;
+}
+
+ol.simple > li, ul.simple > li {
+  margin-bottom: 0.25em;
+  margin-left: 0.4em }
+
+ul.simple.simple-toc > li {
+    margin-top: 1em;
+}
+
+ul.simple-toc {
+  list-style: none;
+  font-size: 0.9em;
+  margin-left: -0.3em;
+  margin-top: 1em; }
+
+ul.simple-toc > li {
+    list-style-type: none;
+}
+
+ul.simple-toc-section {
+  list-style-type: circle;
+  margin-left: 1em;
+  color: #6c9aae; }
+
+
+ol.arabic {
+  list-style: decimal; }
+
+ol.loweralpha {
+  list-style: lower-alpha; }
+
+ol.upperalpha {
+  list-style: upper-alpha; }
+
+ol.lowerroman {
+  list-style: lower-roman; }
+
+ol.upperroman {
+  list-style: upper-roman; }
+
+ul.auto-toc {
+  list-style-type: none; }
+
+
+dl {
+  margin-bottom: 1.5em; }
+
+dt {
+  margin-bottom: -0.5em;
+  margin-left: 0.0em; }
+
+dd {
+  margin-left: 2.0em;
+  margin-bottom: 3.0em;
+  margin-top: 0.5em; }
+
+
+hr {
+  margin: 2em 0;
+  border: 0;
+  border-top: 1px solid #aaa; }
+
+blockquote {
+  font-size: 0.9em;
+  font-style: italic;
+  padding-left: 0.5em;
+  margin-left: 0;
+  border-left: 5px solid #bbc;
+}
+
+.pre {
+  font-family: "Source Code Pro", Monaco, Menlo, Consolas, "Courier New", monospace;
+  font-weight: 500;
+  font-size: 0.85em;
+  background-color: #f0f3ff;
+  padding-left: 3px;
+  padding-right: 3px;
+  border-radius: 4px;
+}
+
+pre {
+  font-family: "Source Code Pro", Monaco, Menlo, Consolas, "Courier New", monospace;
+  color: #222;
+  font-weight: 500;
+  display: inline-block;
+  box-sizing: border-box;
+  min-width: 100%;
+  padding: 0.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  font-size: 0.85em;
+  white-space: pre !important;
+  overflow-y: hidden;
+  overflow-x: visible;
+  background-color: ghostwhite;
+  border: 1px solid #dde;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px; }
+
+.pre-scrollable {
+  max-height: 340px;
+  overflow-y: scroll; }
+
+
+/* Nim line-numbered tables */
+.line-nums-table {
+  width: 100%;
+  table-layout: fixed; }
+
+table.line-nums-table {
+  border-radius: 4px;
+  border: 1px solid #cccccc;
+  background-color: ghostwhite;
+  border-collapse: separate;
+  margin-top: 15px;
+  margin-bottom: 25px; }
+
+.line-nums-table tbody {
+  border: none; }
+
+.line-nums-table td pre {
+  border: none;
+  background-color: transparent; }
+
+.line-nums-table td.blob-line-nums {
+  width: 28px; }
+
+.line-nums-table td.blob-line-nums pre {
+  color: #b0b0b0;
+  -webkit-filter: opacity(75%);
+  text-align: right;
+  border-color: transparent;
+  background-color: transparent;
+  padding-left: 0px;
+  margin-left: 0px;
+  padding-right: 0px;
+  margin-right: 0px; }
+
+
+table {
+  max-width: 100%;
+  background-color: transparent;
+  margin-top: 0.5em;
+  margin-bottom: 1.5em;
+  border-collapse: collapse;
+  border-color: #ccc;
+  border-spacing: 0;
+  font-size: 0.9em;
+}
+
+table th, table td {
+  padding: 0px 0.5em 0px;
+}
+
+table th {
+  background-color: #e8e8e8;
+  font-weight: bold; }
+
+table th.docinfo-name {
+    background-color: transparent;
+}
+
+table tr:hover {
+  background-color: ghostwhite; }
+
+
+/* rst2html default used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0; }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 !important; }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 !important; }
+
+.last, .with-subtitle {
+  margin-bottom: 0 !important; }
+
+.hidden {
+  display: none; }
+
+blockquote.epigraph {
+  margin: 2em 5em; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em; }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden; }
+
+
+div.figure {
+  margin-left: 2em;
+  margin-right: 2em; }
+
+div.footer, div.header {
+  clear: both;
+  text-align: center;
+  color: #666;
+  font-size: smaller; }
+
+div.footer {
+    padding-top: 5em;
+}
+
+div.line-block {
+  display: block;
+  margin-top: 1em;
+  margin-bottom: 1em; }
+
+div.line-block div.line-block {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 1.5em; }
+
+div.topic {
+  margin: 2em; }
+
+div.search_results {
+  background-color: antiquewhite;
+  margin: 3em;
+  padding: 1em;
+  border: 1px solid #4d4d4d;
+}
+
+div#global-links ul {
+  margin-left: 0;
+  list-style-type: none;
+}
+
+div#global-links > simple-boot {
+    margin-left: 3em;
+}
+
+hr.docutils {
+  width: 75%; }
+
+img.align-left, .figure.align-left, object.align-left {
+  clear: left;
+  float: left;
+  margin-right: 1em; }
+
+img.align-right, .figure.align-right, object.align-right {
+  clear: right;
+  float: right;
+  margin-left: 1em; }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto; }
+
+.align-left {
+  text-align: left; }
+
+.align-center {
+  clear: both;
+  text-align: center; }
+
+.align-right {
+  text-align: right; }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit; }
+
+p.attribution {
+  text-align: right;
+  margin-left: 50%; }
+
+p.caption {
+  font-style: italic; }
+
+p.credits {
+  font-style: italic;
+  font-size: smaller; }
+
+p.label {
+  white-space: nowrap; }
+
+p.rubric {
+  font-weight: bold;
+  font-size: larger;
+  color: maroon;
+  text-align: center; }
+
+p.topic-title {
+  font-weight: bold; }
+
+pre.address {
+  margin-bottom: 0;
+  margin-top: 0;
+  font: inherit; }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em;
+  margin-right: 2em; }
+
+pre.code .ln {
+  color: grey; }
+
+/* line numbers */
+pre.code, code {
+  background-color: #eeeeee; }
+
+pre.code .comment, code .comment {
+  color: #5c6576; }
+
+pre.code .keyword, code .keyword {
+  color: #3B0D06;
+  font-weight: bold; }
+
+pre.code .literal.string, code .literal.string {
+  color: #0c5404; }
+
+pre.code .name.builtin, code .name.builtin {
+  color: #352b84; }
+
+pre.code .deleted, code .deleted {
+  background-color: #DEB0A1; }
+
+pre.code .inserted, code .inserted {
+  background-color: #A3D289; }
+
+span.classifier {
+  font-style: oblique; }
+
+span.classifier-delimiter {
+  font-weight: bold; }
+
+span.option {
+  white-space: nowrap; }
+
+span.problematic {
+  color: #b30000; }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80%; }
+
+span.DecNumber {
+  color: #252dbe; }
+
+span.BinNumber {
+  color: #252dbe; }
+
+span.HexNumber {
+  color: #252dbe; }
+
+span.OctNumber {
+  color: #252dbe; }
+
+span.FloatNumber {
+  color: #252dbe; }
+
+span.Identifier {
+  color: #222; }
+
+span.Keyword {
+  font-weight: 600;
+  color: #5e8f60; }
+
+span.StringLit {
+  color: #a4255b; }
+
+span.LongStringLit {
+  color: #a4255b; }
+
+span.CharLit {
+  color: #a4255b; }
+
+span.EscapeSequence {
+  color: black; }
+
+span.Operator {
+  color: black; }
+
+span.Punctuation {
+  color: black; }
+
+span.Comment, span.LongComment {
+  font-style: italic;
+  font-weight: 400;
+  color: #484a86; }
+
+span.RegularExpression {
+  color: darkviolet; }
+
+span.TagStart {
+  color: darkviolet; }
+
+span.TagEnd {
+  color: darkviolet; }
+
+span.Key {
+  color: #252dbe; }
+
+span.Value {
+  color: #252dbe; }
+
+span.RawData {
+  color: #a4255b; }
+
+span.Assembler {
+  color: #252dbe; }
+
+span.Preprocessor {
+  color: #252dbe; }
+
+span.Directive {
+  color: #252dbe; }
+
+span.Command, span.Rule, span.Hyperlink, span.Label, span.Reference,
+span.Other {
+  color: black; }
+
+/* Pop type, const, proc, and iterator defs in nim def blocks */
+dt pre > span.Identifier, dt pre > span.Operator {
+  color: #155da4;
+  font-weight: 700; }
+
+dt pre > span.Keyword ~ span.Identifier, dt pre > span.Identifier ~ span.Identifier,
+dt pre > span.Operator ~ span.Identifier, dt pre > span.Other ~ span.Identifier {
+  color: inherit;
+  font-weight: inherit; }
+
+/* Nim sprite for the footer (taken from main page favicon) */
+.nim-sprite {
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+  background-position: 0 0;
+  background-size: 16px 16px;
+  -webkit-filter: opacity(50%);
+  background-repeat: no-repeat;
+  background-image: url("data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AAAAAAUAAAAF////AP///wD///8A////AP///wD///8A////AP///wD///8A////AAAAAAIAAABbAAAAlQAAAKIAAACbAAAAmwAAAKIAAACVAAAAWwAAAAL///8A////AP///wD///8A////AAAAABQAAADAAAAAYwAAAA3///8A////AP///wD///8AAAAADQAAAGMAAADAAAAAFP///wD///8A////AP///wAAAACdAAAAOv///wD///8A////AP///wD///8A////AP///wD///8AAAAAOgAAAJ3///8A////AP///wAAAAAnAAAAcP///wAAAAAoAAAASv///wD///8A////AP///wAAAABKAAAAKP///wAAAABwAAAAJ////wD///8AAAAAgQAAABwAAACIAAAAkAAAAJMAAACtAAAAFQAAABUAAACtAAAAkwAAAJAAAACIAAAAHAAAAIH///8A////AAAAAKQAAACrAAAAaP///wD///8AAAAARQAAANIAAADSAAAARf///wD///8AAAAAaAAAAKsAAACk////AAAAADMAAACcAAAAnQAAABj///8A////AP///wAAAAAYAAAAGP///wD///8A////AAAAABgAAACdAAAAnAAAADMAAAB1AAAAwwAAAP8AAADpAAAAsQAAAE4AAAAb////AP///wAAAAAbAAAATgAAALEAAADpAAAA/wAAAMMAAAB1AAAAtwAAAOkAAAD/AAAA/wAAAP8AAADvAAAA3gAAAN4AAADeAAAA3gAAAO8AAAD/AAAA/wAAAP8AAADpAAAAtwAAAGUAAAA/AAAA3wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAADfAAAAPwAAAGX///8A////AAAAAEgAAADtAAAAvwAAAL0AAADGAAAA7wAAAO8AAADGAAAAvQAAAL8AAADtAAAASP///wD///8A////AP///wD///8AAAAAO////wD///8A////AAAAAIcAAACH////AP///wD///8AAAAAO////wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A//8AAP//AAD4HwAA7/cAAN/7AAD//wAAoYUAAJ55AACf+QAAh+EAAAAAAADAAwAA4AcAAP5/AAD//wAA//8AAA==");
+  margin-bottom: -5px; }
+
+span.pragmadots {
+  /* Position: relative frees us up to make the dots
+  look really nice without fucking up the layout and
+  causing bulging in the parent container */
+  position: relative;
+  /* 1px down looks slightly nicer */
+  top: 1px;
+  padding: 2px;
+  background-color: #e8e8e8;
+  border-radius: 4px;
+  margin: 0 2px;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+span.pragmadots:hover {
+  background-color: #DBDBDB;
+}
+span.pragmawrap {
+  display: none;
+}
+
+span.attachedType {
+  display: none;
+  visibility: hidden;
+}
+</style>
 
 <script type="text/javascript" src="dochack.js"></script>
 
@@ -33,37 +798,6 @@ function main() {
       event.target.parentNode.nextElementSibling.style.display = "inline";
     }
   }
-
-  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
-  function switchTheme(e) {
-      if (e.target.checked) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          localStorage.setItem('theme', 'dark');
-      } else {
-          document.documentElement.setAttribute('data-theme', 'light');
-          localStorage.setItem('theme', 'light');
-      }
-  }
-
-  toggleSwitch.addEventListener('change', switchTheme, false);
-
-
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.setAttribute('data-theme', "dark");
-    toggleSwitch.checked = true;
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    document.documentElement.setAttribute('data-theme', "light");
-    toggleSwitch.checked = false;
-  } else {
-    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-    if (currentTheme) {
-      document.documentElement.setAttribute('data-theme', currentTheme);
-
-      if (currentTheme === 'dark') {
-        toggleSwitch.checked = true;
-      }
-    }
-  }
 }
 </script>
 
@@ -74,13 +808,6 @@ function main() {
     <h1 class="title">Nim Compiler User Guide</h1>
     <div class="row">
   <div class="three columns">
-  <div class="theme-switch-wrapper">
-    <label class="theme-switch" for="checkbox">
-      <input type="checkbox" id="checkbox" />
-      <div class="slider round"></div>
-    </label>
-   &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
-  </div>
   <div id="global-links">
     <ul class="simple-boot">
       <li>
@@ -138,7 +865,7 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Author:</th><td> Andreas Rumpf</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.2.2</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.0.7</td></tr>
 </tbody></table><blockquote><p>&quot;Look at you, hacker. A pathetic creature of meat and bone, panting and sweating as you run through my corridors. How can you challenge a perfect, immortal machine?&quot;</p></blockquote>
 
 <h1><a class="toc-backref" id="introduction" href="#introduction">Introduction</a></h1><p>This document describes the usage of the <em>Nim compiler</em> on the different supported platforms. It is not a definition of the Nim programming language (which is covered in the <a class="reference external" href="manual.html">manual</a>).</p>
@@ -192,7 +919,7 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 </table></dd>
 </dl>
-<p>Note, single letter options that take an argument require a colon. E.g. -p:PATH.</p>
+<p>Note, single letter options that take an argument require a colon. E.g. -p:PATH. </p>
 <hr />
 <p>Advanced command line switches are:</p>
 <dl class="docutils"><dt>Advanced commands:</dt>
@@ -274,7 +1001,7 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 <tr><th align="left">--include:PATH</th><td align="left">add an automatically included module</td>
 </tr>
-<tr><th align="left">--nimcache:PATH</th><td align="left">set the path used for generated files see also <a class="reference external" href="https://nim-lang.org/docs/nimc.html#compiler-usage-generated-c-code-directory">https://nim-lang.org/docs/nimc.html#compiler-usage-generated-c-code-directory</a></td>
+<tr><th align="left">--nimcache:PATH</th><td align="left">set the path used for generated files</td>
 </tr>
 <tr><th align="left">-c, --compileOnly:on|off</th><td align="left">compile Nim files only; do not assemble or link</td>
 </tr>
@@ -296,8 +1023,6 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 <tr><th align="left">-l, --passL:OPTION</th><td align="left">pass an option to the linker</td>
 </tr>
-<tr><th align="left">--cc:SYMBOL</th><td align="left">specify the C compiler</td>
-</tr>
 <tr><th align="left">--cincludes:DIR</th><td align="left">modify the C compiler header search path</td>
 </tr>
 <tr><th align="left">--clibdir:DIR</th><td align="left">modify the linker library search path</td>
@@ -305,8 +1030,6 @@ nim command [options] [projectfile] [arguments]</pre>
 <tr><th align="left">--clib:LIBNAME</th><td align="left">link an additional C library (you should omit platform-specific extensions)</td>
 </tr>
 <tr><th align="left">--project</th><td align="left">document the whole project (doc2)</td>
-</tr>
-<tr><th align="left">--docRoot:path</th><td align="left">nim doc --docRoot:/foo --project --outdir:docs /foo/sub/main.nim generates: docs/sub/main.html if path == @pkg, will use nimble file enclosing dir if path == @path, will use first matching dir in --path if path == @default (the default and most useful), will use best match among @pkg,@path. if these are nonexistant, will use project path</td>
 </tr>
 <tr><th align="left">--docSeeSrcUrl:url</th><td align="left">activate 'see source' for doc and doc2 commands (see doc.item.seesrc in config/nimdoc.cfg)</td>
 </tr>
@@ -334,15 +1057,11 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 <tr><th align="left">--excessiveStackTrace:on|off</th><td align="left">stack traces use full file paths</td>
 </tr>
-<tr><th align="left">--stackTraceMsgs:on|off</th><td align="left">enable user defined stack frame msgs via <tt class="docutils literal"><span class="pre">setFrameMsg</span></tt></td>
-</tr>
 <tr><th align="left">--oldNewlines:on|off</th><td align="left">turn on|off the old behaviour of &quot;n&quot;</td>
 </tr>
 <tr><th align="left">--laxStrings:on|off</th><td align="left">when turned on, accessing the zero terminator in strings is allowed; only for backwards compatibility</td>
 </tr>
 <tr><th align="left">--nilseqs:on|off</th><td align="left">allow 'nil' for strings/seqs for backwards compatibility</td>
-</tr>
-<tr><th align="left">--seqsv2:on|off</th><td align="left">use the new string/seq implementation based on destructors</td>
 </tr>
 <tr><th align="left">--oldast:on|off</th><td align="left">use old AST for backwards compatibility</td>
 </tr>
@@ -356,8 +1075,6 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 <tr><th align="left">--gc:refc|markAndSweep|boehm|go|none|regions</th><td align="left">select the GC to use; default is 'refc'</td>
 </tr>
-<tr><th align="left">--exceptions:setjmp|cpp|goto|quirky</th><td align="left">select the exception handling implementation</td>
-</tr>
 <tr><th align="left">--index:on|off</th><td align="left">turn index file generation on|off</td>
 </tr>
 <tr><th align="left">--putenv:key=value</th><td align="left">set an environment variable</td>
@@ -367,6 +1084,8 @@ nim command [options] [projectfile] [arguments]</pre>
 <tr><th align="left">--noNimblePath</th><td align="left">deactivate the Nimble path</td>
 </tr>
 <tr><th align="left">--clearNimblePath</th><td align="left">empty the list of Nimble package search paths</td>
+</tr>
+<tr><th align="left">--noCppExceptions</th><td align="left">use default exception handling with C++ backend</td>
 </tr>
 <tr><th align="left">--cppCompileToNamespace:namespace</th><td align="left">use the provided namespace for the generated C++ code, if no namespace is provided &quot;Nim&quot; will be used</td>
 </tr>
@@ -378,9 +1097,7 @@ nim command [options] [projectfile] [arguments]</pre>
 </tr>
 <tr><th align="left">--dynlibOverrideAll</th><td align="left">disables the effects of the dynlib pragma</td>
 </tr>
-<tr><th align="left">--listCmd</th><td align="left">list the compilation commands; can be combined with <tt class="docutils literal"><span class="pre">--hint:exec:on</span></tt> and <tt class="docutils literal"><span class="pre">--hint:link:on</span></tt></td>
-</tr>
-<tr><th align="left">--asm</th><td align="left">produce assembler code</td>
+<tr><th align="left">--listCmd</th><td align="left">list the commands used to execute external programs</td>
 </tr>
 <tr><th align="left">--parallelBuild:0|1|...</th><td align="left">perform a parallel build value = number of processors (0 for auto-detect)</td>
 </tr>
@@ -389,8 +1106,6 @@ nim command [options] [projectfile] [arguments]</pre>
 <tr><th align="left">--verbosity:0|1|2|3</th><td align="left">set Nim's verbosity level (1 is default)</td>
 </tr>
 <tr><th align="left">--errorMax:N</th><td align="left">stop compilation after N errors; 0 means unlimited</td>
-</tr>
-<tr><th align="left">--maxLoopIterationsVM:N</th><td align="left">set max iterations for all VM loops</td>
 </tr>
 <tr><th align="left">--experimental:$1</th><td align="left">enable experimental language feature</td>
 </tr>
@@ -401,12 +1116,6 @@ nim command [options] [projectfile] [arguments]</pre>
 <tr><th align="left">--newruntime</th><td align="left">use an alternative runtime that uses destructors and that uses a shared heap via -d:useMalloc</td>
 </tr>
 <tr><th align="left">--profiler:on|off</th><td align="left">enable profiling; requires <tt class="docutils literal"><span class="pre">import nimprof</span></tt>, and works better with <tt class="docutils literal"><span class="pre">--stackTrace:on</span></tt> see also <a class="reference external" href="https://nim-lang.github.io/Nim/estp.html">https://nim-lang.github.io/Nim/estp.html</a></td>
-</tr>
-<tr><th align="left">--benchmarkVM:on|off</th><td align="left">enable benchmarking of VM code with cpuTime()</td>
-</tr>
-<tr><th align="left">--sinkInference:on|off</th><td align="left">en-/disable sink parameter inference (default: on)</td>
-</tr>
-<tr><th align="left">--panics:on|off</th><td align="left">turn panics into process terminations (default: off)</td>
 </tr>
 </table></dd>
 </dl>
@@ -464,7 +1173,7 @@ nim command [options] [projectfile] [arguments]</pre>
 
 <h2><a class="toc-backref" id="compiler-usage-configuration-files" href="#compiler-usage-configuration-files">Configuration files</a></h2><p><strong>Note:</strong> The <em>project file name</em> is the name of the <tt class="docutils literal"><span class="pre">.nim</span></tt> file that is passed as a command line argument to the compiler.</p>
 <p>The <tt class="docutils literal"><span class="pre">nim</span></tt> executable processes configuration files in the following directories (in this order; later files overwrite previous settings):</p>
-<ol class="simple"><li><tt class="docutils literal"><span class="pre">$nim/config/nim.cfg</span></tt>, <tt class="docutils literal"><span class="pre">/etc/nim/nim.cfg</span></tt> (UNIX) or <tt class="docutils literal"><span class="pre">&lt;Nim's installation directory&gt;\config\nim.cfg</span></tt> (Windows). This file can be skipped with the <tt class="docutils literal"><span class="pre">--skipCfg</span></tt> command line option.</li>
+<ol class="simple"><li><tt class="docutils literal"><span class="pre">$nim/config/nim.cfg</span></tt>, <tt class="docutils literal"><span class="pre">/etc/nim/nim.cfg</span></tt> (UNIX) or <tt class="docutils literal"><span class="pre">&lt;Nim's installation director&gt;\config\nim.cfg</span></tt> (Windows). This file can be skipped with the <tt class="docutils literal"><span class="pre">--skipCfg</span></tt> command line option.</li>
 <li>If environment variable <tt class="docutils literal"><span class="pre">XDG_CONFIG_HOME</span></tt> is defined, <tt class="docutils literal"><span class="pre">$XDG_CONFIG_HOME/nim/nim.cfg</span></tt> or <tt class="docutils literal"><span class="pre">~/.config/nim/nim.cfg</span></tt> (POSIX) or <tt class="docutils literal"><span class="pre">%APPDATA%/nim/nim.cfg</span></tt> (Windows). This file can be skipped with the <tt class="docutils literal"><span class="pre">--skipUserCfg</span></tt> command line option.</li>
 <li><tt class="docutils literal"><span class="pre">$parentDir/nim.cfg</span></tt> where <tt class="docutils literal"><span class="pre">$parentDir</span></tt> stands for any parent  directory of the project file's path. These files can be skipped with the <tt class="docutils literal"><span class="pre">--skipParentCfg</span></tt> command line option.</li>
 <li><tt class="docutils literal"><span class="pre">$projectDir/nim.cfg</span></tt> where <tt class="docutils literal"><span class="pre">$projectDir</span></tt> stands for the project  file's path. This file can be skipped with the <tt class="docutils literal"><span class="pre">--skipProjCfg</span></tt> command line option.</li>
@@ -503,7 +1212,7 @@ nim c --cc:llvm_gcc --compile_only myfile.nim</pre>
 </p>
 <p>This uses the configuration defined in <tt class="docutils literal"><span class="pre">config\nim.cfg</span></tt> for <tt class="docutils literal"><span class="pre">lvm_gcc</span></tt>.</p>
 <p>If nimcache already contains compiled code from a different compiler for the same project, add the <tt class="docutils literal"><span class="pre">-f</span></tt> flag to force all files to be recompiled.</p>
-<p>The default compiler is defined at the top of <tt class="docutils literal"><span class="pre">config\nim.cfg</span></tt>. Changing this setting affects the compiler used by <tt class="docutils literal"><span class="pre">koch</span></tt> to (re)build Nim.</p>
+<p>The default compiler is defined at the top of <tt class="docutils literal"><span class="pre">config\nim.cfg</span></tt>.  Changing this setting affects the compiler used by <tt class="docutils literal"><span class="pre">koch</span></tt> to (re)build Nim.</p>
 
 <h1><a class="toc-backref" id="cross-compilation" href="#cross-compilation">Cross compilation</a></h1><p>To cross compile, use for example:<pre>
 nim c --cpu:i386 --os:linux --compileOnly --genScript myproject.nim</pre>
@@ -607,18 +1316,12 @@ nim c --dynlibOverride:lua --passL:liblua.lib program.nim</pre>
 
 <h1><a class="toc-backref" id="nim-idetools-integration" href="#nim-idetools-integration">Nim idetools integration</a></h1><p>Nim provides language integration with external IDEs through the idetools command. See the documentation of <a class="reference external" href="idetools.html">idetools</a> for further information.</p>
 
-<h1><a class="toc-backref" id="nim-for-embedded-systems" href="#nim-for-embedded-systems">Nim for embedded systems</a></h1><p>While the default Nim configuration is targeted for optimal performance on modern PC hardware and operating systems with ample memory, it is very well possible to run Nim code and a good part of the Nim standard libraries on small embedded microprocessors with only a few kilobytes of memory.</p>
-<p>A good start is to use the <tt class="docutils literal"><span class="pre">any</span></tt> operating target together with the <tt class="docutils literal"><span class="pre">malloc</span></tt> memory allocator and the <tt class="docutils literal"><span class="pre">arc</span></tt> garbage collector. For example:</p>
-<p><tt class="docutils literal"><span class="pre">nim c --os:any --gc:arc -d:useMalloc [...] x.nim</span></tt></p>
-<ul class="simple"><li><tt class="docutils literal"><span class="pre">--gc:arc</span></tt> will enable the reference counting memory management instead of the default garbage collector. This enables Nim to use heap memory which is required for strings and seqs, for example.</li>
-<li>The <tt class="docutils literal"><span class="pre">--os:any</span></tt> target makes sure Nim does not depend on any specific operating system primitives. Your platform should support only some basic ANSI C library <tt class="docutils literal"><span class="pre">stdlib</span></tt> and <tt class="docutils literal"><span class="pre">stdio</span></tt> functions which should be available on almost any platform.</li>
-<li>The <tt class="docutils literal"><span class="pre">-d:useMalloc</span></tt> option configures Nim to use only the standard C memory manage primitives <tt class="docutils literal"><span class="pre">malloc()</span></tt>, <tt class="docutils literal"><span class="pre">free()</span></tt>, <tt class="docutils literal"><span class="pre">realloc()</span></tt>.</li>
-</ul>
-<p>If your platform does not provide these functions it should be trivial to provide an implementation for them and link these to your program.</p>
-<p>For targets with very restricted memory, it might be beneficial to pass some additional flags to both the Nim compiler and the C compiler and/or linker to optimize the build for size. For example, the following flags can be used when targeting a gcc compiler:</p>
-<p><tt class="docutils literal"><span class="pre">--opt:size --passC:-flto --passL:-flto</span></tt></p>
-<p>The <tt class="docutils literal"><span class="pre">--opt:size</span></tt> flag instructs Nim to optimize code generation for small size (with the help of the C compiler), the <tt class="docutils literal"><span class="pre">flto</span></tt> flags enable link-time optimization in the compiler and linker.</p>
-<p>Check the <tt class="docutils literal"><span class="pre">Cross compilation</span></tt> section for instructions how to compile the program for your target.</p>
+<h1><a class="toc-backref" id="nim-for-embedded-systems" href="#nim-for-embedded-systems">Nim for embedded systems</a></h1><p>The standard library can be avoided to a point where C code generation for 16bit micro controllers is feasible. Use the <span id="standalone_1">standalone</span> target (<tt class="docutils literal"><span class="pre">--os:standalone</span></tt>) for a bare bones standard library that lacks any OS features.</p>
+<p>To make the compiler output code for a 16bit target use the <tt class="docutils literal"><span class="pre">--cpu:avr</span></tt> target.</p>
+<p>For example, to generate code for an <span id="avr_1">AVR</span> processor use this command:<pre>
+nim c --cpu:avr --os:standalone --genScript x.nim</pre>
+</p>
+<p>For the <tt class="docutils literal"><span class="pre">standalone</span></tt> target one needs to provide a file <tt class="docutils literal"><span class="pre">panicoverride.nim</span></tt>. See <tt class="docutils literal"><span class="pre">tests/manyloc/standalone/panicoverride.nim</span></tt> for an example implementation.  Additionally, users should specify the amount of heap space to use with the <tt class="docutils literal"><span class="pre">-d:StandaloneHeapSize=&lt;size&gt;</span></tt> command line switch.  Note that the total heap size will be <tt class="docutils literal"><span class="pre">&lt;size&gt; * sizeof(float64)</span></tt>.</p>
 
 <h1><a class="toc-backref" id="nim-for-realtime-systems" href="#nim-for-realtime-systems">Nim for realtime systems</a></h1><p>See the documentation of Nim's soft realtime <a class="reference external" href="gc.html">GC</a> for further information.</p>
 
@@ -666,7 +1369,7 @@ nim c --dynlibOverride:lua --passL:liblua.lib program.nim</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-16 18:38:31 UTC</small>
+        <small>Made with Nim. Generated: 2020-06-17 02:41:06 UTC</small>
       </div>
     </div>
   </div>

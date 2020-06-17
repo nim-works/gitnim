@@ -22,7 +22,4 @@ import unicode
 import uri
 import macros
 
-block:
-  doAssert "./foo//./bar/".normalizedPath == "foo/bar".unixToNativePath
-
 echo "Nimscript imports are successful."

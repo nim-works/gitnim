@@ -1,7 +1,6 @@
 discard """
-  errormsg: '''ambiguous call'''
-  line: 10
-  disabled: "32bit"
+  errormsg: '''ambiguous call; both foobar.async'''
+  line: 9
 """
 
 import foobar

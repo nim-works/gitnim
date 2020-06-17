@@ -12,7 +12,7 @@ type
 
 const
   ThreadsCount = 129
-  SleepTime = 250
+  SleepTime = 1000
 
 proc worker(p: Marker) {.thread.} =
   acquire(p.lock)

@@ -1,5 +1,7 @@
 import  macros
 
+from uri import `/`
+
 macro test*(a: untyped): untyped =
   var nodes: tuple[a, b: int]
   nodes.a = 4
@@ -20,6 +22,7 @@ macro test*(a: untyped): untyped =
 test:
   "hi"
 
+import strutils
 
 template assertNot(arg: untyped): untyped =
   assert(not(arg))
@@ -76,22 +79,6 @@ static:
   assert fooSym.kind in {nnkOpenSymChoice, nnkClosedSymChoice}
   assert    fooSym.eqIdent("fOO")
   assertNot fooSym.eqIdent("bar")
-
-  # eqIdent on exported and backtick quoted identifiers
-  let procName = ident("proc")
-  let quoted = nnkAccQuoted.newTree(procName)
-  let exported = nnkPostfix.newTree(ident"*", procName)
-  let exportedQuoted = nnkPostfix.newTree(ident"*", quoted)
-
-  let nodes = @[procName, quoted, exported, exportedQuoted]
-
-  for i in 0 ..< nodes.len:
-    for j in 0 ..< nodes.len:
-      doAssert eqIdent(nodes[i], nodes[j])
-
-  for node in nodes:
-    doAssert eqIdent(node, "proc")
-
 
   var empty: NimNode
   var myLit = newLit("str")

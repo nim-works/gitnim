@@ -12,9 +12,6 @@ var installDir = rootDir / "tests" / "nimbleDir"
 const path = "../src/nimble"
 const stringNotFound = -1
 
-# Set env var to propagate nimble binary path
-putEnv("NIMBLE_TEST_BINARY_PATH", nimblePath)
-
 # Clear nimble dir.
 removeDir(installDir)
 createDir(installDir)
@@ -38,7 +35,7 @@ proc execNimble(args: varargs[string]): tuple[output: string, exitCode: int] =
   var quotedArgs = @args
   quotedArgs.insert("--nimbleDir:" & installDir)
   quotedArgs.insert(nimblePath)
-  quotedArgs = quotedArgs.map((x: string) => x.quoteShell)
+  quotedArgs = quotedArgs.map((x: string) => ("\"" & x & "\""))
 
   let path {.used.} = getCurrentDir().parentDir() / "src"
 
@@ -483,17 +480,17 @@ test "issue #349":
   ]
 
   proc checkName(name: string) =
+    when defined(windows):
+      if name.toLowerAscii() in @["con", "nul"]:
+        return
     let (outp, code) = execNimble("init", "-y", name)
     let msg = outp.strip.processOutput()
     check code == QuitFailure
     check inLines(msg,
       "\"$1\" is an invalid package name: reserved name" % name)
-    try:
-      removeFile(name.changeFileExt("nimble"))
-      removeDir("src")
-      removeDir("tests")
-    except OSError:
-      discard
+    removeFile(name.changeFileExt("nimble"))
+    removeDir("src")
+    removeDir("tests")
 
   for reserved in reservedNames:
     checkName(reserved.toUpperAscii())
@@ -933,8 +930,7 @@ suite "nimble run":
         "blahblah", # The command to run
       )
       check exitCode == QuitFailure
-      check output.contains("Binary '$1' is not defined in 'run' package." %
-                            "blahblah".changeFileExt(ExeExt))
+      check output.contains("Binary 'blahblah' is not defined in 'run' package.")
 
   test "Parameters passed to executable":
     cd "run":
@@ -946,53 +942,8 @@ suite "nimble run":
         "check" # Second argument passed to the executed command.
       )
       check exitCode == QuitSuccess
-      check output.contains("tests$1run$1$2 --debug check" %
-                            [$DirSep, "run".changeFileExt(ExeExt)])
+      check output.contains("tests/run/run --debug check")
       check output.contains("""Testing `nimble run`: @["--debug", "check"]""")
-
-  test "Parameters not passed to single executable":
-    cd "run":
-      var (output, exitCode) = execNimble(
-        "--debug", # Flag to enable debug verbosity in Nimble
-        "run", # Run command invokation
-        "--debug" # First argument passed to the executed command
-      )
-      check exitCode == QuitSuccess
-      check output.contains("tests$1run$1$2 --debug" %
-                            [$DirSep, "run".changeFileExt(ExeExt)])
-      check output.contains("""Testing `nimble run`: @["--debug"]""")
-
-  test "Parameters passed to single executable":
-    cd "run":
-      var (output, exitCode) = execNimble(
-        "--debug", # Flag to enable debug verbosity in Nimble
-        "run", # Run command invokation
-        "--", # Flag to set run file to "" before next argument
-        "--debug", # First argument passed to the executed command
-        "check" # Second argument passed to the executed command.
-      )
-      check exitCode == QuitSuccess
-      check output.contains("tests$1run$1$2 --debug check" %
-                            [$DirSep, "run".changeFileExt(ExeExt)])
-      check output.contains("""Testing `nimble run`: @["--debug", "check"]""")
-
-  test "Executable output is shown even when not debugging":
-    cd "run":
-      var (output, exitCode) =
-        execNimble("run", "run", "--option1", "arg1")
-      check exitCode == QuitSuccess
-      check output.contains("""Testing `nimble run`: @["--option1", "arg1"]""")
-
-  test "Quotes and whitespace are well handled":
-    cd "run":
-      var (output, exitCode) = execNimble(
-        "run", "run", "\"", "\'", "\t", "arg with spaces"
-      )
-      check exitCode == QuitSuccess
-      check output.contains(
-        """Testing `nimble run`: @["\"", "\'", "\t", "arg with spaces"]"""
-      )
-
 
 test "NimbleVersion is defined":
   cd "nimbleVersionDefine":
@@ -1043,18 +994,3 @@ test "compilation without warnings":
     check exitCode == QuitSuccess
     linesWithWarningsCount += checkOutput(output)
   check linesWithWarningsCount == 0
-
-
-suite "Package Installation":
-
-  # When building, any newly installed packages should be referenced via the path that they get permanently installed at.
-  test "issue799":
-    cd "issue799":
-      let (build_output, build_code) = execNimbleYes("--verbose", "build")
-      check build_code == 0
-      var build_results = processOutput(build_output)
-      build_results.keepItIf(unindent(it).startsWith("Executing"))
-      for build_line in build_results:
-        if build_line.contains("issue799"):
-          let pkg_installed_path = "--path:\"" & installDir / "pkgs" / "nimble-#head" & "\""
-          check build_line.contains(pkg_installed_path)

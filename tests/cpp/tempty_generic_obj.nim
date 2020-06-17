@@ -36,9 +36,9 @@ proc bar(): VectorAlt[cstring] =
 var x = foo()
 var y = bar()
 
-proc init[T; Self: Vector[T]](_: typedesc[Self], n: csize_t): Vector[T]
+proc init[T; Self: Vector[T]](_: typedesc[Self], n: csize): Vector[T]
   {.importcpp: "std::vector<'*0>(@)", header: "<vector>", constructor, nodecl.}
-proc size[T](x: Vector[T]): csize_t
+proc size[T](x: Vector[T]): csize
   {.importcpp: "#.size()", header: "<vector>", nodecl.}
 
 var z = Vector[int16].init(32)

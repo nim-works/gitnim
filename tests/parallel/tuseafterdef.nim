@@ -1,7 +1,6 @@
 discard """
   errormsg: "(k)..(k) not disjoint from (k)..(k)"
   line: 23
-  action: compile
 """
 
 # bug #1597

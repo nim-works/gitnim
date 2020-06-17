@@ -16,7 +16,6 @@ from math import sqrt, ln, log10, log2, exp, round, arccos, arcsin,
 from os import getEnv, existsEnv, dirExists, fileExists, putEnv, walkDir, getAppFilename
 from md5 import getMD5
 from sighashes import symBodyDigest
-from times import cpuTime
 
 from hashes import hash
 
@@ -25,9 +24,6 @@ template mathop(op) {.dirty.} =
 
 template osop(op) {.dirty.} =
   registerCallback(c, "stdlib.os." & astToStr(op), `op Wrapper`)
-
-template timesop(op) {.dirty.} =
-  registerCallback(c, "stdlib.times." & astToStr(op), `op Wrapper`)
 
 template systemop(op) {.dirty.} =
   registerCallback(c, "stdlib.system." & astToStr(op), `op Wrapper`)
@@ -91,7 +87,7 @@ template wrapDangerous(op, modop) {.dirty.} =
 
 proc getCurrentExceptionMsgWrapper(a: VmArgs) {.nimcall.} =
   setResult(a, if a.currentException.isNil: ""
-               else: a.currentException[3].skipColon.strVal)
+               else: a.currentException.sons[3].skipColon.strVal)
 
 proc getCurrentExceptionWrapper(a: VmArgs) {.nimcall.} =
   setResult(a, a.currentException)
@@ -101,36 +97,6 @@ proc staticWalkDirImpl(path: string, relative: bool): PNode =
   for k, f in walkDir(path, relative):
     result.add newTree(nkTupleConstr, newIntNode(nkIntLit, k.ord),
                               newStrNode(nkStrLit, f))
-
-when defined(nimHasInvariant):
-  from std / compilesettings import SingleValueSetting, MultipleValueSetting
-
-  proc querySettingImpl(a: VmArgs, conf: ConfigRef, switch: BiggestInt): string =
-    case SingleValueSetting(switch)
-    of arguments: result = conf.arguments
-    of outFile: result = conf.outFile.string
-    of outDir: result = conf.outDir.string
-    of nimcacheDir: result = conf.getNimcacheDir().string
-    of projectName: result = conf.projectName
-    of projectPath: result = conf.projectPath.string
-    of projectFull: result = conf.projectFull.string
-    of command: result = conf.command
-    of commandLine: result = conf.commandLine
-    of linkOptions: result = conf.linkOptions
-    of compileOptions: result = conf.compileOptions
-    of ccompilerPath: result = conf.cCompilerPath
-
-  proc querySettingSeqImpl(a: VmArgs, conf: ConfigRef, switch: BiggestInt): seq[string] =
-    template copySeq(field: untyped): untyped =
-      for i in field: result.add i.string
-
-    case MultipleValueSetting(switch)
-    of nimblePaths: copySeq(conf.nimblePaths)
-    of searchPaths: copySeq(conf.searchPaths)
-    of lazyPaths: copySeq(conf.lazyPaths)
-    of commandArgs: result = conf.commandArgs
-    of cincludes: copySeq(conf.cIncludes)
-    of clibs: copySeq(conf.cLibs)
 
 proc registerAdditionalOps*(c: PCtx) =
   proc gorgeExWrapper(a: VmArgs) =
@@ -182,11 +148,6 @@ proc registerAdditionalOps*(c: PCtx) =
     systemop getCurrentException
     registerCallback c, "stdlib.*.staticWalkDir", proc (a: VmArgs) {.nimcall.} =
       setResult(a, staticWalkDirImpl(getString(a, 0), getBool(a, 1)))
-    when defined(nimHasInvariant):
-      registerCallback c, "stdlib.compilesettings.querySetting", proc (a: VmArgs) {.nimcall.} =
-        setResult(a, querySettingImpl(a, c.config, getInt(a, 0)))
-      registerCallback c, "stdlib.compilesettings.querySettingSeq", proc (a: VmArgs) {.nimcall.} =
-        setResult(a, querySettingSeqImpl(a, c.config, getInt(a, 0)))
 
     if defined(nimsuggest) or c.config.cmd == cmdCheck:
       discard "don't run staticExec for 'nim suggest'"
@@ -226,7 +187,7 @@ proc registerAdditionalOps*(c: PCtx) =
     let ePos = a.getInt(2).int
     let arr = a.getNode(0)
     var bytes = newSeq[byte](arr.len)
-    for i in 0..<arr.len:
+    for i in 0 ..< arr.len:
       bytes[i] = byte(arr[i].intVal and 0xff)
 
     var res = hashes.hash(bytes, sPos, ePos)
@@ -237,9 +198,3 @@ proc registerAdditionalOps*(c: PCtx) =
 
   registerCallback c, "stdlib.hashes.hashVmImplByte", hashVmImplByte
   registerCallback c, "stdlib.hashes.hashVmImplChar", hashVmImplByte
-
-  if optBenchmarkVM in c.config.globalOptions:
-    wrap0(cpuTime, timesop)
-  else:
-    proc cpuTime(): float = 5.391245e-44  # Randomly chosen
-    wrap0(cpuTime, timesop)

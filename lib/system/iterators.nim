@@ -217,38 +217,45 @@ iterator mitems*(a: var string): var char {.inline.} =
 
 
 iterator fields*[T: tuple|object](x: T): RootObj {.
-  magic: "Fields", noSideEffect.} =
+  magic: "Fields", noSideEffect.}
   ## Iterates over every field of `x`.
   ##
   ## **Warning**: This really transforms the 'for' and unrolls the loop.
   ## The current implementation also has a bug
   ## that affects symbol binding in the loop body.
-  runnableExamples:
-    var t = (1, "foo")
-    for v in fields(t): v = default(type(v))
-    doAssert t == (0, "")
-
-iterator fields*[S:tuple|object, T:tuple|object](x: S, y: T): tuple[key: string, val: RootObj] {.
-  magic: "Fields", noSideEffect.} =
+iterator fields*[S:tuple|object, T:tuple|object](x: S, y: T): tuple[a, b: RootObj] {.
+  magic: "Fields", noSideEffect.}
   ## Iterates over every field of `x` and `y`.
   ##
   ## **Warning**: This really transforms the 'for' and unrolls the loop.
   ## The current implementation also has a bug that affects symbol binding
   ## in the loop body.
-  runnableExamples:
-    var t1 = (1, "foo")
-    var t2 = default(type(t1))
-    for v1, v2 in fields(t1, t2): v2 = v1
-    doAssert t1 == t2
-
-iterator fieldPairs*[T: tuple|object](x: T): tuple[key: string, val: RootObj] {.
-  magic: "FieldPairs", noSideEffect.} =
+iterator fieldPairs*[T: tuple|object](x: T): RootObj {.
+  magic: "FieldPairs", noSideEffect.}
   ## Iterates over every field of `x` returning their name and value.
   ##
   ## When you iterate over objects with different field types you have to use
   ## the compile time ``when`` instead of a runtime ``if`` to select the code
   ## you want to run for each type. To perform the comparison use the `is
-  ## operator <manual.html#generics-is-operator>`_.
+  ## operator <manual.html#generics-is-operator>`_. Example:
+  ##
+  ## .. code-block:: Nim
+  ##   type
+  ##     Custom = object
+  ##       foo: string
+  ##       bar: bool
+  ##
+  ##   proc `$`(x: Custom): string =
+  ##     result = "Custom:"
+  ##     for name, value in x.fieldPairs:
+  ##       when value is bool:
+  ##         result.add("\n\t" & name & " is " & $value)
+  ##       else:
+  ##         if value.isNil:
+  ##           result.add("\n\t" & name & " (nil)")
+  ##         else:
+  ##           result.add("\n\t" & name & " '" & value & "'")
+  ##
   ## Another way to do the same without ``when`` is to leave the task of
   ## picking the appropriate code to a secondary proc which you overload for
   ## each field type and pass the `value` to.
@@ -256,33 +263,12 @@ iterator fieldPairs*[T: tuple|object](x: T): tuple[key: string, val: RootObj] {.
   ## **Warning**: This really transforms the 'for' and unrolls the loop. The
   ## current implementation also has a bug that affects symbol binding in the
   ## loop body.
-  runnableExamples:
-    type
-      Custom = object
-        foo: string
-        bar: bool
-    proc `$`(x: Custom): string =
-      result = "Custom:"
-      for name, value in x.fieldPairs:
-        when value is bool:
-          result.add("\n\t" & name & " is " & $value)
-        else:
-          result.add("\n\t" & name & " '" & value & "'")
 
 iterator fieldPairs*[S: tuple|object, T: tuple|object](x: S, y: T): tuple[
-  key: string, a, b: RootObj] {.
-  magic: "FieldPairs", noSideEffect.} =
+  a, b: RootObj] {.
+  magic: "FieldPairs", noSideEffect.}
   ## Iterates over every field of `x` and `y`.
   ##
   ## **Warning**: This really transforms the 'for' and unrolls the loop.
   ## The current implementation also has a bug that affects symbol binding
   ## in the loop body.
-  runnableExamples:
-    type Foo = object
-      x1: int
-      x2: string
-    var a1 = Foo(x1: 12, x2: "abc")
-    var a2: Foo
-    for name, v1, v2 in fieldPairs(a1, a2):
-      when name == "x2": v2 = v1
-    doAssert a2 == Foo(x1: 0, x2: "abc")

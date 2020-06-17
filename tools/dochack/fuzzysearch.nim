@@ -5,6 +5,7 @@
 #
 import strutils
 import math
+import macros
 
 
 const
@@ -131,9 +132,6 @@ proc fuzzyMatch*(pattern, str: cstring) : tuple[score: int, matched: bool] =
         transition(CharDiff)
 
     strIndex += 1
-
-  if patIndex == pattern.len and (strIndex == str.len or str[strIndex] notin Letters):
-    score += 10
 
   result = (
     score:   max(0, score),

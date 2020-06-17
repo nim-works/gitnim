@@ -2,7 +2,8 @@ discard """
   output: "after"
 """
 
-import macros
+import
+  macros, strutils
 
 macro test_macro*(s: string, n: untyped): untyped =
   result = newNimNode(nnkStmtList)

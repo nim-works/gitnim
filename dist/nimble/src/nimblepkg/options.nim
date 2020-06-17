@@ -51,13 +51,12 @@ type
       search*: seq[string] # Search string.
     of actionInit, actionDump:
       projName*: string
-      vcsOption*: string
     of actionCompile, actionDoc, actionBuild:
       file*: string
       backend*: string
       compileOptions: seq[string]
     of actionRun:
-      runFile: Option[string]
+      runFile: string
       compileFlags: seq[string]
       runFlags*: seq[string]
     of actionCustom:
@@ -81,19 +80,17 @@ Commands:
   init         [pkgname]          Initializes a new Nimble project in the
                                   current directory or if a name is provided a
                                   new directory of the same name.
-               --git
-               --hg               Create a git or hg repo in the new nimble project.
   publish                         Publishes a package on nim-lang/packages.
                                   The current working directory needs to be the
                                   toplevel directory of the Nimble package.
   uninstall    [pkgname, ...]     Uninstalls a list of packages.
                [-i, --inclDeps]   Uninstall package and dependent package(s).
   build        [opts, ...] [bin]  Builds a package.
-  run          [opts, ...] [bin]  Builds and runs a package.
-                                  Binary needs to be specified after any
-                                  compilation options if there are several
-                                  binaries defined, any flags after the binary
-                                  or -- arg are passed to the binary when it is run.
+  run          [opts, ...] bin    Builds and runs a package.
+                                  A binary name needs
+                                  to be specified after any compilation options,
+                                  any flags after the binary name are passed to
+                                  the binary when it is run.
   c, cc, js    [opts, ...] f.nim  Builds a file inside a package. Passes options
                                   to the Nim compiler.
   test                            Compiles and executes tests
@@ -204,10 +201,8 @@ proc initAction*(options: var Options, key: string) =
     else: options.action.backend = keyNorm
   of actionInit:
     options.action.projName = ""
-    options.action.vcsOption = ""
   of actionDump:
     options.action.projName = ""
-    options.action.vcsOption = ""
     options.forcePrompts = forcePromptYes
   of actionRefresh:
     options.action.optionalURL = ""
@@ -266,12 +261,6 @@ proc parseCommand*(key: string, result: var Options) =
   result.action = Action(typ: parseActionType(key))
   initAction(result, key)
 
-proc setRunOptions(result: var Options, key, val: string, isArg: bool) =
-  if result.action.runFile.isNone() and (isArg or val == "--"):
-    result.action.runFile = some(key)
-  else:
-    result.action.runFlags.add(val)
-
 proc parseArgument*(key: string, result: var Options) =
   case result.action.typ
   of actionNil:
@@ -303,7 +292,10 @@ proc parseArgument*(key: string, result: var Options) =
   of actionBuild:
     result.action.file = key
   of actionRun:
-    result.setRunOptions(key, key, true)
+    if result.action.runFile.len == 0:
+      result.action.runFile = key
+    else:
+      result.action.runFlags.add(key)
   of actionCustom:
     result.action.arguments.add(key)
   else:
@@ -357,12 +349,6 @@ proc parseFlag*(flag, val: string, result: var Options, kind = cmdLongOption) =
       result.action.passNimFlags.add(val)
     else:
       wasFlagHandled = false
-  of actionInit:
-    case f
-    of "git", "hg":
-      result.action.vcsOption = f
-    else:
-      wasFlagHandled = false
   of actionUninstall:
     case f
     of "incldeps", "i":
@@ -373,8 +359,7 @@ proc parseFlag*(flag, val: string, result: var Options, kind = cmdLongOption) =
     if not isGlobalFlag:
       result.action.compileOptions.add(getFlagString(kind, flag, val))
   of actionRun:
-    result.showHelp = false
-    result.setRunOptions(flag, getFlagString(kind, flag, val), false)
+    result.action.runFlags.add(getFlagString(kind, flag, val))
   of actionCustom:
     if result.action.command.normalize == "test":
       if f == "continue" or f == "c":
@@ -386,8 +371,7 @@ proc parseFlag*(flag, val: string, result: var Options, kind = cmdLongOption) =
   if not wasFlagHandled and not isGlobalFlag:
     result.unknownFlags.add((kind, flag, val))
 
-proc initOptions*(): Options =
-  # Exported for choosenim
+proc initOptions(): Options =
   Options(
     action: Action(typ: actionNil),
     pkgInfoCache: newTable[string, PackageInfo](),
@@ -444,7 +428,7 @@ proc parseCmdLine*(): Options =
       else:
         parseArgument(key, result)
     of cmdLongOption, cmdShortOption:
-        parseFlag(key, val, result, kind)
+      parseFlag(key, val, result, kind)
     of cmdEnd: assert(false) # cannot happen
 
   handleUnknownFlags(result)
@@ -529,23 +513,15 @@ proc getCompilationFlags*(options: Options): seq[string] =
   var opt = options
   return opt.getCompilationFlags()
 
-proc getCompilationBinary*(options: Options, pkgInfo: PackageInfo): Option[string] =
+proc getCompilationBinary*(options: Options): Option[string] =
   case options.action.typ
   of actionBuild, actionDoc, actionCompile:
     let file = options.action.file.changeFileExt("")
     if file.len > 0:
       return some(file)
   of actionRun:
-    let optRunFile = options.action.runFile
-    let runFile =
-      if optRunFile.get("").len > 0:
-        optRunFile.get()
-      elif pkgInfo.bin.len == 1:
-        pkgInfo.bin[0]
-      else:
-        ""
-
+    let runFile = options.action.runFile.changeFileExt(ExeExt)
     if runFile.len > 0:
-      return some(runFile.changeFileExt(ExeExt))
+      return some(runFile)
   else:
     discard

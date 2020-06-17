@@ -151,7 +151,8 @@
 
 include "system/inclrtl"
 
-import os
+import
+  os, strutils
 
 type
   CmdLineKind* = enum ## The detected command line token.

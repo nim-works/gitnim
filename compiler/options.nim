@@ -19,18 +19,16 @@ const
   useEffectSystem* = true
   useWriteTracking* = false
   hasFFI* = defined(nimHasLibFFI)
-  copyrightYear* = "2020"
+  copyrightYear* = "2019"
 
 type                          # please make sure we have under 32 options
                               # (improves code efficiency a lot!)
   TOption* = enum             # **keep binary compatible**
     optNone, optObjCheck, optFieldCheck, optRangeCheck, optBoundsCheck,
     optOverflowCheck, optNilCheck, optRefCheck,
-    optNaNCheck, optInfCheck, optStaticBoundsCheck, optStyleCheck,
+    optNaNCheck, optInfCheck, optStyleCheck,
     optAssert, optLineDir, optWarns, optHints,
-    optOptimizeSpeed, optOptimizeSize,
-    optStackTrace, # stack tracing support
-    optStackTraceMsgs, # enable custom runtime msgs via `setFrameMsg`
+    optOptimizeSpeed, optOptimizeSize, optStackTrace, # stack tracing support
     optLineTrace,             # line tracing support (includes stack tracing)
     optByRef,                 # use pass by ref for objects
                               # (for interfacing with C)
@@ -41,9 +39,7 @@ type                          # please make sure we have under 32 options
     optMemTracker,
     optLaxStrings,
     optNilSeqs,
-    optOldAst,
-    optSinkInference          # 'sink T' inference
-
+    optOldAst
 
   TOptions* = set[TOption]
   TGlobalOption* = enum       # **keep binary compatible**
@@ -75,6 +71,7 @@ type                          # please make sure we have under 32 options
                               # also: generate header file
     optIdeDebug               # idetools: debug mode
     optIdeTerse               # idetools: use terse descriptions
+    optNoCppExceptions        # use C exception handling even with CPP
     optExcessiveStackTrace    # fully qualified module filenames
     optShowAllMismatches      # show all overloading resolution candidates
     optWholeProject           # for 'doc2': output any dependency
@@ -91,11 +88,6 @@ type                          # please make sure we have under 32 options
     optOwnedRefs              # active if the Nim compiler knows about 'owned'.
     optMultiMethods
     optNimV019
-    optBenchmarkVM            # Enables cpuTime() in the VM
-    optProduceAsm             # produce assembler code
-    optPanics                 # turn panics (sysFatal) into a process termination
-    optNimV1Emulation         # emulate Nim v1.0
-    optSourcemap
 
   TGlobalOptions* = set[TGlobalOption]
 
@@ -122,15 +114,14 @@ type
     cmdJsonScript             # compile a .json build file
   TStringSeq* = seq[string]
   TGCMode* = enum             # the selected GC
-    gcUnselected, gcNone, gcBoehm, gcRegions, gcMarkAndSweep, gcArc, gcOrc,
-    gcHooks,
+    gcUnselected, gcNone, gcBoehm, gcRegions, gcMarkAndSweep, gcDestructors,
     gcRefc, gcV2, gcGo
     # gcRefc and the GCs that follow it use a write barrier,
     # as far as usesWriteBarrier() is concerned
 
   IdeCmd* = enum
     ideNone, ideSug, ideCon, ideDef, ideUse, ideDus, ideChk, ideMod,
-    ideHighlight, ideOutline, ideKnown, ideMsg, ideProject
+    ideHighlight, ideOutline, ideKnown, ideMsg
 
   Feature* = enum  ## experimental features; DO NOT RENAME THESE!
     implicitDeref,
@@ -164,13 +155,6 @@ type
   TSystemCC* = enum
     ccNone, ccGcc, ccNintendoSwitch, ccLLVM_Gcc, ccCLang, ccLcc, ccBcc, ccDmc, ccWcc, ccVcc,
     ccTcc, ccPcc, ccUcc, ccIcl, ccIcc, ccClangCl
-
-  ExceptionSystem* = enum
-    excNone,   # no exception system selected yet
-    excSetjmp, # setjmp based exception handling
-    excCpp,    # use C++'s native exception handling
-    excGoto,   # exception handling based on goto (should become the new default for C)
-    excQuirky  # quirky exception handling
 
   CfileFlag* {.pure.} = enum
     Cached,    ## no need to recompile this time
@@ -207,7 +191,7 @@ type
                           ## the incremental compilation mechanisms
                           ## (+) means "part of the dependency"
     target*: Target       # (+)
-    linesCompiled*: int   # all lines that have been compiled
+    linesCompiled*: int  # all lines that have been compiled
     options*: TOptions    # (+)
     globalOptions*: TGlobalOptions # (+)
     macrosToExpand*: StringTableRef
@@ -217,7 +201,6 @@ type
     exitcode*: int8
     cmd*: TCommands  # the command
     selectedGC*: TGCMode       # the selected GC (+)
-    exc*: ExceptionSystem
     verbosity*: int            # how verbose the compiler is
     numberOfProcessors*: int   # number of processors
     evalExpr*: string          # expression for idetools --eval
@@ -233,29 +216,27 @@ type
     ideCmd*: IdeCmd
     oldNewlines*: bool
     cCompiler*: TSystemCC
-    modifiedyNotes*: TNoteKinds # notes that have been set/unset from either cmdline/configs
-    cmdlineNotes*: TNoteKinds # notes that have been set/unset from cmdline
+    enableNotes*: TNoteKinds
+    disableNotes*: TNoteKinds
     foreignPackageNotes*: TNoteKinds
-    notes*: TNoteKinds # notes after resolving all logic(defaults, verbosity)/cmdline/configs
+    notes*: TNoteKinds
     mainPackageNotes*: TNoteKinds
     mainPackageId*: int
     errorCounter*: int
     hintCounter*: int
     warnCounter*: int
     errorMax*: int
-    maxLoopIterationsVM*: int ## VM: max iterations of all loops
     configVars*: StringTableRef
     symbols*: StringTableRef ## We need to use a StringTableRef here as defined
                              ## symbols are always guaranteed to be style
                              ## insensitive. Otherwise hell would break lose.
     packageCache*: StringTableRef
-    nimblePaths*: seq[AbsoluteDir]
     searchPaths*: seq[AbsoluteDir]
     lazyPaths*: seq[AbsoluteDir]
     outFile*: RelativeFile
     outDir*: AbsoluteDir
     prefixDir*, libpath*, nimcacheDir*: AbsoluteDir
-    dllOverrides, moduleOverrides*, cfileSpecificOptions*: StringTableRef
+    dllOverrides, moduleOverrides*: StringTableRef
     projectName*: string # holds a name like 'nim'
     projectPath*: AbsoluteDir # holds a path like /home/alice/projects/nim/compiler/
     projectFull*: AbsoluteFile # projectPath/projectName
@@ -264,13 +245,11 @@ type
     command*: string # the main command (e.g. cc, check, scan, etc)
     commandArgs*: seq[string] # any arguments after the main command
     commandLine*: string
-    extraCmds*: seq[string] # for writeJsonBuildInstructions
     keepComments*: bool # whether the parser needs to keep comments
     implicitImports*: seq[string] # modules that are to be implicitly imported
     implicitIncludes*: seq[string] # modules that are to be implicitly included
     docSeeSrcUrl*: string # if empty, no seeSrc will be generated. \
     # The string uses the formatting variables `path` and `line`.
-    docRoot*: string ## see nim --fullhelp for --docRoot
 
      # the used compiler
     cIncludes*: seq[AbsoluteDir]  # directories to search for included files
@@ -294,24 +273,6 @@ type
                                 severity: Severity) {.closure, gcsafe.}
     cppCustomNamespace*: string
 
-proc setNoteDefaults*(conf: ConfigRef, note: TNoteKind, enabled = true) =
-  template fun(op) =
-    conf.notes.op note
-    conf.mainPackageNotes.op note
-    conf.foreignPackageNotes.op note
-  if enabled: fun(incl) else: fun(excl)
-
-proc setNote*(conf: ConfigRef, note: TNoteKind, enabled = true) =
-  # see also `prepareConfigNotes` which sets notes
-  if note notin conf.cmdlineNotes:
-    if enabled: incl(conf.notes, note) else: excl(conf.notes, note)
-
-proc hasHint*(conf: ConfigRef, note: TNoteKind): bool =
-  optHints in conf.options and note in conf.notes
-
-proc hasWarn*(conf: ConfigRef, note: TNoteKind): bool =
-  optWarns in conf.options and note in conf.notes
-
 proc hcrOn*(conf: ConfigRef): bool = return optHotCodeReloading in conf.globalOptions
 
 template depConfigFields*(fn) {.dirty.} =
@@ -325,12 +286,12 @@ const oldExperimentalFeatures* = {implicitDeref, dotOperators, callOperator, par
 const
   ChecksOptions* = {optObjCheck, optFieldCheck, optRangeCheck, optNilCheck,
     optOverflowCheck, optBoundsCheck, optAssert, optNaNCheck, optInfCheck,
-    optStyleCheck}
+    optStyleCheck, optRefCheck}
 
   DefaultOptions* = {optObjCheck, optFieldCheck, optRangeCheck,
     optBoundsCheck, optOverflowCheck, optAssert, optWarns, optRefCheck,
-    optHints, optStackTrace, optLineTrace, # consider adding `optStackTraceMsgs`
-    optTrMacros, optNilCheck, optStyleCheck, optSinkInference}
+    optHints, optStackTrace, optLineTrace,
+    optTrMacros, optNilCheck, optStyleCheck}
   DefaultGlobalOptions* = {optThreadAnalysis,
     optExcessiveStackTrace, optListFullPaths}
 
@@ -383,7 +344,6 @@ proc newConfigRef*(): ConfigRef =
     libpath: AbsoluteDir"", nimcacheDir: AbsoluteDir"",
     dllOverrides: newStringTable(modeCaseInsensitive),
     moduleOverrides: newStringTable(modeStyleInsensitive),
-    cfileSpecificOptions: newStringTable(modeCaseSensitive),
     projectName: "", # holds a name like 'nim'
     projectPath: AbsoluteDir"", # holds a path like /home/alice/projects/nim/compiler/
     projectFull: AbsoluteFile"", # projectPath/projectName
@@ -408,8 +368,7 @@ proc newConfigRef*(): ConfigRef =
     ccompilerpath: "",
     toCompile: @[],
     arguments: "",
-    suggestMaxResults: 10_000,
-    maxLoopIterationsVM: 10_000_000,
+    suggestMaxResults: 10_000
   )
   setTargetFromSystem(result.target)
   # enable colors by default on terminals
@@ -523,26 +482,21 @@ proc getOutFile*(conf: ConfigRef; filename: RelativeFile, ext: string): Absolute
 
 proc absOutFile*(conf: ConfigRef): AbsoluteFile =
   result = conf.outDir / conf.outFile
-  when defined(posix):
-    if dirExists(result.string):
-      result.string.add ".out"
+  if dirExists(result.string):
+    result.string.add ".out"
 
 proc prepareToWriteOutput*(conf: ConfigRef): AbsoluteFile =
   ## Create the output directory and returns a full path to the output file
   createDir conf.outDir
   result = conf.outDir / conf.outFile
-  when defined(posix):
-    if dirExists(result.string):
-      result.string.add ".out"
+  if dirExists(result.string):
+    result.string.add ".out"
 
 proc getPrefixDir*(conf: ConfigRef): AbsoluteDir =
   ## Gets the prefix dir, usually the parent directory where the binary resides.
   ##
   ## This is overridden by some tools (namely nimsuggest) via the ``conf.prefixDir``
   ## field.
-  ## This should resolve to root of nim sources, whether running nim from a local
-  ##  clone or using installed nim, so that these exist: `result/doc/advopt.txt`
-  ## and `result/lib/system.nim`
   if not conf.prefixDir.isEmpty: result = conf.prefixDir
   else: result = AbsoluteDir splitPath(getAppDir()).head
 
@@ -578,26 +532,24 @@ proc shortenDir*(conf: ConfigRef; dir: string): string {.
   ## returns the interesting part of a dir
   var prefix = conf.projectPath.string & DirSep
   if startsWith(dir, prefix):
-    return substr(dir, prefix.len)
+    return substr(dir, len(prefix))
   prefix = getPrefixDir(conf).string & DirSep
   if startsWith(dir, prefix):
-    return substr(dir, prefix.len)
+    return substr(dir, len(prefix))
   result = dir
 
 proc removeTrailingDirSep*(path: string): string =
-  if (path.len > 0) and (path[^1] == DirSep):
-    result = substr(path, 0, path.len - 2)
+  if (len(path) > 0) and (path[len(path) - 1] == DirSep):
+    result = substr(path, 0, len(path) - 2)
   else:
     result = path
 
 proc disableNimblePath*(conf: ConfigRef) =
   incl conf.globalOptions, optNoNimblePath
   conf.lazyPaths.setLen(0)
-  conf.nimblePaths.setLen(0)
 
 proc clearNimblePath*(conf: ConfigRef) =
   conf.lazyPaths.setLen(0)
-  conf.nimblePaths.setLen(0)
 
 include packagehandling
 
@@ -628,15 +580,6 @@ proc pathSubs*(conf: ConfigRef; p, config: string): string =
     "projectpath", conf.projectPath.string,
     "projectdir", conf.projectPath.string,
     "nimcache", getNimcacheDir(conf).string]).expandTilde
-
-iterator nimbleSubs*(conf: ConfigRef; p: string): string =
-  let pl = p.toLowerAscii
-  if "$nimblepath" in pl or "$nimbledir" in pl:
-    for i in countdown(conf.nimblePaths.len-1, 0):
-      let nimblePath = removeTrailingDirSep(conf.nimblePaths[i].string)
-      yield p % ["nimblepath", nimblePath, "nimbledir", nimblePath]
-  else:
-    yield p
 
 proc toGeneratedFile*(conf: ConfigRef; path: AbsoluteFile,
                       ext: string): AbsoluteFile =
@@ -684,25 +627,7 @@ template patchModule(conf: ConfigRef) {.dirty.} =
       let ov = conf.moduleOverrides[key]
       if ov.len > 0: result = AbsoluteFile(ov)
 
-when (NimMajor, NimMinor) < (1, 1) or not declared(isRelativeTo):
-  proc isRelativeTo(path, base: string): bool =
-    # pending #13212 use os.isRelativeTo
-    let path = path.normalizedPath
-    let base = base.normalizedPath
-    let ret = relativePath(path, base)
-    result = path.len > 0 and not ret.startsWith ".."
-
-proc getRelativePathFromConfigPath*(conf: ConfigRef; f: AbsoluteFile): RelativeFile =
-  let f = $f
-  template search(paths) =
-    for it in paths:
-      let it = $it
-      if f.isRelativeTo(it):
-        return relativePath(f, it).RelativeFile
-  search(conf.searchPaths)
-  search(conf.lazyPaths)
-
-proc findFile*(conf: ConfigRef; f: string; suppressStdlib = false): AbsoluteFile =
+proc findFile*(conf: ConfigRef; f: string; suppressStdlib = false): AbsoluteFile {.procvar.} =
   if f.isAbsolute:
     result = if f.existsFile: AbsoluteFile(f) else: AbsoluteFile""
   else:
@@ -745,40 +670,21 @@ proc findModule*(conf: ConfigRef; modulename, currentModule: string): AbsoluteFi
 
 proc findProjectNimFile*(conf: ConfigRef; pkg: string): string =
   const extensions = [".nims", ".cfg", ".nimcfg", ".nimble"]
-  var
-    candidates: seq[string] = @[]
-    dir = pkg
-    prev = dir
-    nimblepkg = ""
-  let pkgname = pkg.lastPathPart()
+  var candidates: seq[string] = @[]
+  var dir = pkg
   while true:
-    for k, f in os.walkDir(dir, relative = true):
+    for k, f in os.walkDir(dir, relative=true):
       if k == pcFile and f != "config.nims":
         let (_, name, ext) = splitFile(f)
         if ext in extensions:
           let x = changeFileExt(dir / name, ".nim")
           if fileExists(x):
             candidates.add x
-          if ext == ".nimble":
-            if nimblepkg.len == 0:
-              nimblepkg = name
-              # Since nimble packages can have their source in a subfolder,
-              # check the last folder we were in for a possible match.
-              if dir != prev:
-                let x = prev / x.extractFilename()
-                if fileExists(x):
-                  candidates.add x
-            else:
-              # If we found more than one nimble file, chances are that we
-              # missed the real project file, or this is an invalid nimble
-              # package. Either way, bailing is the better choice.
-              return ""
-    let pkgname = if nimblepkg.len > 0: nimblepkg else: pkgname
     for c in candidates:
-      if pkgname in c.extractFilename(): return c
-    if candidates.len > 0:
+      # nim-foo foo  or  foo  nfoo
+      if (pkg in c) or (c in pkg): return c
+    if candidates.len >= 1:
       return candidates[0]
-    prev = dir
     dir = parentDir(dir)
     if dir == "": break
   return ""
@@ -811,7 +717,6 @@ proc parseIdeCmd*(s: string): IdeCmd =
   of "outline": ideOutline
   of "known": ideKnown
   of "msg": ideMsg
-  of "project": ideProject
   else: ideNone
 
 proc `$`*(c: IdeCmd): string =
@@ -828,7 +733,6 @@ proc `$`*(c: IdeCmd): string =
   of ideOutline: "outline"
   of ideKnown: "known"
   of ideMsg: "msg"
-  of ideProject: "project"
 
 proc floatInt64Align*(conf: ConfigRef): int16 =
   ## Returns either 4 or 8 depending on reasons.
