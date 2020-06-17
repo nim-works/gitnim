@@ -13,7 +13,7 @@ import
 import std/private/miscdollars
 import strutils2
 
-type InstantiationInfo = typeof(instantiationInfo())
+type InstantiationInfo* = typeof(instantiationInfo())
 template instLoc(): InstantiationInfo = instantiationInfo(-2, fullPaths = true)
 
 template flushDot(conf, stdorr) =
@@ -385,7 +385,7 @@ proc getMessageStr(msg: TMsgKind, arg: string): string =
   result = msgKindToString(msg) % [arg]
 
 type
-  TErrorHandling = enum doNothing, doAbort, doRaise
+  TErrorHandling* = enum doNothing, doAbort, doRaise
 
 proc log*(s: string) =
   var f: File
@@ -485,7 +485,7 @@ proc formatMsg*(conf: ConfigRef; info: TLineInfo, msg: TMsgKind, arg: string): s
               else: ErrorTitle
   conf.toFileLineCol(info) & " " & title & getMessageStr(msg, arg)
 
-proc liMessage(conf: ConfigRef; info: TLineInfo, msg: TMsgKind, arg: string,
+proc liMessage*(conf: ConfigRef; info: TLineInfo, msg: TMsgKind, arg: string,
                eh: TErrorHandling, info2: InstantiationInfo, isRaw = false) {.noinline.} =
   var
     title: string
@@ -558,12 +558,13 @@ template fatal*(conf: ConfigRef; info: TLineInfo, msg: TMsgKind, arg = "") =
 template globalAssert*(conf: ConfigRef; cond: untyped, info: TLineInfo = unknownLineInfo, arg = "") =
   ## avoids boilerplate
   if not cond:
-    const info2 = instantiationInfo(-1, fullPaths = true)
     var arg2 = "'$1' failed" % [astToStr(cond)]
     if arg.len > 0: arg2.add "; " & astToStr(arg) & ": " & arg
-    liMessage(conf, info, errGenerated, arg2, doRaise, info2)
+    liMessage(conf, info, errGenerated, arg2, doRaise, instLoc())
 
 template globalError*(conf: ConfigRef; info: TLineInfo, msg: TMsgKind, arg = "") =
+  ## `local` means compilation keeps going until errorMax is reached (via `doNothing`),
+  ## `global` means it stops.
   liMessage(conf, info, msg, arg, doRaise, instLoc())
 
 template globalError*(conf: ConfigRef; info: TLineInfo, arg: string) =
@@ -593,7 +594,7 @@ template internalError*(conf: ConfigRef; errMsg: string) =
   internalErrorImpl(conf, unknownLineInfo, errMsg, instLoc())
 
 template internalAssert*(conf: ConfigRef, e: bool) =
-  # xxx merge with globalAssert from PR #14324
+  # xxx merge with `globalAssert`
   if not e:
     const info2 = instLoc()
     let arg = info2.toFileLineCol

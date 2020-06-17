@@ -503,8 +503,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/pure/pathnorm.nim
   cp lib/pure/strscans.nim $libdir/pure/strscans.nim
   chmod 644 $libdir/pure/strscans.nim
-  cp lib/pure/quitprocs.nim $libdir/pure/quitprocs.nim
-  chmod 644 $libdir/pure/quitprocs.nim
   cp lib/pure/lenientops.nim $libdir/pure/lenientops.nim
   chmod 644 $libdir/pure/lenientops.nim
   cp lib/pure/async.nim $libdir/pure/async.nim
@@ -685,6 +683,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/decls.nim
   cp lib/std/sha1.nim $libdir/std/sha1.nim
   chmod 644 $libdir/std/sha1.nim
+  cp lib/std/exitprocs.nim $libdir/std/exitprocs.nim
+  chmod 644 $libdir/std/exitprocs.nim
   cp lib/std/logic.nim $libdir/std/logic.nim
   chmod 644 $libdir/std/logic.nim
   cp lib/std/varints.nim $libdir/std/varints.nim
