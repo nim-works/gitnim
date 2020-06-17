@@ -100,7 +100,7 @@ when isMainModule:
     logger = newCuteConsoleLogger()
   addHandler logger
 
-  echo "gitnim on ", repo()
+  info "gitnim on ", repo()
   git "fetch --all".split
   info git("tag --list".split, {poStdErrToStdOut})
 
