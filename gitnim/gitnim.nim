@@ -90,8 +90,8 @@ when isMainModule:
   discard git("fetch --all".split, {poStdErrToStdOut})
 
   if paramCount() == 0:
-    info git("branch --all --verbose --color".split, {poStdErrToStdOut})
-    info git("tag --list -n1 --color".split, {poStdErrToStdOut})
+    info git("branch --all --sort=version:refname --verbose --color".split, {poStdErrToStdOut})
+    info git("tag --list -n2 --sort=version:refname --color".split, {poStdErrToStdOut})
   else:
     git ["checkout", paramStr(1)]
     info nim ["--version"]
