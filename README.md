@@ -31,10 +31,15 @@ git nim 1.3.5
 
 ## Advanced Usage
 
+### Using a Different Distribution
+```bash
+export GITNIM_URL=https://github.com/other/distro
+```
+
 ### Creating Your Own Nim Distribution
 
 ```bash
-git checkout -b "myDistro"
+git checkout -b "my distro"
 ```
 
 ### Publishing Your Nim Distribution
