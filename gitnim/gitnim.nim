@@ -86,11 +86,15 @@ when isMainModule:
     logger = newCuteConsoleLogger()
   addHandler logger
 
-  info "gitnim on " & repo() & " for Nim " & NimVersion
+  let
+    app = extractFilename getAppFilename()
+  info app & " on " & repo() & " for Nim " & NimVersion
   discard git("fetch --all".split, {poStdErrToStdOut})
 
   if paramCount() == 0:
+    info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
     info git("branch --all --sort=version:refname --verbose --color".split, {poStdErrToStdOut})
+    info "or you can specify one of these tags; eg. `git nim latest`:"
     info git("tag --list -n2 --sort=version:refname --color".split, {poStdErrToStdOut})
   else:
     git ["checkout", paramStr(1)]
