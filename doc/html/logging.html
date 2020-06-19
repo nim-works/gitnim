@@ -678,6 +678,13 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#Exception"><span class="Identifier">Exception</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#RootEffect"><span class="Identifier">RootEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">base</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
+<p>Override this method in custom loggers. The default implementation does nothing.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#log.e,ConsoleLogger,Level,varargs[string,]">log method</a> for the ConsoleLogger</li>
+<li><a class="reference external" href="#log.e,FileLogger,Level,varargs[string,]">log method</a> for the FileLogger</li>
+<li><a class="reference external" href="#log.e,RollingFileLogger,Level,varargs[string,]">log method</a> for the RollingFileLogger</li>
+<li><a class="reference external" href="#log.t,Level,varargs[string,]">log template</a></li>
+</ul>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L321"
@@ -690,7 +697,19 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-
+<p>Logs to the console with the given <a class="reference external" href="#ConsoleLogger">ConsoleLogger</a> only.</p>
+<p>This method ignores the list of registered handlers.</p>
+<p>Whether the message is logged depends on both the ConsoleLogger's <tt class="docutils literal"><span class="pre">levelThreshold</span></tt> field and the global log filter set using the <a class="reference external" href="#setLogFilter,Level">setLogFilter proc</a>.</p>
+<p><strong>Note:</strong> Only error and fatal messages will cause the output buffer to be flushed immediately. Use the <a class="reference external" href="io.html#flushFile,File">flushFile proc</a> to flush the buffer manually if needed.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#log.e,FileLogger,Level,varargs[string,]">log method</a> for the FileLogger</li>
+<li><a class="reference external" href="#log.e,RollingFileLogger,Level,varargs[string,]">log method</a> for the RollingFileLogger</li>
+<li><a class="reference external" href="#log.t,Level,varargs[string,]">log template</a></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">consoleLog</span> <span class="Operator">=</span> <span class="Identifier">newConsoleLogger</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+<span class="Identifier">consoleLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlInfo</span><span class="Punctuation">,</span> <span class="StringLit">&quot;this is a message&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">consoleLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlError</span><span class="Punctuation">,</span> <span class="StringLit">&quot;error code is: &quot;</span><span class="Punctuation">,</span> <span class="DecNumber">404</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L337"
 class="link-seesrc" target="_blank">Source</a>
@@ -702,7 +721,22 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-
+<p>Logs a message at the specified level using the given <a class="reference external" href="#FileLogger">FileLogger</a> only.</p>
+<p>This method ignores the list of registered handlers.</p>
+<p>Whether the message is logged depends on both the FileLogger's <tt class="docutils literal"><span class="pre">levelThreshold</span></tt> field and the global log filter set using the <a class="reference external" href="#setLogFilter,Level">setLogFilter proc</a>.</p>
+<p><strong>Notes:</strong></p>
+<ul class="simple"><li>Only error and fatal messages will cause the output buffer to be flushed immediately. Use the <a class="reference external" href="io.html#flushFile,File">flushFile proc</a> to flush the buffer manually if needed.</li>
+<li>This method is not available for the JavaScript backend.</li>
+</ul>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#log.e,ConsoleLogger,Level,varargs[string,]">log method</a> for the ConsoleLogger</li>
+<li><a class="reference external" href="#log.e,RollingFileLogger,Level,varargs[string,]">log method</a> for the RollingFileLogger</li>
+<li><a class="reference external" href="#log.t,Level,varargs[string,]">log template</a></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">fileLog</span> <span class="Operator">=</span> <span class="Identifier">newFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;messages.log&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">fileLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlInfo</span><span class="Punctuation">,</span> <span class="StringLit">&quot;this is a message&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">fileLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlError</span><span class="Punctuation">,</span> <span class="StringLit">&quot;error code is: &quot;</span><span class="Punctuation">,</span> <span class="DecNumber">404</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L406"
 class="link-seesrc" target="_blank">Source</a>
@@ -715,7 +749,22 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-
+<p>Logs a message at the specified level using the given <a class="reference external" href="#RollingFileLogger">RollingFileLogger</a> only.</p>
+<p>This method ignores the list of registered handlers.</p>
+<p>Whether the message is logged depends on both the RollingFileLogger's <tt class="docutils literal"><span class="pre">levelThreshold</span></tt> field and the global log filter set using the <a class="reference external" href="#setLogFilter,Level">setLogFilter proc</a>.</p>
+<p><strong>Notes:</strong></p>
+<ul class="simple"><li>Only error and fatal messages will cause the output buffer to be flushed immediately. Use the <a class="reference external" href="io.html#flushFile,File">flushFile proc</a> to flush the buffer manually if needed.</li>
+<li>This method is not available for the JavaScript backend.</li>
+</ul>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#log.e,ConsoleLogger,Level,varargs[string,]">log method</a> for the ConsoleLogger</li>
+<li><a class="reference external" href="#log.e,FileLogger,Level,varargs[string,]">log method</a> for the FileLogger</li>
+<li><a class="reference external" href="#log.t,Level,varargs[string,]">log template</a></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">rollingLog</span> <span class="Operator">=</span> <span class="Identifier">newRollingFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;messages.log&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">rollingLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlInfo</span><span class="Punctuation">,</span> <span class="StringLit">&quot;this is a message&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">rollingLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlError</span><span class="Punctuation">,</span> <span class="StringLit">&quot;error code is: &quot;</span><span class="Punctuation">,</span> <span class="DecNumber">404</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L585"
 class="link-seesrc" target="_blank">Source</a>
@@ -894,7 +943,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-18 00:41:30 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-19 00:41:47 UTC</small>
       </div>
     </div>
   </div>
