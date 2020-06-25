@@ -89,7 +89,7 @@ when isMainModule:
   let
     app = extractFilename getAppFilename()
   info app & " on " & repo() & " for Nim " & NimVersion
-  discard git("fetch --all".split, {poStdErrToStdOut})
+  discard git("fetch --all --prune".split, {poStdErrToStdOut})
 
   if paramCount() == 0:
     info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
