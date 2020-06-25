@@ -49,8 +49,6 @@ if [ $# -eq 1 ] ; then
   echo "removing files..."
 
   rm -f $bindir/nim
-  rm -f $bindir/nim-gdb
-  rm -f $bindir/nim-gdb.bash
   rm -f $configdir/nim.cfg
   rm -f $configdir/nimdoc.cfg
   rm -f $configdir/nimdoc.tex.cfg

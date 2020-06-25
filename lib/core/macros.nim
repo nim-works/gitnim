@@ -535,9 +535,7 @@ proc copyLineInfo*(arg: NimNode, info: NimNode) {.magic: "NLineInfo", noSideEffe
 
 proc lineInfoObj*(n: NimNode): LineInfo {.compileTime.} =
   ## Returns ``LineInfo`` of ``n``, using absolute path for ``filename``.
-  result.filename = n.getFile
-  result.line = n.getLine
-  result.column = n.getColumn
+  result = LineInfo(filename: n.getFile, line: n.getLine, column: n.getColumn)
 
 proc lineInfo*(arg: NimNode): string {.compileTime.} =
   ## Return line info in the form `filepath(line, column)`.
@@ -760,7 +758,7 @@ proc newLit*(arg: enum): NimNode {.compileTime.} =
 proc newLit*[N,T](arg: array[N,T]): NimNode {.compileTime.}
 proc newLit*[T](arg: seq[T]): NimNode {.compileTime.}
 proc newLit*[T](s: set[T]): NimNode {.compileTime.}
-proc newLit*(arg: tuple): NimNode {.compileTime.}
+proc newLit*[T: tuple](arg: T): NimNode {.compileTime.}
 
 proc newLit*(arg: object): NimNode {.compileTime.} =
   result = nnkObjConstr.newTree(arg.type.getTypeInst[1])
@@ -800,10 +798,19 @@ proc newLit*[T](s: set[T]): NimNode {.compileTime.} =
     var typ = getTypeInst(typeof(s))[1]
     result = newCall(typ,result)
 
-proc newLit*(arg: tuple): NimNode {.compileTime.} =
-  result = nnkPar.newTree
-  for a,b in arg.fieldPairs:
-    result.add nnkExprColonExpr.newTree(newIdentNode(a), newLit(b))
+proc isNamedTuple(T: typedesc): bool {.magic: "TypeTrait".}
+  ## See `typetraits.isNamedTuple`
+
+proc newLit*[T: tuple](arg: T): NimNode {.compileTime.} =
+  ## use -d:nimHasWorkaround14720 to restore behavior prior to PR, forcing
+  ## a named tuple even when `arg` is unnamed.
+  result = nnkTupleConstr.newTree
+  when defined(nimHasWorkaround14720) or isNamedTuple(T):
+    for a, b in arg.fieldPairs:
+      result.add nnkExprColonExpr.newTree(newIdentNode(a), newLit(b))
+  else:
+    for b in arg.fields:
+      result.add newLit(b)
 
 proc nestList*(op: NimNode; pack: NimNode): NimNode {.compileTime.} =
   ## Nests the list `pack` into a tree of call expressions:
@@ -869,12 +876,14 @@ proc treeRepr*(n: NimNode): string {.compileTime, benign.} =
   ## Convert the AST `n` to a human-readable tree-like string.
   ##
   ## See also `repr`, `lispRepr`, and `astGenRepr`.
+  result = ""
   n.treeTraverse(result, isLisp = false, indented = true)
 
 proc lispRepr*(n: NimNode; indented = false): string {.compileTime, benign.} =
   ## Convert the AST ``n`` to a human-readable lisp-like string.
   ##
   ## See also ``repr``, ``treeRepr``, and ``astGenRepr``.
+  result = ""
   n.treeTraverse(result, isLisp = true, indented = indented)
 
 proc astGenRepr*(n: NimNode): string {.compileTime, benign.} =
@@ -1602,6 +1611,7 @@ macro getCustomPragmaVal*(n: typed, cp: typed{nkSym}): untyped =
   ##   assert(o.myField.getCustomPragmaVal(serializationKey) == "mf")
   ##   assert(o.getCustomPragmaVal(serializationKey) == "mo")
   ##   assert(MyObj.getCustomPragmaVal(serializationKey) == "mo")
+  result = nil
   let pragmaNode = customPragmaNode(n)
   for p in pragmaNode:
     if p.kind in nnkPragmaCallKinds and p.len > 0 and p[0].kind == nnkSym and p[0] == cp:

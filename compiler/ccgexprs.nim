@@ -126,9 +126,8 @@ proc genRawSetData(cs: TBitSet, size: int): Rope =
     result = intLiteral(cast[BiggestInt](bitSetToWord(cs, size)))
 
 proc genSetNode(p: BProc, n: PNode): Rope =
-  var cs: TBitSet
   var size = int(getSize(p.config, n.typ))
-  toBitSet(p.config, n, cs)
+  let cs = toBitSet(p.config, n)
   if size > 8:
     let id = nodeTableTestOrSet(p.module.dataCache, n, p.module.labels)
     result = p.module.tmpBase & rope(id)
@@ -676,7 +675,7 @@ proc unaryArith(p: BProc, e: PNode, d: var TLoc, op: TMagic) =
 
 proc isCppRef(p: BProc; typ: PType): bool {.inline.} =
   result = p.module.compileToCpp and
-      skipTypes(typ, abstractInstOwned).kind == tyVar and
+      skipTypes(typ, abstractInstOwned).kind in {tyVar} and
       tfVarIsPtr notin skipTypes(typ, abstractInstOwned).flags
 
 proc genDeref(p: BProc, e: PNode, d: var TLoc) =
@@ -693,7 +692,7 @@ proc genDeref(p: BProc, e: PNode, d: var TLoc) =
     if typ.kind in {tyUserTypeClass, tyUserTypeClassInst} and typ.isResolvedUserTypeClass:
       typ = typ.lastSon
     typ = typ.skipTypes(abstractInstOwned)
-    if typ.kind == tyVar and tfVarIsPtr notin typ.flags and p.module.compileToCpp and e[0].kind == nkHiddenAddr:
+    if typ.kind in {tyVar} and tfVarIsPtr notin typ.flags and p.module.compileToCpp and e[0].kind == nkHiddenAddr:
       initLocExprSingleUse(p, e[0][0], d)
       return
     else:
@@ -716,7 +715,7 @@ proc genDeref(p: BProc, e: PNode, d: var TLoc) =
       else:
         internalError(p.config, e.info, "genDeref " & $typ.kind)
     elif p.module.compileToCpp:
-      if typ.kind == tyVar and tfVarIsPtr notin typ.flags and
+      if typ.kind in {tyVar} and tfVarIsPtr notin typ.flags and
            e.kind == nkHiddenDeref:
         putIntoDest(p, d, e, rdLoc(a), a.storage)
         return
@@ -931,7 +930,7 @@ proc genSeqElem(p: BProc, n, x, y: PNode, d: var TLoc) =
   if ty.kind in {tyRef, tyPtr}:
     ty = skipTypes(ty.lastSon, abstractVarRange) # emit range check:
   if optBoundsCheck in p.options:
-    if ty.kind == tyString and (not defined(nimNoZeroTerminator) or optLaxStrings in p.options):
+    if ty.kind == tyString and not defined(nimNoZeroTerminator):
       linefmt(p, cpsStmts,
               "if ((NU)($1) > (NU)$2){ #raiseIndexError2($1,$2); $3}$n",
               [rdLoc(b), lenExpr(p, a), raiseInstr(p)])
@@ -2960,8 +2959,7 @@ proc genBracedInit(p: BProc, n: PNode; isConst: bool): Rope =
       ty = skipTypes(n.typ, abstractInstOwned + {tyStatic}).kind
     case ty
     of tySet:
-      var cs: TBitSet
-      toBitSet(p.config, n, cs)
+      let cs = toBitSet(p.config, n)
       result = genRawSetData(cs, int(getSize(p.config, n.typ)))
     of tySequence:
       if optSeqDestructors in p.config.globalOptions:

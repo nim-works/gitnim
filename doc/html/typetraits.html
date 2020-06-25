@@ -148,6 +148,8 @@ function main() {
     title="tupleLen(t: tuple): int"><wbr />tuple<wbr />Len<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#get.t%2Ctypedesc%5B%5D%2C"
     title="get(T: typedesc[tuple]; i: static int): untyped"><wbr />get<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#elementType.t%2Cuntyped"
+    title="elementType(a: untyped): typedesc"><wbr />element<wbr />Type<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#genericParams.t%2Ctypedesc"
     title="genericParams(T: typedesc): untyped"><wbr />generic<wbr />Params<span class="attachedType"></span></a></li>
 
@@ -345,6 +347,23 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/typetraits.nim#L88" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="elementType.t,untyped"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#elementType.t%2Cuntyped"><span class="Identifier">elementType</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#typedesc"><span class="Identifier">typedesc</span></a></pre></dt>
+<dd>
+
+return element type of <tt class="docutils literal"><span class="pre">a</span></tt>, which can be any iterable (over which you can iterate)
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">iterator</span><span class="Whitespace"> </span><span class="Identifier">myiter</span><span class="Punctuation">(</span><span class="Identifier">n</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">auto</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace">
+  </span><span class="Keyword">for</span><span class="Whitespace"> </span><span class="Identifier">i</span><span class="Whitespace"> </span><span class="Keyword">in</span><span class="Whitespace"> </span><span class="FloatNumber">0.</span><span class="Operator">.&lt;</span><span class="Identifier">n</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Keyword">yield</span><span class="Whitespace"> </span><span class="Identifier">i</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">elementType</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span><span class="DecNumber">2</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Keyword">is</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">elementType</span><span class="Punctuation">(</span><span class="StringLit">&quot;asdf&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Keyword">is</span><span class="Whitespace"> </span><span class="Identifier">char</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">elementType</span><span class="Punctuation">(</span><span class="Identifier">myiter</span><span class="Punctuation">(</span><span class="DecNumber">3</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Keyword">is</span><span class="Whitespace"> </span><span class="Identifier">int</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/typetraits.nim#L97"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/typetraits.nim#L97" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="genericParams.t,typedesc"></a>
 <dt><pre><span class="Keyword">template</span> <a href="#genericParams.t%2Ctypedesc"><span class="Identifier">genericParams</span></a><span class="Other">(</span><span class="Identifier">T</span><span class="Other">:</span> <a href="system.html#typedesc"><span class="Identifier">typedesc</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a></pre></dt>
 <dd>
@@ -357,9 +376,9 @@ return tuple of generic params for generic <tt class="docutils literal"><span cl
 </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">genericParams</span><span class="Punctuation">(</span><span class="Identifier">Bar</span><span class="Punctuation">[</span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Keyword">is</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="Identifier">StaticParam</span><span class="Punctuation">[</span><span class="FloatNumber">1.0</span><span class="Punctuation">]</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">string</span><span class="Punctuation">)</span><span class="Whitespace">
 </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">genericParams</span><span class="Punctuation">(</span><span class="Identifier">Bar</span><span class="Punctuation">[</span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">value</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="FloatNumber">1.0</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/typetraits.nim#L129"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/typetraits.nim#L141"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/typetraits.nim#L129" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/typetraits.nim#L141" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -377,7 +396,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-19 00:40:56 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-25 00:42:47 UTC</small>
       </div>
     </div>
   </div>

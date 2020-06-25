@@ -103,10 +103,6 @@ if [ $# -eq 1 ] ; then
 
   cp bin/nim $bindir/nim
   chmod 755 $bindir/nim
-  cp bin/nim-gdb $bindir/nim-gdb
-  chmod 755 $bindir/nim-gdb
-  cp bin/nim-gdb.bash $bindir/nim-gdb.bash
-  chmod 755 $bindir/nim-gdb.bash
   cp config/nim.cfg $configdir/nim.cfg
   chmod 644 $configdir/nim.cfg
   cp config/nimdoc.cfg $configdir/nimdoc.cfg
@@ -165,8 +161,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/private/since.nim
   cp lib/std/private/globs.nim $libdir/std/private/globs.nim
   chmod 644 $libdir/std/private/globs.nim
-  cp lib/std/private/nimbleutils.nim $libdir/std/private/nimbleutils.nim
-  chmod 644 $libdir/std/private/nimbleutils.nim
   cp lib/std/private/miscdollars.nim $libdir/std/private/miscdollars.nim
   chmod 644 $libdir/std/private/miscdollars.nim
   cp lib/std/editdistance.nim $libdir/std/editdistance.nim

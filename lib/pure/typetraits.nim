@@ -93,6 +93,18 @@ since (1, 1):
   type StaticParam*[value: static type] = object
     ## used to wrap a static value in `genericParams`
 
+since (1, 3, 5):
+  template elementType*(a: untyped): typedesc =
+    ## return element type of `a`, which can be any iterable (over which you
+    ## can iterate)
+    runnableExamples:
+      iterator myiter(n: int): auto =
+        for i in 0..<n: yield i
+      doAssert elementType(@[1,2]) is int
+      doAssert elementType("asdf") is char
+      doAssert elementType(myiter(3)) is int
+    typeof(block: (for ai in a: ai))
+
 import std/macros
 
 macro genericParamsImpl(T: typedesc): untyped =
@@ -112,7 +124,7 @@ macro genericParamsImpl(T: typedesc): untyped =
       of nnkBracketExpr:
         for i in 1..<impl.len:
           let ai = impl[i]
-          var ret: NimNode
+          var ret: NimNode = nil
           case ai.typeKind
           of ntyTypeDesc:
             ret = ai
