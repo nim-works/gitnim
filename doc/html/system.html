@@ -543,7 +543,7 @@ function main() {
   <li><a class="reference" href="#NimVersion"
     title="NimVersion: string = &quot;1.3.5&quot;"><wbr />Nim<wbr />Version<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#nativeStackTraceSupported"
-    title="nativeStackTraceSupported = false"><wbr />native<wbr />Stack<wbr />Trace<wbr />Supported<span class="attachedType"></span></a></li>
+    title="nativeStackTraceSupported = true"><wbr />native<wbr />Stack<wbr />Trace<wbr />Supported<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -1822,6 +1822,8 @@ function main() {
 <tr><td><a class="reference external" href="#pop,seq[T][T]">pop</a></td><td>Remove and return last item of a sequence</td></tr>
 <tr><td><a class="reference external" href="#&amp;,seq[T][T],seq[T][T]">x &amp; y</a></td><td>Concatenate two sequences</td></tr>
 <tr><td><a class="reference external" href="#[],openArray[T],HSlice[U,V]">x[a..b]</a></td><td>Slice of a sequence (both ends included)</td></tr>
+<tr><td><a class="reference external" href="#[],openArray[T],HSlice[U,V]">x[a..^b]</a></td><td>Slice of a sequence but <tt class="docutils literal"><span class="pre">b</span></tt> is a reversed index (both ends included)</td></tr>
+<tr><td><a class="reference external" href="#[],openArray[T],HSlice[U,V]">x[a..&lt;b]</a></td><td>Slice of a sequence (excluded upper bound)</td></tr>
 </table><p><strong>See also:</strong></p>
 <ul class="simple"><li><a class="reference external" href="sequtils.html">sequtils module</a> for operations on container types (including strings)</li>
 <li><a class="reference external" href="json.html">json module</a> for a structure which allows heterogeneous members</li>
@@ -1880,7 +1882,9 @@ function main() {
 <tr><td><a class="reference external" href="#or,bool,bool">T or F</a></td><td>Boolean <tt class="docutils literal"><span class="pre">or</span></tt></td></tr>
 <tr><td><a class="reference external" href="#xor,bool,bool">T xor F</a></td><td>Boolean <tt class="docutils literal"><span class="pre">xor</span></tt> (exclusive or)</td></tr>
 <tr><td><a class="reference external" href="#not,bool">not T</a></td><td>Boolean <tt class="docutils literal"><span class="pre">not</span></tt></td></tr>
+<tr><td><a class="reference external" href="#^.t,int">a[^x]</a></td><td>Take the element at the reversed index <tt class="docutils literal"><span class="pre">x</span></tt></td></tr>
 <tr><td><a class="reference external" href="#..,T,U">a .. b</a></td><td>Binary slice that constructs an interval <tt class="docutils literal"><span class="pre">[a, b]</span></tt></td></tr>
+<tr><td><a class="reference external" href="#..^.t,untyped,untyped">a ..^ b</a></td><td>Interval <tt class="docutils literal"><span class="pre">[a, b]</span></tt> but <tt class="docutils literal"><span class="pre">b</span></tt> as reversed index</td></tr>
 <tr><td><a class="reference external" href="#..&lt;.t,untyped,untyped">a ..&lt; b</a></td><td>Interval <tt class="docutils literal"><span class="pre">[a, b)</span></tt> (excluded upper bound)</td></tr>
 <tr><td><a class="reference external" href="#runnableExamples,untyped">runnableExamples</a></td><td>Create testable documentation</td></tr>
 </table></p>
@@ -4022,7 +4026,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="nativeStackTraceSupported"></a>
-<dt><pre><a href="system.html#nativeStackTraceSupported"><span class="Identifier">nativeStackTraceSupported</span></a> <span class="Other">=</span> <span class="DecNumber">false</span></pre></dt>
+<dt><pre><a href="system.html#nativeStackTraceSupported"><span class="Identifier">nativeStackTraceSupported</span></a> <span class="Other">=</span> <span class="DecNumber">true</span></pre></dt>
 <dd>
 
 
@@ -9418,7 +9422,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="unsetControlCHook"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#unsetControlCHook"><span class="Identifier">unsetControlCHook</span></a><span class="Other">(</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#unsetControlCHook"><span class="Identifier">unsetControlCHook</span></a><span class="Other">(</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Reverts a call to setControlCHook.
@@ -9544,9 +9548,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/system/excpt.nim#L308"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/system/excpt.nim#L345"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/excpt.nim#L308" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/excpt.nim#L345" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="writeStackTrace"></a>
@@ -11495,7 +11499,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-25 00:42:37 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-28 00:40:40 UTC</small>
       </div>
     </div>
   </div>
