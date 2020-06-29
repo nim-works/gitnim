@@ -1,1 +1,0 @@
-echo "Should be ignored"
