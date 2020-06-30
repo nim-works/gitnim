@@ -122,6 +122,9 @@ function main() {
     nil"><wbr />Instr<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#ControlFlowGraph"
     title="ControlFlowGraph = seq[Instr]"><wbr />Control<wbr />Flow<wbr />Graph<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#InstrTargetKind"
+    title="InstrTargetKind = enum
+  None, Full, Partial"><wbr />Instr<wbr />Target<wbr />Kind<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -134,10 +137,8 @@ function main() {
     title="skipConvDfa(n: PNode): PNode"><wbr />skip<wbr />Conv<wbr />Dfa<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#aliases%2CPNode%2CPNode"
     title="aliases(obj, field: PNode): bool"><wbr />aliases<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#useInstrTargets%2CInstr%2CPNode"
-    title="useInstrTargets(ins: Instr; loc: PNode): bool"><wbr />use<wbr />Instr<wbr />Targets<span class="attachedType">Instr</span></a></li>
-  <li><a class="reference" href="#defInstrTargets%2CInstr%2CPNode"
-    title="defInstrTargets(ins: Instr; loc: PNode): bool"><wbr />def<wbr />Instr<wbr />Targets<span class="attachedType">Instr</span></a></li>
+  <li><a class="reference" href="#instrTargets%2CPNode%2CPNode"
+    title="instrTargets(insloc, loc: PNode): InstrTargetKind"><wbr />instr<wbr />Targets<span class="attachedType">InstrTargetKind</span></a></li>
   <li><a class="reference" href="#isAnalysableFieldAccess%2CPNode%2CPSym"
     title="isAnalysableFieldAccess(orig: PNode; owner: PSym): bool"><wbr />is<wbr />Analysable<wbr />Field<wbr />Access<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#constructCfg%2CPSym%2CPNode"
@@ -159,7 +160,7 @@ function main() {
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="types.html">types</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="renderer.html">renderer</a>, <a class="reference external" href="patterns.html">patterns</a>
+<a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="types.html">types</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="renderer.html">renderer</a>, <a class="reference external" href="asciitables.html">asciitables</a>, <a class="reference external" href="patterns.html">patterns</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -205,6 +206,18 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L45" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="InstrTargetKind"></a>
+<dt><pre><a href="dfa.html#InstrTargetKind"><span class="Identifier">InstrTargetKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">None</span><span class="Other">,</span> <span class="Identifier">Full</span><span class="Other">,</span> <span class="Identifier">Partial</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L595"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L595" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 
 </dl></div>
 <div class="section" id="12">
@@ -220,9 +233,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 echos the ControlFlowGraph for debugging purposes.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L94"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L90"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L94" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L90" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skipConvDfa,PNode"></a>
@@ -231,9 +244,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L590"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L566"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L590" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L566" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="aliases,PNode,PNode"></a>
@@ -242,33 +255,21 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L617"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L576"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L617" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L576" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="useInstrTargets,Instr,PNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#useInstrTargets%2CInstr%2CPNode"><span class="Identifier">useInstrTargets</span></a><span class="Other">(</span><span class="Identifier">ins</span><span class="Other">:</span> <a href="dfa.html#Instr"><span class="Identifier">Instr</span></a><span class="Other">;</span> <span class="Identifier">loc</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+<a id="instrTargets,PNode,PNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#instrTargets%2CPNode%2CPNode"><span class="Identifier">instrTargets</span></a><span class="Other">(</span><span class="Identifier">insloc</span><span class="Other">,</span> <span class="Identifier">loc</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="dfa.html#InstrTargetKind"><span class="Identifier">InstrTargetKind</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L631"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L598"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L631" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="defInstrTargets,Instr,PNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#defInstrTargets%2CInstr%2CPNode"><span class="Identifier">defInstrTargets</span></a><span class="Other">(</span><span class="Identifier">ins</span><span class="Other">:</span> <a href="dfa.html#Instr"><span class="Identifier">Instr</span></a><span class="Other">;</span> <span class="Identifier">loc</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L639"
-class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L639" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L598" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isAnalysableFieldAccess,PNode,PSym"></a>
@@ -277,9 +278,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L646"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L605"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L646" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L605" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="constructCfg,PSym,PNode"></a>
@@ -289,9 +290,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 constructs a control flow graph for <tt class="docutils literal"><span class="pre">body</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L804"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/dfa.nim#L761"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L804" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/dfa.nim#L761" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -304,7 +305,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-28 00:41:22 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-30 00:42:41 UTC</small>
       </div>
     </div>
   </div>
