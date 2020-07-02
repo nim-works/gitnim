@@ -571,6 +571,8 @@ function main() {
     title="getOffset(arg: NimNode): int"><wbr />get<wbr />Offset<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#isExported%2CNimNode"
     title="isExported(n: NimNode): bool"><wbr />is<wbr />Exported<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#extractDocCommentsAndRunnables%2CNimNode"
+    title="extractDocCommentsAndRunnables(n: NimNode): NimNode"><wbr />extract<wbr />Doc<wbr />Comments<wbr />And<wbr />Runnables<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -3398,6 +3400,34 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/core/macros.nim#L1693" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="extractDocCommentsAndRunnables,NimNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#extractDocCommentsAndRunnables%2CNimNode"><span class="Identifier">extractDocCommentsAndRunnables</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="system.html#NimNode"><span class="Identifier">NimNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#NimNode"><span class="Identifier">NimNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+returns a <tt class="docutils literal"><span class="pre">nnkStmtList</span></tt> containing the top-level doc comments and runnableExamples in <tt class="docutils literal"><span class="pre">a</span></tt>, stopping at the first child that is neither. Example:<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">macros</span>
+<span class="Keyword">macro</span> <span class="Identifier">transf</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">untyped</span> <span class="Operator">=</span>
+  <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">quote</span> <span class="Keyword">do</span><span class="Punctuation">:</span>
+    <span class="Keyword">proc</span> <span class="Identifier">fun2</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
+  <span class="Keyword">let</span> <span class="Identifier">header</span> <span class="Operator">=</span> <span class="Identifier">extractDocCommentsAndRunnables</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">body</span><span class="Punctuation">)</span>
+  <span class="Comment"># correct usage: rest is appended</span>
+  <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">body</span> <span class="Operator">=</span> <span class="Identifier">header</span>
+  <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">body</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">quote</span> <span class="Keyword">do</span><span class="Punctuation">:</span> <span class="Keyword">discard</span> <span class="Comment"># just an example</span>
+  <span class="Comment"># incorrect usage: nesting inside a nnkStmtList:</span>
+  <span class="Comment"># result.body = quote do: (`header`; discard)</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">fun</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">transf</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
+  <span class="Comment">## first comment</span>
+  <span class="Identifier">runnableExamples</span><span class="Punctuation">:</span> <span class="Keyword">discard</span>
+  <span class="Identifier">runnableExamples</span><span class="Punctuation">:</span> <span class="Keyword">discard</span>
+  <span class="Comment">## last comment</span>
+  <span class="Keyword">discard</span> <span class="Comment"># first statement after doc comments + runnableExamples</span>
+  <span class="Comment">## not docgen'd</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/core/macros.nim#L1696"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/core/macros.nim#L1696" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 
 </dl></div>
 <div class="section" id="15">
@@ -3629,7 +3659,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-01 00:46:19 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-02 00:44:07 UTC</small>
       </div>
     </div>
   </div>

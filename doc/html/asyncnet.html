@@ -372,7 +372,7 @@ class="link-seesrc" target="_blank">Source</a>
     <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="asyncnet.html#AsyncSocket"><span class="Identifier">AsyncSocket</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-
+Establishes connection to the specified <tt class="docutils literal"><span class="pre">address</span></tt>:<tt class="docutils literal"><span class="pre">port</span></tt> pair via the specified protocol. The procedure iterates through possible resolutions of the <tt class="docutils literal"><span class="pre">address</span></tt> until it succeeds, meaning that it seamlessly works with both IPv4 and IPv6. Returns AsyncSocket ready to send or receive data.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L280"
 class="link-seesrc" target="_blank">Source</a>
@@ -384,6 +384,8 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
+<p>Connects <tt class="docutils literal"><span class="pre">socket</span></tt> to server at <tt class="docutils literal"><span class="pre">address:port</span></tt>.</p>
+<p>Returns a <tt class="docutils literal"><span class="pre">Future</span></tt> which will complete when the connection succeeds or an error occurs.</p>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L291"
@@ -396,6 +398,11 @@ class="link-seesrc" target="_blank">Source</a>
     <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
+<p>Reads <strong>up to</strong> <tt class="docutils literal"><span class="pre">size</span></tt> bytes from <tt class="docutils literal"><span class="pre">socket</span></tt> into <tt class="docutils literal"><span class="pre">buf</span></tt>.</p>
+<p>For buffered sockets this function will attempt to read all the requested data. It will read this data in <tt class="docutils literal"><span class="pre">BufferSize</span></tt> chunks.</p>
+<p>For unbuffered sockets this function makes no effort to read all the data requested. It will return as much data as the operating system gives it.</p>
+<p>If socket is disconnected during the recv operation then the future may complete with only a part of the requested data.</p>
+<p>If socket is disconnected and no data is available to be read then the future will complete with a value of <tt class="docutils literal"><span class="pre">0</span></tt>.</p>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L335"
@@ -408,6 +415,11 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
+<p>Reads <strong>up to</strong> <tt class="docutils literal"><span class="pre">size</span></tt> bytes from <tt class="docutils literal"><span class="pre">socket</span></tt>.</p>
+<p>For buffered sockets this function will attempt to read all the requested data. It will read this data in <tt class="docutils literal"><span class="pre">BufferSize</span></tt> chunks.</p>
+<p>For unbuffered sockets this function makes no effort to read all the data requested. It will return as much data as the operating system gives it.</p>
+<p>If socket is disconnected during the recv operation then the future may complete with only a part of the requested data.</p>
+<p>If socket is disconnected and no data is available to be read then the future will complete with a value of <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt>.</p>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L383"
@@ -420,7 +432,7 @@ class="link-seesrc" target="_blank">Source</a>
     <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-
+Sends <tt class="docutils literal"><span class="pre">size</span></tt> bytes from <tt class="docutils literal"><span class="pre">buf</span></tt> to <tt class="docutils literal"><span class="pre">socket</span></tt>. The returned future will complete once all data has been sent.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L435"
 class="link-seesrc" target="_blank">Source</a>
@@ -432,7 +444,7 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-
+Sends <tt class="docutils literal"><span class="pre">data</span></tt> to <tt class="docutils literal"><span class="pre">socket</span></tt>. The returned future will complete once all data has been sent.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L449"
 class="link-seesrc" target="_blank">Source</a>
@@ -474,6 +486,13 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
+<p>Reads a line of data from <tt class="docutils literal"><span class="pre">socket</span></tt> into <tt class="docutils literal"><span class="pre">resString</span></tt>.</p>
+<p>If a full line is read <tt class="docutils literal"><span class="pre">\r\L</span></tt> is not added to <tt class="docutils literal"><span class="pre">line</span></tt>, however if solely <tt class="docutils literal"><span class="pre">\r\L</span></tt> is read then <tt class="docutils literal"><span class="pre">line</span></tt> will be set to it.</p>
+<p>If the socket is disconnected, <tt class="docutils literal"><span class="pre">line</span></tt> will be set to <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt>.</p>
+<p>If the socket is disconnected in the middle of a line (before <tt class="docutils literal"><span class="pre">\r\L</span></tt> is read) then line will be set to <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt>. The partial line <strong>will be lost</strong>.</p>
+<p>The <tt class="docutils literal"><span class="pre">maxLength</span></tt> parameter determines the maximum amount of characters that can be read. <tt class="docutils literal"><span class="pre">resString</span></tt> will be truncated after that.</p>
+<p><strong>Warning</strong>: The <tt class="docutils literal"><span class="pre">Peek</span></tt> flag is not yet implemented.</p>
+<p><strong>Warning</strong>: <tt class="docutils literal"><span class="pre">recvLineInto</span></tt> on unbuffered sockets assumes that the protocol uses <tt class="docutils literal"><span class="pre">\r\L</span></tt> to delimit a new line.</p>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L505"
@@ -486,6 +505,13 @@ class="link-seesrc" target="_blank">Source</a>
     <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
+<p>Reads a line of data from <tt class="docutils literal"><span class="pre">socket</span></tt>. Returned future will complete once a full line is read or an error occurs.</p>
+<p>If a full line is read <tt class="docutils literal"><span class="pre">\r\L</span></tt> is not added to <tt class="docutils literal"><span class="pre">line</span></tt>, however if solely <tt class="docutils literal"><span class="pre">\r\L</span></tt> is read then <tt class="docutils literal"><span class="pre">line</span></tt> will be set to it.</p>
+<p>If the socket is disconnected, <tt class="docutils literal"><span class="pre">line</span></tt> will be set to <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt>.</p>
+<p>If the socket is disconnected in the middle of a line (before <tt class="docutils literal"><span class="pre">\r\L</span></tt> is read) then line will be set to <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt>. The partial line <strong>will be lost</strong>.</p>
+<p>The <tt class="docutils literal"><span class="pre">maxLength</span></tt> parameter determines the maximum amount of characters that can be read. The result is truncated after that.</p>
+<p><strong>Warning</strong>: The <tt class="docutils literal"><span class="pre">Peek</span></tt> flag is not yet implemented.</p>
+<p><strong>Warning</strong>: <tt class="docutils literal"><span class="pre">recvLine</span></tt> on unbuffered sockets assumes that the protocol uses <tt class="docutils literal"><span class="pre">\r\L</span></tt> to delimit a new line.</p>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L598"
@@ -659,6 +685,9 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
+<p>This proc sends <tt class="docutils literal"><span class="pre">data</span></tt> to the specified <tt class="docutils literal"><span class="pre">address</span></tt>, which may be an IP address or a hostname. If a hostname is specified this function will try each IP of that hostname. The returned future will complete once all data has been sent.</p>
+<p>If an error occurs an OSError exception will be raised.</p>
+<p>This proc is normally used with connectionless sockets (UDP sockets).</p>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L812"
@@ -673,6 +702,13 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
+<p>Receives a datagram data from <tt class="docutils literal"><span class="pre">socket</span></tt> into <tt class="docutils literal"><span class="pre">data</span></tt>, which must be at least of size <tt class="docutils literal"><span class="pre">size</span></tt>. The address and port of datagram's sender will be stored into <tt class="docutils literal"><span class="pre">address</span></tt> and <tt class="docutils literal"><span class="pre">port</span></tt>, respectively. Returned future will complete once one datagram has been received, and will return size of packet received.</p>
+<p>If an error occurs an OSError exception will be raised.</p>
+<p>This proc is normally used with connectionless sockets (UDP sockets).</p>
+<p><strong>Notes</strong></p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">data</span></tt> must be initialized to the length of <tt class="docutils literal"><span class="pre">size</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">address</span></tt> must be initialized to 46 in length.</li>
+</ul>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L859"
@@ -686,6 +722,9 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
+<p>Receives a datagram data from <tt class="docutils literal"><span class="pre">socket</span></tt>, which must be at least of size <tt class="docutils literal"><span class="pre">size</span></tt>. Returned future will complete once one datagram has been received and will return tuple with: data of packet received; and address and port of datagram's sender.</p>
+<p>If an error occurs an OSError exception will be raised.</p>
+<p>This proc is normally used with connectionless sockets (UDP sockets).</p>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncnet.nim#L913"
@@ -708,7 +747,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-01 00:46:25 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-02 00:44:13 UTC</small>
       </div>
     </div>
   </div>
