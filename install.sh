@@ -221,6 +221,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/js/jsffi.nim
   cp lib/js/jsconsole.nim $libdir/js/jsconsole.nim
   chmod 644 $libdir/js/jsconsole.nim
+  cp lib/js/jsre.nim $libdir/js/jsre.nim
+  chmod 644 $libdir/js/jsre.nim
   cp lib/js/dom.nim $libdir/js/dom.nim
   chmod 644 $libdir/js/dom.nim
   cp lib/js/asyncjs.nim $libdir/js/asyncjs.nim
