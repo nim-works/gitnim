@@ -205,6 +205,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/vmhooks.nim
     rm -f $nimbleDir/compiler/vmmarshal.nim
     rm -f $nimbleDir/compiler/vmops.nim
+    rm -f $nimbleDir/compiler/vmprofiler.nim
     rm -f $nimbleDir/compiler/wordrecg.nim
     rm -f $nimbleDir/compiler/writetracking.nim
     rm -f $nimbleDir/doc/basicopt.txt

@@ -47,21 +47,12 @@ function main() {
 
   toggleSwitch.addEventListener('change', switchTheme, false);
 
+  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  if (currentTheme) {
+    document.documentElement.setAttribute('data-theme', currentTheme);
 
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.setAttribute('data-theme', "dark");
-    toggleSwitch.checked = true;
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    document.documentElement.setAttribute('data-theme', "light");
-    toggleSwitch.checked = false;
-  } else {
-    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-    if (currentTheme) {
-      document.documentElement.setAttribute('data-theme', currentTheme);
-
-      if (currentTheme === 'dark') {
-        toggleSwitch.checked = true;
-      }
+    if (currentTheme === 'dark') {
+      toggleSwitch.checked = true;
     }
   }
 }
@@ -112,7 +103,9 @@ function main() {
       <li><a class="reference" href="#TBaseLexer"
     title="TBaseLexer = object of RootObj
   bufpos*: int
-  buf*: string
+  buf*: cstring
+  bufStorage: string
+  bufLen: int
   stream*: PLLStream
   lineNumber*: int
   sentinel*: int
@@ -188,7 +181,9 @@ function main() {
 <a id="TBaseLexer"></a>
 <dt><pre><a href="nimlexbase.html#TBaseLexer"><span class="Identifier">TBaseLexer</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">RootObj</span>
   <span class="Identifier">bufpos</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">buf</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
+  <span class="Identifier">buf</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">cstring</span>
+  <span class="Identifier">bufStorage</span><span class="Other">:</span> <span class="Identifier">string</span>
+  <span class="Identifier">bufLen</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">stream</span><span class="Operator">*</span><span class="Other">:</span> <a href="llstream.html#PLLStream"><span class="Identifier">PLLStream</span></a>
   <span class="Identifier">lineNumber</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">sentinel</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
@@ -352,9 +347,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L67"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L69"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L67" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L69" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="handleCR,TBaseLexer,int"></a>
@@ -364,9 +359,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L124"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L128"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L124" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L128" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="handleLF,TBaseLexer,int"></a>
@@ -376,9 +371,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L131"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L135"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L131" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L135" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="openBaseLexer,TBaseLexer,PLLStream,int"></a>
@@ -388,9 +383,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L141"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L145"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L141" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L145" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getColNumber,TBaseLexer,int"></a>
@@ -399,9 +394,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L153"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L159"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L153" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L159" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getCurrentLine,TBaseLexer,bool"></a>
@@ -410,9 +405,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L156"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/nimlexbase.nim#L162"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L156" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/nimlexbase.nim#L162" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -425,7 +420,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-07 00:46:30 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-11 00:48:18 UTC</small>
       </div>
     </div>
   </div>

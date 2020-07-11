@@ -47,21 +47,12 @@ function main() {
 
   toggleSwitch.addEventListener('change', switchTheme, false);
 
+  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  if (currentTheme) {
+    document.documentElement.setAttribute('data-theme', currentTheme);
 
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.setAttribute('data-theme', "dark");
-    toggleSwitch.checked = true;
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    document.documentElement.setAttribute('data-theme', "light");
-    toggleSwitch.checked = false;
-  } else {
-    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-    if (currentTheme) {
-      document.documentElement.setAttribute('data-theme', currentTheme);
-
-      if (currentTheme === 'dark') {
-        toggleSwitch.checked = true;
-      }
+    if (currentTheme === 'dark') {
+      toggleSwitch.checked = true;
     }
   }
 }
@@ -2074,7 +2065,7 @@ return &quot;ambiguous&quot;</pre>
 <li>Apart from the minimal syntactic sugar the language core does not need to know about tables.</li>
 </ul>
 
-<h2><a class="toc-backref" id="statements-and-expressions-type-conversions" href="#statements-and-expressions-type-conversions">Type conversions</a></h2><p>Syntactically a <tt class="docutils literal"><span class="pre">type conversion</span></tt> is like a procedure call, but a type name replaces the procedure name. A type conversion is always safe in the sense that a failure to convert a type to another results in an exception (if it cannot be determined statically).</p>
+<h2><a class="toc-backref" id="statements-and-expressions-type-conversions" href="#statements-and-expressions-type-conversions">Type conversions</a></h2><p>Syntactically a <em>type conversion</em> is like a procedure call, but a type name replaces the procedure name. A type conversion is always safe in the sense that a failure to convert a type to another results in an exception (if it cannot be determined statically).</p>
 <p>Ordinary procs are often preferred over type conversions in Nim: For instance, <tt class="docutils literal"><span class="pre">$</span></tt> is the <tt class="docutils literal"><span class="pre">toString</span></tt> operator by convention and <tt class="docutils literal"><span class="pre">toFloat</span></tt> and <tt class="docutils literal"><span class="pre">toInt</span></tt> can be used to convert from floating point to integer or vice versa.</p>
 <p>A type conversion can also be used to disambiguate overloaded routines:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">p</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;int&quot;</span>
@@ -2085,8 +2076,10 @@ return &quot;ambiguous&quot;</pre>
 <p>Exception: Values that are converted to an unsigned type at compile time are checked so that code like <tt class="docutils literal"><span class="pre">byte(-1)</span></tt> does not compile.</p>
 <p><strong>Note</strong>: Historically the operations were unchecked and the conversions were sometimes checked but starting with the revision 1.0.4 of this document and the language implementation the conversions too are now <em>always unchecked</em>.</p>
 
-<h2><a class="toc-backref" id="statements-and-expressions-type-casts" href="#statements-and-expressions-type-casts">Type casts</a></h2><p>Example:</p>
-<pre class="listing"><span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span></pre><p>Type casts are a crude mechanism to interpret the bit pattern of an expression as if it would be of another type. Type casts are only needed for low-level programming and are inherently unsafe.</p>
+<h2><a class="toc-backref" id="statements-and-expressions-type-casts" href="#statements-and-expressions-type-casts">Type casts</a></h2><p><em>Type casts</em> are a crude mechanism to interpret the bit pattern of an expression as if it would be of another type. Type casts are only needed for low-level programming and are inherently unsafe.</p>
+<pre class="listing"><span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span></pre><p>The target type of a cast must be a concrete type, for instance, a target type that is a type class (which is non-concrete) would be invalid:</p>
+<pre class="listing"><span class="Keyword">type</span> <span class="Identifier">Foo</span> <span class="Operator">=</span> <span class="Identifier">int</span> <span class="Keyword">or</span> <span class="Identifier">float</span>
+<span class="Keyword">var</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Identifier">Foo</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">)</span> <span class="Comment"># Error: cannot cast to a non concrete type: 'Foo'</span></pre><p>Type casts should not be confused with <em>type conversions,</em> as mentioned in the prior section. Unlike type conversions, a type cast cannot change the underlying bit pattern of the data being casted (aside from that the size of the target type may differ from the source type). Casting resembles <em>type punning</em> in other languages or C++'s <tt class="docutils literal"><span class="pre">reinterpret_cast</span></tt> and <tt class="docutils literal"><span class="pre">bit_cast</span></tt> features.</p>
 
 <h2><a class="toc-backref" id="statements-and-expressions-the-addr-operator" href="#statements-and-expressions-the-addr-operator">The addr operator</a></h2><p>The <tt class="docutils literal"><span class="pre">addr</span></tt> operator returns the address of an l-value. If the type of the location is <tt class="docutils literal"><span class="pre">T</span></tt>, the <tt class="docutils literal"><span class="pre">addr</span></tt> operator result is of the type <tt class="docutils literal"><span class="pre">ptr T</span></tt>. An address is always an untraced reference. Taking the address of an object that resides on the stack is <strong>unsafe</strong>, as the pointer may live longer than the object on the stack and can thus reference a non-existing object. One can get the address of variables, but one can't use it on variables declared through <tt class="docutils literal"><span class="pre">let</span></tt> statements:</p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">t1</span> <span class="Operator">=</span> <span class="StringLit">&quot;Hello&quot;</span>
@@ -3953,7 +3946,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-07 00:45:45 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-11 00:47:30 UTC</small>
       </div>
     </div>
   </div>

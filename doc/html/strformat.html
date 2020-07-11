@@ -47,21 +47,12 @@ function main() {
 
   toggleSwitch.addEventListener('change', switchTheme, false);
 
+  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  if (currentTheme) {
+    document.documentElement.setAttribute('data-theme', currentTheme);
 
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.setAttribute('data-theme', "dark");
-    toggleSwitch.checked = true;
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    document.documentElement.setAttribute('data-theme', "light");
-    toggleSwitch.checked = false;
-  } else {
-    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-    if (currentTheme) {
-      document.documentElement.setAttribute('data-theme', currentTheme);
-
-      if (currentTheme === 'dark') {
-        toggleSwitch.checked = true;
-      }
+    if (currentTheme === 'dark') {
+      toggleSwitch.checked = true;
     }
   }
 }
@@ -106,6 +97,7 @@ function main() {
 <li><a class="reference" id="fmt-vsdot-amp_toc" href="#fmt-vsdot-amp"><tt class="docutils literal"><span class="pre">fmt</span></tt> vs. <tt class="docutils literal"><span class="pre">&amp;</span></tt></a></li>
 <li><a class="reference" id="formatting-strings_toc" href="#formatting-strings">Formatting strings</a></li>
 <li><a class="reference" id="formatting-floats_toc" href="#formatting-floats">Formatting floats</a></li>
+<li><a class="reference" id="debugging-strings_toc" href="#debugging-strings">Debugging strings</a></li>
 <li><a class="reference" id="implementation-details_toc" href="#implementation-details">Implementation details</a></li>
 <li><a class="reference" id="standard-format-specifier-for-strings-integers-and-floats_toc" href="#standard-format-specifier-for-strings-integers-and-floats">Standard format specifier for strings, integers and floats</a></li>
 <li><a class="reference" id="limitations_toc" href="#limitations">Limitations</a></li>
@@ -189,7 +181,6 @@ function main() {
 <span class="Identifier">doAssert</span> <span class="Operator">&amp;</span><span class="LongStringLit">&quot;&quot;&quot;{&quot;abc&quot;:&gt;4}&quot;&quot;&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot; abc&quot;</span>
 <span class="Identifier">doAssert</span> <span class="Operator">&amp;</span><span class="LongStringLit">&quot;&quot;&quot;{&quot;abc&quot;:&lt;4}&quot;&quot;&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;abc &quot;</span></pre>
 <h1><a class="toc-backref" id="formatting-floats" href="#formatting-floats">Formatting floats</a></h1><pre class="listing"><span class="Keyword">import</span> <span class="Identifier">strformat</span>
-
 <span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{-12345:08}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;-0012345&quot;</span>
 <span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{-1:3}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot; -1&quot;</span>
 <span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{-1:03}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;-01&quot;</span>
@@ -205,6 +196,37 @@ function main() {
 <span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{123.456:e}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;1.234560e+02&quot;</span>
 <span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{123.456:&gt;13e}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot; 1.234560e+02&quot;</span>
 <span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{123.456:13e}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot; 1.234560e+02&quot;</span></pre>
+<h1><a class="toc-backref" id="debugging-strings" href="#debugging-strings">Debugging strings</a></h1><p><tt class="docutils literal"><span class="pre">fmt&quot;{expr=}&quot;</span></tt> expands to <tt class="docutils literal"><span class="pre">fmt&quot;expr={expr}&quot;</span></tt> namely the text of the expression, an equal sign and the results of evaluated expression.</p>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">strformat</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{123.456=}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;123.456=123.456&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{123.456=:&gt;9.3f}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;123.456=  123.456&quot;</span>
+
+<span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="StringLit">&quot;hello&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x=}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x=hello&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x =}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x =hello&quot;</span>
+
+<span class="Keyword">let</span> <span class="Identifier">y</span> <span class="Operator">=</span> <span class="FloatNumber">3.1415926</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{y=:.2f}&quot;</span> <span class="Operator">==</span> <span class="RawData">fmt&quot;y={y:.2f}&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{y=}&quot;</span> <span class="Operator">==</span> <span class="RawData">fmt&quot;y={y}&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{y = : &lt;8}&quot;</span> <span class="Operator">==</span> <span class="RawData">fmt&quot;y = 3.14159 &quot;</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">hello</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">float</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">12</span>
+<span class="Keyword">let</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="StringLit">&quot;hello&quot;</span>
+<span class="Keyword">let</span> <span class="Identifier">b</span> <span class="Operator">=</span> <span class="FloatNumber">3.1415926</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{hello(x, y) = }&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;hello(x, y) = 12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x.hello(y) = }&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x.hello(y) = 12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{hello x, y = }&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;hello x, y = 12&quot;</span></pre><p>Note that it is space sensitive:</p>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">strformat</span>
+<span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="StringLit">&quot;12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x=}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x=12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x =:}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x =12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x =}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x =12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x= :}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x= 12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x= }&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x= 12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x = :}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x = 12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x = }&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x = 12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x   =  :}&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x   =  12&quot;</span>
+<span class="Identifier">doAssert</span> <span class="RawData">fmt&quot;{x   =  }&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;x   =  12&quot;</span></pre>
 <h1><a class="toc-backref" id="implementation-details" href="#implementation-details">Implementation details</a></h1><p>An expression like <tt class="docutils literal"><span class="pre">&amp;&quot;{key} is {value:arg} {{z}}&quot;</span></tt> is transformed into:</p>
 <pre class="listing"><span class="Keyword">var</span> <span class="Identifier">temp</span> <span class="Operator">=</span> <span class="Identifier">newStringOfCap</span><span class="Punctuation">(</span><span class="Identifier">educatedCapGuess</span><span class="Punctuation">)</span>
 <span class="Identifier">temp</span><span class="Operator">.</span><span class="Identifier">formatValue</span> <span class="Identifier">key</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span>
@@ -298,9 +320,9 @@ function main() {
 
 Type that describes &quot;standard format specifiers&quot;.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L297"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L342"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L297" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L342" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -315,9 +337,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Aligns <tt class="docutils literal"><span class="pre">s</span></tt> using <tt class="docutils literal"><span class="pre">fill</span></tt> char. This is only of interest if you want to write a custom <tt class="docutils literal"><span class="pre">format</span></tt> proc that should support the standard format specifiers.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L276"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L321"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L276" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L321" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseStandardFormatSpecifier,string,int"></a>
@@ -331,9 +353,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This is only of interest if you want to write a custom <tt class="docutils literal"><span class="pre">format</span></tt> proc that should support the standard format specifiers. If <tt class="docutils literal"><span class="pre">ignoreUnknownSuffix</span></tt> is true, an unknown suffix after the <tt class="docutils literal"><span class="pre">type</span></tt> field is not an error.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L368"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L413"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L368" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L413" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="formatValue,string,T,string"></a>
@@ -342,9 +364,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Standard format implementation for <tt class="docutils literal"><span class="pre">SomeInteger</span></tt>. It makes little sense to call this directly, but it is required to exist by the <tt class="docutils literal"><span class="pre">&amp;</span></tt> macro.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L420"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L465"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L420" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L465" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="formatValue,string,SomeFloat,string"></a>
@@ -353,9 +375,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Standard format implementation for <tt class="docutils literal"><span class="pre">SomeFloat</span></tt>. It makes little sense to call this directly, but it is required to exist by the <tt class="docutils literal"><span class="pre">&amp;</span></tt> macro.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L441"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L486"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L441" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L486" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="formatValue,string,string,string"></a>
@@ -365,9 +387,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Standard format implementation for <tt class="docutils literal"><span class="pre">string</span></tt>. It makes little sense to call this directly, but it is required to exist by the <tt class="docutils literal"><span class="pre">&amp;</span></tt> macro.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L498"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L543"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L498" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L543" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -381,9 +403,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 For a specification of the <tt class="docutils literal"><span class="pre">&amp;</span></tt> macro, see the module level documentation.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L604"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L649"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L604" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L649" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fmt.m,string"></a>
@@ -392,9 +414,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 An alias for <tt class="docutils literal"><span class="pre">&amp;</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L607"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L652"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L607" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L652" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fmt.m,string,char,char"></a>
@@ -408,9 +430,9 @@ Use <tt class="docutils literal"><span class="pre">openChar</span></tt> instead 
 </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot;(()&quot;foo&quot; &amp; &quot;bar&quot;())&quot;&quot;&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span><span class="Punctuation">(</span><span class="CharLit">&apos;)&apos;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="CharLit">&apos;(&apos;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;(foobar)&quot;</span><span class="Whitespace">
 </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot; &quot;&quot;{&quot;123+123&quot;}&quot;&quot; &quot;&quot;&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span><span class="Punctuation">(</span><span class="CharLit">&apos;&quot;&apos;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="CharLit">&apos;&quot;&apos;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot; </span><span class="EscapeSequence">\&quot;</span><span class="EscapeSequence">{246}\&quot;</span><span class="StringLit"> &quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L610"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L655"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L610" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L655" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -423,7 +445,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-07 00:46:16 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-11 00:48:03 UTC</small>
       </div>
     </div>
   </div>

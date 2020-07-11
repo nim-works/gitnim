@@ -989,6 +989,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/vmmarshal.nim
   cp compiler/vmops.nim $nimbleDir/compiler/vmops.nim
   chmod 644 $nimbleDir/compiler/vmops.nim
+  cp compiler/vmprofiler.nim $nimbleDir/compiler/vmprofiler.nim
+  chmod 644 $nimbleDir/compiler/vmprofiler.nim
   cp compiler/wordrecg.nim $nimbleDir/compiler/wordrecg.nim
   chmod 644 $nimbleDir/compiler/wordrecg.nim
   cp compiler/writetracking.nim $nimbleDir/compiler/writetracking.nim
