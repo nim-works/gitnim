@@ -82,6 +82,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/cmdlinehelper.nim
     rm -f $nimbleDir/compiler/commands.nim
     rm -f $nimbleDir/compiler/condsyms.nim
+    rm -f $nimbleDir/compiler/cursor_inference.nim
     rm -f $nimbleDir/compiler/debuginfo.nim
     rm -f $nimbleDir/compiler/depends.nim
     rm -f $nimbleDir/compiler/dfa.nim
@@ -139,6 +140,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/nimsets.nim
     rm -f $nimbleDir/compiler/nodejs.nim
     rm -f $nimbleDir/compiler/nversion.nim
+    rm -f $nimbleDir/compiler/optimizer.nim
     rm -f $nimbleDir/compiler/options.nim
     rm -f $nimbleDir/compiler/packagehandling.nim
     rm -f $nimbleDir/compiler/parampatterns.nim

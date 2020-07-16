@@ -743,6 +743,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/commands.nim
   cp compiler/condsyms.nim $nimbleDir/compiler/condsyms.nim
   chmod 644 $nimbleDir/compiler/condsyms.nim
+  cp compiler/cursor_inference.nim $nimbleDir/compiler/cursor_inference.nim
+  chmod 644 $nimbleDir/compiler/cursor_inference.nim
   cp compiler/debuginfo.nim $nimbleDir/compiler/debuginfo.nim
   chmod 644 $nimbleDir/compiler/debuginfo.nim
   cp compiler/depends.nim $nimbleDir/compiler/depends.nim
@@ -857,6 +859,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/nodejs.nim
   cp compiler/nversion.nim $nimbleDir/compiler/nversion.nim
   chmod 644 $nimbleDir/compiler/nversion.nim
+  cp compiler/optimizer.nim $nimbleDir/compiler/optimizer.nim
+  chmod 644 $nimbleDir/compiler/optimizer.nim
   cp compiler/options.nim $nimbleDir/compiler/options.nim
   chmod 644 $nimbleDir/compiler/options.nim
   cp compiler/packagehandling.nim $nimbleDir/compiler/packagehandling.nim
