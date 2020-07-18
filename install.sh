@@ -373,6 +373,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/pure/strtabs.nim
   cp lib/pure/terminal.nim $libdir/pure/terminal.nim
   chmod 644 $libdir/pure/terminal.nim
+  cp lib/pure/includes/decode_helpers.nim $libdir/pure/includes/decode_helpers.nim
+  chmod 644 $libdir/pure/includes/decode_helpers.nim
   cp lib/pure/includes/unicode_ranges.nim $libdir/pure/includes/unicode_ranges.nim
   chmod 644 $libdir/pure/includes/unicode_ranges.nim
   cp lib/pure/includes/osseps.nim $libdir/pure/includes/osseps.nim
