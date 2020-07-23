@@ -106,6 +106,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/injectdestructors.nim
     rm -f $nimbleDir/compiler/installer.ini
     rm -f $nimbleDir/compiler/int128.nim
+    rm -f $nimbleDir/compiler/isolation_check.nim
     rm -f $nimbleDir/compiler/jsgen.nim
     rm -f $nimbleDir/compiler/jstypes.nim
     rm -f $nimbleDir/compiler/lambdalifting.nim
@@ -132,9 +133,9 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/nimblecmd.nim
     rm -f $nimbleDir/compiler/nimconf.nim
     rm -f $nimbleDir/compiler/nimeval.nim
+    rm -f $nimbleDir/compiler/nimfix/nimfix.nim.cfg
     rm -f $nimbleDir/compiler/nimfix/nimfix.nim
     rm -f $nimbleDir/compiler/nimfix/prettybase.nim
-    rm -f $nimbleDir/compiler/nimfix/nimfix.nim.cfg
     rm -f $nimbleDir/compiler/nimlexbase.nim
     rm -f $nimbleDir/compiler/nimpaths.nim
     rm -f $nimbleDir/compiler/nimsets.nim
@@ -151,8 +152,8 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/patterns.nim
     rm -f $nimbleDir/compiler/platform.nim
     rm -f $nimbleDir/compiler/plugins/locals.nim
-    rm -f $nimbleDir/compiler/plugins/active.nim
     rm -f $nimbleDir/compiler/plugins/itersgen.nim
+    rm -f $nimbleDir/compiler/plugins/active.nim
     rm -f $nimbleDir/compiler/pluginsupport.nim
     rm -f $nimbleDir/compiler/pragmas.nim
     rm -f $nimbleDir/compiler/prefixmatches.nim
