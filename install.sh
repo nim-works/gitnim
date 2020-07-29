@@ -165,12 +165,12 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/system/gc_regions.nim
   cp lib/system/cellsets.nim $libdir/system/cellsets.nim
   chmod 644 $libdir/system/cellsets.nim
-  cp lib/system/cyclicrefs_v2.nim $libdir/system/cyclicrefs_v2.nim
-  chmod 644 $libdir/system/cyclicrefs_v2.nim
   cp lib/system/timers.nim $libdir/system/timers.nim
   chmod 644 $libdir/system/timers.nim
   cp lib/system/threadlocalstorage.nim $libdir/system/threadlocalstorage.nim
   chmod 644 $libdir/system/threadlocalstorage.nim
+  cp lib/system/orc.nim $libdir/system/orc.nim
+  chmod 644 $libdir/system/orc.nim
   cp lib/system/seqs_v2.nim $libdir/system/seqs_v2.nim
   chmod 644 $libdir/system/seqs_v2.nim
   cp lib/system/gc_common.nim $libdir/system/gc_common.nim
@@ -179,14 +179,14 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/system/integerops.nim
   cp lib/system/bitmasks.nim $libdir/system/bitmasks.nim
   chmod 644 $libdir/system/bitmasks.nim
+  cp lib/system/arc.nim $libdir/system/arc.nim
+  chmod 644 $libdir/system/arc.nim
   cp lib/system/dyncalls.nim $libdir/system/dyncalls.nim
   chmod 644 $libdir/system/dyncalls.nim
   cp lib/system/alloc.nim $libdir/system/alloc.nim
   chmod 644 $libdir/system/alloc.nim
   cp lib/system/channels.nim $libdir/system/channels.nim
   chmod 644 $libdir/system/channels.nim
-  cp lib/system/cyclicrefs_bacon.nim $libdir/system/cyclicrefs_bacon.nim
-  chmod 644 $libdir/system/cyclicrefs_bacon.nim
   cp lib/system/dollars.nim $libdir/system/dollars.nim
   chmod 644 $libdir/system/dollars.nim
   cp lib/system/profiler.nim $libdir/system/profiler.nim
@@ -239,8 +239,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/system/comparisons.nim
   cp lib/system/repr_v2.nim $libdir/system/repr_v2.nim
   chmod 644 $libdir/system/repr_v2.nim
-  cp lib/system/refs_v2.nim $libdir/system/refs_v2.nim
-  chmod 644 $libdir/system/refs_v2.nim
   cp lib/system/threads.nim $libdir/system/threads.nim
   chmod 644 $libdir/system/threads.nim
   cp lib/system/repr.nim $libdir/system/repr.nim
@@ -987,6 +985,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/types.nim
   cp compiler/typesrenderer.nim $nimbleDir/compiler/typesrenderer.nim
   chmod 644 $nimbleDir/compiler/typesrenderer.nim
+  cp compiler/varpartitions.nim $nimbleDir/compiler/varpartitions.nim
+  chmod 644 $nimbleDir/compiler/varpartitions.nim
   cp compiler/vm.nim $nimbleDir/compiler/vm.nim
   chmod 644 $nimbleDir/compiler/vm.nim
   cp compiler/vmconv.nim $nimbleDir/compiler/vmconv.nim

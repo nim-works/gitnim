@@ -31,6 +31,7 @@ var
   foreignDeps*: seq[string] = @[] ## The foreign dependencies. Only
                                   ## exported for 'distros.nim'.
 
+  nimbleTasks: seq[string] = @[]
   beforeHooks: seq[string] = @[]
   afterHooks: seq[string] = @[]
   commandLineParams: seq[string] = @[]
@@ -40,6 +41,7 @@ var
   project = ""
   success = false
   retVal = true
+  scriptFile = ""
   projectFile = ""
   outFile = ""
 
@@ -55,7 +57,9 @@ proc getParams() =
     let
       param = paramStr(i)
     if param[0] != '-':
-      if projectFile.len == 0:
+      if scriptFile.len == 0:
+        scriptFile = param
+      elif projectFile.len == 0:
         projectFile = param
       elif outFile.len == 0:
         outFile = param
@@ -115,6 +119,7 @@ proc printPkgInfo(): string =
   printSeqIfLen installFiles
   printSeqIfLen installExt
   printSeqIfLen bin
+  printSeqIfLen nimbleTasks
   printSeqIfLen beforeHooks
   printSeqIfLen afterHooks
 
@@ -160,6 +165,8 @@ template task*(name: untyped; description: string; body: untyped): untyped =
   ##    setCommand "c"
   proc `name Task`*() = body
 
+  nimbleTasks.add astToStr(name)
+
   if commandLineParams.len == 0 or "help" in commandLineParams:
     success = true
     echo(astToStr(name), "        ", description)
@@ -195,5 +202,7 @@ proc getPkgDir*(): string =
   ## Returns the package directory containing the .nimble file currently
   ## being evaluated.
   result = projectFile.rsplit(seps={'/', '\\', ':'}, maxsplit=1)[0]
+
+proc thisDir*(): string = getPkgDir()
 
 getParams()

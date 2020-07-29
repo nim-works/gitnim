@@ -163,6 +163,7 @@ type
       ## which itself requires `nimble install libffi`, see #10150
       ## Note: this feature can't be localized with {.push.}
     vmopsDanger,
+    strictFuncs
 
   LegacyFeature* = enum
     allowSemcheckedAstModification,
@@ -372,7 +373,7 @@ const
   DefaultOptions* = {optObjCheck, optFieldCheck, optRangeCheck,
     optBoundsCheck, optOverflowCheck, optAssert, optWarns, optRefCheck,
     optHints, optStackTrace, optLineTrace, # consider adding `optStackTraceMsgs`
-    optTrMacros, optStyleCheck, optSinkInference}
+    optTrMacros, optStyleCheck}
   DefaultGlobalOptions* = {optThreadAnalysis,
     optExcessiveStackTrace, optListFullPaths}
 

@@ -261,8 +261,14 @@ optimizations (and the current implementation does not).
 Sink parameter inference
 ========================
 
-The current implementation does a limited form of sink parameter
-inference. The `.nosinks`:idx: pragma can be used to disable this inference
+The current implementation can do a limited form of sink parameter
+inference. But it has to be enabled via `--sinkInference:on`, either
+on the command line or via a `push` pragma.
+
+To enable it for a section of code, one can
+use `{.push sinkInference: on.}`...`{.pop.}`.
+
+The `.nosinks`:idx: pragma can be used to disable this inference
 for a single routine:
 
 .. code-block:: nim
@@ -270,8 +276,6 @@ for a single routine:
   proc addX(x: T; child: T) {.nosinks.} =
     x.s.add child
 
-To disable it for a section of code, one can
-use `{.push sinkInference: off.}`...`{.pop.}`.
 
 The details of the inference algorithm are currently undocumented.
 
@@ -532,48 +536,6 @@ indirections:
     # no copy into 'v', no destruction of 'v'.
     use(v)
     useItAgain(v)
-
-
-
-Owned refs
-==========
-
-**Note**: The ``owned`` type constructor is only available with
-the ``--newruntime`` compiler switch and is experimental.
-
-
-Let ``W`` be an ``owned ref`` type. Conceptually its hooks look like:
-
-.. code-block:: nim
-
-  proc `=destroy`(x: var W) =
-    if x != nil:
-      assert x.refcount == 0, "dangling unowned pointers exist!"
-      `=destroy`(x[])
-
-  proc `=`(x: var W; y: W) {.error: "owned refs can only be moved".}
-
-  proc `=sink`(x: var W; y: W) =
-    `=destroy`(x)
-    bitwiseCopy x, y # raw pointer copy
-
-
-Let ``U`` be an unowned ``ref`` type. Conceptually its hooks look like:
-
-.. code-block:: nim
-
-  proc `=destroy`(x: var U) =
-    if x != nil:
-      dec x.refcount
-
-  proc `=`(x: var U; y: U) =
-    # Note: No need to check for self-assignments here.
-    if y != nil: inc y.refcount
-    if x != nil: dec x.refcount
-    bitwiseCopy x, y # raw pointer copy
-
-  proc `=sink`(x: var U, y: U) {.error.}
-  # Note: Moves are not available.
 
 
 Hook lifting

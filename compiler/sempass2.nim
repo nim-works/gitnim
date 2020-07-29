@@ -10,7 +10,7 @@
 import
   intsets, ast, astalgo, msgs, renderer, magicsys, types, idents, trees,
   wordrecg, strutils, options, guards, lineinfos, semfold, semdata,
-  modulegraphs
+  modulegraphs, varpartitions
 
 when defined(useDfa):
   import dfa
@@ -35,9 +35,6 @@ In x = y the type of x is marked.
 For every sink parameter of type T T is marked.
 
 For every call f() the return type of f() is marked.
-
-
-
 
 ]#
 
@@ -73,6 +70,7 @@ type
     guards: TModel # nested guards
     locked: seq[PNode] # locked locations
     gcUnsafe, isRecursive, isTopLevel, hasSideEffect, inEnforcedGcSafe: bool
+    hasDangerousAssign: bool
     inEnforcedNoSideEffects: bool
     maxLockLevel, currLockLevel: TLockLevel
     currOptions: TOptions
@@ -85,6 +83,19 @@ proc `<`(a, b: TLockLevel): bool {.borrow.}
 proc `<=`(a, b: TLockLevel): bool {.borrow.}
 proc `==`(a, b: TLockLevel): bool {.borrow.}
 proc max(a, b: TLockLevel): TLockLevel {.borrow.}
+
+proc createTypeBoundOps(tracked: PEffects, typ: PType; info: TLineInfo) =
+  if typ == nil: return
+  when false:
+    let realType = typ.skipTypes(abstractInst)
+    if realType.kind == tyRef and
+        optSeqDestructors in tracked.config.globalOptions:
+      createTypeBoundOps(tracked.graph, tracked.c, realType.lastSon, info)
+
+  createTypeBoundOps(tracked.graph, tracked.c, typ, info)
+  if (tfHasAsgn in typ.flags) or
+      optSeqDestructors in tracked.config.globalOptions:
+    tracked.owner.flags.incl sfInjectDestructors
 
 proc isLocalVar(a: PEffects, s: PSym): bool =
   # and (s.kind != skParam or s.typ.kind == tyOut)
@@ -402,6 +413,7 @@ proc trackTryStmt(tracked: PEffects, n: PNode) =
           if b[j].isInfixAs():
             assert(b[j][1].kind == nkType)
             catches(tracked, b[j][1].typ)
+            createTypeBoundOps(tracked, b[j][2].typ, b[j][2].info)
           else:
             assert(b[j].kind == nkType)
             catches(tracked, b[j].typ)
@@ -722,20 +734,6 @@ proc checkRange(c: PEffects; value: PNode; typ: PType) =
     checkLe(c, lowBound, value)
     checkLe(c, value, highBound)
 
-proc createTypeBoundOps(tracked: PEffects, typ: PType; info: TLineInfo) =
-  if typ == nil: return
-  let realType = typ.skipTypes(abstractInst)
-  when false:
-    # XXX fix this in liftdestructors instead
-    if realType.kind == tyRef and
-        optSeqDestructors in tracked.config.globalOptions:
-      createTypeBoundOps(tracked.graph, tracked.c, realType.lastSon, info)
-
-  createTypeBoundOps(tracked.graph, tracked.c, typ, info)
-  if (tfHasAsgn in typ.flags) or
-      optSeqDestructors in tracked.config.globalOptions:
-    tracked.owner.flags.incl sfInjectDestructors
-
 proc trackCall(tracked: PEffects; n: PNode) =
   template gcsafeAndSideeffectCheck() =
     if notGcSafe(op) and not importedFromC(a):
@@ -801,7 +799,6 @@ proc trackCall(tracked: PEffects; n: PNode) =
 
     # check required for 'nim check':
     if n[1].typ.len > 0:
-      createTypeBoundOps(tracked, n[1].typ.lastSon, n.info)
       createTypeBoundOps(tracked, n[1].typ, n.info)
       # new(x, finalizer): Problem: how to move finalizer into 'createTypeBoundOps'?
 
@@ -842,6 +839,8 @@ proc track(tracked: PEffects, n: PNode) =
     useVar(tracked, n)
     if n.sym.typ != nil and tfHasAsgn in n.sym.typ.flags:
       tracked.owner.flags.incl sfInjectDestructors
+      # bug #15038: ensure consistency
+      if not hasDestructor(n.typ): n.typ = n.sym.typ
   of nkHiddenAddr, nkAddr:
     if n[0].kind == nkSym and isLocalVar(tracked, n[0].sym):
       useVarNoInitCheck(tracked, n[0], n[0].sym)
@@ -885,6 +884,8 @@ proc track(tracked: PEffects, n: PNode) =
       createTypeBoundOps(tracked, n[0].typ, n.info)
     if n[0].kind != nkSym or not isLocalVar(tracked, n[0].sym):
       checkForSink(tracked.config, tracked.owner, n[1])
+      if not tracked.hasDangerousAssign and n[0].kind != nkSym:
+        tracked.hasDangerousAssign = true
   of nkVarSection, nkLetSection:
     for child in n:
       let last = lastSon(child)
@@ -1237,6 +1238,10 @@ proc trackProc*(c: PContext; s: PSym, body: PNode) =
     patchResult(t, ensuresSpec)
     effects[ensuresEffects] = ensuresSpec
 
+  var mutationInfo = MutationInfo()
+  if strictFuncs in c.features and not t.hasSideEffect and t.hasDangerousAssign:
+    t.hasSideEffect = mutatesNonVarParameters(s, body, mutationInfo)
+
   if sfThread in s.flags and t.gcUnsafe:
     if optThreads in g.config.globalOptions and optThreadAnalysis in g.config.globalOptions:
       #localError(s.info, "'$1' is not GC-safe" % s.name.s)
@@ -1248,7 +1253,7 @@ proc trackProc*(c: PContext; s: PSym, body: PNode) =
     when false:
       listGcUnsafety(s, onlyWarning=false, g.config)
     else:
-      localError(g.config, s.info, "'$1' can have side effects" % s.name.s)
+      localError(g.config, s.info, ("'$1' can have side effects" % s.name.s) & (g.config $ mutationInfo))
   if not t.gcUnsafe:
     s.typ.flags.incl tfGcSafe
   if not t.hasSideEffect and sfSideEffect notin s.flags:

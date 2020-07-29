@@ -48,6 +48,13 @@ type
 
 const toDebug {.strdefine.} = ""
 
+proc hasDestructor(c: Con; t: PType): bool {.inline.} =
+  result = ast.hasDestructor(t)
+  when toDebug.len > 0:
+    # for more effective debugging
+    if not result and c.graph.config.selectedGC in {gcArc, gcOrc}:
+      assert(not containsGarbageCollectedRef(t))
+
 template dbg(body) =
   when toDebug.len > 0:
     if c.owner.name.s == toDebug or toDebug == "always":
@@ -61,52 +68,6 @@ proc getTemp(c: var Con; s: var Scope; typ: PType; info: TLineInfo): PNode =
 
 proc nestedScope(parent: var Scope): Scope =
   Scope(vars: @[], wasMoved: @[], final: @[], needsTry: false, parent: addr(parent))
-
-proc optimize(s: var Scope) =
-  # optimize away simple 'wasMoved(x); destroy(x)' pairs.
-  #[ Unfortunately this optimization is only really safe when no exceptions
-     are possible, see for example:
-
-  proc main(inp: string; cond: bool) =
-    if cond:
-      try:
-        var s = ["hi", inp & "more"]
-        for i in 0..4:
-          use s
-        consume(s)
-        wasMoved(s)
-      finally:
-        destroy(x)
-
-    Now assume 'use' raises, then we shouldn't do the 'wasMoved(s)'
-  ]#
-  proc findCorrespondingDestroy(final: seq[PNode]; moved: PNode): int =
-    # remember that it's destroy(addr(x))
-    for i in 0 ..< final.len:
-      if final[i] != nil and exprStructuralEquivalent(final[i][1].skipAddr, moved, strictSymEquality = true):
-        return i
-    return -1
-
-  var removed = 0
-  for i in 0 ..< s.wasMoved.len:
-    let j = findCorrespondingDestroy(s.final, s.wasMoved[i][1])
-    if j >= 0:
-      s.wasMoved[i] = nil
-      s.final[j] = nil
-      inc removed
-  if removed > 0:
-    template filterNil(field) =
-      var m = newSeq[PNode](s.field.len - removed)
-      var mi = 0
-      for i in 0 ..< s.field.len:
-        if s.field[i] != nil:
-          m[mi] = s.field[i]
-          inc mi
-      assert mi == m.len
-      s.field = m
-
-    filterNil(wasMoved)
-    filterNil(final)
 
 proc p(n: PNode; c: var Con; s: var Scope; mode: ProcessMode): PNode
 proc moveOrCopy(dest, ri: PNode; c: var Con; s: var Scope; isDecl = false): PNode
@@ -376,7 +337,7 @@ proc genDiscriminantAsgn(c: var Con; s: var Scope; n: PNode): PNode =
   let leDotExpr = if le.kind == nkCheckedFieldExpr: le[0] else: le
   let objType = leDotExpr[0].typ
 
-  if hasDestructor(objType):
+  if hasDestructor(c, objType):
     if objType.attachedOps[attachedDestructor] != nil and
         sfOverriden in objType.attachedOps[attachedDestructor].flags:
       localError(c.graph.config, n.info, errGenerated, """Assignment to discriminant for objects with user defined destructor is not supported, object must have default destructor.
@@ -410,7 +371,8 @@ proc genDefaultCall(t: PType; c: Con; info: TLineInfo): PNode =
 
 proc destructiveMoveVar(n: PNode; c: var Con; s: var Scope): PNode =
   # generate: (let tmp = v; reset(v); tmp)
-  if not hasDestructor(n.typ):
+  if not hasDestructor(c, n.typ):
+    assert n.kind != nkSym or not hasDestructor(c, n.sym.typ)
     result = copyTree(n)
   else:
     result = newNodeIT(nkStmtListExpr, n.info, n.typ)
@@ -438,7 +400,7 @@ proc isCapturedVar(n: PNode): bool =
 proc passCopyToSink(n: PNode; c: var Con; s: var Scope): PNode =
   result = newNodeIT(nkStmtListExpr, n.info, n.typ)
   let tmp = c.getTemp(s, n.typ, n.info)
-  if hasDestructor(n.typ):
+  if hasDestructor(c, n.typ):
     result.add c.genWasMoved(tmp)
     var m = c.genCopy(tmp, n)
     m.add p(n, c, s, normal)
@@ -477,7 +439,7 @@ proc containsConstSeq(n: PNode): bool =
 proc ensureDestruction(arg, orig: PNode; c: var Con; s: var Scope): PNode =
   # it can happen that we need to destroy expression contructors
   # like [], (), closures explicitly in order to not leak them.
-  if arg.typ != nil and hasDestructor(arg.typ):
+  if arg.typ != nil and hasDestructor(c, arg.typ):
     # produce temp creation for (fn, env). But we need to move 'env'?
     # This was already done in the sink parameter handling logic.
     result = newNodeIT(nkStmtListExpr, arg.info, arg.typ)
@@ -566,7 +528,7 @@ template processScopeExpr(c: var Con; s: var Scope; ret: PNode, processCall: unt
   # tricky because you would have to intercept moveOrCopy at a certain point
   let tmp = c.getTemp(s.parent[], ret.typ, ret.info)
   tmp.sym.flags.incl sfSingleUsedTemp
-  let cpy = if ret.typ.hasDestructor:
+  let cpy = if hasDestructor(c, ret.typ):
               moveOrCopy(tmp, ret, c, s, isDecl = true)
             else:
               newTree(nkFastAsgn, tmp, p(ret, c, s, normal))
@@ -819,10 +781,10 @@ proc p(n: PNode; c: var Con; s: var Scope; mode: ProcessMode): PNode =
       result = newNodeI(nkStmtList, n.info)
       for it in n:
         var ri = it[^1]
-        if it.kind == nkVarTuple and hasDestructor(ri.typ):
+        if it.kind == nkVarTuple and hasDestructor(c, ri.typ):
           let x = lowerTupleUnpacking(c.graph, it, c.owner)
           result.add p(x, c, s, consumed)
-        elif it.kind == nkIdentDefs and hasDestructor(it[0].typ) and not isCursor(it[0], c):
+        elif it.kind == nkIdentDefs and hasDestructor(c, it[0].typ) and not isCursor(it[0], c):
           for j in 0..<it.len-2:
             let v = it[j]
             if v.kind == nkSym:
@@ -832,7 +794,7 @@ proc p(n: PNode; c: var Con; s: var Scope; mode: ProcessMode): PNode =
               if ri.kind == nkEmpty and c.inLoop > 0:
                 ri = genDefaultCall(v.typ, c, v.info)
               if ri.kind != nkEmpty:
-                result.add moveOrCopy(v, ri, c, s, isDecl = true)
+                result.add moveOrCopy(v, ri, c, s, isDecl = false)
         else: # keep the var but transform 'ri':
           var v = copyNode(n)
           var itCopy = copyNode(it)
@@ -842,7 +804,7 @@ proc p(n: PNode; c: var Con; s: var Scope; mode: ProcessMode): PNode =
           v.add itCopy
           result.add v
     of nkAsgn, nkFastAsgn:
-      if hasDestructor(n[0].typ) and n[1].kind notin {nkProcDef, nkDo, nkLambda} and
+      if hasDestructor(c, n[0].typ) and n[1].kind notin {nkProcDef, nkDo, nkLambda} and
           not isCursor(n[0], c):
         # rule (self-assignment-removal):
         if n[1].kind == nkSym and n[0].kind == nkSym and n[0].sym == n[1].sym:
@@ -873,7 +835,7 @@ proc p(n: PNode; c: var Con; s: var Scope; mode: ProcessMode): PNode =
       result = shallowCopy(n)
       for i in 0 ..< n.len:
         result[i] = p(n[i], c, s, normal)
-      if n.typ != nil and hasDestructor(n.typ):
+      if n.typ != nil and hasDestructor(c, n.typ):
         if mode == normal:
           result = ensureDestruction(result, n, c, s)
 
@@ -903,7 +865,7 @@ proc p(n: PNode; c: var Con; s: var Scope; mode: ProcessMode): PNode =
       result[0] = p(n[0], c, s, normal)
       for i in 1 ..< n.len:
         result[i] = n[i]
-      if mode == sinkArg and hasDestructor(n.typ):
+      if mode == sinkArg and hasDestructor(c, n.typ):
         if isAnalysableFieldAccess(n, c.owner) and isLastRead(n, c):
           s.wasMoved.add c.genWasMoved(n)
         else:
@@ -913,7 +875,7 @@ proc p(n: PNode; c: var Con; s: var Scope; mode: ProcessMode): PNode =
       result = shallowCopy(n)
       for i in 0 ..< n.len:
         result[i] = p(n[i], c, s, normal)
-      if mode == sinkArg and hasDestructor(n.typ):
+      if mode == sinkArg and hasDestructor(c, n.typ):
         if isAnalysableFieldAccess(n, c.owner) and isLastRead(n, c):
           # consider 'a[(g; destroy(g); 3)]', we want to say 'wasMoved(a[3])'
           # without the junk, hence 'c.genWasMoved(n)'
@@ -1049,7 +1011,7 @@ proc injectDestructorCalls*(g: ModuleGraph; owner: PSym; n: PNode): PNode =
     let params = owner.typ.n
     for i in 1..<params.len:
       let t = params[i].sym.typ
-      if isSinkTypeForParam(t) and hasDestructor(t.skipTypes({tySink})):
+      if isSinkTypeForParam(t) and hasDestructor(c, t.skipTypes({tySink})):
         scope.final.add c.genDestroy(params[i])
   #if optNimV2 in c.graph.config.globalOptions:
   #  injectDefaultCalls(n, c)
