@@ -122,7 +122,6 @@ function main() {
   nestedBlockCounter*: int
   inTryStmt*: int
   next*: PProcCon
-  wasForwarded*: bool
   mappingExists*: bool
   mapping*: TIdTable
   caseContext*: seq[tuple[n: PNode, idx: int]]"><wbr />TProc<wbr />Con<span class="attachedType"></span></a></li>
@@ -156,6 +155,7 @@ function main() {
   matchedConcept*: ptr TMatchedConcept
   friendModules*: seq[PSym]
   instCounter*: int
+  templInstCounter*: ref int
   ambiguousSymbols*: IntSet
   inGenericContext*: int
   inStaticContext*: int
@@ -389,7 +389,6 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">nestedBlockCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">inTryStmt</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">next</span><span class="Operator">*</span><span class="Other">:</span> <a href="semdata.html#PProcCon"><span class="Identifier">PProcCon</span></a>
-  <span class="Identifier">wasForwarded</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">mappingExists</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">mapping</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#TIdTable"><span class="Identifier">TIdTable</span></a>
   <span class="Identifier">caseContext</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">,</span> <span class="Identifier">idx</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">]</span><span class="Other">]</span>
@@ -413,9 +412,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L43"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L42"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L43" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L42" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TInstantiationPair"></a>
@@ -427,9 +426,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L48"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L47"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L48" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L47" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TExprFlag"></a>
@@ -442,9 +441,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L52"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L51"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L52" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L51" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TExprFlags"></a>
@@ -453,9 +452,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L72"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L71"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L72" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L71" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="PContext"></a>
@@ -464,9 +463,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L74"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L73"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L74" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L73" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TContext"></a>
@@ -480,6 +479,7 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">matchedConcept</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="semdata.html#TMatchedConcept"><span class="Identifier">TMatchedConcept</span></a>
   <span class="Identifier">friendModules</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span>
   <span class="Identifier">instCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">templInstCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ref</span> <span class="Identifier">int</span>
   <span class="Identifier">ambiguousSymbols</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">IntSet</span>
   <span class="Identifier">inGenericContext</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">inStaticContext</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
@@ -534,9 +534,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L75"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L74"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L75" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L74" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1140,7 +1140,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-28 18:38:11 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-31 00:51:52 UTC</small>
       </div>
     </div>
   </div>

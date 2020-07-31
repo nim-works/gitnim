@@ -152,8 +152,9 @@ function main() {
     title="evalStaticStmt(module: PSym; g: ModuleGraph; e: PNode; prc: PSym)"><wbr />eval<wbr />Static<wbr />Stmt<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#setupCompileTimeVar%2CPSym%2CModuleGraph%2CPNode"
     title="setupCompileTimeVar(module: PSym; g: ModuleGraph; n: PNode)"><wbr />setup<wbr />Compile<wbr />Time<wbr />Var<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#evalMacroCall%2CPSym%2CModuleGraph%2CPNode%2CPNode%2CPSym"
-    title="evalMacroCall(module: PSym; g: ModuleGraph; n, nOrig: PNode; sym: PSym): PNode"><wbr />eval<wbr />Macro<wbr />Call<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#evalMacroCall%2CPSym%2CModuleGraph%2Cref.int%2CPNode%2CPNode%2CPSym"
+    title="evalMacroCall(module: PSym; g: ModuleGraph; templInstCounter: ref int; n, nOrig: PNode;
+              sym: PSym): PNode"><wbr />eval<wbr />Macro<wbr />Call<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -469,11 +470,12 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vm.nim#L2185" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="evalMacroCall,PSym,ModuleGraph,PNode,PNode,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#evalMacroCall%2CPSym%2CModuleGraph%2CPNode%2CPNode%2CPSym"><span class="Identifier">evalMacroCall</span></a><span class="Other">(</span><span class="Identifier">module</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">,</span> <span class="Identifier">nOrig</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">EOFError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span>
-    <span class="Identifier">JsonParsingError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span>
-                            <span class="Identifier">WriteEnvEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ExecIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="evalMacroCall,PSym,ModuleGraph,ref.int,PNode,PNode,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#evalMacroCall%2CPSym%2CModuleGraph%2Cref.int%2CPNode%2CPNode%2CPSym"><span class="Identifier">evalMacroCall</span></a><span class="Other">(</span><span class="Identifier">module</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">templInstCounter</span><span class="Other">:</span> <span class="Keyword">ref</span> <span class="Identifier">int</span><span class="Other">;</span>
+                  <span class="Identifier">n</span><span class="Other">,</span> <span class="Identifier">nOrig</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">EOFError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">JsonParsingError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">WriteEnvEffect</span><span class="Other">,</span>
+    <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ExecIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -510,7 +512,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-28 18:38:12 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-07-31 00:51:53 UTC</small>
       </div>
     </div>
   </div>

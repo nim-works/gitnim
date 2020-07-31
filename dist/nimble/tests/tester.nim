@@ -174,11 +174,13 @@ suite "nimble refresh":
 suite "nimscript":
   test "can install nimscript package":
     cd "nimscript":
-      check execNimble(["install", "-y"]).exitCode == QuitSuccess
+      let
+        nim = findExe("nim").relativePath(base = getCurrentDir())
+      check execNimble(["install", "-y", "--nim:" & nim]).exitCode == QuitSuccess
 
   test "before/after install pkg dirs are correct":
     cd "nimscript":
-      let (output, exitCode) = execNimble(["install", "-y"])
+      let (output, exitCode) = execNimble(["install", "-y", "--nim:nim"])
       check exitCode == QuitSuccess
       check output.contains("Before build")
       check output.contains("After build")
@@ -190,7 +192,7 @@ suite "nimscript":
 
   test "before/after on build":
     cd "nimscript":
-      let (output, exitCode) = execNimble(["build"])
+      let (output, exitCode) = execNimble(["build", "--nim:" & findExe("nim")])
       check exitCode == QuitSuccess
       check output.contains("Before build")
       check output.contains("After build")
@@ -538,7 +540,8 @@ suite "develop feature":
 suite "test command":
   test "Runs passing unit tests":
     cd "testCommand/testsPass":
-      let (outp, exitCode) = execNimble("test")
+      # Pass flags to test #726, #757
+      let (outp, exitCode) = execNimble("test", "-d:CUSTOM")
       check exitCode == QuitSuccess
       check outp.processOutput.inLines("First test")
       check outp.processOutput.inLines("Second test")
@@ -555,9 +558,10 @@ suite "test command":
 
   test "test command can be overriden":
     cd "testCommand/testOverride":
-      let (outp, exitCode) = execNimble("test")
+      let (outp, exitCode) = execNimble("-d:CUSTOM", "test", "--runflag")
       check exitCode == QuitSuccess
       check outp.processOutput.inLines("overriden")
+      check outp.processOutput.inLines("true")
 
   test "certain files are ignored":
     cd "testCommand/testsIgnore":
@@ -817,7 +821,7 @@ suite "issues":
       check output.contains("after test")
 
   # When building, any newly installed packages should be referenced via the path that they get permanently installed at.
-  test "issue799":
+  test "issue 799":
     cd "issue799":
       let (build_output, build_code) = execNimbleYes("--verbose", "build")
       check build_code == 0
@@ -825,7 +829,7 @@ suite "issues":
       build_results.keepItIf(unindent(it).startsWith("Executing"))
       for build_line in build_results:
         if build_line.contains("issue799"):
-          let pkg_installed_path = "--path:\"" & installDir / "pkgs" / "nimble-#head" & "\""
+          let pkg_installed_path = "--path:" & (installDir / "pkgs" / "nimble-#head").quoteShell
           check build_line.contains(pkg_installed_path)
 
   test "issue 793":

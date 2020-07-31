@@ -3,7 +3,7 @@
 #
 # Various miscellaneous utility functions reside here.
 import osproc, pegs, strutils, os, uri, sets, json, parseutils
-import version, cli
+import version, cli, options
 
 proc extractBin(cmd: string): string =
   if cmd[0] == '"':
@@ -11,8 +11,10 @@ proc extractBin(cmd: string): string =
   else:
     return cmd.split(' ')[0]
 
-proc doCmd*(cmd: string, showOutput = false, showCmd = false) =
-  let bin = extractBin(cmd)
+proc doCmd*(cmd: string) =
+  let
+    bin = extractBin(cmd)
+    isNim = bin.extractFilename().startsWith("nim")
   if findExe(bin) == "":
     raise newException(NimbleError, "'" & bin & "' not in PATH.")
 
@@ -20,26 +22,23 @@ proc doCmd*(cmd: string, showOutput = false, showCmd = false) =
   stdout.flushFile()
   stderr.flushFile()
 
-  if showCmd:
+  if isNim:
+    # Show no command line and --hints:off output by default for calls
+    # to Nim, command line and standard output with --verbose.
     display("Executing", cmd, priority = MediumPriority)
+    let exitCode = execCmd(cmd)
+    if exitCode != QuitSuccess:
+      raise newException(NimbleError,
+        "Execution failed with exit code $1\nCommand: $2" %
+        [$exitCode, cmd])
   else:
     displayDebug("Executing", cmd)
-  if showOutput:
-    let exitCode = execCmd(cmd)
-    displayDebug("Finished", "with exit code " & $exitCode)
-    if exitCode != QuitSuccess:
-      raise newException(NimbleError,
-          "Execution failed with exit code $1\nCommand: $2" %
-          [$exitCode, cmd])
-  else:
     let (output, exitCode) = execCmdEx(cmd)
-    displayDebug("Finished", "with exit code " & $exitCode)
     displayDebug("Output", output)
-
     if exitCode != QuitSuccess:
       raise newException(NimbleError,
-          "Execution failed with exit code $1\nCommand: $2\nOutput: $3" %
-          [$exitCode, cmd, output])
+        "Execution failed with exit code $1\nCommand: $2\nOutput: $3" %
+        [$exitCode, cmd, output])
 
 proc doCmdEx*(cmd: string): tuple[output: TaintedString, exitCode: int] =
   let bin = extractBin(cmd)
@@ -55,14 +54,8 @@ template cd*(dir: string, body: untyped) =
   body
   setCurrentDir(lastDir)
 
-proc getNimBin*: string =
-  result = "nim"
-  if findExe("nim") != "": result = findExe("nim")
-  elif findExe("nimrod") != "": result = findExe("nimrod")
-
-proc getNimrodVersion*: Version =
-  let nimBin = getNimBin()
-  let vOutput = doCmdEx('"' & nimBin & "\" -v").output
+proc getNimrodVersion*(options: Options): Version =
+  let vOutput = doCmdEx(options.nim.quoteShell & " -v").output
   var matches: array[0..MaxSubpatterns, string]
   if vOutput.find(peg"'Version'\s{(\d+\.)+\d}", matches) == -1:
     raise newException(NimbleError, "Couldn't find Nim version.")

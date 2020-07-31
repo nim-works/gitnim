@@ -82,7 +82,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/cmdlinehelper.nim
     rm -f $nimbleDir/compiler/commands.nim
     rm -f $nimbleDir/compiler/condsyms.nim
-    rm -f $nimbleDir/compiler/cursor_inference.nim
     rm -f $nimbleDir/compiler/debuginfo.nim
     rm -f $nimbleDir/compiler/depends.nim
     rm -f $nimbleDir/compiler/dfa.nim
@@ -151,8 +150,8 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/pathutils.nim
     rm -f $nimbleDir/compiler/patterns.nim
     rm -f $nimbleDir/compiler/platform.nim
-    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/itersgen.nim
+    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/active.nim
     rm -f $nimbleDir/compiler/pluginsupport.nim
     rm -f $nimbleDir/compiler/pragmas.nim
