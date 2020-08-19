@@ -95,6 +95,7 @@ function main() {
   
   <ul class="simple simple-toc" id="toc-list">
 <li><a class="reference" id="parameter-substitution_toc" href="#parameter-substitution">Parameter substitution</a></li>
+<li><a class="reference" id="unix-socket_toc" href="#unix-socket">Unix Socket</a></li>
 <li><a class="reference" id="examples_toc" href="#examples">Examples</a></li>
 <ul class="simple"><li><a class="reference" id="examples-opening-a-connection-to-a-database_toc" href="#examples-opening-a-connection-to-a-database">Opening a connection to a database</a></li>
 <li><a class="reference" id="examples-creating-a-table_toc" href="#examples-creating-a-table">Creating a table</a></li>
@@ -223,6 +224,13 @@ function main() {
               (colA, colB, colC)
               VALUES ($1, $2, $3)&quot;&quot;&quot;</span><span class="Punctuation">,</span>
         <span class="DecNumber">3</span><span class="Punctuation">)</span></pre>
+<h1><a class="toc-backref" id="unix-socket" href="#unix-socket">Unix Socket</a></h1><p>Using Unix sockets instead of TCP connection can <a class="reference external" href="https://momjian.us/main/blogs/pgblog/2012.html#June_6_2012">improve performance up to 30% ~ 175% for some operations</a>.</p>
+<p>To use Unix sockets with <tt class="docutils literal"><span class="pre">db_postgres</span></tt>, change the server address to the socket file path:</p>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">db_postgres</span> <span class="Comment">## Change &quot;localhost&quot; or &quot;127.0.0.1&quot; to the socket file path</span>
+<span class="Keyword">let</span> <span class="Identifier">db</span> <span class="Operator">=</span> <span class="Identifier">db_postgres</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;/run/postgresql&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;user&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;password&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;database&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">echo</span> <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">getAllRows</span><span class="Punctuation">(</span><span class="RawData">sql&quot;SELECT version();&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>The socket file path is operating system specific and distribution specific, additional configuration may or may not be needed on your <tt class="docutils literal"><span class="pre">postgresql.conf</span></tt>. The Postgres server must be on the same computer and only works for Unix-like operating systems.</p>
+
 <h1><a class="toc-backref" id="examples" href="#examples">Examples</a></h1>
 <h2><a class="toc-backref" id="examples-opening-a-connection-to-a-database" href="#examples-opening-a-connection-to-a-database">Opening a connection to a database</a></h2><pre class="listing"><span class="Keyword">import</span> <span class="Identifier">db_postgres</span>
 <span class="Keyword">let</span> <span class="Identifier">db</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;localhost&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;user&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;password&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;dbname&quot;</span><span class="Punctuation">)</span>
@@ -247,9 +255,9 @@ function main() {
 
 encapsulates a database connection
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L74"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L94"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L74" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L94" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Row"></a>
@@ -258,9 +266,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 a row of a dataset. NULL database values will be converted to nil.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L75"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L95"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L75" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L95" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="InstantRow"></a>
@@ -272,9 +280,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 a handle that can be
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L77"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L97"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L77" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L97" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="SqlPrepared"></a>
@@ -283,9 +291,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 a identifier for the prepared queries
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L80"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L100"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L80" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L100" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -299,9 +307,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 raises a DbError exception.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L82"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L102"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L82" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L102" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="dbQuote,string"></a>
@@ -310,9 +318,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 DB quotes the string.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L89"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L109"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L89" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L109" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tryExec,DbConn,SqlQuery,varargs[string,]"></a>
@@ -322,9 +330,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 tries to execute the query and returns true if successful, false otherwise.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L112"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L132"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L112" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L132" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tryExec,DbConn,SqlPrepared,varargs[string,]"></a>
@@ -334,9 +342,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 tries to execute the query and returns true if successful, false otherwise.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L120"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L140"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L120" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L140" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="exec,DbConn,SqlQuery,varargs[string,]"></a>
@@ -346,9 +354,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the query and raises EDB if not successful.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L131"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L151"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L131" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L151" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="exec,DbConn,SqlPrepared,varargs[string]"></a>
@@ -358,9 +366,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L139"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L159"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L139" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L159" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="prepare,DbConn,string,SqlQuery,int"></a>
@@ -370,9 +378,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">SqlPrepared</span></tt> statement. Parameter substitution is done via <tt class="docutils literal"><span class="pre">$1</span></tt>, <tt class="docutils literal"><span class="pre">$2</span></tt>, <tt class="docutils literal"><span class="pre">$3</span></tt>, etc.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L165"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L185"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L165" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L185" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[],InstantRow,int"></a>
@@ -381,9 +389,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns text for given column of the row
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L382"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L402"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L382" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L402" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="unsafeColumnAt,InstantRow,int"></a>
@@ -392,9 +400,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Return cstring of given column of the row
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L386"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L406"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L386" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L406" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="len,InstantRow"></a>
@@ -403,9 +411,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns number of columns in the row
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L390"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L410"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L390" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L410" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getRow,DbConn,SqlQuery,varargs[string,]"></a>
@@ -415,9 +423,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 retrieves a single row. If the query doesn't return any rows, this proc will return a Row with empty strings for each column.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L394"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L414"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L394" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L414" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getRow,DbConn,SqlPrepared,varargs[string,]"></a>
@@ -427,9 +435,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L405"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L425"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L405" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L425" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getAllRows,DbConn,SqlQuery,varargs[string,]"></a>
@@ -439,9 +447,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the query and returns the whole result dataset.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L414"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L434"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L414" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L434" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getAllRows,DbConn,SqlPrepared,varargs[string,]"></a>
@@ -451,9 +459,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the prepared query and returns the whole result dataset.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L422"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L442"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L422" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L442" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getValue,DbConn,SqlQuery,varargs[string,]"></a>
@@ -463,9 +471,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the query and returns the first column of the first row of the result dataset. Returns &quot;&quot; if the dataset contains no rows or the database value is NULL.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L440"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L460"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L440" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L460" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getValue,DbConn,SqlPrepared,varargs[string,]"></a>
@@ -475,9 +483,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the query and returns the first column of the first row of the result dataset. Returns &quot;&quot; if the dataset contains no rows or the database value is NULL.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L453"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L473"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L453" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L473" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tryInsertID,DbConn,SqlQuery,varargs[string,]"></a>
@@ -487,9 +495,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the query (typically &quot;INSERT&quot;) and returns the generated ID for the row or -1 in case of an error. For Postgre this adds <tt class="docutils literal"><span class="pre">RETURNING id</span></tt> to the query, so it only works if your primary key is named <tt class="docutils literal"><span class="pre">id</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L466"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L486"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L466" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L486" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="insertID,DbConn,SqlQuery,varargs[string,]"></a>
@@ -499,9 +507,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the query (typically &quot;INSERT&quot;) and returns the generated ID for the row. For Postgre this adds <tt class="docutils literal"><span class="pre">RETURNING id</span></tt> to the query, so it only works if your primary key is named <tt class="docutils literal"><span class="pre">id</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L480"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L500"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L480" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L500" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tryInsert,DbConn,SqlQuery,string,varargs[string,]"></a>
@@ -509,11 +517,11 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="db_common.html#WriteDbEffect"><span class="Identifier">WriteDbEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">DbError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-executes the query (typically &quot;INSERT&quot;) and returns the generated ID for the row or -1 in case of an error. 
+executes the query (typically &quot;INSERT&quot;) and returns the generated ID for the row or -1 in case of an error.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L490"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L510"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L490" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L510" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="insert,DbConn,SqlQuery,string,varargs[string,]"></a>
@@ -521,11 +529,11 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="db_common.html#WriteDbEffect"><span class="Identifier">WriteDbEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">DbError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-executes the query (typically &quot;INSERT&quot;) and returns the generated ID 
+executes the query (typically &quot;INSERT&quot;) and returns the generated ID
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L502"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L522"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L502" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L522" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="execAffectedRows,DbConn,SqlQuery,varargs[string,]"></a>
@@ -535,9 +543,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the query (typically &quot;UPDATE&quot;) and returns the number of affected rows.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L510"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L530"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L510" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L530" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="execAffectedRows,DbConn,SqlPrepared,varargs[string,]"></a>
@@ -547,9 +555,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the query (typically &quot;UPDATE&quot;) and returns the number of affected rows.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L521"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L541"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L521" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L541" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="close,DbConn"></a>
@@ -558,9 +566,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 closes the database connection.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L534"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L554"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L534" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L554" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="open,string,string,string,string"></a>
@@ -574,9 +582,9 @@ class="link-seesrc" target="_blank">Source</a>
 <pre class="listing"><span class="Identifier">con</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;host=localhost port=5432 dbname=mydb&quot;</span><span class="Punctuation">)</span></pre><p>See <a class="reference external" href="http://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING">http://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING</a> for more information.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L538"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L558"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L538" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L558" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setEncoding,DbConn,string"></a>
@@ -586,9 +594,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 sets the encoding of a database connection, returns true for success, false for failure.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L563"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L583"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L563" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L583" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -603,9 +611,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the query and iterates over the result dataset. This is very fast, but potentially dangerous: If the for-loop-body executes another query, the results can be undefined. For Postgres it is safe though.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L184"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L204"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L184" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L204" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fastRows.i,DbConn,SqlPrepared,varargs[string,]"></a>
@@ -615,9 +623,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 executes the prepared query and iterates over the result dataset.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L197"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L217"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L197" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L217" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="instantRows.i,DbConn,SqlQuery,varargs[string,]"></a>
@@ -627,9 +635,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 same as fastRows but returns a handle that can be used to get column text on demand using []. Returned handle is valid only within iterator body.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L208"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L228"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L208" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L228" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="instantRows.i,DbConn,SqlPrepared,varargs[string,]"></a>
@@ -639,9 +647,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 same as fastRows but returns a handle that can be used to get column text on demand using []. Returned handle is valid only within iterator body.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L218"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L238"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L218" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="instantRows.i,DbConn,DbColumns,SqlQuery,varargs[string,]"></a>
@@ -652,9 +660,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L373"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L393"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L373" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L393" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rows.i,DbConn,SqlQuery,varargs[string,]"></a>
@@ -664,9 +672,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 same as <tt class="docutils literal"><span class="pre">fastRows</span></tt>, but slower and safe.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L430"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L450"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L430" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L450" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rows.i,DbConn,SqlPrepared,varargs[string,]"></a>
@@ -676,9 +684,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 same as <tt class="docutils literal"><span class="pre">fastRows</span></tt>, but slower and safe.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L435"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_postgres.nim#L455"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L435" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_postgres.nim#L455" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -696,7 +704,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-08-13 00:53:44 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-08-19 00:54:33 UTC</small>
       </div>
     </div>
   </div>
