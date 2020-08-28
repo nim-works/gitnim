@@ -210,7 +210,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/vmops.nim
     rm -f $nimbleDir/compiler/vmprofiler.nim
     rm -f $nimbleDir/compiler/wordrecg.nim
-    rm -f $nimbleDir/compiler/writetracking.nim
     rm -f $nimbleDir/doc/basicopt.txt
     rm -f $nimbleDir/doc/advopt.txt
     rm -f $nimbleDir/doc/nimdoc.css

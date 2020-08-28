@@ -1005,8 +1005,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/vmprofiler.nim
   cp compiler/wordrecg.nim $nimbleDir/compiler/wordrecg.nim
   chmod 644 $nimbleDir/compiler/wordrecg.nim
-  cp compiler/writetracking.nim $nimbleDir/compiler/writetracking.nim
-  chmod 644 $nimbleDir/compiler/writetracking.nim
   cp doc/basicopt.txt $nimbleDir/doc/basicopt.txt
   chmod 644 $nimbleDir/doc/basicopt.txt
   cp doc/advopt.txt $nimbleDir/doc/advopt.txt
