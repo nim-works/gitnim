@@ -2903,27 +2903,19 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
   <span class="Identifier">txt</span><span class="Operator">.</span><span class="Identifier">writeLine</span><span class="Punctuation">(</span><span class="StringLit">&quot;line 2&quot;</span><span class="Punctuation">)</span></pre><p>In the example, the two <tt class="docutils literal"><span class="pre">writeLine</span></tt> statements are bound to the <tt class="docutils literal"><span class="pre">actions</span></tt> parameter.</p>
 <p>Usually to pass a block of code to a template the parameter that accepts the block needs to be of type <tt class="docutils literal"><span class="pre">untyped</span></tt>. Because symbol lookups are then delayed until template instantiation time:</p>
 <pre class="listing"><span class="Keyword">template</span> <span class="Identifier">t</span><span class="Punctuation">(</span><span class="Identifier">body</span><span class="Punctuation">:</span> <span class="Identifier">typed</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">proc</span> <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;hey&quot;</span>
   <span class="Keyword">block</span><span class="Punctuation">:</span>
     <span class="Identifier">body</span>
 
 <span class="Identifier">t</span><span class="Punctuation">:</span>
-  <span class="Keyword">var</span> <span class="Identifier">i</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
-  <span class="Identifier">echo</span> <span class="Identifier">i</span>
-
-<span class="Identifier">t</span><span class="Punctuation">:</span>
-  <span class="Keyword">var</span> <span class="Identifier">i</span> <span class="Operator">=</span> <span class="DecNumber">2</span>  <span class="Comment"># fails with 'attempt to redeclare i'</span>
-  <span class="Identifier">echo</span> <span class="Identifier">i</span></pre><p>The above code fails with the mysterious error message that <tt class="docutils literal"><span class="pre">i</span></tt> has already been declared. The reason for this is that the <tt class="docutils literal"><span class="pre">var i = ...</span></tt> bodies need to be type-checked before they are passed to the <tt class="docutils literal"><span class="pre">body</span></tt> parameter and type checking in Nim implies symbol lookups. For the symbol lookups to succeed <tt class="docutils literal"><span class="pre">i</span></tt> needs to be added to the current (i.e. outer) scope. After type checking these additions to the symbol table are not rolled back (for better or worse). The same code works with <tt class="docutils literal"><span class="pre">untyped</span></tt> as the passed body is not required to be type-checked:</p>
+  <span class="Identifier">p</span><span class="Punctuation">(</span><span class="Punctuation">)</span>  <span class="Comment"># fails with 'undeclared identifier: p'</span></pre><p>The above code fails with the error message that <tt class="docutils literal"><span class="pre">p</span></tt> is not declared. The reason for this is that the <tt class="docutils literal"><span class="pre">p()</span></tt> body is type-checked before getting passed to the <tt class="docutils literal"><span class="pre">body</span></tt> parameter and type checking in Nim implies symbol lookups. The same code works with <tt class="docutils literal"><span class="pre">untyped</span></tt> as the passed body is not required to be type-checked:</p>
 <pre class="listing"><span class="Keyword">template</span> <span class="Identifier">t</span><span class="Punctuation">(</span><span class="Identifier">body</span><span class="Punctuation">:</span> <span class="Identifier">untyped</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">proc</span> <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;hey&quot;</span>
   <span class="Keyword">block</span><span class="Punctuation">:</span>
     <span class="Identifier">body</span>
 
 <span class="Identifier">t</span><span class="Punctuation">:</span>
-  <span class="Keyword">var</span> <span class="Identifier">i</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
-  <span class="Identifier">echo</span> <span class="Identifier">i</span>
-
-<span class="Identifier">t</span><span class="Punctuation">:</span>
-  <span class="Keyword">var</span> <span class="Identifier">i</span> <span class="Operator">=</span> <span class="DecNumber">2</span>  <span class="Comment"># compiles</span>
-  <span class="Identifier">echo</span> <span class="Identifier">i</span></pre>
+  <span class="Identifier">p</span><span class="Punctuation">(</span><span class="Punctuation">)</span>  <span class="Comment"># compiles</span></pre>
 <h2><a class="toc-backref" id="templates-varargs-of-untyped" href="#templates-varargs-of-untyped">Varargs of untyped</a></h2><p>In addition to the <tt class="docutils literal"><span class="pre">untyped</span></tt> meta-type that prevents type checking there is also <tt class="docutils literal"><span class="pre">varargs[untyped]</span></tt> so that not even the number of parameters is fixed:</p>
 <pre class="listing"><span class="Keyword">template</span> <span class="Identifier">hideIdentifiers</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">varargs</span><span class="Punctuation">[</span><span class="Identifier">untyped</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
 
@@ -3947,7 +3939,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-08-27 00:56:13 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-08-28 00:58:55 UTC</small>
       </div>
     </div>
   </div>

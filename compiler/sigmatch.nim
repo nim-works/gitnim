@@ -199,6 +199,27 @@ proc copyCandidate(a: var TCandidate, b: TCandidate) =
   a.baseTypeMatch = b.baseTypeMatch
   copyIdTable(a.bindings, b.bindings)
 
+proc typeRel*(c: var TCandidate, f, aOrig: PType,
+              flags: TTypeRelFlags = {}): TTypeRelation
+
+proc checkGeneric(a, b: TCandidate): int =
+  let c = a.c
+  let aa = a.callee
+  let bb = b.callee
+  var winner = 0
+  for i in 1..<min(aa.len, bb.len):
+    var ma = newCandidate(c, bb[i])
+    let tra = typeRel(ma, bb[i], aa[i], {trDontBind})
+    var mb = newCandidate(c, aa[i])
+    let trb = typeRel(mb, aa[i], bb[i], {trDontBind})
+    if tra == isGeneric and trb == isNone:
+      if winner == -1: return 0
+      winner = 1
+    if trb == isGeneric and tra == isNone:
+      if winner == 1: return 0
+      winner = -1
+  result = winner
+
 proc sumGeneric(t: PType): int =
   # count the "genericness" so that Foo[Foo[T]] has the value 3
   # and Foo[T] has the value 2 so that we know Foo[Foo[T]] is more
@@ -296,6 +317,9 @@ proc cmpCandidates*(a, b: TCandidate): int =
   # the other way round because of other semantics:
   result = b.inheritancePenalty - a.inheritancePenalty
   if result != 0: return
+  # check for generic subclass relation
+  result = checkGeneric(a, b)
+  if result != 0: return
   # prefer more specialized generic over more general generic:
   result = complexDisambiguation(a.callee, b.callee)
   # only as a last resort, consider scoping:
@@ -336,9 +360,6 @@ proc describeArgs*(c: PContext, n: PNode, startIdx = 1;
     result.add(argTypeToString(arg, prefer))
     if i != n.len - 1: result.add(", ")
 
-proc typeRel*(c: var TCandidate, f, aOrig: PType,
-              flags: TTypeRelFlags = {}): TTypeRelation
-
 proc concreteType(c: TCandidate, t: PType; f: PType = nil): PType =
   case t.kind
   of tyTypeDesc:
@@ -357,8 +378,7 @@ proc concreteType(c: TCandidate, t: PType; f: PType = nil): PType =
         # proc sort[T](cmp: proc(a, b: T): int = cmp)
       if result.kind != tyGenericParam: break
   of tyGenericInvocation:
-    result = t
-    doAssert(false, "cannot resolve type: " & typeToString(t))
+    result = nil
   of tyOwned:
     # bug #11257: the comparison system.`==`[T: proc](x, y: T) works
     # better without the 'owned' type:
@@ -599,7 +619,8 @@ proc procParamTypeRel(c: var TCandidate, f, a: PType): TTypeRelation =
     # if f is metatype.
     result = typeRel(c, f, a)
 
-  if result <= isSubtype or inconsistentVarTypes(f, a):
+  #               v--- is this correct?
+  if result <= isIntConv or inconsistentVarTypes(f, a):
     result = isNone
 
   #if result == isEqual:
@@ -1465,7 +1486,7 @@ proc typeRel(c: var TCandidate, f, aOrig: PType,
           if baseType != nil:
             c.inheritancePenalty += 1
             let ret = typeRel(c, f, baseType)
-            return if ret == isEqual: isSubtype else: ret
+            return if ret in {isEqual,isGeneric}: isSubtype else: ret
 
         result = isNone
     else:
@@ -1496,10 +1517,12 @@ proc typeRel(c: var TCandidate, f, aOrig: PType,
       #echo "inferred ", typeToString(inst), " for ", f
       return typeRel(c, inst, a)
 
-    if x.kind == tyGenericInvocation or f[0].kind != tyGenericBody:
-      #InternalError("typeRel: tyGenericInvocation -> tyGenericInvocation")
-      # simply no match for now:
-      discard
+    if x.kind == tyGenericInvocation:
+      if f[0] == x[0]:
+        for i in 1..<f.len:
+          let tr = typeRel(c, f[i], x[i])
+          if tr <= isSubtype: return
+        result = isGeneric
     elif x.kind == tyGenericInst and f[0] == x[0] and
           x.len - 1 == f.len:
       for i in 1..<f.len:
@@ -2301,9 +2324,11 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
     formal: PSym # current routine parameter
 
   template noMatch() =
+    c.mergeShadowScope #merge so that we don't have to resem for later overloads
     m.state = csNoMatch
     m.firstMismatch.arg = a
     m.firstMismatch.formal = formal
+    return
 
   template checkConstraint(n: untyped) {.dirty.} =
     if not formal.constraint.isNil:
@@ -2312,7 +2337,6 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
         inc(m.genericMatches, 100)
       else:
         noMatch()
-        return
 
     if formal.typ.kind in {tyVar}:
       let argConverter = if arg.kind == nkHiddenDeref: arg[0] else: arg
@@ -2320,11 +2344,9 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
         if argConverter.typ.kind notin {tyVar}:
           m.firstMismatch.kind = kVarNeeded
           noMatch()
-          return
       elif not n.isLValue:
         m.firstMismatch.kind = kVarNeeded
         noMatch()
-        return
 
   m.state = csMatch # until proven otherwise
   m.firstMismatch = MismatchInfo()
@@ -2336,6 +2358,9 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
   formal = if formalLen > 1: m.callee.n[1].sym else: nil
 
   while a < n.len:
+
+    c.openShadowScope
+
     if a >= formalLen-1 and f < formalLen and m.callee.n[f].typ.isVarargsUntyped:
       formal = m.callee.n[f].sym
       incl(marker, formal.position)
@@ -2360,12 +2385,10 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
       if n[a][0].kind != nkIdent:
         localError(c.config, n[a].info, "named parameter has to be an identifier")
         noMatch()
-        return
       formal = getNamedParamFromList(m.callee.n, n[a][0].ident)
       if formal == nil:
         # no error message!
         noMatch()
-        return
       if containsOrIncl(marker, formal.position):
         m.firstMismatch.kind = kAlreadyGiven
         # already in namedParams, so no match
@@ -2374,7 +2397,6 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
         # different parameter names could match later on):
         when false: localError(n[a].info, errCannotBindXTwice, formal.name.s)
         noMatch()
-        return
       m.baseTypeMatch = false
       m.typedescMatched = false
       n[a][1] = prepareOperand(c, formal.typ, n[a][1])
@@ -2384,7 +2406,6 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
       m.firstMismatch.kind = kTypeMismatch
       if arg == nil:
         noMatch()
-        return
       checkConstraint(n[a][1])
       if m.baseTypeMatch:
         #assert(container == nil)
@@ -2425,16 +2446,13 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
             checkConstraint(n[a])
           else:
             noMatch()
-            return
         else:
           m.firstMismatch.kind = kExtraArg
           noMatch()
-          return
       else:
         if m.callee.n[f].kind != nkSym:
           internalError(c.config, n[a].info, "matches")
           noMatch()
-          return
         formal = m.callee.n[f].sym
         m.firstMismatch.kind = kTypeMismatch
         if containsOrIncl(marker, formal.position) and container.isNil:
@@ -2442,7 +2460,6 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
           # positional param already in namedParams: (see above remark)
           when false: localError(n[a].info, errCannotBindXTwice, formal.name.s)
           noMatch()
-          return
 
         if formal.typ.isVarargsUntyped:
           if container.isNil:
@@ -2459,7 +2476,6 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
                                     n[a], nOrig[a])
           if arg == nil:
             noMatch()
-            return
           if m.baseTypeMatch:
             assert formal.typ.kind == tyVarargs
             #assert(container == nil)
@@ -2488,8 +2504,13 @@ proc matchesAux(c: PContext, n, nOrig: PNode,
             localError(c.config, n[a].info, "cannot convert $1 to $2" % [
               typeToString(n[a].typ), typeToString(formal.typ) ])
             noMatch()
-            return
         checkConstraint(n[a])
+
+    if m.state == csMatch and not(m.calleeSym != nil and m.calleeSym.kind in {skTemplate, skMacro}):
+      c.mergeShadowScope
+    else:
+      c.closeShadowScope
+
     inc(a)
   # for some edge cases (see tdont_return_unowned_from_owned test case)
   m.firstMismatch.arg = a
@@ -2521,7 +2542,7 @@ proc matches*(c: PContext, n, nOrig: PNode, m: var TCandidate) =
   if m.state == csNoMatch: return
   # check that every formal parameter got a value:
   for f in 1..<m.callee.n.len:
-    var formal = m.callee.n[f].sym
+    let formal = m.callee.n[f].sym
     if not containsOrIncl(marker, formal.position):
       if formal.ast == nil:
         if formal.typ.kind == tyVarargs:
