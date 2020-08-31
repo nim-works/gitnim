@@ -771,8 +771,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/filter_tmpl.nim
   cp compiler/filters.nim $nimbleDir/compiler/filters.nim
   chmod 644 $nimbleDir/compiler/filters.nim
-  cp compiler/forloops.nim $nimbleDir/compiler/forloops.nim
-  chmod 644 $nimbleDir/compiler/forloops.nim
   cp compiler/gorgeimpl.nim $nimbleDir/compiler/gorgeimpl.nim
   chmod 644 $nimbleDir/compiler/gorgeimpl.nim
   cp compiler/guards.nim $nimbleDir/compiler/guards.nim

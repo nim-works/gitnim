@@ -93,7 +93,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/extccomp.nim
     rm -f $nimbleDir/compiler/filter_tmpl.nim
     rm -f $nimbleDir/compiler/filters.nim
-    rm -f $nimbleDir/compiler/forloops.nim
     rm -f $nimbleDir/compiler/gorgeimpl.nim
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
