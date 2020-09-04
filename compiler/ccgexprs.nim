@@ -1796,9 +1796,9 @@ template binaryExprIn(p: BProc, e: PNode, a, b, d: var TLoc, frmt: string) =
 
 proc genInExprAux(p: BProc, e: PNode, a, b, d: var TLoc) =
   case int(getSize(p.config, skipTypes(e[1].typ, abstractVar)))
-  of 1: binaryExprIn(p, e, a, b, d, "(($1 &(1U<<((NU)($2)&7U)))!=0)")
-  of 2: binaryExprIn(p, e, a, b, d, "(($1 &(1U<<((NU)($2)&15U)))!=0)")
-  of 4: binaryExprIn(p, e, a, b, d, "(($1 &(1U<<((NU)($2)&31U)))!=0)")
+  of 1: binaryExprIn(p, e, a, b, d, "(($1 &((NU8)1<<((NU)($2)&7U)))!=0)")
+  of 2: binaryExprIn(p, e, a, b, d, "(($1 &((NU16)1<<((NU)($2)&15U)))!=0)")
+  of 4: binaryExprIn(p, e, a, b, d, "(($1 &((NU32)1<<((NU)($2)&31U)))!=0)")
   of 8: binaryExprIn(p, e, a, b, d, "(($1 &((NU64)1<<((NU)($2)&63U)))!=0)")
   else: binaryExprIn(p, e, a, b, d, "(($1[(NU)($2)>>3] &(1U<<((NU)($2)&7U)))!=0)")
 
@@ -1996,25 +1996,30 @@ proc genRangeChck(p: BProc, n: PNode, d: var TLoc) =
       checkUnsignedConversions notin p.config.legacyFeatures):
     discard "no need to generate a check because it was disabled"
   else:
-    let raiser =
-      case skipTypes(n.typ, abstractVarRange).kind
-      of tyUInt..tyUInt64, tyChar: "raiseRangeErrorU"
-      of tyFloat..tyFloat128: "raiseRangeErrorF"
-      else: "raiseRangeErrorI"
-    discard cgsym(p.module, raiser)
-    # This seems to be bug-compatible with Nim version 1 but what we
-    # should really do here is to check if uint64Value < high(int)
     let n0t = n[0].typ
-    let boundaryCast =
-      if n0t.skipTypes(abstractVarRange).kind in {tyUInt, tyUInt32, tyUInt64} or
-          (n0t.sym != nil and sfSystemModule in n0t.sym.owner.flags and n0t.sym.name.s == "csize"):
-        "(NI64)"
-      else:
-        ""
+
     # emit range check:
-    linefmt(p, cpsStmts, "if ($6($1) < $2 || $6($1) > $3){ $4($1, $2, $3); $5}$n",
-      [rdCharLoc(a), genLiteral(p, n[1], dest), genLiteral(p, n[2], dest),
-      raiser, raiseInstr(p), boundaryCast])
+    if n0t.kind in {tyUInt, tyUInt64}:
+      linefmt(p, cpsStmts, "if ($1 > ($6)($3)){ #raiseRangeErrorNoArgs(); $5}$n",
+        [rdCharLoc(a), genLiteral(p, n[1], dest), genLiteral(p, n[2], dest),
+        raiser, raiseInstr(p), getTypeDesc(p.module, n0t)])
+    else:
+      let raiser =
+        case skipTypes(n.typ, abstractVarRange).kind
+        of tyUInt..tyUInt64, tyChar: "raiseRangeErrorU"
+        of tyFloat..tyFloat128: "raiseRangeErrorF"
+        else: "raiseRangeErrorI"
+      discard cgsym(p.module, raiser)
+
+      let boundaryCast =
+        if n0t.skipTypes(abstractVarRange).kind in {tyUInt, tyUInt32, tyUInt64} or
+            (n0t.sym != nil and sfSystemModule in n0t.sym.owner.flags and n0t.sym.name.s == "csize"):
+          "(NI64)"
+        else:
+          ""
+      linefmt(p, cpsStmts, "if ($6($1) < $2 || $6($1) > $3){ $4($1, $2, $3); $5}$n",
+        [rdCharLoc(a), genLiteral(p, n[1], dest), genLiteral(p, n[2], dest),
+        raiser, raiseInstr(p), boundaryCast])
   putIntoDest(p, d, n, "(($1) ($2))" %
       [getTypeDesc(p.module, dest), rdCharLoc(a)], a.storage)
 
@@ -2690,9 +2695,7 @@ proc expr(p: BProc, n: PNode, d: var TLoc) =
     expr(p, n[1][0], d)
   of nkObjDownConv: downConv(p, n, d)
   of nkObjUpConv: upConv(p, n, d)
-  of nkChckRangeF: genRangeChck(p, n, d)
-  of nkChckRange64: genRangeChck(p, n, d)
-  of nkChckRange: genRangeChck(p, n, d)
+  of nkChckRangeF, nkChckRange64, nkChckRange: genRangeChck(p, n, d)
   of nkStringToCString: convStrToCStr(p, n, d)
   of nkCStringToString: convCStrToStr(p, n, d)
   of nkLambdaKinds:
