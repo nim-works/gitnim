@@ -826,6 +826,7 @@ proc trackCall(tracked: PEffects; n: PNode) =
     for i in 1..<min(n.safeLen, op.len):
       case op[i].kind
       of tySink:
+        createTypeBoundOps(tracked,  op[i][0], n.info)
         checkForSink(tracked.config, tracked.owner, n[i])
       of tyVar:
         tracked.hasDangerousAssign = true
@@ -1280,7 +1281,7 @@ proc trackStmt*(c: PContext; module: PSym; n: PNode, isTopLevel: bool) =
                 nkTypeSection, nkConverterDef, nkMethodDef, nkIteratorDef}:
     return
   let g = c.graph
-  var effects = newNode(nkEffectList, n.info)
+  var effects = newNodeI(nkEffectList, n.info)
   var t: TEffects
   initEffects(g, effects, module, t, c)
   t.isTopLevel = isTopLevel

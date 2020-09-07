@@ -251,6 +251,8 @@ function main() {
     title="getPeerCertificates(sslHandle: SslPtr): seq[Certificate]"><wbr />get<wbr />Peer<wbr />Certificates<span class="attachedType">Certificate</span></a></li>
   <li><a class="reference" href="#getPeerCertificates%2CSocket"
     title="getPeerCertificates(socket: Socket): seq[Certificate]"><wbr />get<wbr />Peer<wbr />Certificates<span class="attachedType">Socket</span></a></li>
+  <li><a class="reference" href="#sessionIdContext%3D%2CSslContext%2Cstring"
+    title="sessionIdContext=(ctx: SslContext; sidCtx: string)"><wbr />session<wbr />Id<wbr />Context=<span class="attachedType">SslContext</span></a></li>
   <li><a class="reference" href="#getSocketError%2CSocket"
     title="getSocketError(socket: Socket): OSErrorCode"><wbr />get<wbr />Socket<wbr />Error<span class="attachedType">Socket</span></a></li>
   <li><a class="reference" href="#socketError%2CSocket%2Cint%2Cset%5BSocketFlag%5D"
@@ -975,15 +977,32 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L817" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="sessionIdContext=,SslContext,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#sessionIdContext%3D%2CSslContext%2Cstring"><span class="Identifier">sessionIdContext=</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">sidCtx</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Sets the session id context in which a session can be reused. Used for permitting clients to reuse a session id instead of doing a new handshake.</p>
+<p>TLS clients might attempt to resume a session using the session id context, thus it must be set if verifyMode is set to CVerifyPeer or CVerifyPeerUseEnvVars, otherwise the connection will fail and SslError will be raised if resumption occurs.</p>
+<ul class="simple"><li>Only useful if set server-side.</li>
+<li>Should be unique per-application to prevent clients from malfunctioning.</li>
+<li>sidCtx must be at most 32 characters in length.</li>
+</ul>
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L828"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L828" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="getSocketError,Socket"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#getSocketError%2CSocket"><span class="Identifier">getSocketError</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">)</span><span class="Other">:</span> <a href="os.html#OSErrorCode"><span class="Identifier">OSErrorCode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Checks <tt class="docutils literal"><span class="pre">osLastError</span></tt> for a valid error. If it has been reset it uses the last error stored in the socket object.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L828"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L844"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L828" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L844" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="socketError,Socket,int,set[SocketFlag]"></a>
@@ -998,9 +1017,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If <tt class="docutils literal"><span class="pre">flags</span></tt> contains <tt class="docutils literal"><span class="pre">SafeDisconn</span></tt>, no exception will be raised when the error was caused by a peer disconnection.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L837"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L853"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L837" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L853" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="listen,Socket"></a>
@@ -1012,9 +1031,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Raises an OSError error upon failure.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L902"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L918"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L902" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L918" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindAddr,Socket,string"></a>
@@ -1026,9 +1045,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If <tt class="docutils literal"><span class="pre">address</span></tt> is &quot;&quot; then ADDR_ANY will be bound.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L911"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L927"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L911" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L927" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="acceptAddr,Socket,,string"></a>
@@ -1043,9 +1062,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>The <tt class="docutils literal"><span class="pre">accept</span></tt> call may result in an error if the connecting socket disconnects during the duration of the <tt class="docutils literal"><span class="pre">accept</span></tt>. If the <tt class="docutils literal"><span class="pre">SafeDisconn</span></tt> flag is specified then this error will not be raised and instead accept will be called again.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L931"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L947"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L931" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L947" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="accept,Socket,"></a>
@@ -1059,9 +1078,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>The <tt class="docutils literal"><span class="pre">accept</span></tt> call may result in an error if the connecting socket disconnects during the duration of the <tt class="docutils literal"><span class="pre">accept</span></tt>. If the <tt class="docutils literal"><span class="pre">SafeDisconn</span></tt> flag is specified then this error will not be raised and instead accept will be called again.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1030"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1046"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1030" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1046" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="close,Socket"></a>
@@ -1073,9 +1092,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If <tt class="docutils literal"><span class="pre">socket</span></tt> is an SSL/TLS socket, this proc will also send a closure notification to the peer. If <tt class="docutils literal"><span class="pre">SafeDisconn</span></tt> is in <tt class="docutils literal"><span class="pre">flags</span></tt>, failure to do so due to disconnections will be ignored. This is generally safe in practice. See <a class="reference external" href="https://security.stackexchange.com/a/82044">here</a> for more details.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1106"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1122"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1106" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1122" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toCInt,SOBool"></a>
@@ -1084,9 +1103,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts a <tt class="docutils literal"><span class="pre">SOBool</span></tt> into its Socket Option cint representation.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1167"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1183"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1167" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1183" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getSockOpt,Socket,SOBool"></a>
@@ -1096,9 +1115,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Retrieves option <tt class="docutils literal"><span class="pre">opt</span></tt> as a boolean value.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1180"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1196"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1180" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1196" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getLocalAddr,Socket"></a>
@@ -1110,9 +1129,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This is high-level interface for <span id="getsockname_1">getsockname</span>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1186"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1202"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1186" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1202" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getPeerAddr,Socket"></a>
@@ -1124,9 +1143,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This is high-level interface for <span id="getpeername_1">getpeername</span>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1192"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1208"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1192" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1208" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setSockOpt,Socket,SOBool,bool"></a>
@@ -1138,9 +1157,9 @@ Sets option <tt class="docutils literal"><span class="pre">opt</span></tt> to a 
 <span class="Identifier">socket</span><span class="Operator">.</span><span class="Identifier">setSockOpt</span><span class="Punctuation">(</span><span class="Identifier">OptReusePort</span><span class="Punctuation">,</span> <span class="Identifier">true</span><span class="Punctuation">)</span>
 <span class="Identifier">socket</span><span class="Operator">.</span><span class="Identifier">setSockOpt</span><span class="Punctuation">(</span><span class="Identifier">OptNoDelay</span><span class="Punctuation">,</span> <span class="Identifier">true</span><span class="Punctuation">,</span> <span class="Identifier">level</span><span class="Operator">=</span><span class="Identifier">IPPROTO_TCP</span><span class="Operator">.</span><span class="Identifier">toInt</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1198"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1214"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1198" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1214" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="connectUnix,Socket,string"></a>
@@ -1149,9 +1168,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Connects to Unix socket on <tt class="docutils literal"><span class="pre">path</span></tt>. This only works on Unix-style systems: Mac OS X, BSD and Linux
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1211"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1227"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1211" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1227" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindUnix,Socket,string"></a>
@@ -1160,9 +1179,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Binds Unix socket to <tt class="docutils literal"><span class="pre">path</span></tt>. This only works on Unix-style systems: Mac OS X, BSD and Linux
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1220"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1236"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1220" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1236" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasDataBuffered,Socket"></a>
@@ -1171,9 +1190,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Determines whether a socket has data buffered.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1240"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1256"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1240" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1256" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="recv,Socket,pointer,int"></a>
@@ -1185,9 +1204,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Note</strong>: This is a low-level function, you may be interested in the higher level versions of this function which are also named <tt class="docutils literal"><span class="pre">recv</span></tt>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1297"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1313"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1297" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1313" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="recv,Socket,pointer,int,int"></a>
@@ -1197,9 +1216,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 overload with a <tt class="docutils literal"><span class="pre">timeout</span></tt> parameter in milliseconds.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1377"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1393"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1377" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1393" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="recv,Socket,string,int"></a>
@@ -1218,9 +1237,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Warning</strong>: Only the <tt class="docutils literal"><span class="pre">SafeDisconn</span></tt> flag is currently supported.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1395"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1411"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1395" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1411" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="recv,Socket,int"></a>
@@ -1238,9 +1257,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Warning</strong>: Only the <tt class="docutils literal"><span class="pre">SafeDisconn</span></tt> flag is currently supported.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1432"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1448"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1432" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1448" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="readLine,Socket,TaintedString"></a>
@@ -1258,9 +1277,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Warning</strong>: Only the <tt class="docutils literal"><span class="pre">SafeDisconn</span></tt> flag is currently supported.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1477"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1493"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1477" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1493" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="recvLine,Socket"></a>
@@ -1278,9 +1297,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Warning</strong>: Only the <tt class="docutils literal"><span class="pre">SafeDisconn</span></tt> flag is currently supported.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1533"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1549"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1533" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1549" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="recvFrom,Socket,string,int,string,Port,int32"></a>
@@ -1294,9 +1313,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Warning:</strong> This function does not yet have a buffered implementation, so when <tt class="docutils literal"><span class="pre">socket</span></tt> is buffered the non-buffered implementation will be used. Therefore if <tt class="docutils literal"><span class="pre">socket</span></tt> contains something in its buffer this function will make no effort to return it.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1556"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1572"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1556" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1572" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skip,Socket,int"></a>
@@ -1309,9 +1328,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Returns the number of skipped bytes.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1597"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1613"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1597" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1613" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="send,Socket,pointer,int"></a>
@@ -1323,9 +1342,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Note</strong>: This is a low-level version of <tt class="docutils literal"><span class="pre">send</span></tt>. You likely should use the version below.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1612"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1628"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1612" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1628" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="send,Socket,string"></a>
@@ -1335,9 +1354,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 sends data to a socket.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1631"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1647"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1631" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1647" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="trySend,Socket,string"></a>
@@ -1346,9 +1365,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Safe alternative to <tt class="docutils literal"><span class="pre">send</span></tt>. Does not raise an OSError when an error occurs, and instead returns <tt class="docutils literal"><span class="pre">false</span></tt> on failure.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1646"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1662"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1646" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1662" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sendTo,Socket,string,Port,pointer,int,Domain,int32"></a>
@@ -1363,9 +1382,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Note:</strong> This proc is not available for SSL sockets.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1651"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1667"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1651" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1667" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sendTo,Socket,string,Port,string"></a>
@@ -1378,9 +1397,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This is the high-level version of the above <tt class="docutils literal"><span class="pre">sendTo</span></tt> function.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1685"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1701"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1685" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1701" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isSsl,Socket"></a>
@@ -1389,9 +1408,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Determines whether <tt class="docutils literal"><span class="pre">socket</span></tt> is a SSL socket.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1697"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1713"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1697" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1713" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFd,Socket"></a>
@@ -1400,9 +1419,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the socket's file descriptor
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1704"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1720"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1704" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1720" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="IPv4_any"></a>
@@ -1411,9 +1430,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the IPv4 any address, which can be used to listen on all available network adapters
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1710"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1726"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1710" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1726" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="IPv4_loopback"></a>
@@ -1422,9 +1441,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the IPv4 loopback address (127.0.0.1)
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1717"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1733"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1717" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1733" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="IPv4_broadcast"></a>
@@ -1433,9 +1452,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the IPv4 broadcast address (255.255.255.255)
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1723"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1739"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1723" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1739" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="IPv6_any"></a>
@@ -1444,9 +1463,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the IPv6 any address (::0), which can be used to listen on all available network adapters
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1729"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1745"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1729" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1745" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="IPv6_loopback"></a>
@@ -1455,9 +1474,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the IPv6 loopback address (::1)
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1736"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1752"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1736" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1752" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="==,IpAddress,IpAddress"></a>
@@ -1466,9 +1485,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Compares two IpAddresses for Equality. Returns true if the addresses are equal
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1745"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1761"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1745" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1761" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$,IpAddress"></a>
@@ -1477,9 +1496,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Converts an IpAddress into the textual representation
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1756"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1772"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1756" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1772" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="dial,string,Port"></a>
@@ -1489,9 +1508,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Establishes connection to the specified <tt class="docutils literal"><span class="pre">address</span></tt>:<tt class="docutils literal"><span class="pre">port</span></tt> pair via the specified protocol. The procedure iterates through possible resolutions of the <tt class="docutils literal"><span class="pre">address</span></tt> until it succeeds, meaning that it seamlessly works with both IPv4 and IPv6. Returns Socket ready to send or receive data.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1816"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1832"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1816" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1832" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="connect,Socket,string"></a>
@@ -1503,9 +1522,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If <tt class="docutils literal"><span class="pre">socket</span></tt> is an SSL socket a handshake will be automatically performed.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1874"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1890"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1874" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1890" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="connect,Socket,string,int"></a>
@@ -1518,9 +1537,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Warning:</strong> This procedure appears to be broken for SSL connections as of Nim v1.0.2. Consider using the other <tt class="docutils literal"><span class="pre">connect</span></tt> procedure. See <a class="reference external" href="https://github.com/nim-lang/Nim/issues/15215">https://github.com/nim-lang/Nim/issues/15215</a> for more info.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1949"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1965"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1949" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1965" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getPrimaryIPAddr"></a>
@@ -1533,9 +1552,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Supports IPv4 and v6. Raises OSError if external networking is not set up.</p>
 <pre class="listing"><span class="Identifier">echo</span> <span class="Operator">$</span><span class="Identifier">getPrimaryIPAddr</span><span class="Punctuation">(</span><span class="Punctuation">)</span>  <span class="Comment"># &quot;192.168.1.2&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1975"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1991"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1975" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1991" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1549,9 +1568,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 an alias for 'send'.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1642"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/net.nim#L1658"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1642" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/net.nim#L1658" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1569,7 +1588,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-04 00:43:39 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-07 00:43:42 UTC</small>
       </div>
     </div>
   </div>

@@ -3195,6 +3195,12 @@ framePtr = F.prev;
 var F={procname:"module strutils",prev:framePtr,filename:"/home/runner/work/nightlies/nightlies/nim-1.3.5/lib/pure/strutils.nim",line:0};
 framePtr = F;
 framePtr = F.prev;
+var F={procname:"module strutils",prev:framePtr,filename:"/home/runner/work/nightlies/nightlies/nim-1.3.5/lib/pure/strutils.nim",line:0};
+framePtr = F;
+framePtr = F.prev;
+var F={procname:"module strutils",prev:framePtr,filename:"/home/runner/work/nightlies/nightlies/nim-1.3.5/lib/pure/strutils.nim",line:0};
+framePtr = F;
+framePtr = F.prev;
 var F={procname:"module fuzzysearch",prev:framePtr,filename:"/home/runner/work/nightlies/nightlies/nim-1.3.5/tools/dochack/fuzzysearch.nim",line:0};
 framePtr = F;
 framePtr = F.prev;
@@ -4280,9 +4286,9 @@ framePtr = F.prev;
 var F={procname:"module dochack",prev:framePtr,filename:"/home/runner/work/nightlies/nightlies/nim-1.3.5/tools/dochack/dochack.nim",line:0};
 framePtr = F;
 F.line = 315;
-var oldtoc_10545421 = [null];
+var oldtoc_10545436 = [null];
 F.line = 316;
-var timer_10545422 = [null];
+var timer_10545437 = [null];
 framePtr = F.prev;
 function raiseRangeError() {
     raiseException({message: makeNimstrLit("value out of range"), parent: null, m_type: NTI1194653, name: null, trace: [], up: null}, "RangeDefect");
@@ -4664,28 +4670,28 @@ function dosearch_10535550(value_10535552) {
 
 }
 function search() {
-    function wrapper_10545453() {
+    function wrapper_10545468() {
       var F={procname:"search.wrapper",prev:framePtr,filename:"/home/runner/work/nightlies/nightlies/nim-1.3.5/tools/dochack/dochack.nim",line:0};
       framePtr = F;
         F.line = 320;
-        var elem_10545455 = document.getElementById("searchInput");
+        var elem_10545470 = document.getElementById("searchInput");
         F.line = 321;
-        var value_10545456 = elem_10545455.value;
-        if (!(((value_10545456).length == 0))) {
-        if ((oldtoc_10545421[0] == null)) {
+        var value_10545471 = elem_10545470.value;
+        if (!(((value_10545471).length == 0))) {
+        if ((oldtoc_10545436[0] == null)) {
         F.line = 324;
-        oldtoc_10545421[0] = document.getElementById("tocRoot");
+        oldtoc_10545436[0] = document.getElementById("tocRoot");
         }
         
         F.line = 325;
-        var results_10550006 = dosearch_10535550(value_10545456);
+        var results_10550006 = dosearch_10535550(value_10545471);
         F.line = 326;
         replaceById_10456189("tocRoot", results_10550006);
         }
         else {
-        if (!((oldtoc_10545421[0] == null))) {
+        if (!((oldtoc_10545436[0] == null))) {
         F.line = 328;
-        replaceById_10456189("tocRoot", oldtoc_10545421[0]);
+        replaceById_10456189("tocRoot", oldtoc_10545436[0]);
         }
         }
       framePtr = F.prev;
@@ -4695,13 +4701,13 @@ function search() {
 
   var F={procname:"dochack.search",prev:framePtr,filename:"/home/runner/work/nightlies/nightlies/nim-1.3.5/tools/dochack/dochack.nim",line:0};
   framePtr = F;
-    if (!((timer_10545422[0] == null))) {
+    if (!((timer_10545437[0] == null))) {
     F.line = 330;
-    clearTimeout(timer_10545422[0]);
+    clearTimeout(timer_10545437[0]);
     }
     
     F.line = 331;
-    timer_10545422[0] = setTimeout(wrapper_10545453, 400);
+    timer_10545437[0] = setTimeout(wrapper_10545468, 400);
   framePtr = F.prev;
 
   

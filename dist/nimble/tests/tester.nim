@@ -192,10 +192,12 @@ suite "nimscript":
 
   test "before/after on build":
     cd "nimscript":
-      let (output, exitCode) = execNimble(["build", "--nim:" & findExe("nim")])
+      let (output, exitCode) = execNimble([
+        "build", "--nim:" & findExe("nim"), "--silent"])
       check exitCode == QuitSuccess
       check output.contains("Before build")
       check output.contains("After build")
+      check not output.contains("Verifying")
 
   test "can execute nimscript tasks":
     cd "nimscript":
@@ -612,8 +614,18 @@ suite "check command":
 
 suite "multi":
   test "can install package from git subdir":
-    let args = ["install", "-y", "https://github.com/nimble-test/multi?subdir=alpha"]
-    check execNimble(args).exitCode == QuitSuccess
+    var
+      args = @["install", "-y", "https://github.com/nimble-test/multi?subdir=alpha"]
+      (output, exitCode) = execNimble(args)
+    check exitCode == QuitSuccess
+
+    # Issue 785
+    args[1] = "-n"
+    args.add "https://github.com/nimble-test/multi?subdir=beta"
+    (output, exitCode) = execNimble(args)
+    check exitCode == QuitSuccess
+    check output.contains("forced no")
+    check output.contains("beta installed successfully")
 
   test "can develop package from git subdir":
     removeDir("nimble-test/multi")
@@ -809,6 +821,15 @@ suite "misc tests":
     check execNimble("list").exitCode == QuitSuccess
 
     check execNimble("list", "-i").exitCode == QuitSuccess
+
+  test "project local deps mode":
+    cd "localdeps":
+      removeDir("nimbledeps")
+      createDir("nimbledeps")
+      var (output, exitCode) = execCmdEx(nimblePath & " install -y")
+      check exitCode == QuitSuccess
+      check output.contains("project local deps mode")
+      check output.contains("Succeeded")
 
 suite "issues":
   test "issue 801":
