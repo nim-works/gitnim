@@ -249,6 +249,7 @@ function main() {
 <ul class="simple"><li><a class="reference" id="macros-debug-example_toc" href="#macros-debug-example">Debug Example</a></li>
 <li><a class="reference" id="macros-bindsym_toc" href="#macros-bindsym">BindSym</a></li>
 <li><a class="reference" id="macros-caseminusof-macro_toc" href="#macros-caseminusof-macro">Case-Of Macro</a></li>
+<li><a class="reference" id="macros-for-loop-macros_toc" href="#macros-for-loop-macros">For loop macros</a></li>
 </ul><li><a class="reference" id="special-types_toc" href="#special-types">Special Types</a></li>
 <ul class="simple"><li><a class="reference" id="special-types-static-t_toc" href="#special-types-static-t">static[T]</a></li>
 <li><a class="reference" id="special-types-typedesc-t_toc" href="#special-types-typedesc-t">typedesc[T]</a></li>
@@ -3138,6 +3139,37 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 <li>Else: Use a macro.</li>
 </ol>
 
+<h2><a class="toc-backref" id="macros-for-loop-macros" href="#macros-for-loop-macros">For loop macros</a></h2><p>A macro that takes as its only input parameter an expression of the special type <tt class="docutils literal"><span class="pre">system.ForLoopStmt</span></tt> can rewrite the entirety of a <tt class="docutils literal"><span class="pre">for</span></tt> loop:</p>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">macros</span>
+
+<span class="Keyword">macro</span> <span class="Identifier">enumerate</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">ForLoopStmt</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">untyped</span> <span class="Operator">=</span>
+  <span class="Identifier">expectKind</span> <span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">nnkForStmt</span>
+  <span class="Comment"># we strip off the first for loop variable and use</span>
+  <span class="Comment"># it as an integer counter:</span>
+  <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">newStmtList</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">newVarStmt</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Punctuation">,</span> <span class="Identifier">newLit</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+  <span class="Keyword">var</span> <span class="Identifier">body</span> <span class="Operator">=</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Operator">^</span><span class="DecNumber">1</span><span class="Punctuation">]</span>
+  <span class="Keyword">if</span> <span class="Identifier">body</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">!=</span> <span class="Identifier">nnkStmtList</span><span class="Punctuation">:</span>
+    <span class="Identifier">body</span> <span class="Operator">=</span> <span class="Identifier">newTree</span><span class="Punctuation">(</span><span class="Identifier">nnkStmtList</span><span class="Punctuation">,</span> <span class="Identifier">body</span><span class="Punctuation">)</span>
+  <span class="Identifier">body</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">newCall</span><span class="Punctuation">(</span><span class="RawData">bindSym&quot;inc&quot;</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Punctuation">)</span>
+  <span class="Keyword">var</span> <span class="Identifier">newFor</span> <span class="Operator">=</span> <span class="Identifier">newTree</span><span class="Punctuation">(</span><span class="Identifier">nnkForStmt</span><span class="Punctuation">)</span>
+  <span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="FloatNumber">1.</span><span class="Operator">.</span><span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Operator">-</span><span class="DecNumber">3</span><span class="Punctuation">:</span>
+    <span class="Identifier">newFor</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span>
+  <span class="Comment"># transform enumerate(X) to 'X'</span>
+  <span class="Identifier">newFor</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Operator">^</span><span class="DecNumber">2</span><span class="Punctuation">]</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">]</span>
+  <span class="Identifier">newFor</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">body</span>
+  <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">newFor</span>
+  <span class="Comment"># now wrap the whole macro in a block to create a new scope</span>
+  <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">quote</span> <span class="Keyword">do</span><span class="Punctuation">:</span>
+    <span class="Keyword">block</span><span class="Punctuation">:</span> <span class="Punctuation">`</span><span class="Identifier">result</span><span class="Punctuation">`</span>
+
+<span class="Keyword">for</span> <span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span> <span class="Keyword">in</span> <span class="Identifier">enumerate</span><span class="Punctuation">(</span><span class="Identifier">items</span><span class="Punctuation">(</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="Identifier">a</span><span class="Punctuation">,</span> <span class="StringLit">&quot; &quot;</span><span class="Punctuation">,</span> <span class="Identifier">b</span>
+
+<span class="Comment"># without wrapping the macro in a block, we'd need to choose different</span>
+<span class="Comment"># names for `a` and `b` here to avoid redefinition errors</span>
+<span class="Keyword">for</span> <span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span> <span class="Keyword">in</span> <span class="Identifier">enumerate</span><span class="Punctuation">(</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">5</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="Identifier">a</span><span class="Punctuation">,</span> <span class="StringLit">&quot; &quot;</span><span class="Punctuation">,</span> <span class="Identifier">b</span></pre>
 <h1><a class="toc-backref" id="special-types" href="#special-types">Special Types</a></h1>
 <h2><a class="toc-backref" id="special-types-static-t" href="#special-types-static-t">static[T]</a></h2><p>As their name suggests, static parameters must be constant expressions:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">precompiledRegex</span><span class="Punctuation">(</span><span class="Identifier">pattern</span><span class="Punctuation">:</span> <span class="Keyword">static</span> <span class="Identifier">string</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">RegEx</span> <span class="Operator">=</span>
@@ -3939,7 +3971,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-07 00:43:14 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-09 01:02:02 UTC</small>
       </div>
     </div>
   </div>
