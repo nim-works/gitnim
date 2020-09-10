@@ -3446,7 +3446,7 @@ function newSeq_1455128(len_1455131) {
 
   var F={procname:"newSeq.newSeq",prev:framePtr,filename:"/home/runner/work/nightlies/nightlies/nim-1.3.5/lib/system.nim",line:0};
   framePtr = F;
-    F.line = 654;
+    F.line = 656;
     result_1455133 = new Array(len_1455131); for (var i=0;i<len_1455131;++i) {result_1455133[i]=null;}  framePtr = F.prev;
 
   return result_1455133;

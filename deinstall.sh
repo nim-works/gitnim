@@ -196,6 +196,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/transf.nim
     rm -f $nimbleDir/compiler/trees.nim
     rm -f $nimbleDir/compiler/treetab.nim
+    rm -f $nimbleDir/compiler/typeallowed.nim
     rm -f $nimbleDir/compiler/types.nim
     rm -f $nimbleDir/compiler/typesrenderer.nim
     rm -f $nimbleDir/compiler/varpartitions.nim

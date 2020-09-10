@@ -101,14 +101,42 @@ function main() {
   </ul>
 </li>
 <li>
+  <a class="reference reference-toplevel" href="#7" id="57">Types</a>
+  <ul class="simple simple-toc-section">
+      <li><a class="reference" href="#Joptions"
+    title="Joptions = object
+  allowExtraKeys*: bool ## If `true` Nim&apos;s object to which the JSON is parsed is not required to
+                      ## have a field for every JSON key.
+  allowMissingKeys*: bool ## If `true` Nim&apos;s object to which JSON is parsed is allowed to have
+                        ## fields without corresponding JSON keys."><wbr />Joptions<span class="attachedType"></span></a></li>
+
+  </ul>
+</li>
+<li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#fromJson%2CT%2CJsonNode"
-    title="fromJson[T](a: var T; b: JsonNode)"><wbr />from<wbr />Json<span class="attachedType"></span></a></li>
+    title="fromJson[T](a: var T; b: JsonNode; opt = Joptions())"><wbr />from<wbr />Json<span class="attachedType">Joptions</span></a></li>
   <li><a class="reference" href="#jsonTo%2CJsonNode%2Ctypedesc"
     title="jsonTo(b: JsonNode; T: typedesc): T:type"><wbr />json<wbr />To<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#toJson%2CT"
     title="toJson[T](a: T): JsonNode"><wbr />to<wbr />Json<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#fromJsonHook%2C%2CJsonNode"
+    title="fromJsonHook[K, V](t: var (Table[K, V] | OrderedTable[K, V]); jsonNode: JsonNode)"><wbr />from<wbr />Json<wbr />Hook<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#toJsonHook"
+    title="toJsonHook[K, V](t: (Table[K, V] | OrderedTable[K, V])): JsonNode"><wbr />to<wbr />Json<wbr />Hook<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#fromJsonHook%2CSomeSet%5BA%5D%2CJsonNode"
+    title="fromJsonHook[A](s: var SomeSet[A]; jsonNode: JsonNode)"><wbr />from<wbr />Json<wbr />Hook<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#toJsonHook%2CSomeSet%5BA%5D"
+    title="toJsonHook[A](s: SomeSet[A]): JsonNode"><wbr />to<wbr />Json<wbr />Hook<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#fromJsonHook%2COption%5BT%5D%2CJsonNode"
+    title="fromJsonHook[T](self: var Option[T]; jsonNode: JsonNode)"><wbr />from<wbr />Json<wbr />Hook<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#toJsonHook%2COption%5BT%5D"
+    title="toJsonHook[T](self: Option[T]): JsonNode"><wbr />to<wbr />Json<wbr />Hook<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#fromJsonHook%2CStringTableRef%2CJsonNode"
+    title="fromJsonHook(a: var StringTableRef; b: JsonNode)"><wbr />from<wbr />Json<wbr />Hook<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#toJsonHook%2CStringTableRef"
+    title="toJsonHook(a: StringTableRef): JsonNode"><wbr />to<wbr />Json<wbr />Hook<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -131,20 +159,41 @@ function main() {
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="json.html">json</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="macros.html">macros</a>
+<a class="reference external" href="json.html">json</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="sets.html">sets</a>, <a class="reference external" href="strtabs.html">strtabs</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="macros.html">macros</a>
+</dl></div>
+<div class="section" id="7">
+<h1><a class="toc-backref" href="#7">Types</a></h1>
+<dl class="item">
+<a id="Joptions"></a>
+<dt><pre><a href="jsonutils.html#Joptions"><span class="Identifier">Joptions</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">allowExtraKeys</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span class="Comment">## If `true` Nim's object to which the JSON is parsed is not required to</span>
+                      <span class="Comment">## have a field for every JSON key.</span>
+  <span class="Identifier">allowMissingKeys</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span class="Comment">## If `true` Nim's object to which JSON is parsed is allowed to have</span>
+                        <span class="Comment">## fields without corresponding JSON keys.</span>
+  </pre></dt>
+<dd>
+
+Options controlling the behavior of <tt class="docutils literal"><span class="pre">fromJson</span></tt>.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L33"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L33" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+
 </dl></div>
 <div class="section" id="12">
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
 <a id="fromJson,T,JsonNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#fromJson%2CT%2CJsonNode"><span class="Identifier">fromJson</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Other">;</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a><span class="Other">)</span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#fromJson%2CT%2CJsonNode"><span class="Identifier">fromJson</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Other">;</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a><span class="Other">;</span> <span class="Identifier">opt</span> <span class="Other">=</span> <a href="jsonutils.html#Joptions"><span class="Identifier">Joptions</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span></pre></dt>
 <dd>
 
 inplace version of <tt class="docutils literal"><span class="pre">jsonTo</span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L108"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L177"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L108" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L177" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="jsonTo,JsonNode,typedesc"></a>
@@ -153,9 +202,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 reverse of <tt class="docutils literal"><span class="pre">toJson</span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L170"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L247"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L170" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L247" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toJson,T"></a>
@@ -164,9 +213,180 @@ class="link-seesrc" target="_blank">Source</a>
 
 serializes <tt class="docutils literal"><span class="pre">a</span></tt> to json; uses <tt class="docutils literal"><span class="pre">toJsonHook(a: T)</span></tt> if it's in scope to customize serialization, see strtabs.toJsonHook for an example.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L174"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L251"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L174" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L251" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="fromJsonHook,,JsonNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#fromJsonHook%2C%2CJsonNode"><span class="Identifier">fromJsonHook</span></a><span class="Other">[</span><span class="Identifier">K</span><span class="Other">,</span> <span class="Identifier">V</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Other">(</span><a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><span class="Identifier">K</span><span class="Other">,</span> <span class="Identifier">V</span><span class="Other">]</span> <span class="Operator">|</span> <a href="tables.html#OrderedTable"><span class="Identifier">OrderedTable</span></a><span class="Other">[</span><span class="Identifier">K</span><span class="Other">,</span> <span class="Identifier">V</span><span class="Other">]</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">jsonNode</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a><span class="Other">)</span></pre></dt>
+<dd>
+
+<p>Enables <tt class="docutils literal"><span class="pre">fromJson</span></tt> for <tt class="docutils literal"><span class="pre">Table</span></tt> and <tt class="docutils literal"><span class="pre">OrderedTable</span></tt> types.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#toJsonHook,(Table[K,V]|OrderedTable[K,V])">toJsonHook proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">tables</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">json</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">foo</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Keyword">tuple</span><span class="Punctuation">[</span><span class="Identifier">t</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">Table</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">ot</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">OrderedTable</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">fromJson</span><span class="Punctuation">(</span><span class="Identifier">foo</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">parseJson</span><span class="Punctuation">(</span><span class="LongStringLit">&quot;&quot;&quot;
+      {&quot;t&quot;:{&quot;two&quot;:2,&quot;one&quot;:1},&quot;ot&quot;:{&quot;one&quot;:1,&quot;three&quot;:3}}&quot;&quot;&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">t</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="Punctuation">(</span><span class="StringLit">&quot;one&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;two&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toTable</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">ot</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="Punctuation">(</span><span class="StringLit">&quot;one&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;three&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">3</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toOrderedTable</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L276"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L276" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="toJsonHook"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#toJsonHook"><span class="Identifier">toJsonHook</span></a><span class="Other">[</span><span class="Identifier">K</span><span class="Other">,</span> <span class="Identifier">V</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Other">(</span><a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><span class="Identifier">K</span><span class="Other">,</span> <span class="Identifier">V</span><span class="Other">]</span> <span class="Operator">|</span> <a href="tables.html#OrderedTable"><span class="Identifier">OrderedTable</span></a><span class="Other">[</span><span class="Identifier">K</span><span class="Other">,</span> <span class="Identifier">V</span><span class="Other">]</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a></pre></dt>
+<dd>
+
+<p>Enables <tt class="docutils literal"><span class="pre">toJson</span></tt> for <tt class="docutils literal"><span class="pre">Table</span></tt> and <tt class="docutils literal"><span class="pre">OrderedTable</span></tt> types.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#fromJsonHook,(Table[K,V]|OrderedTable[K,V]),JsonNode">fromJsonHook proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">tables</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">json</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">foo</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="Whitespace">
+  </span><span class="Identifier">t</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="Punctuation">(</span><span class="StringLit">&quot;two&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toTable</span><span class="Punctuation">,</span><span class="Whitespace">
+  </span><span class="Identifier">ot</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="Punctuation">(</span><span class="StringLit">&quot;one&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="StringLit">&quot;three&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">3</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toOrderedTable</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Identifier">toJson</span><span class="Punctuation">(</span><span class="Identifier">foo</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot;{&quot;t&quot;:{&quot;two&quot;:2},&quot;ot&quot;:{&quot;one&quot;:1,&quot;three&quot;:3}}&quot;&quot;&quot;</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L297"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L297" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="fromJsonHook,SomeSet[A],JsonNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#fromJsonHook%2CSomeSet%5BA%5D%2CJsonNode"><span class="Identifier">fromJsonHook</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sets.html#SomeSet"><span class="Identifier">SomeSet</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">jsonNode</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a><span class="Other">)</span></pre></dt>
+<dd>
+
+<p>Enables <tt class="docutils literal"><span class="pre">fromJson</span></tt> for <tt class="docutils literal"><span class="pre">HashSet</span></tt> and <tt class="docutils literal"><span class="pre">OrderedSet</span></tt> types.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#toJsonHook,SomeSet[A]">toJsonHook proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">sets</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">json</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">foo</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Keyword">tuple</span><span class="Punctuation">[</span><span class="Identifier">hs</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">HashSet</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">os</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">OrderedSet</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">fromJson</span><span class="Punctuation">(</span><span class="Identifier">foo</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">parseJson</span><span class="Punctuation">(</span><span class="LongStringLit">&quot;&quot;&quot;
+      {&quot;hs&quot;: [&quot;hash&quot;, &quot;set&quot;], &quot;os&quot;: [&quot;ordered&quot;, &quot;set&quot;]}&quot;&quot;&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">hs</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="StringLit">&quot;hash&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;set&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toHashSet</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">os</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="StringLit">&quot;ordered&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;set&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toOrderedSet</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L313"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L313" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="toJsonHook,SomeSet[A]"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#toJsonHook%2CSomeSet%5BA%5D"><span class="Identifier">toJsonHook</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="sets.html#SomeSet"><span class="Identifier">SomeSet</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a></pre></dt>
+<dd>
+
+<p>Enables <tt class="docutils literal"><span class="pre">toJson</span></tt> for <tt class="docutils literal"><span class="pre">HashSet</span></tt> and <tt class="docutils literal"><span class="pre">OrderedSet</span></tt> types.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#fromJsonHook,SomeSet[A],JsonNode">fromJsonHook proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">sets</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">json</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">foo</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="Identifier">hs</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="StringLit">&quot;hash&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toHashSet</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">os</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="StringLit">&quot;ordered&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;set&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toOrderedSet</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Identifier">toJson</span><span class="Punctuation">(</span><span class="Identifier">foo</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot;{&quot;hs&quot;:[&quot;hash&quot;],&quot;os&quot;:[&quot;ordered&quot;,&quot;set&quot;]}&quot;&quot;&quot;</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L333"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L333" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="fromJsonHook,Option[T],JsonNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#fromJsonHook%2COption%5BT%5D%2CJsonNode"><span class="Identifier">fromJsonHook</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">jsonNode</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a><span class="Other">)</span></pre></dt>
+<dd>
+
+<p>Enables <tt class="docutils literal"><span class="pre">fromJson</span></tt> for <tt class="docutils literal"><span class="pre">Option</span></tt> types.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#toJsonHook,Option[T]">toJsonHook proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">options</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">json</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">opt</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">Option</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Whitespace">
+</span><span class="Identifier">fromJsonHook</span><span class="Punctuation">(</span><span class="Identifier">opt</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">parseJson</span><span class="Punctuation">(</span><span class="StringLit">&quot;</span><span class="EscapeSequence">\&quot;</span><span class="EscapeSequence">test\&quot;</span><span class="StringLit">&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">get</span><span class="Punctuation">(</span><span class="Identifier">opt</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;test&quot;</span><span class="Whitespace">
+</span><span class="Identifier">fromJson</span><span class="Punctuation">(</span><span class="Identifier">opt</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">parseJson</span><span class="Punctuation">(</span><span class="StringLit">&quot;null&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">isNone</span><span class="Punctuation">(</span><span class="Identifier">opt</span><span class="Punctuation">)</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L347"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L347" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="toJsonHook,Option[T]"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#toJsonHook%2COption%5BT%5D"><span class="Identifier">toJsonHook</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">self</span><span class="Other">:</span> <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a></pre></dt>
+<dd>
+
+<p>Enables <tt class="docutils literal"><span class="pre">toJson</span></tt> for <tt class="docutils literal"><span class="pre">Option</span></tt> types.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#fromJsonHook,Option[T],JsonNode">fromJsonHook proc</a></li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">options</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">json</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">optSome</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">some</span><span class="Punctuation">(</span><span class="StringLit">&quot;test&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Identifier">toJson</span><span class="Punctuation">(</span><span class="Identifier">optSome</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;</span><span class="EscapeSequence">\&quot;</span><span class="EscapeSequence">test\&quot;</span><span class="StringLit">&quot;</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">optNone</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">none</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$</span><span class="Identifier">toJson</span><span class="Punctuation">(</span><span class="Identifier">optNone</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;null&quot;</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L365"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L365" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="fromJsonHook,StringTableRef,JsonNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#fromJsonHook%2CStringTableRef%2CJsonNode"><span class="Identifier">fromJsonHook</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="strtabs.html#StringTableRef"><span class="Identifier">StringTableRef</span></a><span class="Other">;</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">JsonKindError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Enables <tt class="docutils literal"><span class="pre">fromJson</span></tt> for <tt class="docutils literal"><span class="pre">StringTableRef</span></tt> type.</p>
+<p>See also:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">toJsonHook</span></tt> proc&lt;#toJsonHook,StringTableRef&gt;`_</li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">strtabs</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">json</span><span class="Whitespace">
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">t</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">newStringTable</span><span class="Punctuation">(</span><span class="Identifier">modeCaseSensitive</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">jsonStr</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot;{&quot;mode&quot;: 0, &quot;table&quot;: {&quot;name&quot;: &quot;John&quot;, &quot;surname&quot;: &quot;Doe&quot;}}&quot;&quot;&quot;</span><span class="Whitespace">
+</span><span class="Identifier">fromJsonHook</span><span class="Punctuation">(</span><span class="Identifier">t</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">parseJson</span><span class="Punctuation">(</span><span class="Identifier">jsonStr</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">t</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">newStringTable</span><span class="Punctuation">(</span><span class="StringLit">&quot;name&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;John&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;surname&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;Doe&quot;</span><span class="Punctuation">,</span><span class="Whitespace">
+                             </span><span class="Identifier">modeCaseSensitive</span><span class="Punctuation">)</span><span class="Punctuation">[</span><span class="Punctuation">]</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L382"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L382" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="toJsonHook,StringTableRef"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#toJsonHook%2CStringTableRef"><span class="Identifier">toJsonHook</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <a href="strtabs.html#StringTableRef"><span class="Identifier">StringTableRef</span></a><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Enables <tt class="docutils literal"><span class="pre">toJson</span></tt> for <tt class="docutils literal"><span class="pre">StringTableRef</span></tt> type.</p>
+<p>See also:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">fromJsonHook</span></tt> proc&lt;#fromJsonHook,StringTableRef,JsonNode&gt;`_</li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">strtabs</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">json</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">t</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">newStringTable</span><span class="Punctuation">(</span><span class="StringLit">&quot;name&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;John&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;surname&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="StringLit">&quot;Doe&quot;</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">modeCaseSensitive</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">jsonStr</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot;{&quot;mode&quot;: &quot;modeCaseSensitive&quot;,
+                      &quot;table&quot;: {&quot;name&quot;: &quot;John&quot;, &quot;surname&quot;: &quot;Doe&quot;}}&quot;&quot;&quot;</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">toJson</span><span class="Punctuation">(</span><span class="Identifier">t</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Identifier">parseJson</span><span class="Punctuation">(</span><span class="Identifier">jsonStr</span><span class="Punctuation">)</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L400"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L400" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -179,7 +399,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-09 01:02:42 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-10 00:44:01 UTC</small>
       </div>
     </div>
   </div>

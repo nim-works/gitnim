@@ -148,6 +148,7 @@ function main() {
 </ul><li><a class="reference" id="taint-mode_toc" href="#taint-mode">Taint mode</a></li>
 <li><a class="reference" id="aliasing-restrictions-in-parameter-passing_toc" href="#aliasing-restrictions-in-parameter-passing">Aliasing restrictions in parameter passing</a></li>
 <li><a class="reference" id="strict-funcs_toc" href="#strict-funcs">Strict funcs</a></li>
+<li><a class="reference" id="view-types_toc" href="#view-types">View types</a></li>
 
 </ul>
 
@@ -1028,7 +1029,38 @@ Arglist
   <span class="Keyword">let</span> <span class="Identifier">m</span> <span class="Operator">=</span> <span class="Identifier">n</span> <span class="Comment"># is the statement that connected the mutation to the parameter</span>
   <span class="Identifier">m</span><span class="Operator">.</span><span class="Identifier">data</span> <span class="Operator">=</span> <span class="StringLit">&quot;yeah&quot;</span> <span class="Comment"># the mutation is here</span>
   <span class="Comment"># Error: 'mut' can have side effects</span>
-  <span class="Comment"># an object reachable from 'n' is potentially mutated</span></pre><p>The algorithm behind this analysis is currently not documented. </p>
+  <span class="Comment"># an object reachable from 'n' is potentially mutated</span></pre><p>The algorithm behind this analysis is currently not documented.</p>
+
+<h1><a class="toc-backref" id="view-types" href="#view-types">View types</a></h1><p>A view type is a type that contains one of the following types:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">var T</span></tt> (mutable view into <tt class="docutils literal"><span class="pre">T</span></tt>)</li>
+<li><tt class="docutils literal"><span class="pre">lent T</span></tt> (immutable view into <tt class="docutils literal"><span class="pre">T</span></tt>)</li>
+<li><tt class="docutils literal"><span class="pre">openArray[T]</span></tt> (pair of (pointer to array of <tt class="docutils literal"><span class="pre">T</span></tt>, size))</li>
+</ul>
+<p>Since version 1.4 Nim allows view types to be used as local variables. This feature needs to be enabled via <tt class="docutils literal"><span class="pre">{.experimental: &quot;views&quot;.}</span></tt>.</p>
+<p>A local variable of a view type <em>borrows</em> from the locations and it is statically enforced that the view does not outlive the location it was borrowed from.</p>
+<p>For example:</p>
+<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">experimental</span><span class="Punctuation">:</span> <span class="StringLit">&quot;views&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">take</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Identifier">echo</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">len</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">main</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">var</span> <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Identifier">s</span> <span class="Comment"># 'x' is a view into 's'</span>
+  <span class="Comment"># it is checked that 'x' does not outlive 's' and</span>
+  <span class="Comment"># that 's' is not mutated.</span>
+  <span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="DecNumber">0</span> <span class="Operator">..</span> <span class="Identifier">high</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+    <span class="Identifier">echo</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span>
+  <span class="Identifier">take</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span>
+  
+  <span class="Identifier">take</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">toOpenArray</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">)</span> <span class="Comment"># slicing remains possible</span>
+  <span class="Keyword">let</span> <span class="Identifier">y</span> <span class="Operator">=</span> <span class="Identifier">x</span>  <span class="Comment"># create a view from a view</span>
+  <span class="Identifier">take</span> <span class="Identifier">y</span>
+  <span class="Comment"># it is checked that 'y' does not outlive 'x' and</span>
+  <span class="Comment"># that 'x' is not mutated as long as 'y' lives.</span>
+
+
+<span class="Identifier">main</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">11</span><span class="Punctuation">,</span> <span class="DecNumber">22</span><span class="Punctuation">,</span> <span class="DecNumber">33</span><span class="Punctuation">]</span><span class="Punctuation">)</span></pre><p>If a view type is used as a return type, the location must borrow from the first parameter that is passed to the proc. See <a class="reference external" href="https://nim-lang.org/docs/manual.html#procedures-var-return-type">https://nim-lang.org/docs/manual.html#procedures-var-return-type</a> for details about how this is done for <tt class="docutils literal"><span class="pre">var T</span></tt>.</p>
+<p>The algorithm behind this analysis is currently not documented. </p>
 </p>
   
   </div>
@@ -1038,7 +1070,7 @@ Arglist
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-09 01:02:03 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-10 00:43:20 UTC</small>
       </div>
     </div>
   </div>

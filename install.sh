@@ -979,6 +979,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/trees.nim
   cp compiler/treetab.nim $nimbleDir/compiler/treetab.nim
   chmod 644 $nimbleDir/compiler/treetab.nim
+  cp compiler/typeallowed.nim $nimbleDir/compiler/typeallowed.nim
+  chmod 644 $nimbleDir/compiler/typeallowed.nim
   cp compiler/types.nim $nimbleDir/compiler/types.nim
   chmod 644 $nimbleDir/compiler/types.nim
   cp compiler/typesrenderer.nim $nimbleDir/compiler/typesrenderer.nim
