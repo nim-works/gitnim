@@ -126,8 +126,8 @@ function main() {
     title="hasSideEffect(c: var Partitions; info: var MutationInfo): bool"><wbr />has<wbr />Side<wbr />Effect<span class="attachedType">Partitions</span></a></li>
   <li><a class="reference" href="#computeGraphPartitions%2CPSym%2CPNode"
     title="computeGraphPartitions(s: PSym; n: PNode; cursorInference = false): Partitions"><wbr />compute<wbr />Graph<wbr />Partitions<span class="attachedType">Partitions</span></a></li>
-  <li><a class="reference" href="#checkBorrowedLocations%2CPartitions%2CConfigRef"
-    title="checkBorrowedLocations(par: var Partitions; config: ConfigRef)"><wbr />check<wbr />Borrowed<wbr />Locations<span class="attachedType">Partitions</span></a></li>
+  <li><a class="reference" href="#checkBorrowedLocations%2CPartitions%2CPNode%2CConfigRef"
+    title="checkBorrowedLocations(par: var Partitions; body: PNode; config: ConfigRef)"><wbr />check<wbr />Borrowed<wbr />Locations<span class="attachedType">Partitions</span></a></li>
   <li><a class="reference" href="#computeCursors%2CPSym%2CPNode%2CConfigRef"
     title="computeCursors(s: PSym; n: PNode; config: ConfigRef)"><wbr />compute<wbr />Cursors<span class="attachedType"></span></a></li>
 
@@ -140,7 +140,13 @@ function main() {
   <div class="nine columns" id="content">
   <div id="tocRoot"></div>
   
-  <p class="module-desc">Partition variables into different graphs. Used for Nim's write tracking and also for the cursor inference. The algorithm is a reinvention / variation of Steensgaard's algorithm. The used data structure is &quot;union find&quot; with path compression.</p>
+  <p class="module-desc">Partition variables into different graphs. Used for Nim's write tracking and also for the cursor inference. The algorithm is a reinvention / variation of Steensgaard's algorithm. The used data structure is &quot;union find&quot; with path compression.We perform two passes over the AST:<ul class="simple"><li>Pass one (<tt class="docutils literal"><span class="pre">computeLiveRanges</span></tt>): collect livetimes of local variables and whether they are potentially re-assigned.</li>
+<li>Pass two (<tt class="docutils literal"><span class="pre">traverse</span></tt>): combine local variables to abstract &quot;graphs&quot;. Strict func checking: Ensure that graphs that are connected to const parameters are not mutated.<dl class="docutils"><dt>Cursor inference: Ensure that potential cursors are not</dt>
+<dd>borrowed from locations that are connected to a graph that is mutated during the liveness of the cursor. (We track all possible mutations of a graph.)</dd>
+</dl>
+</li>
+</ul>
+</p>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
@@ -161,9 +167,9 @@ function main() {
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L45"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L61"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L45" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L61" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Partitions"></a>
@@ -178,9 +184,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L52"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L68"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L52" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L68" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -194,9 +200,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L63"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L79"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L63" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L79" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasSideEffect,Partitions,MutationInfo"></a>
@@ -205,9 +211,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L78"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L94"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L78" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L94" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="computeGraphPartitions,PSym,PNode"></a>
@@ -217,22 +223,22 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L509"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L617"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L509" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L617" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="checkBorrowedLocations,Partitions,ConfigRef"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#checkBorrowedLocations%2CPartitions%2CConfigRef"><span class="Identifier">checkBorrowedLocations</span></a><span class="Other">(</span><span class="Identifier">par</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="varpartitions.html#Partitions"><span class="Identifier">Partitions</span></a><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+<a id="checkBorrowedLocations,Partitions,PNode,ConfigRef"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#checkBorrowedLocations%2CPartitions%2CPNode%2CConfigRef"><span class="Identifier">checkBorrowedLocations</span></a><span class="Other">(</span><span class="Identifier">par</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="varpartitions.html#Partitions"><span class="Identifier">Partitions</span></a><span class="Other">;</span> <span class="Identifier">body</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L543"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L654"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L543" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L654" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="computeCursors,PSym,PNode,ConfigRef"></a>
@@ -242,9 +248,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L551"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/varpartitions.nim#L662"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L551" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L662" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -257,7 +263,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-13 01:04:11 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-29 00:45:30 UTC</small>
       </div>
     </div>
   </div>

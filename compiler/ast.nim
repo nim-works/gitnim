@@ -229,7 +229,7 @@ type
   TNodeKinds* = set[TNodeKind]
 
 type
-  TSymFlag* = enum    # 43 flags!
+  TSymFlag* = enum    # 46 flags!
     sfUsed,           # read access of sym (for warnings) or simply used
     sfExported,       # symbol is exported from module
     sfFromGeneric,    # symbol is instantiation of a generic; this is needed
@@ -293,7 +293,8 @@ type
     sfNeverRaises     # proc can never raise an exception, not even OverflowDefect
                       # or out-of-memory
     sfUsedInFinallyOrExcept  # symbol is used inside an 'except' or 'finally'
-    sfSingleUsedTemp   # For temporaries that we know will only be used once
+    sfSingleUsedTemp  # For temporaries that we know will only be used once
+    sfNoalias         # 'noalias' annotation, means C's 'restrict'
 
   TSymFlags* = set[TSymFlag]
 
@@ -680,7 +681,7 @@ type
     mNBindSym, mNCallSite,
     mEqIdent, mEqNimrodNode, mSameNodeType, mGetImpl, mNGenSym,
     mNHint, mNWarning, mNError,
-    mInstantiationInfo, mGetTypeInfo,
+    mInstantiationInfo, mGetTypeInfo, mGetTypeInfoV2,
     mNimvm, mIntDefine, mStrDefine, mBoolDefine, mRunnableExamples,
     mException, mBuiltinType, mSymOwner, mUncheckedArray, mGetImplTransf,
     mSymIsInstantiationOf, mNodeId

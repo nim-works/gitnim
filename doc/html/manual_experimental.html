@@ -107,7 +107,6 @@ function main() {
 <li><a class="reference" id="covariance_toc" href="#covariance">Covariance</a></li>
 <li><a class="reference" id="automatic-dereferencing_toc" href="#automatic-dereferencing">Automatic dereferencing</a></li>
 <li><a class="reference" id="code-reordering_toc" href="#code-reordering">Code reordering</a></li>
-<li><a class="reference" id="automatic-self-insertions_toc" href="#automatic-self-insertions">Automatic self insertions</a></li>
 <li><a class="reference" id="named-argument-overloading_toc" href="#named-argument-overloading">Named argument overloading</a></li>
 <li><a class="reference" id="do-notation_toc" href="#do-notation">Do notation</a></li>
 <li><a class="reference" id="special-operators_toc" href="#special-operators">Special Operators</a></li>
@@ -147,6 +146,7 @@ function main() {
 <li><a class="reference" id="guards-and-locks-norewrite-pragma_toc" href="#guards-and-locks-norewrite-pragma">noRewrite pragma</a></li>
 </ul><li><a class="reference" id="taint-mode_toc" href="#taint-mode">Taint mode</a></li>
 <li><a class="reference" id="aliasing-restrictions-in-parameter-passing_toc" href="#aliasing-restrictions-in-parameter-passing">Aliasing restrictions in parameter passing</a></li>
+<li><a class="reference" id="noalias-annotation_toc" href="#noalias-annotation">Noalias annotation</a></li>
 <li><a class="reference" id="strict-funcs_toc" href="#strict-funcs">Strict funcs</a></li>
 <li><a class="reference" id="view-types_toc" href="#view-types">View types</a></li>
 
@@ -157,7 +157,7 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Authors:</th><td> Andreas Rumpf</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.3.5</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.3.7</td></tr>
 </tbody></table>
 <h1><a class="toc-backref" id="about-this-document" href="#about-this-document">About this document</a></h1><p>This document describes features of Nim that are to be considered experimental. Some of these are not covered by the <tt class="docutils literal"><span class="pre">.experimental</span></tt> pragma or <tt class="docutils literal"><span class="pre">--experimental</span></tt> switch because they are already behind a special syntax and one may want to use Nim libraries using these features without using them oneself.</p>
 <p><strong>Note</strong>: Unless otherwise indicated, these features are not to be removed, but refined and overhauled.</p>
@@ -289,25 +289,6 @@ function main() {
     <span class="Identifier">echo</span><span class="Punctuation">(</span><span class="StringLit">&quot;Hello!&quot;</span><span class="Punctuation">)</span>
 
 <span class="Identifier">a</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
-<h1><a class="toc-backref" id="automatic-self-insertions" href="#automatic-self-insertions">Automatic self insertions</a></h1><p><strong>Note</strong>: The <tt class="docutils literal"><span class="pre">.this</span></tt> pragma is deprecated and should not be used anymore.</p>
-<p>Starting with version 0.14 of the language, Nim supports <tt class="docutils literal"><span class="pre">field</span></tt> as a shortcut for <tt class="docutils literal"><span class="pre">self.field</span></tt> comparable to the <span id="this_1">this</span> keyword in Java or C++. This feature has to be explicitly enabled via a <tt class="docutils literal"><span class="pre">{.this: self.}</span></tt> statement pragma (instead of <tt class="docutils literal"><span class="pre">self</span></tt> any other identifier can be used too). This pragma is active for the rest of the module:</p>
-<pre class="listing"><span class="Keyword">type</span>
-  <span class="Identifier">Parent</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">RootObj</span>
-    <span class="Identifier">parentField</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">Child</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">Parent</span>
-    <span class="Identifier">childField</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
-
-<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">this</span><span class="Punctuation">:</span> <span class="Identifier">self</span><span class="Operator">.</span><span class="Punctuation">}</span>
-<span class="Keyword">proc</span> <span class="Identifier">sumFields</span><span class="Punctuation">(</span><span class="Identifier">self</span><span class="Punctuation">:</span> <span class="Identifier">Child</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span>
-  <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">parentField</span> <span class="Operator">+</span> <span class="Identifier">childField</span>
-  <span class="Comment"># is rewritten to:</span>
-  <span class="Comment"># result = self.parentField + self.childField</span></pre><p>In addition to fields, routine applications are also rewritten, but only if no other interpretation of the call is possible:</p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">test</span><span class="Punctuation">(</span><span class="Identifier">self</span><span class="Punctuation">:</span> <span class="Identifier">Child</span><span class="Punctuation">)</span> <span class="Operator">=</span>
-  <span class="Identifier">echo</span> <span class="Identifier">childField</span><span class="Punctuation">,</span> <span class="StringLit">&quot; &quot;</span><span class="Punctuation">,</span> <span class="Identifier">sumFields</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-  <span class="Comment"># is rewritten to:</span>
-  <span class="Identifier">echo</span> <span class="Identifier">self</span><span class="Operator">.</span><span class="Identifier">childField</span><span class="Punctuation">,</span> <span class="StringLit">&quot; &quot;</span><span class="Punctuation">,</span> <span class="Identifier">sumFields</span><span class="Punctuation">(</span><span class="Identifier">self</span><span class="Punctuation">)</span>
-  <span class="Comment"># but NOT rewritten to:</span>
-  <span class="Identifier">echo</span> <span class="Identifier">self</span><span class="Punctuation">,</span> <span class="Identifier">self</span><span class="Operator">.</span><span class="Identifier">childField</span><span class="Punctuation">,</span> <span class="StringLit">&quot; &quot;</span><span class="Punctuation">,</span> <span class="Identifier">sumFields</span><span class="Punctuation">(</span><span class="Identifier">self</span><span class="Punctuation">)</span></pre>
 <h1><a class="toc-backref" id="named-argument-overloading" href="#named-argument-overloading">Named argument overloading</a></h1><p>Routines with the same type signature can be called differently if a parameter has different names. This does not need an <tt class="docutils literal"><span class="pre">experimental</span></tt> switch, but is an unstable feature.</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span>
   <span class="Identifier">echo</span> <span class="StringLit">&quot;Using x: &quot;</span><span class="Punctuation">,</span> <span class="Identifier">x</span>
@@ -1008,6 +989,9 @@ Arglist
 <ol class="simple"><li>A global or thread local variable (or a location derived from such a location) can only passed to a parameter of a <tt class="docutils literal"><span class="pre">.noSideEffect</span></tt> proc.</li>
 </ol>
 
+<h1><a class="toc-backref" id="noalias-annotation" href="#noalias-annotation">Noalias annotation</a></h1><p>Since version 1.4 of the Nim compiler, there is a <tt class="docutils literal"><span class="pre">.noalias</span></tt> annotation for variables and parameters. It is mapped directly to C/C++'s <tt class="docutils literal"><span class="pre">restrict</span></tt> keyword and means that the underlying pointer is pointing to a unique location in memory, no other aliases to this location exist. It is <em>unchecked</em> that this alias restriction is followed, if the restriction is violated, the backend optimizer is free to miscompile the code. This is an <strong>unsafe</strong> language feature.</p>
+<p>Ideally in later versions of the language, the restriction will be enforced at compile time. (Which is also why the name <tt class="docutils literal"><span class="pre">noalias</span></tt> was choosen instead of a more verbose name like <tt class="docutils literal"><span class="pre">unsafeAssumeNoAlias</span></tt>.)</p>
+
 <h1><a class="toc-backref" id="strict-funcs" href="#strict-funcs">Strict funcs</a></h1><p>Since version 1.4 a stricter definition of &quot;side effect&quot; is available. In addition to the existing rule that a side effect is calling a function with side effects the following rule is also enforced:</p>
 <p>Any mutation to an object does count as a side effect if that object is reachable via a parameter that is not declared as a <tt class="docutils literal"><span class="pre">var</span></tt> parameter.</p>
 <p>For example:</p>
@@ -1070,7 +1054,7 @@ Arglist
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-13 01:03:20 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-29 00:44:41 UTC</small>
       </div>
     </div>
   </div>

@@ -6,6 +6,13 @@ language](https://nim-lang.org).
 Interested in learning **how to create a package**? Skip directly to that section
 [here](#creating-packages).
 
+This documentation is for the latest commit of Nimble. Nim releases ship with a
+specific version of Nimble and may not contain all the features and fixes described
+here. `nimble -v` will display the version of Nimble in use and corresponding
+documentation can be found [here](https://github.com/nim-lang/nimble/releases).
+
+The Nimble change log can be found [here](https://github.com/nim-lang/nimble/blob/master/changelog.markdown).
+
 ## Contents
 
 - [Requirements](#requirements)
@@ -627,11 +634,10 @@ determined by the nature of your package, that is, whether your package exposes
 only one module or multiple modules.
 
 If your package exposes only a single module, then that module should be
-present in the root directory (the directory with the .nimble file) of your Git
-repository, and should be named whatever your package's name is. A good example
-of this is the [jester](https://github.com/dom96/jester) package which exposes
-the ``jester`` module. In this case the jester package is imported with
-``import jester``.
+present in the source directory of your Git repository, and should be named
+whatever your package's name is. A good example of this is the
+[jester](https://github.com/dom96/jester) package which exposes the ``jester``
+module. In this case the jester package is imported with ``import jester``.
 
 If your package exposes multiple modules then the modules should be in a
 ``PackageName`` directory. This will allow for a certain measure of isolation
@@ -912,7 +918,8 @@ work properly and you won't be able to run them.
 If the ``nimbledeps`` directory exists next to the package ``.nimble`` file,
 Nimble will use that directory as ``$nimbleDir`` and ``$HOME/.nimble`` will be
 ignored. This allows for project local dependencies and isolation from other
-projects.
+projects. The `-l | --localdeps` flag can be used to setup a project in local
+dependency mode.
 
 Nimble also allows overriding ``$nimbleDir`` on the command line with the
 ``--nimbleDir`` flag or the ``NIMBLE_DIR`` environment variable if required.

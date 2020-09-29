@@ -207,8 +207,9 @@ function main() {
 <ul class="simple"><li><a class="reference" id="var-return-type-future-directions_toc" href="#var-return-type-future-directions">Future directions</a></li>
 </ul><li><a class="reference" id="procedures-nrvo_toc" href="#procedures-nrvo">NRVO</a></li>
 <li><a class="reference" id="procedures-overloading-of-the-subscript-operator_toc" href="#procedures-overloading-of-the-subscript-operator">Overloading of the subscript operator</a></li>
-</ul><li><a class="reference" id="multiminusmethods_toc" href="#multiminusmethods">Multi-methods</a></li>
-<ul class="simple"><li><a class="reference" id="multiminusmethods-inhibit-dynamic-method-resolution-via-proccall_toc" href="#multiminusmethods-inhibit-dynamic-method-resolution-via-proccall">Inhibit dynamic method resolution via procCall</a></li>
+</ul><li><a class="reference" id="methods_toc" href="#methods">Methods</a></li>
+<ul class="simple"><li><a class="reference" id="methods-multiminusmethods_toc" href="#methods-multiminusmethods">Multi-methods</a></li>
+<li><a class="reference" id="methods-inhibit-dynamic-method-resolution-via-proccall_toc" href="#methods-inhibit-dynamic-method-resolution-via-proccall">Inhibit dynamic method resolution via procCall</a></li>
 </ul><li><a class="reference" id="iterators-and-the-for-statement_toc" href="#iterators-and-the-for-statement">Iterators and the for statement</a></li>
 <ul class="simple"><li><a class="reference" id="iterators-and-the-for-statement-implicit-itemsslashpairs-invocations_toc" href="#iterators-and-the-for-statement-implicit-itemsslashpairs-invocations">Implicit items/pairs invocations</a></li>
 <li><a class="reference" id="iterators-and-the-for-statement-first-class-iterators_toc" href="#iterators-and-the-for-statement-first-class-iterators">First class iterators</a></li>
@@ -345,7 +346,7 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Authors:</th><td> Andreas Rumpf, Zahary Karadjov</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.3.5</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.3.7</td></tr>
 </tbody></table><blockquote><p>&quot;Complexity&quot; seems to be a lot like &quot;energy&quot;: you can transfer it from the end user to one/some of the other players, but the total amount seems to remain pretty much constant for a given task. -- Ran</p></blockquote>
 
 <h1><a class="toc-backref" id="about-this-document" href="#about-this-document">About this document</a></h1><p><strong>Note</strong>: This document is a draft! Several of Nim's features may need more precise wording. This manual is constantly evolving into a proper specification.</p>
@@ -2320,8 +2321,7 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 
 <h2><a class="toc-backref" id="procedures-overloading-of-the-subscript-operator" href="#procedures-overloading-of-the-subscript-operator">Overloading of the subscript operator</a></h2><p>The <tt class="docutils literal"><span class="pre">[]</span></tt> subscript operator for arrays/openarrays/sequences can be overloaded.</p>
 
-<h1><a class="toc-backref" id="multiminusmethods" href="#multiminusmethods">Multi-methods</a></h1><p><strong>Note:</strong> Starting from Nim 0.20, to use multi-methods one must explicitly pass <tt class="docutils literal"><span class="pre">--multimethods:on</span></tt> when compiling.</p>
-<p>Procedures always use static dispatch. Multi-methods use dynamic dispatch. For dynamic dispatch to work on an object it should be a reference type.</p>
+<h1><a class="toc-backref" id="methods" href="#methods">Methods</a></h1><p>Procedures always use static dispatch. Methods use dynamic dispatch. For dynamic dispatch to work on an object it should be a reference type.</p>
 <pre class="listing"><span class="Keyword">type</span>
   <span class="Identifier">Expression</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">RootObj</span> <span class="Comment">## abstract base class for an expression</span>
   <span class="Identifier">Literal</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">Expression</span>
@@ -2353,7 +2353,27 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 <p><strong>Note</strong>: Compile-time execution is not (yet) supported for methods.</p>
 <p><strong>Note</strong>: Starting from Nim 0.20, generic methods are deprecated.</p>
 
-<h2><a class="toc-backref" id="multiminusmethods-inhibit-dynamic-method-resolution-via-proccall" href="#multiminusmethods-inhibit-dynamic-method-resolution-via-proccall">Inhibit dynamic method resolution via procCall</a></h2><p>Dynamic method resolution can be inhibited via the builtin <span id="systemdotproccall_1">system.procCall</span>. This is somewhat comparable to the <span id="super_1">super</span> keyword that traditional OOP languages offer.</p>
+<h2><a class="toc-backref" id="methods-multiminusmethods" href="#methods-multiminusmethods">Multi-methods</a></h2><p><strong>Note:</strong> Starting from Nim 0.20, to use multi-methods one must explicitly pass <tt class="docutils literal"><span class="pre">--multimethods:on</span></tt> when compiling.</p>
+<p>In a multi-method all parameters that have an object type are used for the dispatching:</p>
+<pre class="listing"><span class="Keyword">type</span>
+  <span class="Identifier">Thing</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">RootObj</span>
+  <span class="Identifier">Unit</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">Thing</span>
+    <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
+
+<span class="Keyword">method</span> <span class="Identifier">collide</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">Thing</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">inline</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
+  <span class="Identifier">quit</span> <span class="StringLit">&quot;to override!&quot;</span>
+
+<span class="Keyword">method</span> <span class="Identifier">collide</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">Thing</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">Unit</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">inline</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
+  <span class="Identifier">echo</span> <span class="StringLit">&quot;1&quot;</span>
+
+<span class="Keyword">method</span> <span class="Identifier">collide</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">Unit</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">Thing</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">inline</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
+  <span class="Identifier">echo</span> <span class="StringLit">&quot;2&quot;</span>
+
+<span class="Keyword">var</span> <span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">Unit</span>
+<span class="Identifier">new</span> <span class="Identifier">a</span>
+<span class="Identifier">new</span> <span class="Identifier">b</span>
+<span class="Identifier">collide</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">)</span> <span class="Comment"># output: 2</span></pre>
+<h2><a class="toc-backref" id="methods-inhibit-dynamic-method-resolution-via-proccall" href="#methods-inhibit-dynamic-method-resolution-via-proccall">Inhibit dynamic method resolution via procCall</a></h2><p>Dynamic method resolution can be inhibited via the builtin <span id="systemdotproccall_1">system.procCall</span>. This is somewhat comparable to the <span id="super_1">super</span> keyword that traditional OOP languages offer.</p>
 <pre class="listing"><span class="Keyword">type</span>
   <span class="Identifier">Thing</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">RootObj</span>
   <span class="Identifier">Unit</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">Thing</span>
@@ -3144,10 +3164,11 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 
 <span class="Keyword">macro</span> <span class="Identifier">enumerate</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">ForLoopStmt</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">untyped</span> <span class="Operator">=</span>
   <span class="Identifier">expectKind</span> <span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">nnkForStmt</span>
-  <span class="Comment"># we strip off the first for loop variable and use</span>
-  <span class="Comment"># it as an integer counter:</span>
+  <span class="Comment"># check if the starting count is specified:</span>
+  <span class="Keyword">var</span> <span class="Identifier">countStart</span> <span class="Operator">=</span> <span class="Keyword">if</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Operator">^</span><span class="DecNumber">2</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">len</span> <span class="Operator">==</span> <span class="DecNumber">2</span><span class="Punctuation">:</span> <span class="Identifier">newLit</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">)</span> <span class="Keyword">else</span><span class="Punctuation">:</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Operator">^</span><span class="DecNumber">2</span><span class="Punctuation">]</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">]</span>
   <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">newStmtList</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-  <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">newVarStmt</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Punctuation">,</span> <span class="Identifier">newLit</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+  <span class="Comment"># we strip off the first for loop variable and use it as an integer counter:</span>
+  <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">newVarStmt</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Punctuation">,</span> <span class="Identifier">countStart</span><span class="Punctuation">)</span>
   <span class="Keyword">var</span> <span class="Identifier">body</span> <span class="Operator">=</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Operator">^</span><span class="DecNumber">1</span><span class="Punctuation">]</span>
   <span class="Keyword">if</span> <span class="Identifier">body</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">!=</span> <span class="Identifier">nnkStmtList</span><span class="Punctuation">:</span>
     <span class="Identifier">body</span> <span class="Operator">=</span> <span class="Identifier">newTree</span><span class="Punctuation">(</span><span class="Identifier">nnkStmtList</span><span class="Punctuation">,</span> <span class="Identifier">body</span><span class="Punctuation">)</span>
@@ -3156,7 +3177,7 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
   <span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="FloatNumber">1.</span><span class="Operator">.</span><span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Operator">-</span><span class="DecNumber">3</span><span class="Punctuation">:</span>
     <span class="Identifier">newFor</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span>
   <span class="Comment"># transform enumerate(X) to 'X'</span>
-  <span class="Identifier">newFor</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Operator">^</span><span class="DecNumber">2</span><span class="Punctuation">]</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">]</span>
+  <span class="Identifier">newFor</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="Operator">^</span><span class="DecNumber">2</span><span class="Punctuation">]</span><span class="Punctuation">[</span><span class="Operator">^</span><span class="DecNumber">1</span><span class="Punctuation">]</span>
   <span class="Identifier">newFor</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">body</span>
   <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">newFor</span>
   <span class="Comment"># now wrap the whole macro in a block to create a new scope</span>
@@ -3168,7 +3189,7 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 
 <span class="Comment"># without wrapping the macro in a block, we'd need to choose different</span>
 <span class="Comment"># names for `a` and `b` here to avoid redefinition errors</span>
-<span class="Keyword">for</span> <span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span> <span class="Keyword">in</span> <span class="Identifier">enumerate</span><span class="Punctuation">(</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">5</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+<span class="Keyword">for</span> <span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span> <span class="Keyword">in</span> <span class="Identifier">enumerate</span><span class="Punctuation">(</span><span class="DecNumber">10</span><span class="Punctuation">,</span> <span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">5</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">a</span><span class="Punctuation">,</span> <span class="StringLit">&quot; &quot;</span><span class="Punctuation">,</span> <span class="Identifier">b</span></pre>
 <h1><a class="toc-backref" id="special-types" href="#special-types">Special Types</a></h1>
 <h2><a class="toc-backref" id="special-types-static-t" href="#special-types-static-t">static[T]</a></h2><p>As their name suggests, static parameters must be constant expressions:</p>
@@ -3971,7 +3992,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-13 01:03:19 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-29 00:44:41 UTC</small>
       </div>
     </div>
   </div>
