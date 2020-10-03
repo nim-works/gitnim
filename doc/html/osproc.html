@@ -138,6 +138,8 @@ function main() {
               options = {poStdErrToStdOut, poParentStreams}; n = countProcessors();
               beforeRunEvent: proc (idx: int) = nil;
               afterRunEvent: proc (idx: int; p: Process) = nil): int"><wbr />exec<wbr />Processes<span class="attachedType">Process</span></a></li>
+  <li><a class="reference" href="#readLines%2CProcess"
+    title="readLines(p: Process): (seq[string], int)"><wbr />read<wbr />Lines<span class="attachedType">Process</span></a></li>
   <li><a class="reference" href="#execProcess%2Cstring%2Cstring%2CopenArray%5Bstring%5D%2CStringTableRef%2Cset%5BProcessOption%5D"
     title="execProcess(command: string; workingDir: string = &quot;&quot;; args: openArray[string] = [];
             env: StringTableRef = nil; options: set[ProcessOption] = {poStdErrToStdOut,
@@ -181,6 +183,14 @@ function main() {
           options: set[ProcessOption] = {poStdErrToStdOut, poUsePath};
           env: StringTableRef = nil; workingDir = &quot;&quot;; input = &quot;&quot;): tuple[
     output: TaintedString, exitCode: int]"><wbr />exec<wbr />Cmd<wbr />Ex<span class="attachedType">ProcessOption</span></a></li>
+
+  </ul>
+</li>
+<li>
+  <a class="reference reference-toplevel" href="#15" id="65">Iterators</a>
+  <ul class="simple simple-toc-section">
+      <li><a class="reference" href="#lines.i%2CProcess"
+    title="lines(p: Process): string"><wbr />lines<span class="attachedType">Process</span></a></li>
 
   </ul>
 </li>
@@ -353,6 +363,31 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L332" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="readLines,Process"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#readLines%2CProcess"><span class="Identifier">readLines</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="osproc.html#Process"><span class="Identifier">Process</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Convenience function for working with <tt class="docutils literal"><span class="pre">startProcess</span></tt> to read data from a background process.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#lines.i,Process">lines iterator</a></li>
+</ul>
+<p>Example:</p>
+<pre class="listing"><span class="Keyword">const</span> <span class="Identifier">opts</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="Identifier">poUsePath</span><span class="Punctuation">,</span> <span class="Identifier">poDaemon</span><span class="Punctuation">,</span> <span class="Identifier">poStdErrToStdOut</span><span class="Punctuation">}</span>
+<span class="Keyword">var</span> <span class="Identifier">ps</span><span class="Punctuation">:</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">Process</span><span class="Punctuation">]</span>
+<span class="Keyword">for</span> <span class="Identifier">prog</span> <span class="Keyword">in</span> <span class="Punctuation">[</span><span class="StringLit">&quot;a&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;b&quot;</span><span class="Punctuation">]</span><span class="Punctuation">:</span> <span class="Comment"># run 2 progs in parallel</span>
+  <span class="Identifier">ps</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">startProcess</span><span class="Punctuation">(</span><span class="StringLit">&quot;nim&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="Punctuation">[</span><span class="StringLit">&quot;r&quot;</span><span class="Punctuation">,</span> <span class="Identifier">prog</span><span class="Punctuation">]</span><span class="Punctuation">,</span> <span class="Keyword">nil</span><span class="Punctuation">,</span> <span class="Identifier">opts</span><span class="Punctuation">)</span>
+<span class="Keyword">for</span> <span class="Identifier">p</span> <span class="Keyword">in</span> <span class="Identifier">ps</span><span class="Punctuation">:</span>
+  <span class="Keyword">let</span> <span class="Punctuation">(</span><span class="Identifier">lines</span><span class="Punctuation">,</span> <span class="Identifier">exCode</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">readLines</span>
+  <span class="Keyword">if</span> <span class="Identifier">exCode</span> <span class="Operator">!=</span> <span class="DecNumber">0</span><span class="Punctuation">:</span>
+    <span class="Keyword">for</span> <span class="Identifier">line</span> <span class="Keyword">in</span> <span class="Identifier">lines</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="Identifier">line</span>
+  <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">close</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L476"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L476" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="execProcess,string,string,openArray[string],StringTableRef,set[ProcessOption]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#execProcess%2Cstring%2Cstring%2CopenArray%5Bstring%5D%2CStringTableRef%2Cset%5BProcessOption%5D"><span class="Identifier">execProcess</span></a><span class="Other">(</span><span class="Identifier">command</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">workingDir</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
                 <span class="Identifier">args</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">env</span><span class="Other">:</span> <a href="strtabs.html#StringTableRef"><span class="Identifier">StringTableRef</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">options</span><span class="Other">:</span> <a href="system.html#set"><span class="Identifier">set</span></a><span class="Other">[</span>
@@ -374,9 +409,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Comment"># Note: outp may have an interleave of text from the nim compile</span>
 <span class="Comment"># and any output from mytestfile when it runs</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L448"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L499"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L448" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L499" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="startProcess,string,string,openArray[string],StringTableRef,set[ProcessOption]"></a>
@@ -398,9 +433,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L887"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L938"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L887" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L938" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="close,Process"></a>
@@ -412,9 +447,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>WARNING:</strong> If the process has not finished executing, this will forcibly terminate the process. Doing so may result in zombie processes and <a class="reference external" href="http://stackoverflow.com/questions/27021641/how-to-fix-request-failed-on-channel-0">pty leaks</a>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1111"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1162"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1111" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1162" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="suspend,Process"></a>
@@ -429,9 +464,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1128"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1179"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1128" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1179" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="resume,Process"></a>
@@ -446,9 +481,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1131"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1182"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1131" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1182" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="running,Process"></a>
@@ -457,9 +492,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns true if the process <tt class="docutils literal"><span class="pre">p</span></tt> is still running. Returns immediately.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1134"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1185"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1134" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1185" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="terminate,Process"></a>
@@ -475,9 +510,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1152"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1203"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1152" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1203" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="kill,Process"></a>
@@ -493,9 +528,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1156"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1207"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1156" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1207" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="waitForExit,Process,int"></a>
@@ -508,9 +543,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>On posix, if the process has exited because of a signal, 128 + signal number will be returned.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1289"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1340"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1289" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1340" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="peekExitCode,Process"></a>
@@ -521,9 +556,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>On posix, if the process has exited because of a signal, 128 + signal number will be returned.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1395"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1446"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1395" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1446" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="inputStream,Process"></a>
@@ -539,9 +574,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1414"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1465"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1414" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1465" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="outputStream,Process"></a>
@@ -558,9 +593,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1420"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1471"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1420" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1471" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errorStream,Process"></a>
@@ -577,9 +612,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1426"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1477"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1426" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1477" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="peekableOutputStream,Process"></a>
@@ -596,9 +631,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1432"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1483"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1432" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1483" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="peekableErrorStream,Process"></a>
@@ -615,9 +650,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1438"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1489"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1438" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1489" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="execCmd,string"></a>
@@ -635,9 +670,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Example:</p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">errC</span> <span class="Operator">=</span> <span class="Identifier">execCmd</span><span class="Punctuation">(</span><span class="StringLit">&quot;nim c -r mytestfile.nim&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1447"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1498"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1447" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1498" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasData,Process"></a>
@@ -646,9 +681,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1487"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1538"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1487" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1538" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="execCmdEx,string,set[ProcessOption],StringTableRef,string,string"></a>
@@ -676,9 +711,41 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">assert</span> <span class="Identifier">execCmdEx</span><span class="Punctuation">(</span><span class="StringLit">&quot;echo $FO&quot;</span><span class="Punctuation">,</span> <span class="Identifier">env</span> <span class="Operator">=</span> <span class="Identifier">newStringTable</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;FO&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;B&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Punctuation">(</span><span class="StringLit">&quot;B</span><span class="EscapeSequence">\n</span><span class="StringLit">&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">)</span>
   <span class="Identifier">assert</span> <span class="Identifier">execCmdEx</span><span class="Punctuation">(</span><span class="StringLit">&quot;echo $PWD&quot;</span><span class="Punctuation">,</span> <span class="Identifier">workingDir</span> <span class="Operator">=</span> <span class="StringLit">&quot;/&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Punctuation">(</span><span class="StringLit">&quot;/</span><span class="EscapeSequence">\n</span><span class="StringLit">&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1497"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L1548"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1497" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L1548" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+
+</dl></div>
+<div class="section" id="15">
+<h1><a class="toc-backref" href="#15">Iterators</a></h1>
+<dl class="item">
+<a id="lines.i,Process"></a>
+<dt><pre><span class="Keyword">iterator</span> <a href="#lines.i%2CProcess"><span class="Identifier">lines</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="osproc.html#Process"><span class="Identifier">Process</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
+                                 <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Convenience iterator for working with <tt class="docutils literal"><span class="pre">startProcess</span></tt> to read data from a background process.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#readLines,Process">readLines proc</a></li>
+</ul>
+<p>Example:</p>
+<pre class="listing"><span class="Keyword">const</span> <span class="Identifier">opts</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="Identifier">poUsePath</span><span class="Punctuation">,</span> <span class="Identifier">poDaemon</span><span class="Punctuation">,</span> <span class="Identifier">poStdErrToStdOut</span><span class="Punctuation">}</span>
+<span class="Keyword">var</span> <span class="Identifier">ps</span><span class="Punctuation">:</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">Process</span><span class="Punctuation">]</span>
+<span class="Keyword">for</span> <span class="Identifier">prog</span> <span class="Keyword">in</span> <span class="Punctuation">[</span><span class="StringLit">&quot;a&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;b&quot;</span><span class="Punctuation">]</span><span class="Punctuation">:</span> <span class="Comment"># run 2 progs in parallel</span>
+  <span class="Identifier">ps</span><span class="Operator">.</span><span class="Identifier">add</span> <span class="Identifier">startProcess</span><span class="Punctuation">(</span><span class="StringLit">&quot;nim&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="Punctuation">[</span><span class="StringLit">&quot;r&quot;</span><span class="Punctuation">,</span> <span class="Identifier">prog</span><span class="Punctuation">]</span><span class="Punctuation">,</span> <span class="Keyword">nil</span><span class="Punctuation">,</span> <span class="Identifier">opts</span><span class="Punctuation">)</span>
+<span class="Keyword">for</span> <span class="Identifier">p</span> <span class="Keyword">in</span> <span class="Identifier">ps</span><span class="Punctuation">:</span>
+  <span class="Keyword">var</span> <span class="Identifier">i</span> <span class="Operator">=</span> <span class="DecNumber">0</span>
+  <span class="Keyword">for</span> <span class="Identifier">line</span> <span class="Keyword">in</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">lines</span><span class="Punctuation">:</span>
+    <span class="Identifier">echo</span> <span class="Identifier">line</span>
+    <span class="Identifier">i</span><span class="Operator">.</span><span class="Identifier">inc</span>
+    <span class="Keyword">if</span> <span class="Identifier">i</span> <span class="Operator">&gt;</span> <span class="DecNumber">100</span><span class="Punctuation">:</span> <span class="Keyword">break</span>
+  <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">close</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/osproc.nim#L447"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/osproc.nim#L447" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -696,7 +763,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-29 00:45:03 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-03 01:06:29 UTC</small>
       </div>
     </div>
   </div>

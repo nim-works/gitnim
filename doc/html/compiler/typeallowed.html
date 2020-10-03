@@ -106,6 +106,9 @@ function main() {
   taProcContextIsNotMacro"><wbr />TType<wbr />Allowed<wbr />Flag<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#TTypeAllowedFlags"
     title="TTypeAllowedFlags = set[TTypeAllowedFlag]"><wbr />TType<wbr />Allowed<wbr />Flags<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#ViewTypeKind"
+    title="ViewTypeKind = enum
+  noView, immutableView, mutableView"><wbr />View<wbr />Type<wbr />Kind<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -114,8 +117,12 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#typeAllowed%2CPType%2CTSymKind%2CPContext%2CTTypeAllowedFlags"
     title="typeAllowed(t: PType; kind: TSymKind; c: PContext; flags: TTypeAllowedFlags = {}): PType"><wbr />type<wbr />Allowed<span class="attachedType">TTypeAllowedFlags</span></a></li>
-  <li><a class="reference" href="#isViewType%2CPType"
-    title="isViewType(t: PType): bool"><wbr />is<wbr />View<wbr />Type<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#classifyViewType%2CPType"
+    title="classifyViewType(t: PType): ViewTypeKind"><wbr />classify<wbr />View<wbr />Type<span class="attachedType">ViewTypeKind</span></a></li>
+  <li><a class="reference" href="#directViewType%2CPType"
+    title="directViewType(t: PType): ViewTypeKind"><wbr />direct<wbr />View<wbr />Type<span class="attachedType">ViewTypeKind</span></a></li>
+  <li><a class="reference" href="#requiresInit%2CPType"
+    title="requiresInit(t: PType): bool"><wbr />requires<wbr />Init<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -159,6 +166,18 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/compiler/typeallowed.nim#L26" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="ViewTypeKind"></a>
+<dt><pre><a href="typeallowed.html#ViewTypeKind"><span class="Identifier">ViewTypeKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">noView</span><span class="Other">,</span> <span class="Identifier">immutableView</span><span class="Other">,</span> <span class="Identifier">mutableView</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/typeallowed.nim#L191"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/typeallowed.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 
 </dl></div>
 <div class="section" id="12">
@@ -176,15 +195,38 @@ class="link-seesrc" target="_blank">Source</a>
 <a href="https://github.com/nim-lang/Nim/edit/devel/compiler/typeallowed.nim#L184" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="isViewType,PType"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#isViewType%2CPType"><span class="Identifier">isViewType</span></a><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="classifyViewType,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#classifyViewType%2CPType"><span class="Identifier">classifyViewType</span></a><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="typeallowed.html#ViewTypeKind"><span class="Identifier">ViewTypeKind</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/typeallowed.nim#L226"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/typeallowed.nim#L246"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/typeallowed.nim#L226" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/typeallowed.nim#L246" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="directViewType,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#directViewType%2CPType"><span class="Identifier">directViewType</span></a><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="typeallowed.html#ViewTypeKind"><span class="Identifier">ViewTypeKind</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/typeallowed.nim#L250"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/typeallowed.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="requiresInit,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#requiresInit%2CPType"><span class="Identifier">requiresInit</span></a><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/typeallowed.nim#L262"
+class="link-seesrc" target="_blank">Source</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/typeallowed.nim#L262" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -197,7 +239,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-29 00:45:30 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-03 01:06:57 UTC</small>
       </div>
     </div>
   </div>

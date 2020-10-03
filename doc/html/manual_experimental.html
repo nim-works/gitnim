@@ -149,7 +149,12 @@ function main() {
 <li><a class="reference" id="noalias-annotation_toc" href="#noalias-annotation">Noalias annotation</a></li>
 <li><a class="reference" id="strict-funcs_toc" href="#strict-funcs">Strict funcs</a></li>
 <li><a class="reference" id="view-types_toc" href="#view-types">View types</a></li>
-
+<ul class="simple"><li><a class="reference" id="view-types-path-expressions_toc" href="#view-types-path-expressions">Path expressions</a></li>
+<li><a class="reference" id="view-types-start-of-a-borrow_toc" href="#view-types-start-of-a-borrow">Start of a borrow</a></li>
+<li><a class="reference" id="view-types-end-of-a-borrow_toc" href="#view-types-end-of-a-borrow">End of a borrow</a></li>
+<li><a class="reference" id="view-types-reborrows_toc" href="#view-types-reborrows">Reborrows</a></li>
+<li><a class="reference" id="view-types-algorithm_toc" href="#view-types-algorithm">Algorithm</a></li>
+</ul>
 </ul>
 
   </div>
@@ -1013,13 +1018,25 @@ Arglist
   <span class="Keyword">let</span> <span class="Identifier">m</span> <span class="Operator">=</span> <span class="Identifier">n</span> <span class="Comment"># is the statement that connected the mutation to the parameter</span>
   <span class="Identifier">m</span><span class="Operator">.</span><span class="Identifier">data</span> <span class="Operator">=</span> <span class="StringLit">&quot;yeah&quot;</span> <span class="Comment"># the mutation is here</span>
   <span class="Comment"># Error: 'mut' can have side effects</span>
-  <span class="Comment"># an object reachable from 'n' is potentially mutated</span></pre><p>The algorithm behind this analysis is currently not documented.</p>
+  <span class="Comment"># an object reachable from 'n' is potentially mutated</span></pre><p>The algorithm behind this analysis is described in the <a class="reference external" href="#view-types-algorithm">view types section</a>.</p>
 
-<h1><a class="toc-backref" id="view-types" href="#view-types">View types</a></h1><p>A view type is a type that contains one of the following types:</p>
+<h1><a class="toc-backref" id="view-types" href="#view-types">View types</a></h1><p><strong>Note</strong>:  <tt class="docutils literal"><span class="pre">--experimental:views</span></tt> is more effective with <tt class="docutils literal"><span class="pre">--experimental:strictFuncs</span></tt>.</p>
+<p>A view type is a type that is or contains one of the following types:</p>
 <ul class="simple"><li><tt class="docutils literal"><span class="pre">var T</span></tt> (mutable view into <tt class="docutils literal"><span class="pre">T</span></tt>)</li>
 <li><tt class="docutils literal"><span class="pre">lent T</span></tt> (immutable view into <tt class="docutils literal"><span class="pre">T</span></tt>)</li>
 <li><tt class="docutils literal"><span class="pre">openArray[T]</span></tt> (pair of (pointer to array of <tt class="docutils literal"><span class="pre">T</span></tt>, size))</li>
 </ul>
+<p>For example:</p>
+<pre class="listing"><span class="Keyword">type</span>
+  <span class="Identifier">View1</span> <span class="Operator">=</span> <span class="Keyword">var</span> <span class="Identifier">int</span>
+  <span class="Identifier">View2</span> <span class="Operator">=</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">byte</span><span class="Punctuation">]</span>
+  <span class="Identifier">View3</span> <span class="Operator">=</span> <span class="Identifier">lent</span> <span class="Identifier">string</span>
+  <span class="Identifier">View4</span> <span class="Operator">=</span> <span class="Identifier">Table</span><span class="Punctuation">[</span><span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">char</span><span class="Punctuation">]</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">]</span></pre><p>Exceptions to this rule are types constructed via <tt class="docutils literal"><span class="pre">ptr</span></tt> or <tt class="docutils literal"><span class="pre">proc</span></tt>. For example, the following types are <strong>not</strong> view types:</p>
+<pre class="listing"><span class="Keyword">type</span>
+  <span class="Identifier">NotView1</span> <span class="Operator">=</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">)</span>
+  <span class="Identifier">NotView2</span> <span class="Operator">=</span> <span class="Keyword">ptr</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">char</span><span class="Punctuation">]</span>
+  <span class="Identifier">NotView3</span> <span class="Operator">=</span> <span class="Keyword">ptr</span> <span class="Identifier">array</span><span class="Punctuation">[</span><span class="DecNumber">4</span><span class="Punctuation">,</span> <span class="Keyword">var</span> <span class="Identifier">int</span><span class="Punctuation">]</span></pre><p>A <em>mutable</em> view type is a type that is or contains a <tt class="docutils literal"><span class="pre">var T</span></tt> type. An <em>immutable</em> view type is a view type that is not a mutable view type.</p>
+<p>A <em>view</em> is a symbol (a let, var, const, etc.) that has a view type.</p>
 <p>Since version 1.4 Nim allows view types to be used as local variables. This feature needs to be enabled via <tt class="docutils literal"><span class="pre">{.experimental: &quot;views&quot;.}</span></tt>.</p>
 <p>A local variable of a view type <em>borrows</em> from the locations and it is statically enforced that the view does not outlive the location it was borrowed from.</p>
 <p>For example:</p>
@@ -1043,8 +1060,79 @@ Arglist
   <span class="Comment"># that 'x' is not mutated as long as 'y' lives.</span>
 
 
-<span class="Identifier">main</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">11</span><span class="Punctuation">,</span> <span class="DecNumber">22</span><span class="Punctuation">,</span> <span class="DecNumber">33</span><span class="Punctuation">]</span><span class="Punctuation">)</span></pre><p>If a view type is used as a return type, the location must borrow from the first parameter that is passed to the proc. See <a class="reference external" href="https://nim-lang.org/docs/manual.html#procedures-var-return-type">https://nim-lang.org/docs/manual.html#procedures-var-return-type</a> for details about how this is done for <tt class="docutils literal"><span class="pre">var T</span></tt>.</p>
-<p>The algorithm behind this analysis is currently not documented. </p>
+<span class="Identifier">main</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">11</span><span class="Punctuation">,</span> <span class="DecNumber">22</span><span class="Punctuation">,</span> <span class="DecNumber">33</span><span class="Punctuation">]</span><span class="Punctuation">)</span></pre><p>A local variable of a view type can borrow from a location derived from a parameter, another local variable, a global <tt class="docutils literal"><span class="pre">const</span></tt> or <tt class="docutils literal"><span class="pre">let</span></tt> symbol or a thread-local <tt class="docutils literal"><span class="pre">var</span></tt> or <tt class="docutils literal"><span class="pre">let</span></tt>.</p>
+<p>Let <tt class="docutils literal"><span class="pre">p</span></tt> the proc that is analysed for the correctness of the borrow operation.</p>
+<p>Let <tt class="docutils literal"><span class="pre">source</span></tt> be one of:</p>
+<ul class="simple"><li>A formal parameter of <tt class="docutils literal"><span class="pre">p</span></tt>. Note that this does not cover parameters of inner procs.</li>
+<li>The <tt class="docutils literal"><span class="pre">result</span></tt> symbol of <tt class="docutils literal"><span class="pre">p</span></tt>.</li>
+<li>A local <tt class="docutils literal"><span class="pre">var</span></tt> or <tt class="docutils literal"><span class="pre">let</span></tt> or <tt class="docutils literal"><span class="pre">const</span></tt> of <tt class="docutils literal"><span class="pre">p</span></tt>. Note that this does not cover locals of inner procs.</li>
+<li>A thread-local <tt class="docutils literal"><span class="pre">var</span></tt> or <tt class="docutils literal"><span class="pre">let</span></tt>.</li>
+<li>A global <tt class="docutils literal"><span class="pre">let</span></tt> or <tt class="docutils literal"><span class="pre">const</span></tt>.</li>
+<li>A constant array/seq/object/tuple constructor.</li>
+</ul>
+
+<h2><a class="toc-backref" id="view-types-path-expressions" href="#view-types-path-expressions">Path expressions</a></h2><p>A location derived from <tt class="docutils literal"><span class="pre">source</span></tt> is then defined as a path expression that has <tt class="docutils literal"><span class="pre">source</span></tt> as the owner. A path expression <tt class="docutils literal"><span class="pre">e</span></tt> is defined recursively:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">source</span></tt> itself is a path expression.</li>
+<li>Container access like <tt class="docutils literal"><span class="pre">e[i]</span></tt> is a path expression.</li>
+<li>Tuple access <tt class="docutils literal"><span class="pre">e[0]</span></tt> is a path expression.</li>
+<li>Object field access <tt class="docutils literal"><span class="pre">e.field</span></tt> is a path expression.</li>
+<li><tt class="docutils literal"><span class="pre">system.toOpenArray(e, ...)</span></tt> is a path expression.</li>
+<li>Pointer dereference <tt class="docutils literal"><span class="pre">e[]</span></tt> is a path expression.</li>
+<li>An address <tt class="docutils literal"><span class="pre">addr e</span></tt>, <tt class="docutils literal"><span class="pre">unsafeAddr e</span></tt> is a path expression.</li>
+<li>A type conversion <tt class="docutils literal"><span class="pre">T(e)</span></tt> is a path expression.</li>
+<li>A cast expression <tt class="docutils literal"><span class="pre">cast[T](e)</span></tt> is a path expression.</li>
+<li><tt class="docutils literal"><span class="pre">f(e, ...)</span></tt> is a path expression if <tt class="docutils literal"><span class="pre">f</span></tt>'s return type is a view type. Because the view can only have been borrowed from <tt class="docutils literal"><span class="pre">e</span></tt>, we then know that owner of <tt class="docutils literal"><span class="pre">f(e, ...)</span></tt> is <tt class="docutils literal"><span class="pre">e</span></tt>.</li>
+</ul>
+<p>If a view type is used as a return type, the location must borrow from a location that is derived from the first parameter that is passed to the proc. See <a class="reference external" href="https://nim-lang.org/docs/manual.html#procedures-var-return-type">https://nim-lang.org/docs/manual.html#procedures-var-return-type</a> for details about how this is done for <tt class="docutils literal"><span class="pre">var T</span></tt>.</p>
+<p>A mutable view can borrow from a mutable location, an immutable view can borrow from both a mutable or an immutable location.</p>
+<p>The <em>duration</em> of a borrow is the span of commands beginning from the assignment to the view and ending with the last usage of the view.</p>
+<p>For the duration of the borrow operation, no mutations to the borrowed locations may be performed except via the potentially mutable view that borrowed from the location. The borrowed location is said to be <em>sealed</em> during the borrow.</p>
+<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">experimental</span><span class="Punctuation">:</span> <span class="StringLit">&quot;views&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
+
+<span class="Keyword">type</span>
+  <span class="Identifier">Obj</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+    <span class="Identifier">field</span><span class="Punctuation">:</span> <span class="Identifier">string</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">dangerous</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">Obj</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">let</span> <span class="Identifier">v</span><span class="Punctuation">:</span> <span class="Identifier">lent</span> <span class="Identifier">Obj</span> <span class="Operator">=</span> <span class="Identifier">s</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span> <span class="Comment"># seal 's'</span>
+  <span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">setLen</span> <span class="DecNumber">0</span>  <span class="Comment"># prevented at compile-time because 's' is sealed.</span>
+  <span class="Identifier">echo</span> <span class="Identifier">v</span><span class="Operator">.</span><span class="Identifier">field</span></pre><p>The scope of the view does not matter:</p>
+<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">valid</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">Obj</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">let</span> <span class="Identifier">v</span><span class="Punctuation">:</span> <span class="Identifier">lent</span> <span class="Identifier">Obj</span> <span class="Operator">=</span> <span class="Identifier">s</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span>  <span class="Comment"># begin of borrow</span>
+  <span class="Identifier">echo</span> <span class="Identifier">v</span><span class="Operator">.</span><span class="Identifier">field</span>            <span class="Comment"># end of borrow</span>
+  <span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">setLen</span> <span class="DecNumber">0</span>  <span class="Comment"># valid because 'v' isn't used afterwards</span></pre><p>The analysis requires as much precision about mutations as is reasonably obtainable, so it is more effective with the experimental <a class="reference external" href="#strict-funcs">strict funcs</a> feature. In other words <tt class="docutils literal"><span class="pre">--experimental:views</span></tt> works better with <tt class="docutils literal"><span class="pre">--experimental:strictFuncs</span></tt>.</p>
+<p>The analysis is currently control flow insensitive:</p>
+<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">invalid</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">Obj</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">let</span> <span class="Identifier">v</span><span class="Punctuation">:</span> <span class="Identifier">lent</span> <span class="Identifier">Obj</span> <span class="Operator">=</span> <span class="Identifier">s</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span>
+  <span class="Keyword">if</span> <span class="Identifier">false</span><span class="Punctuation">:</span>
+    <span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">setLen</span> <span class="DecNumber">0</span>
+  <span class="Identifier">echo</span> <span class="Identifier">v</span><span class="Operator">.</span><span class="Identifier">field</span></pre><p>In this example, the compiler assumes that <tt class="docutils literal"><span class="pre">s.setLen 0</span></tt> invalidates the borrow operation of <tt class="docutils literal"><span class="pre">v</span></tt> even though a human being can easily see that it will never do that at runtime.</p>
+
+<h2><a class="toc-backref" id="view-types-start-of-a-borrow" href="#view-types-start-of-a-borrow">Start of a borrow</a></h2><p>A borrow starts with one of the following:</p>
+<ul class="simple"><li>The assignment of a non-view-type to a view-type.</li>
+<li>The assignment of a location that is derived from a local parameter to a view-type.</li>
+</ul>
+
+<h2><a class="toc-backref" id="view-types-end-of-a-borrow" href="#view-types-end-of-a-borrow">End of a borrow</a></h2><p>A borrow operation ends with the last usage of the view variable.</p>
+
+<h2><a class="toc-backref" id="view-types-reborrows" href="#view-types-reborrows">Reborrows</a></h2><p>A view <tt class="docutils literal"><span class="pre">v</span></tt> can borrow from multiple different locations. However, the borrow is always the full span of <tt class="docutils literal"><span class="pre">v</span></tt>'s lifetime and every location that is borrowed from is sealed during <tt class="docutils literal"><span class="pre">v</span></tt>'s lifetime.</p>
+
+<h2><a class="toc-backref" id="view-types-algorithm" href="#view-types-algorithm">Algorithm</a></h2><p>The following section is an outline of the algorithm that the current implementation uses. The algorithm performs two traversals over the AST of the procedure or global section of code that uses a view variable. No fixpoint iterations are performed, the complexity of the analysis is O(N) where N is the number of nodes of the AST.</p>
+<p>The first pass over the AST computes the lifetime of each local variable based on a notion of an &quot;abstract time&quot;, in the implementation it's a simple integer that is incremented for every visited node.</p>
+<p>In the second pass information about the underlying object &quot;graphs&quot; is computed. Let <tt class="docutils literal"><span class="pre">v</span></tt> be a parameter or a local variable. Let <tt class="docutils literal"><span class="pre">G(v)</span></tt> be the graph that <tt class="docutils literal"><span class="pre">v</span></tt> belongs to. A graph is defined by the set of variables that belong to the graph. Initially for all <tt class="docutils literal"><span class="pre">v</span></tt>: <tt class="docutils literal"><span class="pre">G(v) = {v}</span></tt>. Every variable can only be part of a single graph.</p>
+<p>Assignments like <tt class="docutils literal"><span class="pre">a = b</span></tt> &quot;connect&quot; two variables, both variables end up in the same graph <tt class="docutils literal"><span class="pre">{a, b} = G(a) = G(b)</span></tt>. Unfortunately, the pattern to look for is much more complex than that and can involve multiple assignment targets and sources:<pre>
+f(x, y) = g(a, b)</pre>
+</p>
+<p>connects <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> to <tt class="docutils literal"><span class="pre">a</span></tt> and <tt class="docutils literal"><span class="pre">b</span></tt>: <tt class="docutils literal"><span class="pre">G(x) = G(y) = G(a) = G(b) = {x, y, a, b}</span></tt>. A type based alias analysis rules out some of these combinations, for example a <tt class="docutils literal"><span class="pre">string</span></tt> value cannot possibly be connected to a <tt class="docutils literal"><span class="pre">seq[int]</span></tt>.</p>
+<p>A pattern like <tt class="docutils literal"><span class="pre">v[] = value</span></tt> or <tt class="docutils literal"><span class="pre">v.field = value</span></tt> marks <tt class="docutils literal"><span class="pre">G(v)</span></tt> as mutated. After the second pass a set of disjoint graphs was computed.</p>
+<p>For strict functions it is then enforced that there is no graph that is both mutated and has an element that is an immutable parameter (that is a parameter that is not of type <tt class="docutils literal"><span class="pre">var T</span></tt>).</p>
+<p>For borrow checking a different set of checks is performed. Let <tt class="docutils literal"><span class="pre">v</span></tt> be the view and <tt class="docutils literal"><span class="pre">b</span></tt> the location that is borrowed from.</p>
+<ul class="simple"><li>The lifetime of <tt class="docutils literal"><span class="pre">v</span></tt> must not exceed <tt class="docutils literal"><span class="pre">b</span></tt>'s lifetime. Note: The lifetime of a parameter is the complete proc body.</li>
+<li>If <tt class="docutils literal"><span class="pre">v</span></tt> is a mutable view and <tt class="docutils literal"><span class="pre">v</span></tt> is used to actually mutate the borrowed location, then <tt class="docutils literal"><span class="pre">b</span></tt> has to be a mutable location. Note: If it is not actually used for mutation, borrowing a mutable view from an immutable location is allowed! This allows for many important idioms and will be justified in an upcoming RFC.</li>
+<li>During <tt class="docutils literal"><span class="pre">v</span></tt>'s lifetime, <tt class="docutils literal"><span class="pre">G(b)</span></tt> can only be modified by <tt class="docutils literal"><span class="pre">v</span></tt> (and only if <tt class="docutils literal"><span class="pre">v</span></tt> is a mutable view).</li>
+<li>If <tt class="docutils literal"><span class="pre">v</span></tt> is <tt class="docutils literal"><span class="pre">result</span></tt> then <tt class="docutils literal"><span class="pre">b</span></tt> has to be a location derived from the first formal parameter or from a constant location.</li>
+<li>A view cannot be used for a read or a write access before it was assigned to.</li>
+</ul>
 </p>
   
   </div>
@@ -1054,7 +1142,7 @@ Arglist
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-29 00:44:41 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-03 01:06:06 UTC</small>
       </div>
     </div>
   </div>

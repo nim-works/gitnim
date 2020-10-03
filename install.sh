@@ -429,6 +429,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/decls.nim
   cp lib/std/wordwrap.nim $libdir/std/wordwrap.nim
   chmod 644 $libdir/std/wordwrap.nim
+  cp lib/std/effecttraits.nim $libdir/std/effecttraits.nim
+  chmod 644 $libdir/std/effecttraits.nim
   cp lib/std/varints.nim $libdir/std/varints.nim
   chmod 644 $libdir/std/varints.nim
   cp lib/std/editdistance.nim $libdir/std/editdistance.nim
