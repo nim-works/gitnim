@@ -76,6 +76,8 @@ if [ $# -eq 1 ] ; then
   mkdir -p $libdir/nintendoswitch
   mkdir -p $libdir/windows
   mkdir -p $libdir/posix
+  mkdir -p $libdir/fusion
+  mkdir -p $libdir/fusion/htmlparser
   mkdir -p $libdir/packages/docutils
   mkdir -p $libdir/deprecated/pure
   mkdir -p $libdir/system
@@ -185,6 +187,20 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/posix/inotify.nim
   cp lib/posix/linux.nim $libdir/posix/linux.nim
   chmod 644 $libdir/posix/linux.nim
+  cp lib/fusion/filepermissions.nim $libdir/fusion/filepermissions.nim
+  chmod 644 $libdir/fusion/filepermissions.nim
+  cp lib/fusion/btreetables.nim $libdir/fusion/btreetables.nim
+  chmod 644 $libdir/fusion/btreetables.nim
+  cp lib/fusion/compat.nim $libdir/fusion/compat.nim
+  chmod 644 $libdir/fusion/compat.nim
+  cp lib/fusion/htmlparser.nim $libdir/fusion/htmlparser.nim
+  chmod 644 $libdir/fusion/htmlparser.nim
+  cp lib/fusion/pools.nim $libdir/fusion/pools.nim
+  chmod 644 $libdir/fusion/pools.nim
+  cp lib/fusion/htmlparser/xmltree.nim $libdir/fusion/htmlparser/xmltree.nim
+  chmod 644 $libdir/fusion/htmlparser/xmltree.nim
+  cp lib/fusion/htmlparser/parsexml.nim $libdir/fusion/htmlparser/parsexml.nim
+  chmod 644 $libdir/fusion/htmlparser/parsexml.nim
   cp lib/packages/docutils/highlite.nim $libdir/packages/docutils/highlite.nim
   chmod 644 $libdir/packages/docutils/highlite.nim
   cp lib/packages/docutils/rstast.nim $libdir/packages/docutils/rstast.nim

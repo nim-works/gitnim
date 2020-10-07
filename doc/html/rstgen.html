@@ -121,19 +121,19 @@ function main() {
   options*: RstParseOptions
   findFile*: FindFileHandler
   msgHandler*: MsgHandler
-  outDir*: AbsoluteDir         ## output directory, initialized by docgen.nim
-  destFile*: AbsoluteFile      ## output (HTML) file, initialized by docgen.nim
-  filename*: string            ## source Nim or Rst file
+  outDir*: AbsoluteDir       ## output directory, initialized by docgen.nim
+  destFile*: AbsoluteFile    ## output (HTML) file, initialized by docgen.nim
+  filename*: string          ## source Nim or Rst file
   meta*: array[MetaEnum, string]
   currentSection: string ## \
-                       ## Stores the empty string or the last headline/overline found in the rst
-                       ## document, so it can be used as a prettier name for term index generation.
+                         ## Stores the empty string or the last headline/overline found in the rst
+                         ## document, so it can be used as a prettier name for term index generation.
   seenIndexTerms: Table[string, int] ## \
-                                  ## Keeps count of same text index terms to generate different identifiers
-                                  ## for hyperlinks. See renderIndexTerm proc for details.
-  id*: int                     ## A counter useful for generating IDs.
+                                     ## Keeps count of same text index terms to generate different identifiers
+                                     ## for hyperlinks. See renderIndexTerm proc for details.
+  id*: int                   ## A counter useful for generating IDs.
   onTestSnippet*: proc (d: var RstGenerator; filename, cmd: string; status: int;
-                      content: string)"><wbr />Rst<wbr />Generator<span class="attachedType"></span></a></li>
+                        content: string)"><wbr />Rst<wbr />Generator<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -148,39 +148,86 @@ function main() {
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
+      <ul class="simple nested-toc-section">renderRstToOut
+      <li><a class="reference" href="#renderRstToOut%2CRstGenerator%2CPRstNode%2Cstring"
+    title="renderRstToOut(d: var RstGenerator; n: PRstNode; result: var string)">renderRstToOut,RstGenerator,PRstNode,string<span class="attachedType">RstGenerator</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">nextSplitPoint
+      <li><a class="reference" href="#nextSplitPoint%2Cstring%2Cint"
+    title="nextSplitPoint(s: string; start: int): int">nextSplitPoint,string,int<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">rstToLatex
+      <li><a class="reference" href="#rstToLatex%2Cstring%2CRstParseOptions"
+    title="rstToLatex(rstSource: string; options: RstParseOptions): string">rstToLatex,string,RstParseOptions<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">defaultConfig
+      <li><a class="reference" href="#defaultConfig"
+    title="defaultConfig(): StringTableRef">defaultConfig<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">mergeIndexes
+      <li><a class="reference" href="#mergeIndexes%2Cstring"
+    title="mergeIndexes(dir: string): string">mergeIndexes,string<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">initRstGenerator
+      <li><a class="reference" href="#initRstGenerator%2CRstGenerator%2COutputTarget%2CStringTableRef%2Cstring%2CRstParseOptions%2CFindFileHandler%2CMsgHandler"
+    title="initRstGenerator(g: var RstGenerator; target: OutputTarget;
+                 config: StringTableRef; filename: string;
+                 options: RstParseOptions; findFile: FindFileHandler = nil;
+                 msgHandler: MsgHandler = nil)">initRstGenerator,RstGenerator,OutputTarget,StringTableRef,string,RstParseOptions,FindFileHandler,MsgHandler<span class="attachedType">RstGenerator</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">prettyLink
       <li><a class="reference" href="#prettyLink%2Cstring"
-    title="prettyLink(file: string): string"><wbr />pretty<wbr />Link<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#initRstGenerator%2CRstGenerator%2COutputTarget%2CStringTableRef%2Cstring%2CRstParseOptions%2CFindFileHandler%2CMsgHandler"
-    title="initRstGenerator(g: var RstGenerator; target: OutputTarget; config: StringTableRef;
-                 filename: string; options: RstParseOptions;
-                 findFile: FindFileHandler = nil; msgHandler: MsgHandler = nil)"><wbr />init<wbr />Rst<wbr />Generator<span class="attachedType">RstGenerator</span></a></li>
-  <li><a class="reference" href="#writeIndexFile%2CRstGenerator%2Cstring"
-    title="writeIndexFile(g: var RstGenerator; outfile: string)"><wbr />write<wbr />Index<wbr />File<span class="attachedType">RstGenerator</span></a></li>
-  <li><a class="reference" href="#escChar%2COutputTarget%2Cstring%2Cchar"
-    title="escChar(target: OutputTarget; dest: var string; c: char)"><wbr />esc<wbr />Char<span class="attachedType">OutputTarget</span></a></li>
-  <li><a class="reference" href="#nextSplitPoint%2Cstring%2Cint"
-    title="nextSplitPoint(s: string; start: int): int"><wbr />next<wbr />Split<wbr />Point<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#esc%2COutputTarget%2Cstring"
-    title="esc(target: OutputTarget; s: string; splitAfter = -1): string"><wbr />esc<span class="attachedType">OutputTarget</span></a></li>
-  <li><a class="reference" href="#setIndexTerm%2CRstGenerator%2Cstring%2Cstring%2Cstring%2Cstring%2Cstring"
-    title="setIndexTerm(d: var RstGenerator; htmlFile, id, term: string; linkTitle, linkDesc = &quot;&quot;)"><wbr />set<wbr />Index<wbr />Term<span class="attachedType">RstGenerator</span></a></li>
-  <li><a class="reference" href="#renderIndexTerm%2CPDoc%2CPRstNode%2Cstring"
-    title="renderIndexTerm(d: PDoc; n: PRstNode; result: var string)"><wbr />render<wbr />Index<wbr />Term<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#mergeIndexes%2Cstring"
-    title="mergeIndexes(dir: string): string"><wbr />merge<wbr />Indexes<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#renderTocEntries%2CRstGenerator%2Cint%2Cint%2Cstring"
-    title="renderTocEntries(d: var RstGenerator; j: var int; lvl: int; result: var string)"><wbr />render<wbr />Toc<wbr />Entries<span class="attachedType">RstGenerator</span></a></li>
-  <li><a class="reference" href="#renderRstToOut%2CRstGenerator%2CPRstNode%2Cstring"
-    title="renderRstToOut(d: var RstGenerator; n: PRstNode; result: var string)"><wbr />render<wbr />Rst<wbr />To<wbr />Out<span class="attachedType">RstGenerator</span></a></li>
-  <li><a class="reference" href="#formatNamedVars%2Cstring%2CopenArray%5Bstring%5D%2CopenArray%5Bstring%5D"
+    title="prettyLink(file: string): string">prettyLink,string<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">escChar
+      <li><a class="reference" href="#escChar%2COutputTarget%2Cstring%2Cchar"
+    title="escChar(target: OutputTarget; dest: var string; c: char)">escChar,OutputTarget,string,char<span class="attachedType">OutputTarget</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">writeIndexFile
+      <li><a class="reference" href="#writeIndexFile%2CRstGenerator%2Cstring"
+    title="writeIndexFile(g: var RstGenerator; outfile: string)">writeIndexFile,RstGenerator,string<span class="attachedType">RstGenerator</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">esc
+      <li><a class="reference" href="#esc%2COutputTarget%2Cstring"
+    title="esc(target: OutputTarget; s: string; splitAfter = -1): string">esc,OutputTarget,string<span class="attachedType">OutputTarget</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">rstToHtml
+      <li><a class="reference" href="#rstToHtml%2Cstring%2CRstParseOptions%2CStringTableRef"
+    title="rstToHtml(s: string; options: RstParseOptions; config: StringTableRef): string">rstToHtml,string,RstParseOptions,StringTableRef<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">renderTocEntries
+      <li><a class="reference" href="#renderTocEntries%2CRstGenerator%2Cint%2Cint%2Cstring"
+    title="renderTocEntries(d: var RstGenerator; j: var int; lvl: int; result: var string)">renderTocEntries,RstGenerator,int,int,string<span class="attachedType">RstGenerator</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">renderIndexTerm
+      <li><a class="reference" href="#renderIndexTerm%2CPDoc%2CPRstNode%2Cstring"
+    title="renderIndexTerm(d: PDoc; n: PRstNode; result: var string)">renderIndexTerm,PDoc,PRstNode,string<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">setIndexTerm
+      <li><a class="reference" href="#setIndexTerm%2CRstGenerator%2Cstring%2Cstring%2Cstring%2Cstring%2Cstring"
+    title="setIndexTerm(d: var RstGenerator; htmlFile, id, term: string;
+             linkTitle, linkDesc = &quot;&quot;)">setIndexTerm,RstGenerator,string,string,string,string,string<span class="attachedType">RstGenerator</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">formatNamedVars
+      <li><a class="reference" href="#formatNamedVars%2Cstring%2CopenArray%5Bstring%5D%2CopenArray%5Bstring%5D"
     title="formatNamedVars(frmt: string; varnames: openArray[string];
-                varvalues: openArray[string]): string"><wbr />format<wbr />Named<wbr />Vars<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#defaultConfig"
-    title="defaultConfig(): StringTableRef"><wbr />default<wbr />Config<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#rstToHtml%2Cstring%2CRstParseOptions%2CStringTableRef"
-    title="rstToHtml(s: string; options: RstParseOptions; config: StringTableRef): string"><wbr />rst<wbr />To<wbr />Html<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#rstToLatex%2Cstring%2CRstParseOptions"
-    title="rstToLatex(rstSource: string; options: RstParseOptions): string"><wbr />rst<wbr />To<wbr />Latex<span class="attachedType"></span></a></li>
+                varvalues: openArray[string]): string">formatNamedVars,string,openArray[string],openArray[string]<span class="attachedType"></span></a></li>
+
+  </ul>
 
   </ul>
 </li>
@@ -240,19 +287,19 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">options</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a>
   <span class="Identifier">findFile</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#FindFileHandler"><span class="Identifier">FindFileHandler</span></a>
   <span class="Identifier">msgHandler</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a>
-  <span class="Identifier">outDir</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">AbsoluteDir</span>         <span class="Comment">## output directory, initialized by docgen.nim</span>
-  <span class="Identifier">destFile</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">AbsoluteFile</span>      <span class="Comment">## output (HTML) file, initialized by docgen.nim</span>
-  <span class="Identifier">filename</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>            <span class="Comment">## source Nim or Rst file</span>
+  <span class="Identifier">outDir</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">AbsoluteDir</span>       <span class="Comment">## output directory, initialized by docgen.nim</span>
+  <span class="Identifier">destFile</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">AbsoluteFile</span>    <span class="Comment">## output (HTML) file, initialized by docgen.nim</span>
+  <span class="Identifier">filename</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>          <span class="Comment">## source Nim or Rst file</span>
   <span class="Identifier">meta</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">MetaEnum</span><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">]</span>
   <span class="Identifier">currentSection</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Comment">## \</span>
-                       <span class="Comment">## Stores the empty string or the last headline/overline found in the rst</span>
-                       <span class="Comment">## document, so it can be used as a prettier name for term index generation.</span>
+                         <span class="Comment">## Stores the empty string or the last headline/overline found in the rst</span>
+                         <span class="Comment">## document, so it can be used as a prettier name for term index generation.</span>
   <span class="Identifier">seenIndexTerms</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span> <span class="Comment">## \</span>
-                                  <span class="Comment">## Keeps count of same text index terms to generate different identifiers</span>
-                                  <span class="Comment">## for hyperlinks. See renderIndexTerm proc for details.</span>
-  <span class="Identifier">id</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>                     <span class="Comment">## A counter useful for generating IDs.</span>
+                                     <span class="Comment">## Keeps count of same text index terms to generate different identifiers</span>
+                                     <span class="Comment">## for hyperlinks. See renderIndexTerm proc for details.</span>
+  <span class="Identifier">id</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>                   <span class="Comment">## A counter useful for generating IDs.</span>
   <span class="Identifier">onTestSnippet</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">d</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">,</span> <span class="Identifier">cmd</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">status</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
-                      <span class="Identifier">content</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span>
+                        <span class="Identifier">content</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span>
 </pre></dt>
 <dd>
 
@@ -297,9 +344,10 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="initRstGenerator,RstGenerator,OutputTarget,StringTableRef,string,RstParseOptions,FindFileHandler,MsgHandler"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#initRstGenerator%2CRstGenerator%2COutputTarget%2CStringTableRef%2Cstring%2CRstParseOptions%2CFindFileHandler%2CMsgHandler"><span class="Identifier">initRstGenerator</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">target</span><span class="Other">:</span> <a href="rstgen.html#OutputTarget"><span class="Identifier">OutputTarget</span></a><span class="Other">;</span>
-                     <span class="Identifier">config</span><span class="Other">:</span> <span class="Identifier">StringTableRef</span><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
-                     <span class="Identifier">options</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a><span class="Other">;</span> <span class="Identifier">findFile</span><span class="Other">:</span> <a href="rst.html#FindFileHandler"><span class="Identifier">FindFileHandler</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
-                     <span class="Identifier">msgHandler</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                      <span class="Identifier">config</span><span class="Other">:</span> <span class="Identifier">StringTableRef</span><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
+                      <span class="Identifier">options</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a><span class="Other">;</span> <span class="Identifier">findFile</span><span class="Other">:</span> <a href="rst.html#FindFileHandler"><span class="Identifier">FindFileHandler</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
+                      <span class="Identifier">msgHandler</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Initializes a <tt class="docutils literal"><span class="pre">RstGenerator</span></tt>.</p>
@@ -334,8 +382,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="escChar,OutputTarget,string,char"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#escChar%2COutputTarget%2Cstring%2Cchar"><span class="Identifier">escChar</span></a><span class="Other">(</span><span class="Identifier">target</span><span class="Other">:</span> <a href="rstgen.html#OutputTarget"><span class="Identifier">OutputTarget</span></a><span class="Other">;</span> <span class="Identifier">dest</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">c</span><span class="Other">:</span> <span class="Identifier">char</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#escChar%2COutputTarget%2Cstring%2Cchar"><span class="Identifier">escChar</span></a><span class="Other">(</span><span class="Identifier">target</span><span class="Other">:</span> <a href="rstgen.html#OutputTarget"><span class="Identifier">OutputTarget</span></a><span class="Other">;</span> <span class="Identifier">dest</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">c</span><span class="Other">:</span> <span class="Identifier">char</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -357,7 +405,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="esc,OutputTarget,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#esc%2COutputTarget%2Cstring"><span class="Identifier">esc</span></a><span class="Other">(</span><span class="Identifier">target</span><span class="Other">:</span> <a href="rstgen.html#OutputTarget"><span class="Identifier">OutputTarget</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">splitAfter</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#esc%2COutputTarget%2Cstring"><span class="Identifier">esc</span></a><span class="Other">(</span><span class="Identifier">target</span><span class="Other">:</span> <a href="rstgen.html#OutputTarget"><span class="Identifier">OutputTarget</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">splitAfter</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Escapes the HTML.
@@ -369,7 +418,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="setIndexTerm,RstGenerator,string,string,string,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#setIndexTerm%2CRstGenerator%2Cstring%2Cstring%2Cstring%2Cstring%2Cstring"><span class="Identifier">setIndexTerm</span></a><span class="Other">(</span><span class="Identifier">d</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">htmlFile</span><span class="Other">,</span> <span class="Identifier">id</span><span class="Other">,</span> <span class="Identifier">term</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
-                 <span class="Identifier">linkTitle</span><span class="Other">,</span> <span class="Identifier">linkDesc</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                  <span class="Identifier">linkTitle</span><span class="Other">,</span> <span class="Identifier">linkDesc</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Adds a <tt class="docutils literal"><span class="pre">term</span></tt> to the index using the specified hyperlink identifier.</p>
@@ -400,7 +449,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="mergeIndexes,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#mergeIndexes%2Cstring"><span class="Identifier">mergeIndexes</span></a><span class="Other">(</span><span class="Identifier">dir</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
-                                     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Merges all index files in <tt class="docutils literal"><span class="pre">dir</span></tt> and returns the generated index as HTML.</p>
@@ -416,8 +465,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="renderTocEntries,RstGenerator,int,int,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#renderTocEntries%2CRstGenerator%2Cint%2Cint%2Cstring"><span class="Identifier">renderTocEntries</span></a><span class="Other">(</span><span class="Identifier">d</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">j</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">lvl</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">result</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#renderTocEntries%2CRstGenerator%2Cint%2Cint%2Cstring"><span class="Identifier">renderTocEntries</span></a><span class="Other">(</span><span class="Identifier">d</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">j</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">lvl</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
+                      <span class="Identifier">result</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -446,8 +495,8 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="formatNamedVars,string,openArray[string],openArray[string]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#formatNamedVars%2Cstring%2CopenArray%5Bstring%5D%2CopenArray%5Bstring%5D"><span class="Identifier">formatNamedVars</span></a><span class="Other">(</span><span class="Identifier">frmt</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">varnames</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">;</span>
-                    <span class="Identifier">varvalues</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                     <span class="Identifier">varvalues</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -515,7 +564,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-03 01:06:47 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-07 13:53:20 UTC</small>
       </div>
     </div>
   </div>

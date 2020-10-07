@@ -144,12 +144,12 @@ function main() {
     title="HttpClientBase[SocketType] = ref object
   socket: SocketType
   connected: bool
-  currentURL: Uri              ## Where we are currently connected.
-  headers*: HttpHeaders        ## Headers to send in requests.
-  maxRedirects: Natural        ## Maximum redirects, set to ``0`` to disable.
+  currentURL: Uri            ## Where we are currently connected.
+  headers*: HttpHeaders      ## Headers to send in requests.
+  maxRedirects: Natural      ## Maximum redirects, set to ``0`` to disable.
   userAgent: string
-  timeout*: int                ## Only used for blocking HttpClient for now.
-  proxy: Proxy                 ## ``nil`` or the callback to call when request progress changes.
+  timeout*: int              ## Only used for blocking HttpClient for now.
+  proxy: Proxy               ## ``nil`` or the callback to call when request progress changes.
   when SocketType is Socket:
     onProgressChanged
   else:
@@ -166,7 +166,7 @@ function main() {
 
   else:
     bodyStream
-  getBody: bool                ## When `false`, the body is never read in requestAux."><wbr />Http<wbr />Client<wbr />Base<span class="attachedType"></span></a></li>
+  getBody: bool              ## When `false`, the body is never read in requestAux."><wbr />Http<wbr />Client<wbr />Base<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#HttpClient"
     title="HttpClient = HttpClientBase[Socket]"><wbr />Http<wbr />Client<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#AsyncHttpClient"
@@ -185,121 +185,209 @@ function main() {
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#code"
-    title="code(response: Response | AsyncResponse): HttpCode"><wbr />code<span class="attachedType">Response</span></a></li>
-  <li><a class="reference" href="#contentType"
-    title="contentType(response: Response | AsyncResponse): string"><wbr />content<wbr />Type<span class="attachedType">Response</span></a></li>
-  <li><a class="reference" href="#contentLength"
-    title="contentLength(response: Response | AsyncResponse): int"><wbr />content<wbr />Length<span class="attachedType">Response</span></a></li>
-  <li><a class="reference" href="#lastModified"
-    title="lastModified(response: Response | AsyncResponse): DateTime"><wbr />last<wbr />Modified<span class="attachedType">Response</span></a></li>
-  <li><a class="reference" href="#body%2CResponse"
-    title="body(response: Response): string"><wbr />body<span class="attachedType">Response</span></a></li>
-  <li><a class="reference" href="#body%2CAsyncResponse"
-    title="body(response: AsyncResponse): Future[string]"><wbr />body<span class="attachedType">AsyncResponse</span></a></li>
-  <li><a class="reference" href="#newProxy%2Cstring%2Cstring"
-    title="newProxy(url: string; auth = &quot;&quot;): Proxy"><wbr />new<wbr />Proxy<span class="attachedType">Proxy</span></a></li>
-  <li><a class="reference" href="#newMultipartData"
-    title="newMultipartData(): MultipartData"><wbr />new<wbr />Multipart<wbr />Data<span class="attachedType">MultipartData</span></a></li>
-  <li><a class="reference" href="#%24%2CMultipartData"
-    title="`$`(data: MultipartData): string"><wbr />`$`<span class="attachedType">MultipartData</span></a></li>
-  <li><a class="reference" href="#add%2CMultipartData%2Cstring%2Cstring%2Cstring%2Cstring"
-    title="add(p: MultipartData; name, content: string; filename: string = &quot;&quot;;
-    contentType: string = &quot;&quot;; useStream = true)"><wbr />add<span class="attachedType">MultipartData</span></a></li>
-  <li><a class="reference" href="#add%2CMultipartData%2CMultipartEntries"
-    title="add(p: MultipartData; xs: MultipartEntries): MultipartData"><wbr />add<span class="attachedType">MultipartData</span></a></li>
-  <li><a class="reference" href="#newMultipartData%2CMultipartEntries"
-    title="newMultipartData(xs: MultipartEntries): MultipartData"><wbr />new<wbr />Multipart<wbr />Data<span class="attachedType">MultipartEntries</span></a></li>
-  <li><a class="reference" href="#addFiles%2CMultipartData%2CopenArray%5Btuple%5Bstring%2Cstring%5D%5D"
-    title="addFiles(p: MultipartData; xs: openArray[tuple[name, file: string]];
-         mimeDb = newMimetypes(); useStream = true): MultipartData"><wbr />add<wbr />Files<span class="attachedType">MultipartData</span></a></li>
-  <li><a class="reference" href="#%5B%5D%3D%2CMultipartData%2Cstring%2Cstring"
-    title="`[]=`(p: MultipartData; name, content: string)"><wbr />`[]=`<span class="attachedType">MultipartData</span></a></li>
-  <li><a class="reference" href="#%5B%5D%3D%2CMultipartData%2Cstring%2Ctuple%5Bstring%2Cstring%2Cstring%5D"
-    title="`[]=`(p: MultipartData; name: string;
-      file: tuple[name, contentType, content: string])"><wbr />`[]=`<span class="attachedType">MultipartData</span></a></li>
-  <li><a class="reference" href="#newHttpClient%2Cint%2CProxy"
-    title="newHttpClient(userAgent = defUserAgent; maxRedirects = 5;
-              sslContext = getDefaultSSL(); proxy: Proxy = nil; timeout = -1;
-              headers = newHttpHeaders()): HttpClient"><wbr />new<wbr />Http<wbr />Client<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#newAsyncHttpClient%2Cint%2CProxy"
+      <ul class="simple nested-toc-section">postContent
+      <li><a class="reference" href="#postContent%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="postContent(client: AsyncHttpClient; url: string; body = &quot;&quot;;
+            multipart: MultipartData = nil): Future[string]">postContent,AsyncHttpClient,string,string,MultipartData<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#postContent%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="postContent(client: HttpClient; url: string; body = &quot;&quot;;
+            multipart: MultipartData = nil): string">postContent,HttpClient,string,string,MultipartData<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">put
+      <li><a class="reference" href="#put%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="put(client: AsyncHttpClient; url: string; body = &quot;&quot;;
+    multipart: MultipartData = nil): Future[AsyncResponse]">put,AsyncHttpClient,string,string,MultipartData<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#put%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="put(client: HttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): Response">put,HttpClient,string,string,MultipartData<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">newAsyncHttpClient
+      <li><a class="reference" href="#newAsyncHttpClient%2Cint%2CProxy"
     title="newAsyncHttpClient(userAgent = defUserAgent; maxRedirects = 5;
                    sslContext = getDefaultSSL(); proxy: Proxy = nil;
-                   headers = newHttpHeaders()): AsyncHttpClient"><wbr />new<wbr />Async<wbr />Http<wbr />Client<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#close"
-    title="close(client: HttpClient | AsyncHttpClient)"><wbr />close<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#getSocket%2CHttpClient"
-    title="getSocket(client: HttpClient): Socket"><wbr />get<wbr />Socket<span class="attachedType">HttpClient</span></a></li>
+                   headers = newHttpHeaders()): AsyncHttpClient">newAsyncHttpClient,int,Proxy<span class="attachedType">AsyncHttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">$
+      <li><a class="reference" href="#%24%2CMultipartData"
+    title="`$`(data: MultipartData): string">$,MultipartData<span class="attachedType">MultipartData</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">code
+      <li><a class="reference" href="#code"
+    title="code(response: Response | AsyncResponse): HttpCode">code<span class="attachedType">Response</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">close
+      <li><a class="reference" href="#close"
+    title="close(client: HttpClient | AsyncHttpClient)">close<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">head
+      <li><a class="reference" href="#head%2CAsyncHttpClient%2Cstring"
+    title="head(client: AsyncHttpClient; url: string): Future[AsyncResponse]">head,AsyncHttpClient,string<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#head%2CHttpClient%2Cstring"
+    title="head(client: HttpClient; url: string): Response">head,HttpClient,string<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">[]=
+      <li><a class="reference" href="#%5B%5D%3D%2CMultipartData%2Cstring%2Cstring"
+    title="`[]=`(p: MultipartData; name, content: string)">[]=,MultipartData,string,string<span class="attachedType">MultipartData</span></a></li>
+  <li><a class="reference" href="#%5B%5D%3D%2CMultipartData%2Cstring%2Ctuple%5Bstring%2Cstring%2Cstring%5D"
+    title="`[]=`(p: MultipartData; name: string;
+      file: tuple[name, contentType, content: string])">[]=,MultipartData,string,tuple[string,string,string]<span class="attachedType">MultipartData</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">post
+      <li><a class="reference" href="#post%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="post(client: AsyncHttpClient; url: string; body = &quot;&quot;;
+     multipart: MultipartData = nil): Future[AsyncResponse]">post,AsyncHttpClient,string,string,MultipartData<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#post%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="post(client: HttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): Response">post,HttpClient,string,string,MultipartData<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">add
+      <li><a class="reference" href="#add%2CMultipartData%2Cstring%2Cstring%2Cstring%2Cstring"
+    title="add(p: MultipartData; name, content: string; filename: string = &quot;&quot;;
+    contentType: string = &quot;&quot;; useStream = true)">add,MultipartData,string,string,string,string<span class="attachedType">MultipartData</span></a></li>
+  <li><a class="reference" href="#add%2CMultipartData%2CMultipartEntries"
+    title="add(p: MultipartData; xs: MultipartEntries): MultipartData">add,MultipartData,MultipartEntries<span class="attachedType">MultipartData</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">deleteContent
+      <li><a class="reference" href="#deleteContent%2CAsyncHttpClient%2Cstring"
+    title="deleteContent(client: AsyncHttpClient; url: string): Future[string]">deleteContent,AsyncHttpClient,string<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#deleteContent%2CHttpClient%2Cstring"
+    title="deleteContent(client: HttpClient; url: string): string">deleteContent,HttpClient,string<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">putContent
+      <li><a class="reference" href="#putContent%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="putContent(client: AsyncHttpClient; url: string; body = &quot;&quot;;
+           multipart: MultipartData = nil): Future[string]">putContent,AsyncHttpClient,string,string,MultipartData<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#putContent%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="putContent(client: HttpClient; url: string; body = &quot;&quot;;
+           multipart: MultipartData = nil): string">putContent,HttpClient,string,string,MultipartData<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">get
+      <li><a class="reference" href="#get%2CAsyncHttpClient%2Cstring"
+    title="get(client: AsyncHttpClient; url: string): Future[AsyncResponse]">get,AsyncHttpClient,string<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#get%2CHttpClient%2Cstring"
+    title="get(client: HttpClient; url: string): Response">get,HttpClient,string<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">newMultipartData
+      <li><a class="reference" href="#newMultipartData"
+    title="newMultipartData(): MultipartData">newMultipartData<span class="attachedType">MultipartData</span></a></li>
+  <li><a class="reference" href="#newMultipartData%2CMultipartEntries"
+    title="newMultipartData(xs: MultipartEntries): MultipartData">newMultipartData,MultipartEntries<span class="attachedType">MultipartEntries</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">patch
+      <li><a class="reference" href="#patch%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="patch(client: AsyncHttpClient; url: string; body = &quot;&quot;;
+      multipart: MultipartData = nil): Future[AsyncResponse]">patch,AsyncHttpClient,string,string,MultipartData<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#patch%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="patch(client: HttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): Response">patch,HttpClient,string,string,MultipartData<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">body
+      <li><a class="reference" href="#body%2CResponse"
+    title="body(response: Response): string">body,Response<span class="attachedType">Response</span></a></li>
+  <li><a class="reference" href="#body%2CAsyncResponse"
+    title="body(response: AsyncResponse): Future[string]">body,AsyncResponse<span class="attachedType">AsyncResponse</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getSocket
+      <li><a class="reference" href="#getSocket%2CHttpClient"
+    title="getSocket(client: HttpClient): Socket">getSocket,HttpClient<span class="attachedType">HttpClient</span></a></li>
   <li><a class="reference" href="#getSocket%2CAsyncHttpClient"
-    title="getSocket(client: AsyncHttpClient): AsyncSocket"><wbr />get<wbr />Socket<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#request%2CAsyncHttpClient%2Cstring%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"
+    title="getSocket(client: AsyncHttpClient): AsyncSocket">getSocket,AsyncHttpClient<span class="attachedType">AsyncHttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">delete
+      <li><a class="reference" href="#delete%2CAsyncHttpClient%2Cstring"
+    title="delete(client: AsyncHttpClient; url: string): Future[AsyncResponse]">delete,AsyncHttpClient,string<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#delete%2CHttpClient%2Cstring"
+    title="delete(client: HttpClient; url: string): Response">delete,HttpClient,string<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">addFiles
+      <li><a class="reference" href="#addFiles%2CMultipartData%2CopenArray%5Btuple%5Bstring%2Cstring%5D%5D"
+    title="addFiles(p: MultipartData; xs: openArray[tuple[name, file: string]];
+         mimeDb = newMimetypes(); useStream = true): MultipartData">addFiles,MultipartData,openArray[tuple[string,string]]<span class="attachedType">MultipartData</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getContent
+      <li><a class="reference" href="#getContent%2CAsyncHttpClient%2Cstring"
+    title="getContent(client: AsyncHttpClient; url: string): Future[string]">getContent,AsyncHttpClient,string<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#getContent%2CHttpClient%2Cstring"
+    title="getContent(client: HttpClient; url: string): string">getContent,HttpClient,string<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">contentLength
+      <li><a class="reference" href="#contentLength"
+    title="contentLength(response: Response | AsyncResponse): int">contentLength<span class="attachedType">Response</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">newHttpClient
+      <li><a class="reference" href="#newHttpClient%2Cint%2CProxy"
+    title="newHttpClient(userAgent = defUserAgent; maxRedirects = 5;
+              sslContext = getDefaultSSL(); proxy: Proxy = nil; timeout = -1;
+              headers = newHttpHeaders()): HttpClient">newHttpClient,int,Proxy<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">contentType
+      <li><a class="reference" href="#contentType"
+    title="contentType(response: Response | AsyncResponse): string">contentType<span class="attachedType">Response</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">request
+      <li><a class="reference" href="#request%2CAsyncHttpClient%2Cstring%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"
     title="request(client: AsyncHttpClient; url: string; httpMethod: string; body = &quot;&quot;;
         headers: HttpHeaders = nil; multipart: MultipartData = nil): Future[
-    AsyncResponse]"><wbr />request<span class="attachedType">AsyncHttpClient</span></a></li>
+    AsyncResponse]">request,AsyncHttpClient,string,string,string,HttpHeaders,MultipartData<span class="attachedType">AsyncHttpClient</span></a></li>
   <li><a class="reference" href="#request%2CHttpClient%2Cstring%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"
     title="request(client: HttpClient; url: string; httpMethod: string; body = &quot;&quot;;
-        headers: HttpHeaders = nil; multipart: MultipartData = nil): Response"><wbr />request<span class="attachedType">HttpClient</span></a></li>
+        headers: HttpHeaders = nil; multipart: MultipartData = nil): Response">request,HttpClient,string,string,string,HttpHeaders,MultipartData<span class="attachedType">HttpClient</span></a></li>
   <li><a class="reference" href="#request%2CAsyncHttpClient%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"
     title="request(client: AsyncHttpClient; url: string; httpMethod = HttpGet; body = &quot;&quot;;
         headers: HttpHeaders = nil; multipart: MultipartData = nil): Future[
-    AsyncResponse]"><wbr />request<span class="attachedType">AsyncHttpClient</span></a></li>
+    AsyncResponse]">request,AsyncHttpClient,string,string,HttpHeaders,MultipartData<span class="attachedType">AsyncHttpClient</span></a></li>
   <li><a class="reference" href="#request%2CHttpClient%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"
     title="request(client: HttpClient; url: string; httpMethod = HttpGet; body = &quot;&quot;;
-        headers: HttpHeaders = nil; multipart: MultipartData = nil): Response"><wbr />request<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#head%2CAsyncHttpClient%2Cstring"
-    title="head(client: AsyncHttpClient; url: string): Future[AsyncResponse]"><wbr />head<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#head%2CHttpClient%2Cstring"
-    title="head(client: HttpClient; url: string): Response"><wbr />head<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#get%2CAsyncHttpClient%2Cstring"
-    title="get(client: AsyncHttpClient; url: string): Future[AsyncResponse]"><wbr />get<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#get%2CHttpClient%2Cstring"
-    title="get(client: HttpClient; url: string): Response"><wbr />get<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#getContent%2CAsyncHttpClient%2Cstring"
-    title="getContent(client: AsyncHttpClient; url: string): Future[string]"><wbr />get<wbr />Content<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#getContent%2CHttpClient%2Cstring"
-    title="getContent(client: HttpClient; url: string): string"><wbr />get<wbr />Content<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#delete%2CAsyncHttpClient%2Cstring"
-    title="delete(client: AsyncHttpClient; url: string): Future[AsyncResponse]"><wbr />delete<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#delete%2CHttpClient%2Cstring"
-    title="delete(client: HttpClient; url: string): Response"><wbr />delete<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#deleteContent%2CAsyncHttpClient%2Cstring"
-    title="deleteContent(client: AsyncHttpClient; url: string): Future[string]"><wbr />delete<wbr />Content<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#deleteContent%2CHttpClient%2Cstring"
-    title="deleteContent(client: HttpClient; url: string): string"><wbr />delete<wbr />Content<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#post%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="post(client: AsyncHttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): Future[
-    AsyncResponse]"><wbr />post<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#post%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="post(client: HttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): Response"><wbr />post<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#postContent%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="postContent(client: AsyncHttpClient; url: string; body = &quot;&quot;;
-            multipart: MultipartData = nil): Future[string]"><wbr />post<wbr />Content<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#postContent%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="postContent(client: HttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): string"><wbr />post<wbr />Content<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#put%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="put(client: AsyncHttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): Future[
-    AsyncResponse]"><wbr />put<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#put%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="put(client: HttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): Response"><wbr />put<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#putContent%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="putContent(client: AsyncHttpClient; url: string; body = &quot;&quot;;
-           multipart: MultipartData = nil): Future[string]"><wbr />put<wbr />Content<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#putContent%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="putContent(client: HttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): string"><wbr />put<wbr />Content<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#patch%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="patch(client: AsyncHttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): Future[
-    AsyncResponse]"><wbr />patch<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#patch%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="patch(client: HttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): Response"><wbr />patch<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#patchContent%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="patchContent(client: AsyncHttpClient; url: string; body = &quot;&quot;;
-             multipart: MultipartData = nil): Future[string]"><wbr />patch<wbr />Content<span class="attachedType">AsyncHttpClient</span></a></li>
-  <li><a class="reference" href="#patchContent%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
-    title="patchContent(client: HttpClient; url: string; body = &quot;&quot;; multipart: MultipartData = nil): string"><wbr />patch<wbr />Content<span class="attachedType">HttpClient</span></a></li>
-  <li><a class="reference" href="#downloadFile%2CHttpClient%2Cstring%2Cstring"
-    title="downloadFile(client: HttpClient; url: string; filename: string)"><wbr />download<wbr />File<span class="attachedType">HttpClient</span></a></li>
+        headers: HttpHeaders = nil; multipart: MultipartData = nil): Response">request,HttpClient,string,string,HttpHeaders,MultipartData<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">downloadFile
+      <li><a class="reference" href="#downloadFile%2CHttpClient%2Cstring%2Cstring"
+    title="downloadFile(client: HttpClient; url: string; filename: string)">downloadFile,HttpClient,string,string<span class="attachedType">HttpClient</span></a></li>
   <li><a class="reference" href="#downloadFile%2CAsyncHttpClient%2Cstring%2Cstring"
-    title="downloadFile(client: AsyncHttpClient; url: string; filename: string): Future[void]"><wbr />download<wbr />File<span class="attachedType">AsyncHttpClient</span></a></li>
+    title="downloadFile(client: AsyncHttpClient; url: string; filename: string): Future[
+    void]">downloadFile,AsyncHttpClient,string,string<span class="attachedType">AsyncHttpClient</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">lastModified
+      <li><a class="reference" href="#lastModified"
+    title="lastModified(response: Response | AsyncResponse): DateTime">lastModified<span class="attachedType">Response</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">newProxy
+      <li><a class="reference" href="#newProxy%2Cstring%2Cstring"
+    title="newProxy(url: string; auth = &quot;&quot;): Proxy">newProxy,string,string<span class="attachedType">Proxy</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">patchContent
+      <li><a class="reference" href="#patchContent%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="patchContent(client: AsyncHttpClient; url: string; body = &quot;&quot;;
+             multipart: MultipartData = nil): Future[string]">patchContent,AsyncHttpClient,string,string,MultipartData<span class="attachedType">AsyncHttpClient</span></a></li>
+  <li><a class="reference" href="#patchContent%2CHttpClient%2Cstring%2Cstring%2CMultipartData"
+    title="patchContent(client: HttpClient; url: string; body = &quot;&quot;;
+             multipart: MultipartData = nil): string">patchContent,HttpClient,string,string,MultipartData<span class="attachedType">HttpClient</span></a></li>
+
+  </ul>
 
   </ul>
 </li>
@@ -523,12 +611,12 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><a href="httpclient.html#HttpClientBase"><span class="Identifier">HttpClientBase</span></a><span class="Other">[</span><span class="Identifier">SocketType</span><span class="Other">]</span> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
   <span class="Identifier">socket</span><span class="Other">:</span> <span class="Identifier">SocketType</span>
   <span class="Identifier">connected</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>
-  <span class="Identifier">currentURL</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a>              <span class="Comment">## Where we are currently connected.</span>
-  <span class="Identifier">headers</span><span class="Operator">*</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a>        <span class="Comment">## Headers to send in requests.</span>
-  <span class="Identifier">maxRedirects</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a>        <span class="Comment">## Maximum redirects, set to ``0`` to disable.</span>
+  <span class="Identifier">currentURL</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a>            <span class="Comment">## Where we are currently connected.</span>
+  <span class="Identifier">headers</span><span class="Operator">*</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a>      <span class="Comment">## Headers to send in requests.</span>
+  <span class="Identifier">maxRedirects</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a>      <span class="Comment">## Maximum redirects, set to ``0`` to disable.</span>
   <span class="Identifier">userAgent</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
-  <span class="Identifier">timeout</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                <span class="Comment">## Only used for blocking HttpClient for now.</span>
-  <span class="Identifier">proxy</span><span class="Other">:</span> <a href="httpclient.html#Proxy"><span class="Identifier">Proxy</span></a>                 <span class="Comment">## ``nil`` or the callback to call when request progress changes.</span>
+  <span class="Identifier">timeout</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>              <span class="Comment">## Only used for blocking HttpClient for now.</span>
+  <span class="Identifier">proxy</span><span class="Other">:</span> <a href="httpclient.html#Proxy"><span class="Identifier">Proxy</span></a>               <span class="Comment">## ``nil`` or the callback to call when request progress changes.</span>
   <span class="Keyword">when</span> <span class="Identifier">SocketType</span> <span class="Identifier">is</span> Socket<span class="Other">:</span>
     <span class="Identifier">onProgressChanged</span>
   <span class="Keyword">else</span><span class="Other">:</span>
@@ -545,7 +633,7 @@ class="link-seesrc" target="_blank">Source</a>
 
   <span class="Keyword">else</span><span class="Other">:</span>
     <span class="Identifier">bodyStream</span>
-  <span class="Identifier">getBody</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>                <span class="Comment">## When `false`, the body is never read in requestAux.</span>
+  <span class="Identifier">getBody</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>              <span class="Comment">## When `false`, the body is never read in requestAux.</span>
   </pre></dt>
 <dd>
 
@@ -614,7 +702,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="contentType"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#contentType"><span class="Identifier">contentType</span></a><span class="Other">(</span><span class="Identifier">response</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span class="Operator">|</span> <a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#contentType"><span class="Identifier">contentType</span></a><span class="Other">(</span><span class="Identifier">response</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span class="Operator">|</span> <a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Retrieves the specified response's content type.</p>
@@ -656,7 +744,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="body,Response"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#body%2CResponse"><span class="Identifier">body</span></a><span class="Other">(</span><span class="Identifier">response</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
-                                    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                                        <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Retrieves the specified response's body.</p>
@@ -692,7 +780,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="newMultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#newMultipartData"><span class="Identifier">newMultipartData</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#newMultipartData"><span class="Identifier">newMultipartData</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Constructs a new <tt class="docutils literal"><span class="pre">MultipartData</span></tt> object.
@@ -715,7 +803,8 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="add,MultipartData,string,string,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#add%2CMultipartData%2Cstring%2Cstring%2Cstring%2Cstring"><span class="Identifier">add</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">content</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-        <span class="Identifier">contentType</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">useStream</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+         <span class="Identifier">contentType</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">useStream</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Add a value to the multipart data.</p>
@@ -741,8 +830,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="newMultipartData,MultipartEntries"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#newMultipartData%2CMultipartEntries"><span class="Identifier">newMultipartData</span></a><span class="Other">(</span><span class="Identifier">xs</span><span class="Other">:</span> <a href="httpclient.html#MultipartEntries"><span class="Identifier">MultipartEntries</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#newMultipartData%2CMultipartEntries"><span class="Identifier">newMultipartData</span></a><span class="Other">(</span><span class="Identifier">xs</span><span class="Other">:</span> <a href="httpclient.html#MultipartEntries"><span class="Identifier">MultipartEntries</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Create a new multipart data object and fill it with the entries <tt class="docutils literal"><span class="pre">xs</span></tt> directly.<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">data</span> <span class="Operator">=</span> <span class="Identifier">newMultipartData</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;action&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;login&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;format&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;json&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre>
@@ -754,8 +843,8 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="addFiles,MultipartData,openArray[tuple[string,string]]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#addFiles%2CMultipartData%2CopenArray%5Btuple%5Bstring%2Cstring%5D%5D"><span class="Identifier">addFiles</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a><span class="Other">;</span> <span class="Identifier">xs</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">file</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">]</span><span class="Other">;</span>
-             <span class="Identifier">mimeDb</span> <span class="Other">=</span> <span class="Identifier">newMimetypes</span><span class="Other">(</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">useStream</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">discardable</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+              <span class="Identifier">mimeDb</span> <span class="Other">=</span> <span class="Identifier">newMimetypes</span><span class="Other">(</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">useStream</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">discardable</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Add files to a multipart data object. The files will be streamed from disk when the request is being made. When <tt class="docutils literal"><span class="pre">stream</span></tt> is <tt class="docutils literal"><span class="pre">false</span></tt>, the files are instead read into memory, but beware this is very memory ineffecient even for small files. The MIME types will automatically be determined. Raises an <tt class="docutils literal"><span class="pre">IOError</span></tt> if the file cannot be opened or reading fails. To manually specify file content, filename and MIME type, use <tt class="docutils literal"><span class="pre">[]=</span></tt> instead.<pre class="listing"><span class="Identifier">data</span><span class="Operator">.</span><span class="Identifier">addFiles</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;uploaded_file&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;public/test.html&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre>
@@ -766,7 +855,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="[]=,MultipartData,string,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%3D%2CMultipartData%2Cstring%2Cstring"><span class="Identifier">`[]=`</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">content</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%3D%2CMultipartData%2Cstring%2Cstring"><span class="Identifier">`[]=`</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">content</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Add a multipart entry to the multipart data <tt class="docutils literal"><span class="pre">p</span></tt>. The value is added without a filename and without a content type.<pre class="listing"><span class="Identifier">data</span><span class="Punctuation">[</span><span class="StringLit">&quot;username&quot;</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="StringLit">&quot;NimUser&quot;</span></pre>
@@ -778,8 +868,8 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="[]=,MultipartData,string,tuple[string,string,string]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%3D%2CMultipartData%2Cstring%2Ctuple%5Bstring%2Cstring%2Cstring%5D"><span class="Identifier">`[]=`</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span>
-          <span class="Identifier">file</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">contentType</span><span class="Other">,</span> <span class="Identifier">content</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+           <span class="Identifier">file</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">name</span><span class="Other">,</span> <span class="Identifier">contentType</span><span class="Other">,</span> <span class="Identifier">content</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Add a file to the multipart data <tt class="docutils literal"><span class="pre">p</span></tt>, specifying filename, contentType and content manually.<pre class="listing"><span class="Identifier">data</span><span class="Punctuation">[</span><span class="StringLit">&quot;uploaded_file&quot;</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="StringLit">&quot;test.html&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;text/html&quot;</span><span class="Punctuation">,</span>
@@ -792,8 +882,9 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="newHttpClient,int,Proxy"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#newHttpClient%2Cint%2CProxy"><span class="Identifier">newHttpClient</span></a><span class="Other">(</span><span class="Identifier">userAgent</span> <span class="Other">=</span> <span class="Identifier">defUserAgent</span><span class="Other">;</span> <span class="Identifier">maxRedirects</span> <span class="Other">=</span> <span class="DecNumber">5</span><span class="Other">;</span>
-                  <span class="Identifier">sslContext</span> <span class="Other">=</span> <span class="Identifier">getDefaultSSL</span><span class="Other">(</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">proxy</span><span class="Other">:</span> <a href="httpclient.html#Proxy"><span class="Identifier">Proxy</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span>
-                  <span class="Identifier">headers</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                   <span class="Identifier">sslContext</span> <span class="Other">=</span> <span class="Identifier">getDefaultSSL</span><span class="Other">(</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">proxy</span><span class="Other">:</span> <a href="httpclient.html#Proxy"><span class="Identifier">Proxy</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
+                   <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span> <span class="Identifier">headers</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Creates a new HttpClient instance.</p>
@@ -822,9 +913,9 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="newAsyncHttpClient,int,Proxy"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#newAsyncHttpClient%2Cint%2CProxy"><span class="Identifier">newAsyncHttpClient</span></a><span class="Other">(</span><span class="Identifier">userAgent</span> <span class="Other">=</span> <span class="Identifier">defUserAgent</span><span class="Other">;</span> <span class="Identifier">maxRedirects</span> <span class="Other">=</span> <span class="DecNumber">5</span><span class="Other">;</span>
-                       <span class="Identifier">sslContext</span> <span class="Other">=</span> <span class="Identifier">getDefaultSSL</span><span class="Other">(</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">proxy</span><span class="Other">:</span> <a href="httpclient.html#Proxy"><span class="Identifier">Proxy</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
-                       <span class="Identifier">headers</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                        <span class="Identifier">sslContext</span> <span class="Other">=</span> <span class="Identifier">getDefaultSSL</span><span class="Other">(</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">proxy</span><span class="Other">:</span> <a href="httpclient.html#Proxy"><span class="Identifier">Proxy</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
+                        <span class="Identifier">headers</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Creates a new AsyncHttpClient instance.</p>
@@ -852,7 +943,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getSocket,HttpClient"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getSocket%2CHttpClient"><span class="Identifier">getSocket</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">)</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getSocket%2CHttpClient"><span class="Identifier">getSocket</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">)</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Get network socket, useful if you want to find out more details about the connection</p>
@@ -867,7 +958,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getSocket,AsyncHttpClient"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getSocket%2CAsyncHttpClient"><span class="Identifier">getSocket</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncnet.html#AsyncSocket"><span class="Identifier">AsyncSocket</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getSocket%2CAsyncHttpClient"><span class="Identifier">getSocket</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncnet.html#AsyncSocket"><span class="Identifier">AsyncSocket</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -878,10 +970,10 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="request,AsyncHttpClient,string,string,string,HttpHeaders,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#request%2CAsyncHttpClient%2Cstring%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"><span class="Identifier">request</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">httpMethod</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-            <span class="Identifier">headers</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span>
-    <a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
-                    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#request%2CAsyncHttpClient%2Cstring%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"><span class="Identifier">request</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">httpMethod</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span>
+             <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">headers</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
+             <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Connects to the hostname specified by the URL and performs a request using the custom method string specified by <tt class="docutils literal"><span class="pre">httpMethod</span></tt>.</p>
@@ -897,9 +989,10 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="request,HttpClient,string,string,string,HttpHeaders,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#request%2CHttpClient%2Cstring%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"><span class="Identifier">request</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">httpMethod</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-            <span class="Identifier">headers</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
-    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+             <span class="Identifier">headers</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span>
+    <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -910,10 +1003,10 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="request,AsyncHttpClient,string,string,HttpHeaders,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#request%2CAsyncHttpClient%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"><span class="Identifier">request</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">httpMethod</span> <span class="Other">=</span> <span class="Identifier">HttpGet</span><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-            <span class="Identifier">headers</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span>
-    <a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
-                    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#request%2CAsyncHttpClient%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"><span class="Identifier">request</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">httpMethod</span> <span class="Other">=</span> <span class="Identifier">HttpGet</span><span class="Other">;</span>
+             <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">headers</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
+             <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Connects to the hostname specified by the URL and performs a request using the method specified.</p>
@@ -928,9 +1021,10 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="request,HttpClient,string,string,HttpHeaders,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#request%2CHttpClient%2Cstring%2Cstring%2CHttpHeaders%2CMultipartData"><span class="Identifier">request</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">httpMethod</span> <span class="Other">=</span> <span class="Identifier">HttpGet</span><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-            <span class="Identifier">headers</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
-    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+             <span class="Identifier">headers</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span>
+    <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -955,9 +1049,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="head,HttpClient,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#head%2CHttpClient%2Cstring"><span class="Identifier">head</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span>
-    <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#head%2CHttpClient%2Cstring"><span class="Identifier">head</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
+    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -982,9 +1076,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="get,HttpClient,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#get%2CHttpClient%2Cstring"><span class="Identifier">get</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span>
-    <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#get%2CHttpClient%2Cstring"><span class="Identifier">get</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
+    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1007,9 +1101,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getContent,HttpClient,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getContent%2CHttpClient%2Cstring"><span class="Identifier">getContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span>
-    <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getContent%2CHttpClient%2Cstring"><span class="Identifier">getContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
+    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1032,9 +1126,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="delete,HttpClient,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#delete%2CHttpClient%2Cstring"><span class="Identifier">delete</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span>
-    <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#delete%2CHttpClient%2Cstring"><span class="Identifier">delete</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
+    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1057,9 +1151,10 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="deleteContent,HttpClient,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#deleteContent%2CHttpClient%2Cstring"><span class="Identifier">deleteContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
-    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
-    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#deleteContent%2CHttpClient%2Cstring"><span class="Identifier">deleteContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span>
+    <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1071,7 +1166,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="post,AsyncHttpClient,string,string,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#post%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">post</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-         <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+          <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1083,8 +1178,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="post,HttpClient,string,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#post%2CHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">post</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
+<dt><pre><span class="Keyword">proc</span> <a href="#post%2CHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">post</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+          <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
     <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1097,7 +1193,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="postContent,AsyncHttpClient,string,string,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#postContent%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">postContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-                <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+                 <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1110,9 +1206,9 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="postContent,HttpClient,string,string,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#postContent%2CHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">postContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-                <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span>
-    <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                 <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
+    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1123,9 +1219,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="put,AsyncHttpClient,string,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#put%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">put</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span>
-    <a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
-                    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#put%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">put</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+         <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Connects to the hostname specified by the URL and performs a PUT request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre">client.maxRedirects</span></tt>.
@@ -1136,8 +1232,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="put,HttpClient,string,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#put%2CHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">put</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
+<dt><pre><span class="Keyword">proc</span> <a href="#put%2CHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">put</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+         <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
     <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1150,8 +1247,8 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="putContent,AsyncHttpClient,string,string,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#putContent%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">putContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-               <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Connects to the hostname specified by the URL andreturns the content of a PUT request.
@@ -1163,9 +1260,9 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="putContent,HttpClient,string,string,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#putContent%2CHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">putContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-               <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span>
-    <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
+    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1177,7 +1274,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="patch,AsyncHttpClient,string,string,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#patch%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">patch</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-          <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+           <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1189,8 +1286,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="patch,HttpClient,string,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#patch%2CHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">patch</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
+<dt><pre><span class="Keyword">proc</span> <a href="#patch%2CHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">patch</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+           <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
     <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1203,7 +1301,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="patchContent,AsyncHttpClient,string,string,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#patchContent%2CAsyncHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">patchContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-                 <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+                  <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1216,7 +1314,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="patchContent,HttpClient,string,string,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#patchContent%2CHttpClient%2Cstring%2Cstring%2CMultipartData"><span class="Identifier">patchContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-                 <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
+                  <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span>
     <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
     <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
@@ -1230,8 +1328,9 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="downloadFile,HttpClient,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#downloadFile%2CHttpClient%2Cstring%2Cstring"><span class="Identifier">downloadFile</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">TimeoutError</span><span class="Other">,</span>
-    <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">HttpRequestError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span>
+    <span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">ProtocolError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Downloads <tt class="docutils literal"><span class="pre">url</span></tt> and saves it to <tt class="docutils literal"><span class="pre">filename</span></tt>.
@@ -1242,8 +1341,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="downloadFile,AsyncHttpClient,string,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#downloadFile%2CAsyncHttpClient%2Cstring%2Cstring"><span class="Identifier">downloadFile</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#downloadFile%2CAsyncHttpClient%2Cstring%2Cstring"><span class="Identifier">downloadFile</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span>
+    <a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1268,7 +1367,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-03 01:06:28 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-07 13:53:01 UTC</small>
       </div>
     </div>
   </div>

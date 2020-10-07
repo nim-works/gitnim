@@ -183,9 +183,9 @@ proc put(g: var TSrcGen, kind: TokType, s: string; sym: PSym = nil) =
     addPendingNL(g)
     if s.len > 0:
       addTok(g, kind, s, sym)
-      inc(g.lineLen, s.len)
   else:
     g.pendingWhitespace = s.len
+  inc(g.lineLen, s.len)
 
 proc putComment(g: var TSrcGen, s: string) =
   if s.len == 0: return
@@ -336,7 +336,7 @@ proc litAux(g: TSrcGen; n: PNode, x: BiggestInt, size: int): string =
 
   if nfBase2 in n.flags: result = "0b" & toBin(x, size * 8)
   elif nfBase8 in n.flags:
-    var y = if size < sizeof(BiggestInt): x and ((1 shl (size*8)) - 1)
+    var y = if size < sizeof(BiggestInt): x and ((1.BiggestInt shl (size*8)) - 1)
             else: x
     result = "0o" & toOct(y, size * 3)
   elif nfBase16 in n.flags: result = "0x" & toHex(x, size * 2)
@@ -1057,9 +1057,10 @@ proc gsub(g: var TSrcGen, n: PNode, c: TContext) =
       put(g, tkSymbol, "(wrong conv)")
   of nkCast:
     put(g, tkCast, "cast")
-    put(g, tkBracketLe, "[")
-    gsub(g, n, 0)
-    put(g, tkBracketRi, "]")
+    if n.len > 0 and n[0].kind != nkEmpty:
+      put(g, tkBracketLe, "[")
+      gsub(g, n, 0)
+      put(g, tkBracketRi, "]")
     put(g, tkParLe, "(")
     gsub(g, n, 1)
     put(g, tkParRi, ")")

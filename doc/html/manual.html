@@ -624,7 +624,7 @@ colon = ':' COMMENT?
 colcom = ':' COMMENT?
 operator =  OP0 | OP1 | OP2 | OP3 | OP4 | OP5 | OP6 | OP7 | OP8 | OP9
          | 'or' | 'xor' | 'and'
-         | 'is' | 'isnot' | 'in' | 'notin' | 'of' | 'as' | 'from' |
+         | 'is' | 'isnot' | 'in' | 'notin' | 'of' | 'as' | 'from'
          | 'div' | 'mod' | 'shl' | 'shr' | 'not' | 'static' | '..'
 prefixOperator = operator
 optInd = COMMENT? IND?
@@ -649,15 +649,15 @@ dotExpr = expr '.' optInd (symbol | '[:' exprList ']')
 explicitGenericInstantiation = '[:' exprList ']' ( '(' exprColonEqExpr ')' )?
 qualifiedIdent = symbol ('.' optInd symbol)?
 setOrTableConstr = '{' ((exprColonEqExpr comma)* | ':' ) '}'
-castExpr = 'cast' '[' optInd typeDesc optPar ']' '(' optInd expr optPar ')'
+castExpr = 'cast' ('[' optInd typeDesc optPar ']' '(' optInd expr optPar ')') /
 parKeyw = 'discard' | 'include' | 'if' | 'while' | 'case' | 'try'
         | 'finally' | 'except' | 'for' | 'block' | 'const' | 'let'
         | 'when' | 'var' | 'mixin'
 par = '(' optInd
-          ( &amp;parKeyw complexOrSimpleStmt ^+ ';'
-          | ';' complexOrSimpleStmt ^+ ';'
+          ( &amp;parKeyw (ifExpr \ complexOrSimpleStmt) ^+ ';'
+          | ';' (ifExpr \ complexOrSimpleStmt) ^+ ';'
           | pragmaStmt
-          | simpleExpr ( ('=' expr (';' complexOrSimpleStmt ^+ ';' )? )
+          | simpleExpr ( ('=' expr (';' (ifExpr \ complexOrSimpleStmt) ^+ ';' )? )
                        | (':' expr (',' exprColonEqExpr     ^+ ',' )? ) ) )
           optPar ')'
 literal = | INT_LIT | INT8_LIT | INT16_LIT | INT32_LIT | INT64_LIT
@@ -677,11 +677,6 @@ primarySuffix = '(' (exprColonEqExpr comma?)* ')'
       | '[' optInd exprColonEqExprList optPar ']'
       | '{' optInd exprColonEqExprList optPar '}'
       | &amp;( '`'|IDENT|literal|'cast'|'addr'|'type') expr # command syntax
-condExpr = expr colcom expr optInd
-        ('elif' expr colcom expr optInd)*
-         'else' colcom expr
-ifExpr = 'if' condExpr
-whenExpr = 'when' condExpr
 pragma = '{.' optInd (exprColonEqExpr comma?)* optPar ('.}' | '}')
 identVis = symbol OPR?  # postfix position
 identVisDot = symbol '.' optInd symbol OPR?
@@ -748,6 +743,11 @@ condStmt = expr colcom stmt COMMENT?
            (IND{=} 'else' colcom stmt)?
 ifStmt = 'if' condStmt
 whenStmt = 'when' condStmt
+condExpr = expr colcom expr optInd
+        ('elif' expr colcom expr optInd)*
+         'else' colcom expr
+ifExpr = 'if' condExpr
+whenExpr = 'when' condExpr
 whileStmt = 'while' expr colcom stmt
 ofBranch = 'of' exprList colcom stmt
 ofBranches = ofBranch (IND{=} ofBranch)*
@@ -811,8 +811,8 @@ complexOrSimpleStmt = (ifStmt | whenStmt | whileStmt
                     | tryStmt | forStmt
                     | blockStmt | staticStmt | deferStmt | asmStmt
                     | 'proc' routine
-                    | 'func' routine
                     | 'method' routine
+                    | 'func' routine
                     | 'iterator' routine
                     | 'macro' routine
                     | 'template' routine
@@ -3373,9 +3373,9 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 <h2><a class="toc-backref" id="pragmas-nosideeffect-pragma" href="#pragmas-nosideeffect-pragma">noSideEffect pragma</a></h2><p>The <tt class="docutils literal"><span class="pre">noSideEffect</span></tt> pragma is used to mark a proc/iterator to have no side effects. This means that the proc/iterator only changes locations that are reachable from its parameters and the return value only depends on the arguments. If none of its parameters have the type <tt class="docutils literal"><span class="pre">var T</span></tt> or <tt class="docutils literal"><span class="pre">out T</span></tt> or <tt class="docutils literal"><span class="pre">ref T</span></tt> or <tt class="docutils literal"><span class="pre">ptr T</span></tt> this means no locations are modified. It is a static error to mark a proc/iterator to have no side effect if the compiler cannot verify this.</p>
 <p>As a special semantic rule, the built-in <a class="reference external" href="system.html#debugEcho,varargs[typed,]">debugEcho</a> pretends to be free of side effects, so that it can be used for debugging routines marked as <tt class="docutils literal"><span class="pre">noSideEffect</span></tt>.</p>
 <p><tt class="docutils literal"><span class="pre">func</span></tt> is syntactic sugar for a proc with no side effects:</p>
-<pre class="listing"><span class="Keyword">func</span> <span class="Punctuation">`</span><span class="Operator">+</span><span class="Punctuation">`</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span></pre><p>To override the compiler's side effect analysis a <tt class="docutils literal"><span class="pre">{.noSideEffect.}</span></tt> pragma block can be used:</p>
+<pre class="listing"><span class="Keyword">func</span> <span class="Punctuation">`</span><span class="Operator">+</span><span class="Punctuation">`</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span></pre><p>To override the compiler's side effect analysis a <tt class="docutils literal"><span class="pre">{.noSideEffect.}</span></tt> <tt class="docutils literal"><span class="pre">cast</span></tt> pragma block can be used:</p>
 <pre class="listing"><span class="Keyword">func</span> <span class="Identifier">f</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span>
-  <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">noSideEffect</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span>
+  <span class="Punctuation">{</span><span class="Operator">.</span><span class="Keyword">cast</span><span class="Punctuation">(</span><span class="Identifier">noSideEffect</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span>
     <span class="Identifier">echo</span> <span class="StringLit">&quot;test&quot;</span></pre>
 <h2><a class="toc-backref" id="pragmas-compiletime-pragma" href="#pragmas-compiletime-pragma">compileTime pragma</a></h2><p>The <tt class="docutils literal"><span class="pre">compileTime</span></tt> pragma is used to mark a proc or variable to be used only during compile-time execution. No code will be generated for it. Compile-time procs are useful as helpers for macros. Since version 0.12.0 of the language, a proc that uses <tt class="docutils literal"><span class="pre">system.NimNode</span></tt> within its parameter types is implicitly declared <tt class="docutils literal"><span class="pre">compileTime</span></tt>:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">astHelper</span><span class="Punctuation">(</span><span class="Identifier">n</span><span class="Punctuation">:</span> <span class="Identifier">NimNode</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">NimNode</span> <span class="Operator">=</span>
@@ -3629,6 +3629,8 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
          <span class="Identifier">pure</span><span class="Punctuation">,</span> <span class="Identifier">incompleteStruct</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">object</span></pre>
 <h2><a class="toc-backref" id="implementation-specific-pragmas-compile-pragma" href="#implementation-specific-pragmas-compile-pragma">Compile pragma</a></h2><p>The <tt class="docutils literal"><span class="pre">compile</span></tt> pragma can be used to compile and link a C/C++ source file with the project:</p>
 <pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">compile</span><span class="Punctuation">:</span> <span class="StringLit">&quot;myfile.cpp&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></pre><p><strong>Note</strong>: Nim computes a SHA1 checksum and only recompiles the file if it has changed. One can use the <tt class="docutils literal"><span class="pre">-f</span></tt> command line option to force recompilation of the file.</p>
+<p>Since 1.4 the <tt class="docutils literal"><span class="pre">compile</span></tt> pragma is also available with this syntax:</p>
+<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">compile</span><span class="Punctuation">(</span><span class="StringLit">&quot;myfile.cpp&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;--custom flags here&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span></pre><p>As can be seen in the example, this new variant allows for custom flags that are passed to the C compiler when the file is recompiled.</p>
 
 <h2><a class="toc-backref" id="implementation-specific-pragmas-link-pragma" href="#implementation-specific-pragmas-link-pragma">Link pragma</a></h2><p>The <tt class="docutils literal"><span class="pre">link</span></tt> pragma can be used to link an additional file with the project:</p>
 <pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">link</span><span class="Punctuation">:</span> <span class="StringLit">&quot;myfile.o&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></pre>
@@ -3968,13 +3970,13 @@ libtcl8.3.so.0</pre>
 <h2><a class="toc-backref" id="threads-gc-safety" href="#threads-gc-safety">GC safety</a></h2><p>We call a proc <tt class="docutils literal"><span class="pre">p</span></tt> <span id="gc-safe_1">GC safe</span> when it doesn't access any global variable that contains GC'ed memory (<tt class="docutils literal"><span class="pre">string</span></tt>, <tt class="docutils literal"><span class="pre">seq</span></tt>, <tt class="docutils literal"><span class="pre">ref</span></tt> or a closure) either directly or indirectly through a call to a GC unsafe proc.</p>
 <p>The <span id="gcsafe_1">gcsafe</span> annotation can be used to mark a proc to be gcsafe, otherwise this property is inferred by the compiler. Note that <tt class="docutils literal"><span class="pre">noSideEffect</span></tt> implies <tt class="docutils literal"><span class="pre">gcsafe</span></tt>. The only way to create a thread is via <tt class="docutils literal"><span class="pre">spawn</span></tt> or <tt class="docutils literal"><span class="pre">createThread</span></tt>. The invoked proc must not use <tt class="docutils literal"><span class="pre">var</span></tt> parameters nor must any of its parameters contain a <tt class="docutils literal"><span class="pre">ref</span></tt> or <tt class="docutils literal"><span class="pre">closure</span></tt> type. This enforces the <em>no heap sharing restriction</em>.</p>
 <p>Routines that are imported from C are always assumed to be <tt class="docutils literal"><span class="pre">gcsafe</span></tt>. To disable the GC-safety checking the <tt class="docutils literal"><span class="pre">--threadAnalysis:off</span></tt> command line switch can be used. This is a temporary workaround to ease the porting effort from old code to the new threading model.</p>
-<p>To override the compiler's gcsafety analysis a <tt class="docutils literal"><span class="pre">{.gcsafe.}</span></tt> pragma block can be used:</p>
+<p>To override the compiler's gcsafety analysis a <tt class="docutils literal"><span class="pre">{.cast(gcsafe).}</span></tt> pragma block can be used:</p>
 <pre class="listing"><span class="Keyword">var</span>
   <span class="Identifier">someGlobal</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span> <span class="StringLit">&quot;some string here&quot;</span>
   <span class="Identifier">perThread</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">threadvar</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span> <span class="Identifier">string</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">setPerThread</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span>
-  <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">gcsafe</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span>
+  <span class="Punctuation">{</span><span class="Operator">.</span><span class="Keyword">cast</span><span class="Punctuation">(</span><span class="Identifier">gcsafe</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span>
     <span class="Identifier">deepCopy</span><span class="Punctuation">(</span><span class="Identifier">perThread</span><span class="Punctuation">,</span> <span class="Identifier">someGlobal</span><span class="Punctuation">)</span></pre><p>See also:</p>
 <ul class="simple"><li><a class="reference external" href="gc.html">Shared heap memory management.</a>.</li>
 </ul>
@@ -3992,7 +3994,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-03 01:06:06 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-07 13:52:37 UTC</small>
       </div>
     </div>
   </div>

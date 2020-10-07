@@ -148,7 +148,7 @@ function main() {
       sslPeekChar: char
       sslNoShutdown: bool
 
-  lastError: OSErrorCode       ## stores the last error on this socket
+  lastError: OSErrorCode     ## stores the last error on this socket
   domain: Domain
   sockType: SockType
   protocol: Protocol"><wbr />Socket<wbr />Impl<span class="attachedType"></span></a></li>
@@ -156,8 +156,8 @@ function main() {
     title="Socket = ref SocketImpl"><wbr />Socket<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#SOBool"
     title="SOBool = enum
-  OptAcceptConn, OptBroadcast, OptDebug, OptDontRoute, OptKeepAlive, OptOOBInline,
-  OptReuseAddr, OptReusePort, OptNoDelay"><wbr />SOBool<span class="attachedType"></span></a></li>
+  OptAcceptConn, OptBroadcast, OptDebug, OptDontRoute, OptKeepAlive,
+  OptOOBInline, OptReuseAddr, OptReusePort, OptNoDelay"><wbr />SOBool<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#ReadLineResult"
     title="ReadLineResult = enum
   ReadFullLine, ReadPartialLine, ReadDisconnected, ReadNone"><wbr />Read<wbr />Line<wbr />Result<span class="attachedType"></span></a></li>
@@ -174,11 +174,11 @@ function main() {
   case family*: IpAddressFamily ## the type of the IP address (IPv4 or IPv6)
   of IpAddressFamily.IPv6:
       address_v6*: array[0 .. 15, uint8] ## Contains the IP address in bytes in
-                                    ## case of IPv6
+                                         ## case of IPv6
     
   of IpAddressFamily.IPv4:
       address_v4*: array[0 .. 3, uint8] ## Contains the IP address in bytes in
-                                   ## case of IPv4"><wbr />Ip<wbr />Address<span class="attachedType"></span></a></li>
+                                        ## case of IPv4"><wbr />Ip<wbr />Address<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -195,152 +195,328 @@ function main() {
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#isDisconnectionError%2Cset%5BSocketFlag%5D%2COSErrorCode"
-    title="isDisconnectionError(flags: set[SocketFlag]; lastError: OSErrorCode): bool"><wbr />is<wbr />Disconnection<wbr />Error<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#toOSFlags%2Cset%5BSocketFlag%5D"
-    title="toOSFlags(socketFlags: set[SocketFlag]): cint"><wbr />to<wbr />OSFlags<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#newSocket%2CSocketHandle%2CDomain%2CSockType%2CProtocol"
+      <ul class="simple nested-toc-section">getSockOpt
+      <li><a class="reference" href="#getSockOpt%2CSocket%2CSOBool"
+    title="getSockOpt(socket: Socket; opt: SOBool; level = SOL_SOCKET): bool">getSockOpt,Socket,SOBool<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">destroyContext
+      <li><a class="reference" href="#destroyContext%2CSslContext"
+    title="destroyContext(ctx: SslContext)">destroyContext,SslContext<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">trySend
+      <li><a class="reference" href="#trySend%2CSocket%2Cstring"
+    title="trySend(socket: Socket; data: string): bool">trySend,Socket,string<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">$
+      <li><a class="reference" href="#%24%2CIpAddress"
+    title="`$`(address: IpAddress): string">$,IpAddress<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">newSocket
+      <li><a class="reference" href="#newSocket%2CSocketHandle%2CDomain%2CSockType%2CProtocol"
     title="newSocket(fd: SocketHandle; domain: Domain = AF_INET;
           sockType: SockType = SOCK_STREAM; protocol: Protocol = IPPROTO_TCP;
-          buffered = true): owned(Socket)"><wbr />new<wbr />Socket<span class="attachedType"></span></a></li>
+          buffered = true): owned(Socket)">newSocket,SocketHandle,Domain,SockType,Protocol<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#newSocket%2Ccint%2Ccint%2Ccint"
     title="newSocket(domain, sockType, protocol: cint; buffered = true;
-          inheritable = defined(nimInheritHandles)): owned(Socket)"><wbr />new<wbr />Socket<span class="attachedType"></span></a></li>
+          inheritable = defined(nimInheritHandles)): owned(Socket)">newSocket,cint,cint,cint<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#newSocket%2CDomain%2CSockType%2CProtocol"
     title="newSocket(domain: Domain = AF_INET; sockType: SockType = SOCK_STREAM;
           protocol: Protocol = IPPROTO_TCP; buffered = true;
-          inheritable = defined(nimInheritHandles)): owned(Socket)"><wbr />new<wbr />Socket<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#parseIpAddress%2Cstring"
-    title="parseIpAddress(addressStr: string): IpAddress"><wbr />parse<wbr />Ip<wbr />Address<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#isIpAddress%2Cstring"
-    title="isIpAddress(addressStr: string): bool"><wbr />is<wbr />Ip<wbr />Address<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#toSockAddr%2CIpAddress%2CPort%2CSockaddr_storage%2CSockLen"
-    title="toSockAddr(address: IpAddress; port: Port; sa: var Sockaddr_storage; sl: var SockLen)"><wbr />to<wbr />Sock<wbr />Addr<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#fromSockAddr%2C%2CSockLen%2CIpAddress%2CPort"
-    title="fromSockAddr(sa: Sockaddr_storage | SockAddr | Sockaddr_in | Sockaddr_in6; sl: SockLen;
-             address: var IpAddress; port: var Port)"><wbr />from<wbr />Sock<wbr />Addr<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#raiseSSLError%2Cstring"
-    title="raiseSSLError(s = &quot;&quot;)"><wbr />raise<wbr />SSLError<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#getExtraData%2CSslContext%2Cint"
-    title="getExtraData(ctx: SslContext; index: int): RootRef"><wbr />get<wbr />Extra<wbr />Data<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#setExtraData%2CSslContext%2Cint%2CRootRef"
-    title="setExtraData(ctx: SslContext; index: int; data: RootRef)"><wbr />set<wbr />Extra<wbr />Data<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#newContext%2Cstring%2Cstring%2Cstring%2Cstring"
-    title="newContext(protVersion = protSSLv23; verifyMode = CVerifyPeer; certFile = &quot;&quot;;
-           keyFile = &quot;&quot;; cipherList = CiphersIntermediate; caDir = &quot;&quot;; caFile = &quot;&quot;): SslContext"><wbr />new<wbr />Context<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#destroyContext%2CSslContext"
-    title="destroyContext(ctx: SslContext)"><wbr />destroy<wbr />Context<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#pskIdentityHint%3D%2CSslContext%2Cstring"
-    title="pskIdentityHint=(ctx: SslContext; hint: string)"><wbr />psk<wbr />Identity<wbr />Hint=<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#clientGetPskFunc%2CSslContext"
-    title="clientGetPskFunc(ctx: SslContext): SslClientGetPskFunc"><wbr />client<wbr />Get<wbr />Psk<wbr />Func<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#clientGetPskFunc%3D%2CSslContext%2CSslClientGetPskFunc"
-    title="clientGetPskFunc=(ctx: SslContext; fun: SslClientGetPskFunc)"><wbr />client<wbr />Get<wbr />Psk<wbr />Func=<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#serverGetPskFunc%2CSslContext"
-    title="serverGetPskFunc(ctx: SslContext): SslServerGetPskFunc"><wbr />server<wbr />Get<wbr />Psk<wbr />Func<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#serverGetPskFunc%3D%2CSslContext%2CSslServerGetPskFunc"
-    title="serverGetPskFunc=(ctx: SslContext; fun: SslServerGetPskFunc)"><wbr />server<wbr />Get<wbr />Psk<wbr />Func=<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#getPskIdentity%2CSocket"
-    title="getPskIdentity(socket: Socket): string"><wbr />get<wbr />Psk<wbr />Identity<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#wrapSocket%2CSslContext%2CSocket"
-    title="wrapSocket(ctx: SslContext; socket: Socket)"><wbr />wrap<wbr />Socket<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#wrapConnectedSocket%2CSslContext%2CSocket%2CSslHandshakeType%2Cstring"
-    title="wrapConnectedSocket(ctx: SslContext; socket: Socket; handshake: SslHandshakeType;
-                    hostname: string = &quot;&quot;)"><wbr />wrap<wbr />Connected<wbr />Socket<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#getPeerCertificates%2CSslPtr"
-    title="getPeerCertificates(sslHandle: SslPtr): seq[Certificate]"><wbr />get<wbr />Peer<wbr />Certificates<span class="attachedType">Certificate</span></a></li>
-  <li><a class="reference" href="#getPeerCertificates%2CSocket"
-    title="getPeerCertificates(socket: Socket): seq[Certificate]"><wbr />get<wbr />Peer<wbr />Certificates<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#sessionIdContext%3D%2CSslContext%2Cstring"
-    title="sessionIdContext=(ctx: SslContext; sidCtx: string)"><wbr />session<wbr />Id<wbr />Context=<span class="attachedType">SslContext</span></a></li>
-  <li><a class="reference" href="#getSocketError%2CSocket"
-    title="getSocketError(socket: Socket): OSErrorCode"><wbr />get<wbr />Socket<wbr />Error<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#socketError%2CSocket%2Cint%2Cset%5BSocketFlag%5D"
-    title="socketError(socket: Socket; err: int = -1; async = false; lastError = -1.OSErrorCode;
-            flags: set[SocketFlag] = {}): void"><wbr />socket<wbr />Error<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#listen%2CSocket"
-    title="listen(socket: Socket; backlog = SOMAXCONN)"><wbr />listen<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#bindAddr%2CSocket%2Cstring"
-    title="bindAddr(socket: Socket; port = Port(0); address = &quot;&quot;)"><wbr />bind<wbr />Addr<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#acceptAddr%2CSocket%2C%2Cstring"
-    title="acceptAddr(server: Socket; client: var owned(Socket); address: var string;
-           flags = {SafeDisconn}; inheritable = defined(nimInheritHandles))"><wbr />accept<wbr />Addr<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#accept%2CSocket%2C"
-    title="accept(server: Socket; client: var owned(Socket); flags = {SafeDisconn};
-       inheritable = defined(nimInheritHandles))"><wbr />accept<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#close%2CSocket"
-    title="close(socket: Socket; flags = {SafeDisconn})"><wbr />close<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#toCInt%2CSOBool"
-    title="toCInt(opt: SOBool): cint"><wbr />to<wbr />CInt<span class="attachedType">SOBool</span></a></li>
-  <li><a class="reference" href="#getSockOpt%2CSocket%2CSOBool"
-    title="getSockOpt(socket: Socket; opt: SOBool; level = SOL_SOCKET): bool"><wbr />get<wbr />Sock<wbr />Opt<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#getLocalAddr%2CSocket"
-    title="getLocalAddr(socket: Socket): (string, Port)"><wbr />get<wbr />Local<wbr />Addr<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#getPeerAddr%2CSocket"
-    title="getPeerAddr(socket: Socket): (string, Port)"><wbr />get<wbr />Peer<wbr />Addr<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#setSockOpt%2CSocket%2CSOBool%2Cbool"
-    title="setSockOpt(socket: Socket; opt: SOBool; value: bool; level = SOL_SOCKET)"><wbr />set<wbr />Sock<wbr />Opt<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#connectUnix%2CSocket%2Cstring"
-    title="connectUnix(socket: Socket; path: string)"><wbr />connect<wbr />Unix<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#bindUnix%2CSocket%2Cstring"
-    title="bindUnix(socket: Socket; path: string)"><wbr />bind<wbr />Unix<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#hasDataBuffered%2CSocket"
-    title="hasDataBuffered(s: Socket): bool"><wbr />has<wbr />Data<wbr />Buffered<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#recv%2CSocket%2Cpointer%2Cint"
-    title="recv(socket: Socket; data: pointer; size: int): int"><wbr />recv<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#recv%2CSocket%2Cpointer%2Cint%2Cint"
-    title="recv(socket: Socket; data: pointer; size: int; timeout: int): int"><wbr />recv<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#recv%2CSocket%2Cstring%2Cint"
-    title="recv(socket: Socket; data: var string; size: int; timeout = -1; flags = {SafeDisconn}): int"><wbr />recv<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#recv%2CSocket%2Cint"
-    title="recv(socket: Socket; size: int; timeout = -1; flags = {SafeDisconn}): string"><wbr />recv<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#readLine%2CSocket%2CTaintedString"
-    title="readLine(socket: Socket; line: var TaintedString; timeout = -1; flags = {SafeDisconn};
-         maxLength = MaxLineLength)"><wbr />read<wbr />Line<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#recvLine%2CSocket"
-    title="recvLine(socket: Socket; timeout = -1; flags = {SafeDisconn}; maxLength = MaxLineLength): TaintedString"><wbr />recv<wbr />Line<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#recvFrom%2CSocket%2Cstring%2Cint%2Cstring%2CPort%2Cint32"
+          inheritable = defined(nimInheritHandles)): owned(Socket)">newSocket,Domain,SockType,Protocol<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">recvLine
+      <li><a class="reference" href="#recvLine%2CSocket"
+    title="recvLine(socket: Socket; timeout = -1; flags = {SafeDisconn};
+         maxLength = MaxLineLength): TaintedString">recvLine,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">recvFrom
+      <li><a class="reference" href="#recvFrom%2CSocket%2Cstring%2Cint%2Cstring%2CPort%2Cint32"
     title="recvFrom(socket: Socket; data: var string; length: int; address: var string;
-         port: var Port; flags = 0&apos;i32): int"><wbr />recv<wbr />From<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#skip%2CSocket%2Cint"
-    title="skip(socket: Socket; size: int; timeout = -1)"><wbr />skip<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#send%2CSocket%2Cpointer%2Cint"
-    title="send(socket: Socket; data: pointer; size: int): int"><wbr />send<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#send%2CSocket%2Cstring"
-    title="send(socket: Socket; data: string; flags = {SafeDisconn})"><wbr />send<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#trySend%2CSocket%2Cstring"
-    title="trySend(socket: Socket; data: string): bool"><wbr />try<wbr />Send<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#sendTo%2CSocket%2Cstring%2CPort%2Cpointer%2Cint%2CDomain%2Cint32"
-    title="sendTo(socket: Socket; address: string; port: Port; data: pointer; size: int;
-       af: Domain = AF_INET; flags = 0&apos;i32)"><wbr />send<wbr />To<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#sendTo%2CSocket%2Cstring%2CPort%2Cstring"
-    title="sendTo(socket: Socket; address: string; port: Port; data: string)"><wbr />send<wbr />To<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#isSsl%2CSocket"
-    title="isSsl(socket: Socket): bool"><wbr />is<wbr />Ssl<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#getFd%2CSocket"
-    title="getFd(socket: Socket): SocketHandle"><wbr />get<wbr />Fd<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#IPv4_any"
-    title="IPv4_any(): IpAddress"><wbr />IPv4_<wbr />any<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#IPv4_loopback"
-    title="IPv4_loopback(): IpAddress"><wbr />IPv4_<wbr />loopback<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#IPv4_broadcast"
-    title="IPv4_broadcast(): IpAddress"><wbr />IPv4_<wbr />broadcast<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#IPv6_any"
-    title="IPv6_any(): IpAddress"><wbr />IPv6_<wbr />any<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#IPv6_loopback"
-    title="IPv6_loopback(): IpAddress"><wbr />IPv6_<wbr />loopback<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#%3D%3D%2CIpAddress%2CIpAddress"
-    title="`==`(lhs, rhs: IpAddress): bool"><wbr />`==`<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#%24%2CIpAddress"
-    title="`$`(address: IpAddress): string"><wbr />`$`<span class="attachedType">IpAddress</span></a></li>
-  <li><a class="reference" href="#dial%2Cstring%2CPort"
-    title="dial(address: string; port: Port; protocol = IPPROTO_TCP; buffered = true): owned(Socket)"><wbr />dial<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#connect%2CSocket%2Cstring"
-    title="connect(socket: Socket; address: string; port = Port(0))"><wbr />connect<span class="attachedType">Socket</span></a></li>
+         port: var Port; flags = 0&apos;i32): int">recvFrom,Socket,string,int,string,Port,int32<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getPeerCertificates
+      <li><a class="reference" href="#getPeerCertificates%2CSslPtr"
+    title="getPeerCertificates(sslHandle: SslPtr): seq[Certificate]">getPeerCertificates,SslPtr<span class="attachedType">Certificate</span></a></li>
+  <li><a class="reference" href="#getPeerCertificates%2CSocket"
+    title="getPeerCertificates(socket: Socket): seq[Certificate]">getPeerCertificates,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getPeerAddr
+      <li><a class="reference" href="#getPeerAddr%2CSocket"
+    title="getPeerAddr(socket: Socket): (string, Port)">getPeerAddr,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">connectUnix
+      <li><a class="reference" href="#connectUnix%2CSocket%2Cstring"
+    title="connectUnix(socket: Socket; path: string)">connectUnix,Socket,string<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">clientGetPskFunc
+      <li><a class="reference" href="#clientGetPskFunc%2CSslContext"
+    title="clientGetPskFunc(ctx: SslContext): SslClientGetPskFunc">clientGetPskFunc,SslContext<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">readLine
+      <li><a class="reference" href="#readLine%2CSocket%2CTaintedString"
+    title="readLine(socket: Socket; line: var TaintedString; timeout = -1;
+         flags = {SafeDisconn}; maxLength = MaxLineLength)">readLine,Socket,TaintedString<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getFd
+      <li><a class="reference" href="#getFd%2CSocket"
+    title="getFd(socket: Socket): SocketHandle">getFd,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">toSockAddr
+      <li><a class="reference" href="#toSockAddr%2CIpAddress%2CPort%2CSockaddr_storage%2CSockLen"
+    title="toSockAddr(address: IpAddress; port: Port; sa: var Sockaddr_storage;
+           sl: var SockLen)">toSockAddr,IpAddress,Port,Sockaddr_storage,SockLen<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getSocketError
+      <li><a class="reference" href="#getSocketError%2CSocket"
+    title="getSocketError(socket: Socket): OSErrorCode">getSocketError,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getPrimaryIPAddr
+      <li><a class="reference" href="#getPrimaryIPAddr"
+    title="getPrimaryIPAddr(dest = parseIpAddress(&quot;8.8.8.8&quot;)): IpAddress">getPrimaryIPAddr<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">connect
+      <li><a class="reference" href="#connect%2CSocket%2Cstring"
+    title="connect(socket: Socket; address: string; port = Port(0))">connect,Socket,string<span class="attachedType">Socket</span></a></li>
   <li><a class="reference" href="#connect%2CSocket%2Cstring%2Cint"
-    title="connect(socket: Socket; address: string; port = Port(0); timeout: int)"><wbr />connect<span class="attachedType">Socket</span></a></li>
-  <li><a class="reference" href="#getPrimaryIPAddr"
-    title="getPrimaryIPAddr(dest = parseIpAddress(&quot;8.8.8.8&quot;)): IpAddress"><wbr />get<wbr />Primary<wbr />IPAddr<span class="attachedType">IpAddress</span></a></li>
+    title="connect(socket: Socket; address: string; port = Port(0); timeout: int)">connect,Socket,string,int<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">listen
+      <li><a class="reference" href="#listen%2CSocket"
+    title="listen(socket: Socket; backlog = SOMAXCONN)">listen,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">setSockOpt
+      <li><a class="reference" href="#setSockOpt%2CSocket%2CSOBool%2Cbool"
+    title="setSockOpt(socket: Socket; opt: SOBool; value: bool; level = SOL_SOCKET)">setSockOpt,Socket,SOBool,bool<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">send
+      <li><a class="reference" href="#send%2CSocket%2Cpointer%2Cint"
+    title="send(socket: Socket; data: pointer; size: int): int">send,Socket,pointer,int<span class="attachedType">Socket</span></a></li>
+  <li><a class="reference" href="#send%2CSocket%2Cstring"
+    title="send(socket: Socket; data: string; flags = {SafeDisconn})">send,Socket,string<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">toOSFlags
+      <li><a class="reference" href="#toOSFlags%2Cset%5BSocketFlag%5D"
+    title="toOSFlags(socketFlags: set[SocketFlag]): cint">toOSFlags,set[SocketFlag]<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">IPv6_loopback
+      <li><a class="reference" href="#IPv6_loopback"
+    title="IPv6_loopback(): IpAddress">IPv6_loopback<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getExtraData
+      <li><a class="reference" href="#getExtraData%2CSslContext%2Cint"
+    title="getExtraData(ctx: SslContext; index: int): RootRef">getExtraData,SslContext,int<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">sessionIdContext=
+      <li><a class="reference" href="#sessionIdContext%3D%2CSslContext%2Cstring"
+    title="sessionIdContext=(ctx: SslContext; sidCtx: string)">sessionIdContext=,SslContext,string<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">setExtraData
+      <li><a class="reference" href="#setExtraData%2CSslContext%2Cint%2CRootRef"
+    title="setExtraData(ctx: SslContext; index: int; data: RootRef)">setExtraData,SslContext,int,RootRef<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">accept
+      <li><a class="reference" href="#accept%2CSocket%2C"
+    title="accept(server: Socket; client: var owned(Socket); flags = {SafeDisconn};
+       inheritable = defined(nimInheritHandles))">accept,Socket,<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">close
+      <li><a class="reference" href="#close%2CSocket"
+    title="close(socket: Socket; flags = {SafeDisconn})">close,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">isIpAddress
+      <li><a class="reference" href="#isIpAddress%2Cstring"
+    title="isIpAddress(addressStr: string): bool">isIpAddress,string<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">bindUnix
+      <li><a class="reference" href="#bindUnix%2CSocket%2Cstring"
+    title="bindUnix(socket: Socket; path: string)">bindUnix,Socket,string<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">skip
+      <li><a class="reference" href="#skip%2CSocket%2Cint"
+    title="skip(socket: Socket; size: int; timeout = -1)">skip,Socket,int<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getPskIdentity
+      <li><a class="reference" href="#getPskIdentity%2CSocket"
+    title="getPskIdentity(socket: Socket): string">getPskIdentity,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">serverGetPskFunc=
+      <li><a class="reference" href="#serverGetPskFunc%3D%2CSslContext%2CSslServerGetPskFunc"
+    title="serverGetPskFunc=(ctx: SslContext; fun: SslServerGetPskFunc)">serverGetPskFunc=,SslContext,SslServerGetPskFunc<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">socketError
+      <li><a class="reference" href="#socketError%2CSocket%2Cint%2Cset%5BSocketFlag%5D"
+    title="socketError(socket: Socket; err: int = -1; async = false;
+            lastError = -1.OSErrorCode; flags: set[SocketFlag] = {}): void">socketError,Socket,int,set[SocketFlag]<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">dial
+      <li><a class="reference" href="#dial%2Cstring%2CPort"
+    title="dial(address: string; port: Port; protocol = IPPROTO_TCP; buffered = true): owned(
+    Socket)">dial,string,Port<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">clientGetPskFunc=
+      <li><a class="reference" href="#clientGetPskFunc%3D%2CSslContext%2CSslClientGetPskFunc"
+    title="clientGetPskFunc=(ctx: SslContext; fun: SslClientGetPskFunc)">clientGetPskFunc=,SslContext,SslClientGetPskFunc<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">toCInt
+      <li><a class="reference" href="#toCInt%2CSOBool"
+    title="toCInt(opt: SOBool): cint">toCInt,SOBool<span class="attachedType">SOBool</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">raiseSSLError
+      <li><a class="reference" href="#raiseSSLError%2Cstring"
+    title="raiseSSLError(s = &quot;&quot;)">raiseSSLError,string<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">recv
+      <li><a class="reference" href="#recv%2CSocket%2Cpointer%2Cint"
+    title="recv(socket: Socket; data: pointer; size: int): int">recv,Socket,pointer,int<span class="attachedType">Socket</span></a></li>
+  <li><a class="reference" href="#recv%2CSocket%2Cpointer%2Cint%2Cint"
+    title="recv(socket: Socket; data: pointer; size: int; timeout: int): int">recv,Socket,pointer,int,int<span class="attachedType">Socket</span></a></li>
+  <li><a class="reference" href="#recv%2CSocket%2Cstring%2Cint"
+    title="recv(socket: Socket; data: var string; size: int; timeout = -1;
+     flags = {SafeDisconn}): int">recv,Socket,string,int<span class="attachedType">Socket</span></a></li>
+  <li><a class="reference" href="#recv%2CSocket%2Cint"
+    title="recv(socket: Socket; size: int; timeout = -1; flags = {SafeDisconn}): string">recv,Socket,int<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">IPv4_any
+      <li><a class="reference" href="#IPv4_any"
+    title="IPv4_any(): IpAddress">IPv4_any<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">IPv4_loopback
+      <li><a class="reference" href="#IPv4_loopback"
+    title="IPv4_loopback(): IpAddress">IPv4_loopback<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">pskIdentityHint=
+      <li><a class="reference" href="#pskIdentityHint%3D%2CSslContext%2Cstring"
+    title="pskIdentityHint=(ctx: SslContext; hint: string)">pskIdentityHint=,SslContext,string<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">serverGetPskFunc
+      <li><a class="reference" href="#serverGetPskFunc%2CSslContext"
+    title="serverGetPskFunc(ctx: SslContext): SslServerGetPskFunc">serverGetPskFunc,SslContext<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">IPv6_any
+      <li><a class="reference" href="#IPv6_any"
+    title="IPv6_any(): IpAddress">IPv6_any<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">acceptAddr
+      <li><a class="reference" href="#acceptAddr%2CSocket%2C%2Cstring"
+    title="acceptAddr(server: Socket; client: var owned(Socket); address: var string;
+           flags = {SafeDisconn}; inheritable = defined(nimInheritHandles))">acceptAddr,Socket,,string<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">wrapSocket
+      <li><a class="reference" href="#wrapSocket%2CSslContext%2CSocket"
+    title="wrapSocket(ctx: SslContext; socket: Socket)">wrapSocket,SslContext,Socket<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">wrapConnectedSocket
+      <li><a class="reference" href="#wrapConnectedSocket%2CSslContext%2CSocket%2CSslHandshakeType%2Cstring"
+    title="wrapConnectedSocket(ctx: SslContext; socket: Socket;
+                    handshake: SslHandshakeType; hostname: string = &quot;&quot;)">wrapConnectedSocket,SslContext,Socket,SslHandshakeType,string<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">sendTo
+      <li><a class="reference" href="#sendTo%2CSocket%2Cstring%2CPort%2Cpointer%2Cint%2CDomain%2Cint32"
+    title="sendTo(socket: Socket; address: string; port: Port; data: pointer; size: int;
+       af: Domain = AF_INET; flags = 0&apos;i32)">sendTo,Socket,string,Port,pointer,int,Domain,int32<span class="attachedType">Socket</span></a></li>
+  <li><a class="reference" href="#sendTo%2CSocket%2Cstring%2CPort%2Cstring"
+    title="sendTo(socket: Socket; address: string; port: Port; data: string)">sendTo,Socket,string,Port,string<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">isDisconnectionError
+      <li><a class="reference" href="#isDisconnectionError%2Cset%5BSocketFlag%5D%2COSErrorCode"
+    title="isDisconnectionError(flags: set[SocketFlag]; lastError: OSErrorCode): bool">isDisconnectionError,set[SocketFlag],OSErrorCode<span class="attachedType"></span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">bindAddr
+      <li><a class="reference" href="#bindAddr%2CSocket%2Cstring"
+    title="bindAddr(socket: Socket; port = Port(0); address = &quot;&quot;)">bindAddr,Socket,string<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getLocalAddr
+      <li><a class="reference" href="#getLocalAddr%2CSocket"
+    title="getLocalAddr(socket: Socket): (string, Port)">getLocalAddr,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">parseIpAddress
+      <li><a class="reference" href="#parseIpAddress%2Cstring"
+    title="parseIpAddress(addressStr: string): IpAddress">parseIpAddress,string<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">hasDataBuffered
+      <li><a class="reference" href="#hasDataBuffered%2CSocket"
+    title="hasDataBuffered(s: Socket): bool">hasDataBuffered,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">IPv4_broadcast
+      <li><a class="reference" href="#IPv4_broadcast"
+    title="IPv4_broadcast(): IpAddress">IPv4_broadcast<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">newContext
+      <li><a class="reference" href="#newContext%2Cstring%2Cstring%2Cstring%2Cstring"
+    title="newContext(protVersion = protSSLv23; verifyMode = CVerifyPeer; certFile = &quot;&quot;;
+           keyFile = &quot;&quot;; cipherList = CiphersIntermediate; caDir = &quot;&quot;;
+           caFile = &quot;&quot;): SslContext">newContext,string,string,string,string<span class="attachedType">SslContext</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">==
+      <li><a class="reference" href="#%3D%3D%2CIpAddress%2CIpAddress"
+    title="`==`(lhs, rhs: IpAddress): bool">==,IpAddress,IpAddress<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">fromSockAddr
+      <li><a class="reference" href="#fromSockAddr%2C%2CSockLen%2CIpAddress%2CPort"
+    title="fromSockAddr(sa: Sockaddr_storage | SockAddr | Sockaddr_in | Sockaddr_in6;
+             sl: SockLen; address: var IpAddress; port: var Port)">fromSockAddr,,SockLen,IpAddress,Port<span class="attachedType">IpAddress</span></a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">isSsl
+      <li><a class="reference" href="#isSsl%2CSocket"
+    title="isSsl(socket: Socket): bool">isSsl,Socket<span class="attachedType">Socket</span></a></li>
+
+  </ul>
 
   </ul>
 </li>
@@ -520,7 +696,7 @@ class="link-seesrc" target="_blank">Source</a>
       <span class="Identifier">sslPeekChar</span><span class="Other">:</span> <a href="system.html#char"><span class="Identifier">char</span></a>
       <span class="Identifier">sslNoShutdown</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>
 
-  <span class="Identifier">lastError</span><span class="Other">:</span> <a href="os.html#OSErrorCode"><span class="Identifier">OSErrorCode</span></a>       <span class="Comment">## stores the last error on this socket</span>
+  <span class="Identifier">lastError</span><span class="Other">:</span> <a href="os.html#OSErrorCode"><span class="Identifier">OSErrorCode</span></a>     <span class="Comment">## stores the last error on this socket</span>
   <span class="Identifier">domain</span><span class="Other">:</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a>
   <span class="Identifier">sockType</span><span class="Other">:</span> <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a>
   <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a>
@@ -547,8 +723,8 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="SOBool"></a>
 <dt><pre><a href="net.html#SOBool"><span class="Identifier">SOBool</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">OptAcceptConn</span><span class="Other">,</span> <span class="Identifier">OptBroadcast</span><span class="Other">,</span> <span class="Identifier">OptDebug</span><span class="Other">,</span> <span class="Identifier">OptDontRoute</span><span class="Other">,</span> <span class="Identifier">OptKeepAlive</span><span class="Other">,</span> <span class="Identifier">OptOOBInline</span><span class="Other">,</span>
-  <span class="Identifier">OptReuseAddr</span><span class="Other">,</span> <span class="Identifier">OptReusePort</span><span class="Other">,</span> <span class="Identifier">OptNoDelay</span></pre></dt>
+  <span class="Identifier">OptAcceptConn</span><span class="Other">,</span> <span class="Identifier">OptBroadcast</span><span class="Other">,</span> <span class="Identifier">OptDebug</span><span class="Other">,</span> <span class="Identifier">OptDontRoute</span><span class="Other">,</span> <span class="Identifier">OptKeepAlive</span><span class="Other">,</span>
+  <span class="Identifier">OptOOBInline</span><span class="Other">,</span> <span class="Identifier">OptReuseAddr</span><span class="Other">,</span> <span class="Identifier">OptReusePort</span><span class="Other">,</span> <span class="Identifier">OptNoDelay</span></pre></dt>
 <dd>
 
 Boolean socket options.
@@ -610,11 +786,11 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Keyword">case</span> <span class="Identifier">family</span><span class="Operator">*</span><span class="Other">:</span> <a href="net.html#IpAddressFamily"><span class="Identifier">IpAddressFamily</span></a> <span class="Comment">## the type of the IP address (IPv4 or IPv6)</span>
   <span class="Keyword">of</span> <span class="Identifier">IpAddressFamily</span><span class="Other">.</span><span class="Identifier">IPv6</span><span class="Other">:</span>
       <span class="Identifier">address_v6</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">15</span><span class="Other">,</span> <a href="system.html#uint8"><span class="Identifier">uint8</span></a><span class="Other">]</span> <span class="Comment">## Contains the IP address in bytes in</span>
-                                    <span class="Comment">## case of IPv6</span>
+                                         <span class="Comment">## case of IPv6</span>
     
   <span class="Keyword">of</span> <span class="Identifier">IpAddressFamily</span><span class="Other">.</span><span class="Identifier">IPv4</span><span class="Other">:</span>
       <span class="Identifier">address_v4</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">3</span><span class="Other">,</span> <a href="system.html#uint8"><span class="Identifier">uint8</span></a><span class="Other">]</span> <span class="Comment">## Contains the IP address in bytes in</span>
-                                   <span class="Comment">## case of IPv4</span>
+                                        <span class="Comment">## case of IPv4</span>
     
   </pre></dt>
 <dd>
@@ -683,8 +859,9 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="newSocket,SocketHandle,Domain,SockType,Protocol"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#newSocket%2CSocketHandle%2CDomain%2CSockType%2CProtocol"><span class="Identifier">newSocket</span></a><span class="Other">(</span><span class="Identifier">fd</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">;</span> <span class="Identifier">domain</span><span class="Other">:</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a> <span class="Other">=</span> <span class="Identifier">AF_INET</span><span class="Other">;</span>
-              <span class="Identifier">sockType</span><span class="Other">:</span> <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a> <span class="Other">=</span> <span class="Identifier">SOCK_STREAM</span><span class="Other">;</span> <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Identifier">IPPROTO_TCP</span><span class="Other">;</span>
-              <span class="Identifier">buffered</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><span class="Identifier">Socket</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+               <span class="Identifier">sockType</span><span class="Other">:</span> <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a> <span class="Other">=</span> <span class="Identifier">SOCK_STREAM</span><span class="Other">;</span>
+               <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Identifier">IPPROTO_TCP</span><span class="Other">;</span> <span class="Identifier">buffered</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><span class="Identifier">Socket</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Creates a new socket as specified by the params.
@@ -696,7 +873,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="newSocket,cint,cint,cint"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#newSocket%2Ccint%2Ccint%2Ccint"><span class="Identifier">newSocket</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">,</span> <span class="Identifier">sockType</span><span class="Other">,</span> <span class="Identifier">protocol</span><span class="Other">:</span> <a href="system.html#cint"><span class="Identifier">cint</span></a><span class="Other">;</span> <span class="Identifier">buffered</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span>
-              <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><span class="Identifier">Socket</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+               <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><span class="Identifier">Socket</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -712,8 +889,8 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="newSocket,Domain,SockType,Protocol"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#newSocket%2CDomain%2CSockType%2CProtocol"><span class="Identifier">newSocket</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">:</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a> <span class="Other">=</span> <span class="Identifier">AF_INET</span><span class="Other">;</span> <span class="Identifier">sockType</span><span class="Other">:</span> <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a> <span class="Other">=</span> <span class="Identifier">SOCK_STREAM</span><span class="Other">;</span>
-              <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Identifier">IPPROTO_TCP</span><span class="Other">;</span> <span class="Identifier">buffered</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span>
-              <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><span class="Identifier">Socket</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+               <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a> <span class="Other">=</span> <span class="Identifier">IPPROTO_TCP</span><span class="Other">;</span> <span class="Identifier">buffered</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span>
+               <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><span class="Identifier">Socket</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -728,7 +905,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="parseIpAddress,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#parseIpAddress%2Cstring"><span class="Identifier">parseIpAddress</span></a><span class="Other">(</span><span class="Identifier">addressStr</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="net.html#IpAddress"><span class="Identifier">IpAddress</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#parseIpAddress%2Cstring"><span class="Identifier">parseIpAddress</span></a><span class="Other">(</span><span class="Identifier">addressStr</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="net.html#IpAddress"><span class="Identifier">IpAddress</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Parses an IP address Raises ValueError on error
@@ -751,7 +929,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="toSockAddr,IpAddress,Port,Sockaddr_storage,SockLen"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#toSockAddr%2CIpAddress%2CPort%2CSockaddr_storage%2CSockLen"><span class="Identifier">toSockAddr</span></a><span class="Other">(</span><span class="Identifier">address</span><span class="Other">:</span> <a href="net.html#IpAddress"><span class="Identifier">IpAddress</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span> <span class="Identifier">sa</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="winlean.html#Sockaddr_storage"><span class="Identifier">Sockaddr_storage</span></a><span class="Other">;</span>
-               <span class="Identifier">sl</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="winlean.html#SockLen"><span class="Identifier">SockLen</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                <span class="Identifier">sl</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="winlean.html#SockLen"><span class="Identifier">SockLen</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Converts <tt class="docutils literal"><span class="pre">IpAddress</span></tt> and <tt class="docutils literal"><span class="pre">Port</span></tt> to <tt class="docutils literal"><span class="pre">SockAddr</span></tt> and <tt class="docutils literal"><span class="pre">SockLen</span></tt>
@@ -763,7 +941,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="fromSockAddr,,SockLen,IpAddress,Port"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#fromSockAddr%2C%2CSockLen%2CIpAddress%2CPort"><span class="Identifier">fromSockAddr</span></a><span class="Other">(</span><span class="Identifier">sa</span><span class="Other">:</span> <a href="winlean.html#Sockaddr_storage"><span class="Identifier">Sockaddr_storage</span></a> <span class="Operator">|</span> <a href="winlean.html#SockAddr"><span class="Identifier">SockAddr</span></a> <span class="Operator">|</span> <a href="winlean.html#Sockaddr_in"><span class="Identifier">Sockaddr_in</span></a> <span class="Operator">|</span> <a href="winlean.html#Sockaddr_in6"><span class="Identifier">Sockaddr_in6</span></a><span class="Other">;</span>
-                 <span class="Identifier">sl</span><span class="Other">:</span> <a href="winlean.html#SockLen"><span class="Identifier">SockLen</span></a><span class="Other">;</span> <span class="Identifier">address</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="net.html#IpAddress"><span class="Identifier">IpAddress</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
+                  <span class="Identifier">sl</span><span class="Other">:</span> <a href="winlean.html#SockLen"><span class="Identifier">SockLen</span></a><span class="Other">;</span> <span class="Identifier">address</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="net.html#IpAddress"><span class="Identifier">IpAddress</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Converts <tt class="docutils literal"><span class="pre">SockAddr</span></tt> and <tt class="docutils literal"><span class="pre">SockLen</span></tt> to <tt class="docutils literal"><span class="pre">IpAddress</span></tt> and <tt class="docutils literal"><span class="pre">Port</span></tt>. Raises <tt class="docutils literal"><span class="pre">ObjectConversionDefect</span></tt> in case of invalid <tt class="docutils literal"><span class="pre">sa</span></tt> and <tt class="docutils literal"><span class="pre">sl</span></tt> arguments.
@@ -785,7 +963,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getExtraData,SslContext,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getExtraData%2CSslContext%2Cint"><span class="Identifier">getExtraData</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#RootRef"><span class="Identifier">RootRef</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getExtraData%2CSslContext%2Cint"><span class="Identifier">getExtraData</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#RootRef"><span class="Identifier">RootRef</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Retrieves arbitrary data stored inside SslContext.
@@ -796,8 +975,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="setExtraData,SslContext,int,RootRef"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#setExtraData%2CSslContext%2Cint%2CRootRef"><span class="Identifier">setExtraData</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#RootRef"><span class="Identifier">RootRef</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#setExtraData%2CSslContext%2Cint%2CRootRef"><span class="Identifier">setExtraData</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#RootRef"><span class="Identifier">RootRef</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Stores arbitrary data inside SslContext. The unique <tt class="docutils literal"><span class="pre">index</span></tt> should be retrieved using getSslContextExtraDataIndex.
@@ -808,8 +987,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="newContext,string,string,string,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#newContext%2Cstring%2Cstring%2Cstring%2Cstring"><span class="Identifier">newContext</span></a><span class="Other">(</span><span class="Identifier">protVersion</span> <span class="Other">=</span> <span class="Identifier">protSSLv23</span><span class="Other">;</span> <span class="Identifier">verifyMode</span> <span class="Other">=</span> <span class="Identifier">CVerifyPeer</span><span class="Other">;</span> <span class="Identifier">certFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-               <span class="Identifier">keyFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">cipherList</span> <span class="Other">=</span> <span class="Identifier">CiphersIntermediate</span><span class="Other">;</span> <span class="Identifier">caDir</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">caFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+<dt><pre><span class="Keyword">proc</span> <a href="#newContext%2Cstring%2Cstring%2Cstring%2Cstring"><span class="Identifier">newContext</span></a><span class="Other">(</span><span class="Identifier">protVersion</span> <span class="Other">=</span> <span class="Identifier">protSSLv23</span><span class="Other">;</span> <span class="Identifier">verifyMode</span> <span class="Other">=</span> <span class="Identifier">CVerifyPeer</span><span class="Other">;</span>
+                <span class="Identifier">certFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">keyFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">cipherList</span> <span class="Other">=</span> <span class="Identifier">CiphersIntermediate</span><span class="Other">;</span>
+                <span class="Identifier">caDir</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">caFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -850,7 +1030,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="pskIdentityHint=,SslContext,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#pskIdentityHint%3D%2CSslContext%2Cstring"><span class="Identifier">pskIdentityHint=</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">hint</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#pskIdentityHint%3D%2CSslContext%2Cstring"><span class="Identifier">pskIdentityHint=</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">hint</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Sets the identity hint passed to server.</p>
@@ -863,7 +1044,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="clientGetPskFunc,SslContext"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#clientGetPskFunc%2CSslContext"><span class="Identifier">clientGetPskFunc</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">)</span><span class="Other">:</span> <a href="net.html#SslClientGetPskFunc"><span class="Identifier">SslClientGetPskFunc</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#clientGetPskFunc%2CSslContext"><span class="Identifier">clientGetPskFunc</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">)</span><span class="Other">:</span> <a href="net.html#SslClientGetPskFunc"><span class="Identifier">SslClientGetPskFunc</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -888,7 +1070,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="serverGetPskFunc,SslContext"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#serverGetPskFunc%2CSslContext"><span class="Identifier">serverGetPskFunc</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">)</span><span class="Other">:</span> <a href="net.html#SslServerGetPskFunc"><span class="Identifier">SslServerGetPskFunc</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#serverGetPskFunc%2CSslContext"><span class="Identifier">serverGetPskFunc</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">)</span><span class="Other">:</span> <a href="net.html#SslServerGetPskFunc"><span class="Identifier">SslServerGetPskFunc</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -939,7 +1122,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="wrapConnectedSocket,SslContext,Socket,SslHandshakeType,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#wrapConnectedSocket%2CSslContext%2CSocket%2CSslHandshakeType%2Cstring"><span class="Identifier">wrapConnectedSocket</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span>
-                        <span class="Identifier">handshake</span><span class="Other">:</span> <a href="net.html#SslHandshakeType"><span class="Identifier">SslHandshakeType</span></a><span class="Other">;</span> <span class="Identifier">hostname</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+                         <span class="Identifier">handshake</span><span class="Other">:</span> <a href="net.html#SslHandshakeType"><span class="Identifier">SslHandshakeType</span></a><span class="Other">;</span> <span class="Identifier">hostname</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -954,8 +1137,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getPeerCertificates,SslPtr"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getPeerCertificates%2CSslPtr"><span class="Identifier">getPeerCertificates</span></a><span class="Other">(</span><span class="Identifier">sslHandle</span><span class="Other">:</span> <a href="openssl.html#SslPtr"><span class="Identifier">SslPtr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="net.html#Certificate"><span class="Identifier">Certificate</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getPeerCertificates%2CSslPtr"><span class="Identifier">getPeerCertificates</span></a><span class="Other">(</span><span class="Identifier">sslHandle</span><span class="Other">:</span> <a href="openssl.html#SslPtr"><span class="Identifier">SslPtr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="net.html#Certificate"><span class="Identifier">Certificate</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Returns the certificate chain received by the peer we are connected to through the OpenSSL connection represented by <tt class="docutils literal"><span class="pre">sslHandle</span></tt>. The handshake must have been completed and the certificate chain must have been verified successfully or else an empty sequence is returned. The chain is ordered from leaf certificate to root certificate.
@@ -966,8 +1149,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getPeerCertificates,Socket"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getPeerCertificates%2CSocket"><span class="Identifier">getPeerCertificates</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="net.html#Certificate"><span class="Identifier">Certificate</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getPeerCertificates%2CSocket"><span class="Identifier">getPeerCertificates</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="net.html#Certificate"><span class="Identifier">Certificate</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Returns the certificate chain received by the peer we are connected to through the given socket. The handshake must have been completed and the certificate chain must have been verified successfully or else an empty sequence is returned. The chain is ordered from leaf certificate to root certificate.
@@ -978,7 +1161,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="sessionIdContext=,SslContext,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#sessionIdContext%3D%2CSslContext%2Cstring"><span class="Identifier">sessionIdContext=</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">sidCtx</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#sessionIdContext%3D%2CSslContext%2Cstring"><span class="Identifier">sessionIdContext=</span></a><span class="Other">(</span><span class="Identifier">ctx</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a><span class="Other">;</span> <span class="Identifier">sidCtx</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Sets the session id context in which a session can be reused. Used for permitting clients to reuse a session id instead of doing a new handshake.</p>
@@ -1006,9 +1190,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="socketError,Socket,int,set[SocketFlag]"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#socketError%2CSocket%2Cint%2Cset%5BSocketFlag%5D"><span class="Identifier">socketError</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">err</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span> <span class="Identifier">async</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">lastError</span> <span class="Other">=</span> <span class="DecNumber">-1</span><span class="Other">.</span><span class="Identifier">OSErrorCode</span><span class="Other">;</span>
-                <span class="Identifier">flags</span><span class="Other">:</span> <a href="system.html#set"><span class="Identifier">set</span></a><span class="Other">[</span><a href="net.html#SocketFlag"><span class="Identifier">SocketFlag</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#void"><span class="Identifier">void</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">gcsafe</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#socketError%2CSocket%2Cint%2Cset%5BSocketFlag%5D"><span class="Identifier">socketError</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">err</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span> <span class="Identifier">async</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
+                 <span class="Identifier">lastError</span> <span class="Other">=</span> <span class="DecNumber">-1</span><span class="Other">.</span><span class="Identifier">OSErrorCode</span><span class="Other">;</span> <span class="Identifier">flags</span><span class="Other">:</span> <a href="system.html#set"><span class="Identifier">set</span></a><span class="Other">[</span><a href="net.html#SocketFlag"><span class="Identifier">SocketFlag</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#void"><span class="Identifier">void</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Raises an OSError based on the error code returned by <tt class="docutils literal"><span class="pre">SSL_get_error</span></tt> (for SSL sockets) and <tt class="docutils literal"><span class="pre">osLastError</span></tt> otherwise.</p>
@@ -1037,8 +1221,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="bindAddr,Socket,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#bindAddr%2CSocket%2Cstring"><span class="Identifier">bindAddr</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">port</span> <span class="Other">=</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">(</span><span class="DecNumber">0</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">address</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#bindAddr%2CSocket%2Cstring"><span class="Identifier">bindAddr</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">port</span> <span class="Other">=</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">(</span><span class="DecNumber">0</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">address</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Binds <tt class="docutils literal"><span class="pre">address</span></tt>:<tt class="docutils literal"><span class="pre">port</span></tt> to the socket.</p>
@@ -1052,7 +1236,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="acceptAddr,Socket,,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#acceptAddr%2CSocket%2C%2Cstring"><span class="Identifier">acceptAddr</span></a><span class="Other">(</span><span class="Identifier">server</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">client</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">owned</span><span class="Other">(</span><span class="Identifier">Socket</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">address</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span>
-               <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span> <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+                <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span> <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">locks</span><span class="Other">:</span> <span class="DecNumber">0</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1069,7 +1253,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="accept,Socket,"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#accept%2CSocket%2C"><span class="Identifier">accept</span></a><span class="Other">(</span><span class="Identifier">server</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">client</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">owned</span><span class="Other">(</span><span class="Identifier">Socket</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span>
-           <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
+            <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1121,8 +1305,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getLocalAddr,Socket"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getLocalAddr%2CSocket"><span class="Identifier">getLocalAddr</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getLocalAddr%2CSocket"><span class="Identifier">getLocalAddr</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Get the socket's local address and port number.</p>
@@ -1222,8 +1406,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="recv,Socket,string,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#recv%2CSocket%2Cstring%2Cint"><span class="Identifier">recv</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#recv%2CSocket%2Cstring%2Cint"><span class="Identifier">recv</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span>
+          <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span>
+                                        <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Higher-level version of <tt class="docutils literal"><span class="pre">recv</span></tt>.</p>
@@ -1243,8 +1428,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="recv,Socket,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#recv%2CSocket%2Cint"><span class="Identifier">recv</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#recv%2CSocket%2Cint"><span class="Identifier">recv</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Higher-level version of <tt class="docutils literal"><span class="pre">recv</span></tt> which returns a string.</p>
@@ -1264,7 +1450,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="readLine,Socket,TaintedString"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#readLine%2CSocket%2CTaintedString"><span class="Identifier">readLine</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">line</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#TaintedString"><span class="Identifier">TaintedString</span></a><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span>
-             <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span> <span class="Identifier">maxLength</span> <span class="Other">=</span> <span class="Identifier">MaxLineLength</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+              <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span> <span class="Identifier">maxLength</span> <span class="Other">=</span> <span class="Identifier">MaxLineLength</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">,</span> <a href="system.html#TimeEffect"><span class="Identifier">TimeEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1284,7 +1470,7 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="recvLine,Socket"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#recvLine%2CSocket"><span class="Identifier">recvLine</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span>
-             <span class="Identifier">maxLength</span> <span class="Other">=</span> <span class="Identifier">MaxLineLength</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#TaintedString"><span class="Identifier">TaintedString</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+              <span class="Identifier">maxLength</span> <span class="Other">=</span> <span class="Identifier">MaxLineLength</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#TaintedString"><span class="Identifier">TaintedString</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -1303,9 +1489,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="recvFrom,Socket,string,int,string,Port,int32"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#recvFrom%2CSocket%2Cstring%2Cint%2Cstring%2CPort%2Cint32"><span class="Identifier">recvFrom</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">length</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">address</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span>
-             <span class="Identifier">port</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="DecNumber">0'i32</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#recvFrom%2CSocket%2Cstring%2Cint%2Cstring%2CPort%2Cint32"><span class="Identifier">recvFrom</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">length</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span>
+              <span class="Identifier">address</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="DecNumber">0'i32</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Receives data from <tt class="docutils literal"><span class="pre">socket</span></tt>. This function should normally be used with connection-less sockets (UDP sockets).</p>
@@ -1319,8 +1505,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="skip,Socket,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#skip%2CSocket%2Cint"><span class="Identifier">skip</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#skip%2CSocket%2Cint"><span class="Identifier">skip</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">timeout</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeoutError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Skips <tt class="docutils literal"><span class="pre">size</span></tt> amount of bytes.</p>
@@ -1334,8 +1520,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="send,Socket,pointer,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#send%2CSocket%2Cpointer%2Cint"><span class="Identifier">send</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#WriteIOEffect"><span class="Identifier">WriteIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#send%2CSocket%2Cpointer%2Cint"><span class="Identifier">send</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#WriteIOEffect"><span class="Identifier">WriteIOEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Sends data to a socket.</p>
@@ -1348,8 +1534,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="send,Socket,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#send%2CSocket%2Cstring"><span class="Identifier">send</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#WriteIOEffect"><span class="Identifier">WriteIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#send%2CSocket%2Cstring"><span class="Identifier">send</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#WriteIOEffect"><span class="Identifier">WriteIOEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 sends data to a socket.
@@ -1360,7 +1546,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="trySend,Socket,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#trySend%2CSocket%2Cstring"><span class="Identifier">trySend</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#WriteIOEffect"><span class="Identifier">WriteIOEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#trySend%2CSocket%2Cstring"><span class="Identifier">trySend</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#WriteIOEffect"><span class="Identifier">WriteIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Safe alternative to <tt class="docutils literal"><span class="pre">send</span></tt>. Does not raise an OSError when an error occurs, and instead returns <tt class="docutils literal"><span class="pre">false</span></tt> on failure.
@@ -1371,9 +1558,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="sendTo,Socket,string,Port,pointer,int,Domain,int32"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#sendTo%2CSocket%2Cstring%2CPort%2Cpointer%2Cint%2CDomain%2Cint32"><span class="Identifier">sendTo</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">address</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a><span class="Other">;</span> <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span>
-           <span class="Identifier">af</span><span class="Other">:</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a> <span class="Other">=</span> <span class="Identifier">AF_INET</span><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="DecNumber">0'i32</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#WriteIOEffect"><span class="Identifier">WriteIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#sendTo%2CSocket%2Cstring%2CPort%2Cpointer%2Cint%2CDomain%2Cint32"><span class="Identifier">sendTo</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">address</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a><span class="Other">;</span>
+            <span class="Identifier">size</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span> <span class="Identifier">af</span><span class="Other">:</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a> <span class="Other">=</span> <span class="Identifier">AF_INET</span><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="DecNumber">0'i32</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#WriteIOEffect"><span class="Identifier">WriteIOEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>This proc sends <tt class="docutils literal"><span class="pre">data</span></tt> to the specified <tt class="docutils literal"><span class="pre">address</span></tt>, which may be an IP address or a hostname, if a hostname is specified this function will try each IP of that hostname.</p>
@@ -1514,8 +1701,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="connect,Socket,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#connect%2CSocket%2Cstring"><span class="Identifier">connect</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">address</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">port</span> <span class="Other">=</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">(</span><span class="DecNumber">0</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#connect%2CSocket%2Cstring"><span class="Identifier">connect</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="net.html#Socket"><span class="Identifier">Socket</span></a><span class="Other">;</span> <span class="Identifier">address</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">port</span> <span class="Other">=</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">(</span><span class="DecNumber">0</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><a href="system.html#ReadIOEffect"><span class="Identifier">ReadIOEffect</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">SslError</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Connects socket to <tt class="docutils literal"><span class="pre">address</span></tt>:<tt class="docutils literal"><span class="pre">port</span></tt>. <tt class="docutils literal"><span class="pre">Address</span></tt> can be an IP address or a host name. If <tt class="docutils literal"><span class="pre">address</span></tt> is a host name, this function will try each IP of that host name. <tt class="docutils literal"><span class="pre">htons</span></tt> is already performed on <tt class="docutils literal"><span class="pre">port</span></tt> so you must not do it.</p>
@@ -1588,7 +1775,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-03 01:06:20 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-07 13:52:52 UTC</small>
       </div>
     </div>
   </div>
