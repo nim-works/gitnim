@@ -53,8 +53,8 @@ newSocket	net.html#newSocket,cint,cint,cint	net: newSocket(domain, sockType, pro
 newSocket	net.html#newSocket,Domain,SockType,Protocol	net: newSocket(domain: Domain = AF_INET; sockType: SockType = SOCK_STREAM;\n          protocol: Protocol = IPPROTO_TCP; buffered = true): owned(Socket)	
 parseIpAddress	net.html#parseIpAddress,string	net: parseIpAddress(addressStr: string): IpAddress	
 isIpAddress	net.html#isIpAddress,string	net: isIpAddress(addressStr: string): bool	
-toSockAddr	net.html#toSockAddr,IpAddress,Port,Sockaddr_storage,SockLen	net: toSockAddr(address: IpAddress; port: Port; sa: var Sockaddr_storage; sl: var SockLen)	
-fromSockAddr	net.html#fromSockAddr,,SockLen,IpAddress,Port	net: fromSockAddr(sa: Sockaddr_storage | SockAddr | Sockaddr_in | Sockaddr_in6; sl: SockLen;\n             address: var IpAddress; port: var Port)	
+toSockAddr	net.html#toSockAddr,IpAddress,Port,Sockaddr_storage,SockLen	net: toSockAddr(address: IpAddress; port: Port; sa: var Sockaddr_storage;\n           sl: var SockLen)	
+fromSockAddr	net.html#fromSockAddr,,SockLen,IpAddress,Port	net: fromSockAddr(sa: Sockaddr_storage | SockAddr | Sockaddr_in | Sockaddr_in6;\n             sl: SockLen; address: var IpAddress; port: var Port)	
 raiseSSLError	net.html#raiseSSLError,string	net: raiseSSLError(s = &quot;&quot;)	
 getExtraData	net.html#getExtraData,SslContext,int	net: getExtraData(ctx: SslContext; index: int): RootRef	
 setExtraData	net.html#setExtraData,SslContext,int,RootRef	net: setExtraData(ctx: SslContext; index: int; data: RootRef)	
@@ -67,11 +67,11 @@ serverGetPskFunc	net.html#serverGetPskFunc,SslContext	net: serverGetPskFunc(ctx:
 serverGetPskFunc=	net.html#serverGetPskFunc=,SslContext,SslServerGetPskFunc	net: serverGetPskFunc=(ctx: SslContext; fun: SslServerGetPskFunc)	
 getPskIdentity	net.html#getPskIdentity,Socket	net: getPskIdentity(socket: Socket): string	
 wrapSocket	net.html#wrapSocket,SslContext,Socket	net: wrapSocket(ctx: SslContext; socket: Socket)	
-wrapConnectedSocket	net.html#wrapConnectedSocket,SslContext,Socket,SslHandshakeType,string	net: wrapConnectedSocket(ctx: SslContext; socket: Socket; handshake: SslHandshakeType;\n                    hostname: string = &quot;&quot;)	
+wrapConnectedSocket	net.html#wrapConnectedSocket,SslContext,Socket,SslHandshakeType,string	net: wrapConnectedSocket(ctx: SslContext; socket: Socket;\n                    handshake: SslHandshakeType; hostname: string = &quot;&quot;)	
 getPeerCertificates	net.html#getPeerCertificates,SslPtr	net: getPeerCertificates(sslHandle: SslPtr): seq[Certificate]	
 getPeerCertificates	net.html#getPeerCertificates,Socket	net: getPeerCertificates(socket: Socket): seq[Certificate]	
 getSocketError	net.html#getSocketError,Socket	net: getSocketError(socket: Socket): OSErrorCode	
-socketError	net.html#socketError,Socket,int	net: socketError(socket: Socket; err: int = -1; async = false; lastError = -1.OSErrorCode): void	
+socketError	net.html#socketError,Socket,int	net: socketError(socket: Socket; err: int = -1; async = false;\n            lastError = -1.OSErrorCode): void	
 listen	net.html#listen,Socket	net: listen(socket: Socket; backlog = SOMAXCONN)	
 bindAddr	net.html#bindAddr,Socket,string	net: bindAddr(socket: Socket; port = Port(0); address = &quot;&quot;)	
 acceptAddr	net.html#acceptAddr,Socket,,string	net: acceptAddr(server: Socket; client: var owned(Socket); address: var string;\n           flags = {SafeDisconn})	
@@ -89,10 +89,10 @@ bindUnix	net.html#bindUnix,Socket,string	net: bindUnix(socket: Socket; path: str
 hasDataBuffered	net.html#hasDataBuffered,Socket	net: hasDataBuffered(s: Socket): bool	
 recv	net.html#recv,Socket,pointer,int	net: recv(socket: Socket; data: pointer; size: int): int	
 recv	net.html#recv,Socket,pointer,int,int	net: recv(socket: Socket; data: pointer; size: int; timeout: int): int	
-recv	net.html#recv,Socket,string,int	net: recv(socket: Socket; data: var string; size: int; timeout = -1; flags = {SafeDisconn}): int	
+recv	net.html#recv,Socket,string,int	net: recv(socket: Socket; data: var string; size: int; timeout = -1;\n     flags = {SafeDisconn}): int	
 recv	net.html#recv,Socket,int	net: recv(socket: Socket; size: int; timeout = -1; flags = {SafeDisconn}): string	
-readLine	net.html#readLine,Socket,TaintedString	net: readLine(socket: Socket; line: var TaintedString; timeout = -1; flags = {SafeDisconn};\n         maxLength = MaxLineLength)	
-recvLine	net.html#recvLine,Socket	net: recvLine(socket: Socket; timeout = -1; flags = {SafeDisconn}; maxLength = MaxLineLength): TaintedString	
+readLine	net.html#readLine,Socket,TaintedString	net: readLine(socket: Socket; line: var TaintedString; timeout = -1;\n         flags = {SafeDisconn}; maxLength = MaxLineLength)	
+recvLine	net.html#recvLine,Socket	net: recvLine(socket: Socket; timeout = -1; flags = {SafeDisconn};\n         maxLength = MaxLineLength): TaintedString	
 recvFrom	net.html#recvFrom,Socket,string,int,string,Port,int32	net: recvFrom(socket: Socket; data: var string; length: int; address: var string;\n         port: var Port; flags = 0&apos;i32): int	
 skip	net.html#skip,Socket,int	net: skip(socket: Socket; size: int; timeout = -1)	
 send	net.html#send,Socket,pointer,int	net: send(socket: Socket; data: pointer; size: int): int	
@@ -110,7 +110,7 @@ IPv6_any	net.html#IPv6_any	net: IPv6_any(): IpAddress
 IPv6_loopback	net.html#IPv6_loopback	net: IPv6_loopback(): IpAddress	
 `==`	net.html#==,IpAddress,IpAddress	net: `==`(lhs, rhs: IpAddress): bool	
 `$`	net.html#$,IpAddress	net: `$`(address: IpAddress): string	
-dial	net.html#dial,string,Port	net: dial(address: string; port: Port; protocol = IPPROTO_TCP; buffered = true): owned(Socket)	
+dial	net.html#dial,string,Port	net: dial(address: string; port: Port; protocol = IPPROTO_TCP; buffered = true): owned(\n    Socket)	
 connect	net.html#connect,Socket,string	net: connect(socket: Socket; address: string; port = Port(0))	
 connect	net.html#connect,Socket,string,int	net: connect(socket: Socket; address: string; port = Port(0); timeout: int)	
 getPrimaryIPAddr	net.html#getPrimaryIPAddr	net: getPrimaryIPAddr(dest = parseIpAddress(&quot;8.8.8.8&quot;)): IpAddress	

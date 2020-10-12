@@ -128,9 +128,9 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/nimblecmd.nim
     rm -f $nimbleDir/compiler/nimconf.nim
     rm -f $nimbleDir/compiler/nimeval.nim
+    rm -f $nimbleDir/compiler/nimfix/nimfix.nim.cfg
     rm -f $nimbleDir/compiler/nimfix/nimfix.nim
     rm -f $nimbleDir/compiler/nimfix/prettybase.nim
-    rm -f $nimbleDir/compiler/nimfix/nimfix.nim.cfg
     rm -f $nimbleDir/compiler/nimlexbase.nim
     rm -f $nimbleDir/compiler/nimsets.nim
     rm -f $nimbleDir/compiler/nodejs.nim

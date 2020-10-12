@@ -119,7 +119,7 @@ function main() {
     title="FutureBase = ref object of RootObj
   callbacks: CallbackList
   finished: bool
-  error*: ref Exception         ## Stored exception
+  error*: ref Exception      ## Stored exception
   errorStackTrace*: string
   when not false:
       stackTrace: seq[StackTraceEntry] ## For debugging purposes only.
@@ -127,7 +127,7 @@ function main() {
       fromProc: string"><wbr />Future<wbr />Base<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#Future"
     title="Future[T] = ref object of FutureBase
-  value: T                     ## Stored value"><wbr />Future<span class="attachedType"></span></a></li>
+  value: T                   ## Stored value"><wbr />Future<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#FutureVar"
     title="FutureVar[T] = distinct Future[T]"><wbr />Future<wbr />Var<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#FutureError"
@@ -176,13 +176,14 @@ function main() {
   <li><a class="reference" href="#addCallback%2CFutureBase%2Cproc%29"
     title="addCallback(future: FutureBase; cb: proc () {.closure, gcsafe.})"><wbr />add<wbr />Callback<span class="attachedType">FutureBase</span></a></li>
   <li><a class="reference" href="#addCallback%2CFuture%5BT%5D%2Cproc%28Future%5BT%5D%29"
-    title="addCallback[T](future: Future[T]; cb: proc (future: Future[T]) {.closure, gcsafe.})"><wbr />add<wbr />Callback<span class="attachedType">Future</span></a></li>
+    title="addCallback[T](future: Future[T];
+               cb: proc (future: Future[T]) {.closure, gcsafe.})"><wbr />add<wbr />Callback<span class="attachedType">Future</span></a></li>
   <li><a class="reference" href="#callback%3D%2CFutureBase%2Cproc%29"
     title="callback=(future: FutureBase; cb: proc () {.closure, gcsafe.})"><wbr />callback=<span class="attachedType">FutureBase</span></a></li>
   <li><a class="reference" href="#callback%3D%2CFuture%5BT%5D%2Cproc%28Future%5BT%5D%29"
     title="callback=[T](future: Future[T]; cb: proc (future: Future[T]) {.closure, gcsafe.})"><wbr />callback=<span class="attachedType">Future</span></a></li>
   <li><a class="reference" href="#%24%2Cseq%5BStackTraceEntry%5D"
-    title="`$`(entries: seq[StackTraceEntry]): string"><wbr />`$`<span class="attachedType"></span></a></li>
+    title="`$`(stackTraceEntries: seq[StackTraceEntry]): string"><wbr />`$`<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#read"
     title="read[T](future: Future[T] | FutureVar[T]): T"><wbr />read<span class="attachedType">Future</span></a></li>
   <li><a class="reference" href="#readError%2CFuture%5BT%5D"
@@ -215,7 +216,7 @@ function main() {
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="os.html">os</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="times.html">times</a>, <a class="reference external" href="heapqueue.html">heapqueue</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="deques.html">deques</a>, <a class="reference external" href="cstrutils.html">cstrutils</a>
+<a class="reference external" href="os.html">os</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="times.html">times</a>, <a class="reference external" href="heapqueue.html">heapqueue</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="deques.html">deques</a>, <a class="reference external" href="cstrutils.html">cstrutils</a>, <a class="reference external" href="stacktraces.html">stacktraces</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -224,7 +225,7 @@ function main() {
 <dt><pre><a href="asyncfutures.html#FutureBase"><span class="Identifier">FutureBase</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="system.html#RootObj"><span class="Identifier">RootObj</span></a>
   <span class="Identifier">callbacks</span><span class="Other">:</span> <span class="Identifier">CallbackList</span>
   <span class="Identifier">finished</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>
-  <span class="Identifier">error</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="system.html#Exception"><span class="Identifier">Exception</span></a>         <span class="Comment">## Stored exception</span>
+  <span class="Identifier">error</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="system.html#Exception"><span class="Identifier">Exception</span></a>      <span class="Comment">## Stored exception</span>
   <span class="Identifier">errorStackTrace</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
   <span class="Keyword">when</span> <span class="Keyword">not</span> <span class="DecNumber">false</span><span class="Other">:</span>
       <span class="Identifier">stackTrace</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#StackTraceEntry"><span class="Identifier">StackTraceEntry</span></a><span class="Other">]</span> <span class="Comment">## For debugging purposes only.</span>
@@ -236,22 +237,22 @@ function main() {
 
 Untyped future.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L20"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L22"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L20" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L22" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Future"></a>
 <dt><pre><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="asyncfutures.html#FutureBase"><span class="Identifier">FutureBase</span></a>
-  <span class="Identifier">value</span><span class="Other">:</span> <span class="Identifier">T</span>                     <span class="Comment">## Stored value</span>
+  <span class="Identifier">value</span><span class="Other">:</span> <span class="Identifier">T</span>                   <span class="Comment">## Stored value</span>
   </pre></dt>
 <dd>
 
 Typed future.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L31"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L33"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L31" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L33" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="FutureVar"></a>
@@ -260,9 +261,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L34"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L36"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L34" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L36" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="FutureError"></a>
@@ -273,9 +274,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L36"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L38"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L36" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L38" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -289,9 +290,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L42"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L44"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L42" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L44" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="NimAsyncContinueSuffix"></a>
@@ -300,9 +301,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 For internal usage. Do not use.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L45"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L47"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L45" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L47" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -311,25 +312,27 @@ class="link-seesrc" target="_blank">Source</a>
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
 <a id="getCallSoonProc"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getCallSoonProc"><span class="Identifier">getCallSoonProc</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">cbproc</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getCallSoonProc"><span class="Identifier">getCallSoonProc</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">cbproc</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Get current implementation of <tt class="docutils literal"><span class="pre">callSoon</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L86"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L88"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L86" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L88" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setCallSoonProc"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#setCallSoonProc"><span class="Identifier">setCallSoonProc</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <span class="Other">(</span><span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">cbproc</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#setCallSoonProc"><span class="Identifier">setCallSoonProc</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <span class="Other">(</span><span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">cbproc</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Change current implementation of <tt class="docutils literal"><span class="pre">callSoon</span></tt>. This is normally called when dispatcher from <tt class="docutils literal"><span class="pre">asyncdispatcher</span></tt> is initialized.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L90"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L92"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L90" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L92" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="callSoon,proc)"></a>
@@ -341,9 +344,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If async dispatcher is not running, <tt class="docutils literal"><span class="pre">cbproc</span></tt> will be executed immediately.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L94"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L96"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L94" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L96" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newFuture,string"></a>
@@ -354,9 +357,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Specifying <tt class="docutils literal"><span class="pre">fromProc</span></tt>, which is a string specifying the name of the proc that this future belongs to, is a good habit as it helps with debugging.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L115"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L117"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L115" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L117" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newFutureVar,string"></a>
@@ -367,9 +370,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Specifying <tt class="docutils literal"><span class="pre">fromProc</span></tt>, which is a string specifying the name of the proc that this future belongs to, is a good habit as it helps with debugging.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L123"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L125"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L123" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L125" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="clean,FutureVar[T]"></a>
@@ -378,9 +381,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Resets the <tt class="docutils literal"><span class="pre">finished</span></tt> status of <tt class="docutils literal"><span class="pre">future</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L133"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L135"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L133" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L135" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="complete,Future[T],T"></a>
@@ -389,21 +392,21 @@ class="link-seesrc" target="_blank">Source</a>
 
 Completes <tt class="docutils literal"><span class="pre">future</span></tt> with value <tt class="docutils literal"><span class="pre">val</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L208"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L210"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L208" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L210" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="complete,Future[void]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#complete%2CFuture%5Bvoid%5D"><span class="Identifier">complete</span></a><span class="Other">(</span><span class="Identifier">future</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">FutureError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
-                                   <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                                      <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Completes a void <tt class="docutils literal"><span class="pre">future</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L218"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L220"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L218" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L220" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="complete,FutureVar[T]"></a>
@@ -412,9 +415,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Completes a <tt class="docutils literal"><span class="pre">FutureVar</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L227"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L229"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L227" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L229" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="complete,FutureVar[T],T"></a>
@@ -425,9 +428,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Any previously stored value will be overwritten.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L236"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L238"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L236" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fail,Future[T],ref.Exception"></a>
@@ -436,9 +439,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Completes <tt class="docutils literal"><span class="pre">future</span></tt> with <tt class="docutils literal"><span class="pre">error</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L248"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L250"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L248" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="clearCallbacks,FutureBase"></a>
@@ -447,9 +450,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L259"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L261"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L259" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L261" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addCallback,FutureBase,proc)"></a>
@@ -461,23 +464,23 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If future has already completed then <tt class="docutils literal"><span class="pre">cb</span></tt> will be called immediately.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L263"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L265"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L263" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L265" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addCallback,Future[T],proc(Future[T])"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#addCallback%2CFuture%5BT%5D%2Cproc%28Future%5BT%5D%29"><span class="Identifier">addCallback</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">future</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span>
-                   <span class="Identifier">cb</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">future</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">closure</span><span class="Other">,</span> <span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span></pre></dt>
+                    <span class="Identifier">cb</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">future</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">closure</span><span class="Other">,</span> <span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span></pre></dt>
 <dd>
 
 <p>Adds the callbacks proc to be called when the future completes.</p>
 <p>If future has already completed then <tt class="docutils literal"><span class="pre">cb</span></tt> will be called immediately.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L273"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L275"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L273" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L275" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="callback=,FutureBase,proc)"></a>
@@ -490,34 +493,35 @@ class="link-seesrc" target="_blank">Source</a>
 <p>It's recommended to use <tt class="docutils literal"><span class="pre">addCallback</span></tt> or <tt class="docutils literal"><span class="pre">then</span></tt> instead.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L283"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L285"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L283" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L285" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="callback=,Future[T],proc(Future[T])"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#callback%3D%2CFuture%5BT%5D%2Cproc%28Future%5BT%5D%29"><span class="Identifier">callback=</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">future</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span>
-                 <span class="Identifier">cb</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">future</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">closure</span><span class="Other">,</span> <span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span></pre></dt>
+                  <span class="Identifier">cb</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">future</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">closure</span><span class="Other">,</span> <span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span></pre></dt>
 <dd>
 
 <p>Sets the callback proc to be called when the future completes.</p>
 <p>If future has already completed then <tt class="docutils literal"><span class="pre">cb</span></tt> will be called immediately.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L292"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L294"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L292" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L294" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$,seq[StackTraceEntry]"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%24%2Cseq%5BStackTraceEntry%5D"><span class="Identifier">`$`</span></a><span class="Other">(</span><span class="Identifier">entries</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#StackTraceEntry"><span class="Identifier">StackTraceEntry</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#%24%2Cseq%5BStackTraceEntry%5D"><span class="Identifier">`$`</span></a><span class="Other">(</span><span class="Identifier">stackTraceEntries</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#StackTraceEntry"><span class="Identifier">StackTraceEntry</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L314"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L316"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L314" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="read"></a>
@@ -528,9 +532,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If the result of the future is an error then that error will be raised.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L372"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L379"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L372" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L379" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="readError,Future[T]"></a>
@@ -541,9 +545,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>An <tt class="docutils literal"><span class="pre">ValueError</span></tt> exception will be thrown if no exception exists in the specified Future.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L390"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L397"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L390" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L397" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mget,FutureVar[T]"></a>
@@ -554,9 +558,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Unlike <tt class="docutils literal"><span class="pre">read</span></tt>, this function will not raise an exception if the Future has not been finished.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L399"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L406"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L399" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L406" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="finished"></a>
@@ -567,9 +571,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><tt class="docutils literal"><span class="pre">True</span></tt> may indicate an error or a value. Use <tt class="docutils literal"><span class="pre">failed</span></tt> to distinguish.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L406"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L413"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L406" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L413" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="failed,FutureBase"></a>
@@ -578,9 +582,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Determines whether <tt class="docutils literal"><span class="pre">future</span></tt> completed with an error.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L415"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L422"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L415" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L422" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="asyncCheck,Future[T]"></a>
@@ -591,9 +595,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This should be used instead of <tt class="docutils literal"><span class="pre">discard</span></tt> to discard void futures, or use <tt class="docutils literal"><span class="pre">waitFor</span></tt> if you need to wait for the future's completion.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L419"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L426"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L419" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L426" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="and,Future[T],Future[Y]"></a>
@@ -602,9 +606,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns a future which will complete once both <tt class="docutils literal"><span class="pre">fut1</span></tt> and <tt class="docutils literal"><span class="pre">fut2</span></tt> complete.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L434"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L441"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L434" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L441" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="or,Future[T],Future[Y]"></a>
@@ -613,9 +617,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns a future which will complete once either <tt class="docutils literal"><span class="pre">fut1</span></tt> or <tt class="docutils literal"><span class="pre">fut2</span></tt> complete.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L450"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L457"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L450" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L457" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="all,varargs[Future[T]]"></a>
@@ -627,9 +631,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If the awaited futures <em>are</em> <tt class="docutils literal"><span class="pre">Future[void]</span></tt>, this proc returns <tt class="docutils literal"><span class="pre">Future[void]</span></tt>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L462"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncfutures.nim#L469"
 class="link-seesrc" target="_blank">Source</a>
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L462" class="link-seesrc" target="_blank" >Edit</a>
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncfutures.nim#L469" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -642,7 +646,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-09-22 00:48:18 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-12 05:33:19 UTC</small>
       </div>
     </div>
   </div>
