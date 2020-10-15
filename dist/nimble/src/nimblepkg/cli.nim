@@ -30,7 +30,7 @@ type
                            ## machine readable.
 
   Priority* = enum
-    DebugPriority, LowPriority, MediumPriority, HighPriority
+    DebugPriority, LowPriority, MediumPriority, HighPriority, SilentPriority
 
   DisplayType* = enum
     Error, Warning, Message, Success
@@ -217,6 +217,8 @@ proc promptListInteractive(question: string, args: openarray[string]): string =
       cursorUp(stdout)
     resetAttributes(stdout)
 
+    # Ensure that the screen is updated before input
+    flushFile(stdout)
     # Begin key input
     while true:
       case getch():

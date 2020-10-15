@@ -33,6 +33,7 @@ type
 proc initPackageInfo*(path: string): PackageInfo =
   result.myPath = path
   result.specialVersion = ""
+  result.nimbleTasks.init()
   result.preHooks.init()
   result.postHooks.init()
   # reasonable default:
@@ -49,7 +50,7 @@ proc initPackageInfo*(path: string): PackageInfo =
   result.installExt = @[]
   result.requires = @[]
   result.foreignDeps = @[]
-  result.bin = @[]
+  result.bin = initTable[string, string]()
   result.srcDir = ""
   result.binDir = ""
   result.backend = "c"
@@ -134,7 +135,7 @@ proc fromJson(obj: JSonNode): Package =
 proc readMetaData*(path: string): MetaData =
   ## Reads the metadata present in ``~/.nimble/pkgs/pkg-0.1/nimblemeta.json``
   var bmeta = path / "nimblemeta.json"
-  if not existsFile(bmeta):
+  if not fileExists(bmeta):
     result.url = ""
     display("Warning:", "No nimblemeta.json file found in " & path,
             Warning, HighPriority)
@@ -231,8 +232,14 @@ proc fetchList*(list: PackageList, options: Options) =
     copyFile(copyFromPath,
         options.getNimbleDir() / "packages_$1.json" % list.name.toLowerAscii())
 
+# Cache after first call
+var
+  gPackageJson: Table[string, JsonNode]
 proc readPackageList(name: string, options: Options): JsonNode =
   # If packages.json is not present ask the user if they want to download it.
+  if gPackageJson.hasKey(name):
+    return gPackageJson[name]
+
   if needsRefresh(options):
     if options.prompt("No local packages.json found, download it from " &
             "internet?"):
@@ -241,9 +248,11 @@ proc readPackageList(name: string, options: Options): JsonNode =
     else:
       # The user might not need a package list for now. So let's try
       # going further.
-      return newJArray()
-  return parseFile(options.getNimbleDir() / "packages_" &
-                   name.toLowerAscii() & ".json")
+      gPackageJson[name] = newJArray()
+      return gPackageJson[name]
+  gPackageJson[name] = parseFile(options.getNimbleDir() / "packages_" &
+                                 name.toLowerAscii() & ".json")
+  return gPackageJson[name]
 
 proc getPackage*(pkg: string, options: Options, resPkg: var Package): bool
 proc resolveAlias(pkg: Package, options: Options): Package =
@@ -412,6 +421,8 @@ proc getOutputDir*(pkgInfo: PackageInfo, bin: string): string =
     result = pkgInfo.mypath.splitFile.dir / pkgInfo.binDir / bin
   else:
     result = pkgInfo.mypath.splitFile.dir / bin
+  if bin.len != 0 and dirExists(result):
+    result &= ".out"
 
 proc echoPackage*(pkg: Package) =
   echo(pkg.name & ":")
@@ -496,7 +507,7 @@ proc iterInstallFiles*(realDir: string, pkgInfo: PackageInfo,
   if whitelistMode:
     for file in pkgInfo.installFiles:
       let src = realDir / file
-      if not src.existsFile():
+      if not src.fileExists():
         if options.prompt("Missing file " & src & ". Continue?"):
           continue
         else:
@@ -507,7 +518,7 @@ proc iterInstallFiles*(realDir: string, pkgInfo: PackageInfo,
     for dir in pkgInfo.installDirs:
       # TODO: Allow skipping files inside dirs?
       let src = realDir / dir
-      if not src.existsDir():
+      if not src.dirExists():
         if options.prompt("Missing directory " & src & ". Continue?"):
           continue
         else:

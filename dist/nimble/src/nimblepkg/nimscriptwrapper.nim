@@ -4,7 +4,7 @@
 ## Implements the new configuration system for Nimble. Uses Nim as a
 ## scripting language.
 
-import hashes, json, os, strutils, tables, times, osproc, strtabs
+import hashes, json, os, strutils, tables, times, osproc
 
 import version, options, cli, tools
 
@@ -36,44 +36,34 @@ proc writeExecutionOutput(data: string) =
   # Nimble files.
   display("Info", data)
 
+proc getNimblecache(): string =
+  getTempDir() / "nimblecache-" & $getEnv("USER").hash().abs()
+
 proc execNimscript(
-  nimsFile, projectDir, actionName: string, options: Options, isHook: bool
+  nimbleFile, nimsFile, actionName: string, options: Options, isHook: bool
 ): tuple[output: string, exitCode: int, stdout: string] =
   let
-    nimsFileCopied = projectDir / nimsFile.splitFile().name & "_" & getProcessId() & ".nims"
     outFile = getNimbleTempDir() & ".out"
-
-  let
-    isScriptResultCopied =
-      nimsFileCopied.fileExists() and
-      nimsFileCopied.getLastModificationTime() >= nimsFile.getLastModificationTime()
-
-  if not isScriptResultCopied:
-    nimsFile.copyFile(nimsFileCopied)
-
-  defer:
-    # Only if copied in this invocation, allows recursive calls of nimble
-    if not isScriptResultCopied and options.shouldRemoveTmp(nimsFileCopied):
-        nimsFileCopied.removeFile()
+    isCustomTask = isCustomTask(actionName, options)
+    compFlags = if isCustomTask: join(options.getCompilationFlags(), " ")
+      else: ""
 
   var cmd = (
-    "nim e $# -p:$# $# $# $#" % [
+    "$# e $# --colors:on $# $# $# $# $#" % [
+      getNimBin(options).quoteShell,
       "--hints:off --verbosity:0",
-      (getTempDir() / "nimblecache").quoteShell,
-      nimsFileCopied.quoteShell,
+      compFlags,
+      nimsFile.quoteShell,
+      nimbleFile.quoteShell,
       outFile.quoteShell,
       actionName
     ]
   ).strip()
 
-  let isCustomTask = isCustomTask(actionName, options)
   if isCustomTask:
     for i in options.action.arguments:
       cmd &= " " & i.quoteShell()
-    for key, val in options.action.flags.pairs():
-      cmd &= " $#$#" % [if key.len == 1: "-" else: "--", key]
-      if val.len != 0:
-        cmd &= ":" & val.quoteShell()
+    cmd &= " " & join(options.action.custRunFlags, " ")
 
   displayDebug("Executing " & cmd)
 
@@ -89,39 +79,46 @@ proc execNimscript(
       discard outFile.tryRemoveFile()
 
 proc getNimsFile(scriptName: string, options: Options): string =
+  # Create .nims and .ini file out of .nimble file in nimblecache
   let
-    cacheDir = getTempDir() / "nimblecache"
-    shash = $scriptName.parentDir().hash().abs()
+    scriptName = scriptName.absolutePath()
+
+    nimbleLastModified = getAppFilename().getLastModificationTime()
+    cacheDir = getNimblecache()
+
+    # nimscriptapi.nim caching
+    nhash = $($nimbleLastModified).hash().abs()
+    nimscriptApiFile = cacheDir / ("nimscriptapi_" & nhash).addFileExt("nim")
+
+    # .nims and .ini caching
+    shash = $(scriptName & $nimbleLastModified).hash().abs()
     prjCacheDir = cacheDir / scriptName.splitFile().name & "_" & shash
-    nimscriptApiFile = cacheDir / "nimscriptapi.nim"
+    nimsFile = prjCacheDir / scriptName.extractFilename().changeFileExt("nims")
+    iniFile = nimsFile.changeFileExt("ini")
 
-  result = prjCacheDir / scriptName.extractFilename().changeFileExt ".nims"
-
-  let
-    iniFile = result.changeFileExt(".ini")
-
-    isNimscriptApiCached =
-      nimscriptApiFile.fileExists() and nimscriptApiFile.getLastModificationTime() > 
-      getAppFilename().getLastModificationTime()
-    
-    isScriptResultCached =
-      isNimscriptApiCached and result.fileExists() and result.getLastModificationTime() >
-      scriptName.getLastModificationTime()
-
-  if not isNimscriptApiCached:
+  # Create nimscriptapi.nim unique to this version of nimble
+  if not fileExists(nimscriptApiFile):
     createDir(cacheDir)
     writeFile(nimscriptApiFile, nimscriptApi)
 
-  if not isScriptResultCached:
-    createDir(result.parentDir())
-    writeFile(result, """
-import system except getCommand, setCommand, switch, `--`,
+  # Create .nims file contents
+  if not fileExists(nimsFile):
+    createDir(nimsFile.parentDir())
+    writeFile(nimsFile, """
+import system except getCommand, setCommand, switch, `--`, thisDir,
   packageName, version, author, description, license, srcDir, binDir, backend,
   skipDirs, skipFiles, skipExt, installDirs, installFiles, installExt, bin, foreignDeps,
   requires, task, packageName
-""" &
-      "import nimscriptapi, strutils\n" & scriptName.readFile() & "\nonExit()\n")
+
+import strutils
+import "$1"
+include "$2"
+
+onExit()
+""" % [nimscriptApiFile.replace("\\", "/"), scriptName.replace("\\", "/")])
     discard tryRemoveFile(iniFile)
+
+  result = nimsFile
 
 proc getIniFile*(scriptName: string, options: Options): string =
   let
@@ -136,7 +133,7 @@ proc getIniFile*(scriptName: string, options: Options): string =
 
   if not isIniResultCached:
     let (output, exitCode, stdout) = execNimscript(
-      nimsFile, scriptName.parentDir(), printPkgInfo, options, isHook=false
+      scriptName, nimsFile, printPkgInfo, options, isHook=false
     )
 
     if exitCode == 0 and output.len != 0:
@@ -152,7 +149,7 @@ proc execScript(
 
   let (output, exitCode, stdout) =
     execNimscript(
-      nimsFile, scriptName.parentDir(), actionName, options, isHook
+      scriptName, nimsFile, actionName, options, isHook
     )
 
   if exitCode != 0:

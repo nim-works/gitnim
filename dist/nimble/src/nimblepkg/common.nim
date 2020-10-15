@@ -5,7 +5,7 @@
 # recursive imports
 
 when not defined(nimscript):
-  import sets
+  import sets, tables
 
   import version
 
@@ -18,6 +18,7 @@ when not defined(nimscript):
       isMinimal*: bool
       isInstalled*: bool ## Determines if the pkg this info belongs to is installed
       isLinked*: bool ## Determines if the pkg this info belongs to has been linked via `develop`
+      nimbleTasks*: HashSet[string] ## All tasks defined in the Nimble file
       postHooks*: HashSet[string] ## Useful to know so that Nimble doesn't execHook unnecessarily
       preHooks*: HashSet[string]
       name*: string
@@ -36,14 +37,14 @@ when not defined(nimscript):
       installFiles*: seq[string]
       installExt*: seq[string]
       requires*: seq[PkgTuple]
-      bin*: seq[string]
+      bin*: Table[string, string]
       binDir*: string
       srcDir*: string
       backend*: string
       foreignDeps*: seq[string]
 
     ## Same as quit(QuitSuccess), but allows cleanup.
-    NimbleQuit* = ref object of Exception
+    NimbleQuit* = ref object of CatchableError
 
   proc raiseNimbleError*(msg: string, hint = "") =
     var exc = newException(NimbleError, msg)
@@ -63,7 +64,7 @@ when not defined(nimscript):
     return (error, hint)
 
 const
-  nimbleVersion* = "0.11.0"
+  nimbleVersion* = "0.12.0"
 
 when not declared(initHashSet):
   import sets
