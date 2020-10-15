@@ -30,7 +30,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/lib/nim
       docdir=/usr/share/nim/doc
       datadir=/usr/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.7"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.2.8"
       ;;
     "/usr/local/bin")
       bindir=/usr/local/bin
@@ -38,7 +38,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/local/lib/nim
       docdir=/usr/local/share/nim/doc
       datadir=/usr/local/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.7"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.2.8"
       ;;
     "/opt")
       bindir="/opt/nim/bin"
@@ -46,7 +46,7 @@ if [ $# -eq 1 ] ; then
       libdir="/opt/nim/lib"
       docdir="/opt/nim/doc"
       datadir="/opt/nim/data"
-      nimbleDir="/opt/nimble/pkgs/compiler-1.2.7"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.2.8"
       mkdir -p /opt/nim
       mkdir -p $bindir
       mkdir -p $configdir

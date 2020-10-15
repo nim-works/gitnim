@@ -5,6 +5,7 @@
 
 import system except getCommand, setCommand, switch, `--`
 import strformat, strutils, tables
+export tables
 
 when (NimMajor, NimMinor) < (1, 3):
   when not defined(nimscript):
@@ -31,36 +32,46 @@ var
   foreignDeps*: seq[string] = @[] ## The foreign dependencies. Only
                                   ## exported for 'distros.nim'.
 
+  nimbleTasks: seq[string] = @[]
   beforeHooks: seq[string] = @[]
   afterHooks: seq[string] = @[]
-  commandLineParams: seq[string] = @[]
-  flags: TableRef[string, seq[string]]
+  flags: Table[string, seq[string]]
+  namedBin*: Table[string, string]
 
   command = "e"
   project = ""
   success = false
   retVal = true
-  projectFile = ""
-  outFile = ""
 
 proc requires*(deps: varargs[string]) =
   ## Call this to set the list of requirements of your Nimble
   ## package.
   for d in deps: requiresData.add(d)
 
-proc getParams() =
+proc getParams(): tuple[scriptFile, projectFile, outFile, actionName: string,
+                        commandLineParams: seq[string]] =
   # Called by nimscriptwrapper.nim:execNimscript()
-  #   nim e --flags /full/path/to/file.nims /full/path/to/file.out action
+  #   nim e --flags /full/path/to/file.nims /full/path/to/file.nimble /full/path/to/file.out action
   for i in 2 .. paramCount():
     let
       param = paramStr(i)
     if param[0] != '-':
-      if projectFile.len == 0:
-        projectFile = param
-      elif outFile.len == 0:
-        outFile = param
+      if result.scriptFile.len == 0:
+        result.scriptFile = param
+      elif result.projectFile.len == 0:
+        result.projectFile = param
+      elif result.outFile.len == 0:
+        result.outFile = param
+      elif result.actionName.len == 0:
+        result.actionName = param.normalize
       else:
-        commandLineParams.add param.normalize
+        result.commandLineParams.add param
+    else:
+      result.commandLineParams.add param
+
+const
+  # Command line values are const so that thisDir() works at compile time
+  (scriptFile, projectFile, outFile, actionName, commandLineParams*) = getParams()
 
 proc getCommand*(): string =
   return command
@@ -71,9 +82,6 @@ proc setCommand*(cmd: string, prj = "") =
     project = prj
 
 proc switch*(key: string, value="") =
-  if flags.isNil:
-    flags = newTable[string, seq[string]]()
-
   if flags.hasKey(key):
     flags[key].add(value)
   else:
@@ -97,6 +105,14 @@ proc printPkgInfo(): string =
   if backend.len == 0:
     backend = "c"
 
+  # Forward `namedBin` entries in `bin`
+  for k, v in namedBin:
+    let idx = bin.find(k)
+    if idx == -1:
+      bin.add k & "=" & v
+    else:
+      bin[idx] = k & "=" & v
+
   result = "[Package]\n"
   if packageName.len != 0:
     result &= "name: \"" & packageName & "\"\n"
@@ -115,6 +131,7 @@ proc printPkgInfo(): string =
   printSeqIfLen installFiles
   printSeqIfLen installExt
   printSeqIfLen bin
+  printSeqIfLen nimbleTasks
   printSeqIfLen beforeHooks
   printSeqIfLen afterHooks
 
@@ -123,7 +140,7 @@ proc printPkgInfo(): string =
     result &= &"requires: \"{requiresData.join(\", \")}\"\n"
 
 proc onExit*() =
-  if "printPkgInfo".normalize in commandLineParams:
+  if "printPkgInfo".normalize == actionName:
     if outFile.len != 0:
       writeFile(outFile, printPkgInfo())
   else:
@@ -133,7 +150,7 @@ proc onExit*() =
     output &= "\"command\": \"" & command & "\", "
     if project.len != 0:
       output &= "\"project\": \"" & project & "\", "
-    if not flags.isNil and flags.len != 0:
+    if flags.len != 0:
       output &= "\"flags\": {"
       for key, val in flags.pairs:
         output &= "\"" & key & "\": ["
@@ -160,10 +177,12 @@ template task*(name: untyped; description: string; body: untyped): untyped =
   ##    setCommand "c"
   proc `name Task`*() = body
 
-  if commandLineParams.len == 0 or "help" in commandLineParams:
+  nimbleTasks.add astToStr(name)
+
+  if actionName.len == 0 or actionName == "help":
     success = true
     echo(astToStr(name), "        ", description)
-  elif astToStr(name).normalize in commandLineParams:
+  elif actionName == astToStr(name).normalize:
     success = true
     `name Task`()
 
@@ -175,7 +194,7 @@ template before*(action: untyped, body: untyped): untyped =
 
   beforeHooks.add astToStr(action)
 
-  if (astToStr(action) & "Before").normalize in commandLineParams:
+  if (astToStr(action) & "Before").normalize == actionName:
     success = true
     retVal = `action Before`()
 
@@ -187,7 +206,7 @@ template after*(action: untyped, body: untyped): untyped =
 
   afterHooks.add astToStr(action)
 
-  if (astToStr(action) & "After").normalize in commandLineParams:
+  if (astToStr(action) & "After").normalize == actionName:
     success = true
     retVal = `action After`()
 
@@ -196,4 +215,4 @@ proc getPkgDir*(): string =
   ## being evaluated.
   result = projectFile.rsplit(seps={'/', '\\', ':'}, maxsplit=1)[0]
 
-getParams()
+proc thisDir*(): string = getPkgDir()

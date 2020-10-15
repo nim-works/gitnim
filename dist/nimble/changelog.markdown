@@ -3,6 +3,51 @@
 
 # Nimble changelog
 
+## 0.12.0
+
+This is a major release containing multiple improvements and bug fixes:
+
+- `nimble dump` now provides `--json` output.
+- Calls to the Nim compiler now display `--hints:off` output by default.
+  The `--verbose` flag will print the full Nim command as well as regular
+  compiler output.
+- Custom tasks can now be passed compiler flags as well as run flags when run
+  as `nimble <compflags> task <runflags>`. This includes the custom `test`
+  task if defined. Compile flags are forwarded to `nim e` that executes the
+  `.nimble` task and can be used to set `--define:xxx` and other compiler flags
+  that are applicable in Nimscript mode. Run flags can be accessed per usual
+  from `commandLineParams: seq[string]`.
+- The default `nimble test` task also allows passing compiler flags but given
+  run flags are not really applicable for multiple test binaries, it allows
+  specifying compile flags before or after the `test` task.
+- `nimble install` also allows passing compiler flags similar to the default
+  `nimble test` and no longer requires the `--passNim` flag.
+- The Nim compiler to be used by Nimble can now be specified with the `--nim`
+  flag. This is useful for debugging purposes.
+- Nimble now supports project local dependency mode - if a `nimbledeps` directory
+  exists within a project, Nimble will use it to store all package dependencies
+  instead of `~/.nimble/bin`. This enables isolation of a project and its
+  dependencies from other projects being developed.
+- The `-l | --localdeps` flag can be used to setup a project in local dependency
+  mode.
+- Nimble output can now be suppressed using `--silent`.
+- Binaries compiled by Nimble can now be named differently than the source file
+  with the `namedBin` table instead of `bin`. In addition, binary names that clash
+  with a `pkgname` directory containing .nim files no longer require appending
+  `pkg` to the directory.
+
+----
+
+Full changelog: https://github.com/nim-lang/nimble/compare/v0.11.4...v0.12.0
+
+## 0.11.4 - 19/05/2020
+
+This is a minor release containing just 2 commits and a few minor bug fixes.
+
+----
+
+Full changelog: https://github.com/nim-lang/nimble/compare/v0.11.2...v0.11.4
+
 ## 0.11.2 - 02/05/2020
 
 This is a minor release containing just 15 commits. This release brings mostly

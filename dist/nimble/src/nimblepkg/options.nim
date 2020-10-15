@@ -1,14 +1,18 @@
 # Copyright (C) Dominik Picheta. All rights reserved.
 # BSD License. Look at license.txt for more info.
 
-import json, strutils, os, parseopt, strtabs, uri, tables, terminal
+import json, strutils, os, parseopt, uri, tables, terminal
 import sequtils, sugar
 import std/options as std_opt
 from httpclient import Proxy, newProxy
 
 import config, version, common, cli
 
+const
+  nimbledeps* = "nimbledeps"
+
 type
+  DumpMode* = enum kdumpIni, kdumpJson
   Options* = object
     forcePrompts*: ForcePrompt
     depsOnly*: bool
@@ -30,6 +34,12 @@ type
     forceFullClone*: bool
     # Temporary storage of flags that have not been captured by any specific Action.
     unknownFlags*: seq[(CmdLineKind, string, string)]
+    dumpMode*: DumpMode
+    startDir*: string # Current directory on startup - is top level pkg dir for
+                      # some commands, useful when processing deps
+    nim*: string # Nim compiler location
+    localdeps*: bool # True if project local deps mode
+    developLocaldeps*: bool # True if local deps + nimble develop pkg1 ...
 
   ActionType* = enum
     actionNil, actionRefresh, actionInit, actionDump, actionPublish,
@@ -63,16 +73,17 @@ type
     of actionCustom:
       command*: string
       arguments*: seq[string]
-      flags*: StringTableRef
+      custCompileFlags*: seq[string]
+      custRunFlags*: seq[string]
 
 const
   help* = """
-Usage: nimble COMMAND [opts]
+Usage: nimble [nimbleopts] COMMAND [cmdopts]
 
 Commands:
   install      [pkgname, ...]     Installs a list of packages.
-               [-d, --depsOnly]   Install only dependencies.
-               [-p, --passNim]    Forward specified flag to compiler.
+               [-d, --depsOnly]   Installs only dependencies of the package.
+               [opts, ...]        Passes options to the Nim compiler.
   develop      [pkgname, ...]     Clones a list of packages for development.
                                   Symlinks the cloned packages or any package
                                   in the current working directory.
@@ -81,32 +92,33 @@ Commands:
   init         [pkgname]          Initializes a new Nimble project in the
                                   current directory or if a name is provided a
                                   new directory of the same name.
-               --git
-               --hg               Create a git or hg repo in the new nimble project.
+               [--git, --hg]      Creates a git/hg repo in the new nimble project.
   publish                         Publishes a package on nim-lang/packages.
                                   The current working directory needs to be the
                                   toplevel directory of the Nimble package.
   uninstall    [pkgname, ...]     Uninstalls a list of packages.
-               [-i, --inclDeps]   Uninstall package and dependent package(s).
-  build        [opts, ...] [bin]  Builds a package.
+               [-i, --inclDeps]   Uninstalls package and dependent package(s).
+  build        [opts, ...] [bin]  Builds a package. Passes options to the Nim
+                                  compiler.
   run          [opts, ...] [bin]  Builds and runs a package.
                                   Binary needs to be specified after any
                                   compilation options if there are several
-                                  binaries defined, any flags after the binary
+                                  binaries defined. Any flags after the binary
                                   or -- arg are passed to the binary when it is run.
   c, cc, js    [opts, ...] f.nim  Builds a file inside a package. Passes options
                                   to the Nim compiler.
   test                            Compiles and executes tests
                [-c, --continue]   Don't stop execution on a failed test.
+               [opts, ...]        Passes options to the Nim compiler.
   doc, doc2    [opts, ...] f.nim  Builds documentation for a file inside a
                                   package. Passes options to the Nim compiler.
   refresh      [url]              Refreshes the package list. A package list URL
                                   can be optionally specified.
   search       pkg/tag            Searches for a specified package. Search is
                                   performed by tag and by name.
-               [--ver]            Query remote server for package version.
+               [--ver]            Queries remote server for package version.
   list                            Lists all packages.
-               [--ver]            Query remote server for package version.
+               [--ver]            Queries remote server for package version.
                [-i, --installed]  Lists all installed packages.
   tasks                           Lists the tasks specified in the Nimble
                                   package's Nimble file.
@@ -117,15 +129,17 @@ Commands:
                                   .nimble file, a project directory or
                                   the name of an installed package.
 
-
-Options:
+Nimble Options:
   -h, --help                      Print this help message.
   -v, --version                   Print version information.
   -y, --accept                    Accept all interactive prompts.
   -n, --reject                    Reject all interactive prompts.
+  -l, --localdeps                 Run in project local dependency mode
       --ver                       Query remote server for package version
                                   information when searching or listing packages
       --nimbleDir:dirname         Set the Nimble directory.
+      --nim:path                  Use specified path for Nim compiler
+      --silent                    Hide all Nimble and Nim output
       --verbose                   Show all non-debug output.
       --debug                     Show all output including debug messages.
       --noColor                   Don't colorise output.
@@ -216,7 +230,8 @@ proc initAction*(options: var Options, key: string) =
   of actionCustom:
     options.action.command = key
     options.action.arguments = @[]
-    options.action.flags = newStringTable()
+    options.action.custCompileFlags = @[]
+    options.action.custRunFlags = @[]
   of actionPublish, actionList, actionTasks, actionCheck, actionRun,
      actionNil: discard
 
@@ -242,19 +257,7 @@ proc promptList*(options: Options, question: string, args: openarray[string]): s
   return promptList(options.forcePrompts, question, args)
 
 proc getNimbleDir*(options: Options): string =
-  result = options.config.nimbleDir
-  if options.nimbleDir.len != 0:
-    # --nimbleDir:<dir> takes priority...
-    result = options.nimbleDir
-  else:
-    # ...followed by the environment variable.
-    let env = getEnv("NIMBLE_DIR")
-    if env.len != 0:
-      display("Warning:", "Using the environment variable: NIMBLE_DIR='" &
-                        env & "'", Warning)
-      result = env
-
-  return expandTilde(result)
+  return options.nimbleDir
 
 proc getPkgsDir*(options: Options): string =
   options.getNimbleDir() / "pkgs"
@@ -262,9 +265,91 @@ proc getPkgsDir*(options: Options): string =
 proc getBinDir*(options: Options): string =
   options.getNimbleDir() / "bin"
 
+proc setNimbleDir*(options: var Options) =
+  var
+    nimbleDir = options.config.nimbleDir
+    propagate = false
+
+  if (options.localdeps and options.action.typ == actionDevelop and
+      options.action.packages.len != 0):
+    # Localdeps + nimble develop pkg1 ...
+    options.developLocaldeps = true
+
+  if options.nimbleDir.len != 0:
+    # --nimbleDir:<dir> takes priority...
+    nimbleDir = options.nimbleDir
+    propagate = true
+  else:
+    # ...followed by the environment variable.
+    let env = getEnv("NIMBLE_DIR")
+    if env.len != 0:
+      display("Warning:", "Using the environment variable: NIMBLE_DIR='" &
+              env & "'", Warning, priority = HighPriority)
+      nimbleDir = env
+    else:
+      # ...followed by project local deps mode
+      if dirExists(nimbledeps) or (options.localdeps and not options.developLocaldeps):
+        display("Warning:", "Using project local deps mode", Warning,
+                priority = HighPriority)
+        nimbleDir = nimbledeps
+        options.localdeps = true
+        propagate = true
+
+  options.nimbleDir = expandTilde(nimbleDir).absolutePath()
+  if propagate:
+    # Propagate custom nimbleDir to child processes
+    putEnv("NIMBLE_DIR", options.nimbleDir)
+
+    # Add $nimbledeps/bin to PATH
+    let path = getEnv("PATH")
+    if options.nimbleDir notin path:
+      putEnv("PATH", options.nimbleDir / "bin" & PathSep & path)
+
+  if not options.developLocaldeps:
+    # Create nimbleDir/pkgs if it doesn't exist - will create nimbleDir as well
+    let pkgsDir = options.getPkgsDir()
+    if not dirExists(pkgsDir):
+      createDir(pkgsDir)
+
 proc parseCommand*(key: string, result: var Options) =
   result.action = Action(typ: parseActionType(key))
   initAction(result, key)
+
+proc setNimBin*(options: var Options) =
+  # Find nim binary and set into options
+  if options.nim.len != 0:
+    # --nim:<path> takes priority...
+    if options.nim.splitPath().head.len == 0:
+      # Just filename, search in PATH - nim_temp shortcut
+      let pnim = findExe(options.nim)
+      if pnim.len != 0:
+        options.nim = pnim
+      else:
+        raise newException(NimbleError,
+          "Unable to find `$1` in $PATH" % options.nim)
+    elif not options.nim.isAbsolute():
+      # Relative path
+      options.nim = expandTilde(options.nim).absolutePath()
+
+    if not fileExists(options.nim):
+      raise newException(NimbleError, "Unable to find `$1`" % options.nim)
+  else:
+    # Search PATH
+    let pnim = findExe("nim")
+    if pnim.len != 0:
+      options.nim = pnim
+    else:
+      let pnimrod = findExe("nimrod")
+      if pnimrod.len != 0:
+        options.nim = pnimrod
+
+    if options.nim.len == 0:
+      # Nim not found in PATH
+      raise newException(NimbleError,
+        "Unable to find `nim` binary - add to $PATH or use `--nim`")
+
+proc getNimBin*(options: Options): string =
+  return options.nim
 
 proc setRunOptions(result: var Options, key, val: string, isArg: bool) =
   if result.action.runFile.isNone() and (isArg or val == "--"):
@@ -332,10 +417,13 @@ proc parseFlag*(flag, val: string, result: var Options, kind = cmdLongOption) =
   of "accept", "y": result.forcePrompts = forcePromptYes
   of "reject", "n": result.forcePrompts = forcePromptNo
   of "nimbledir": result.nimbleDir = val
+  of "silent": result.verbosity = SilentPriority
   of "verbose": result.verbosity = LowPriority
   of "debug": result.verbosity = DebugPriority
   of "nocolor": result.noColor = true
   of "disablevalidation": result.disableValidation = true
+  of "nim": result.nim = val
+  of "localdeps", "l": result.localdeps = true
   else: isGlobalFlag = false
 
   var wasFlagHandled = true
@@ -349,6 +437,12 @@ proc parseFlag*(flag, val: string, result: var Options, kind = cmdLongOption) =
       result.queryVersions = true
     else:
       wasFlagHandled = false
+  of actionDump:
+    case f
+    of "json": result.dumpMode = kdumpJson
+    of "ini": result.dumpMode = kdumpIni
+    else:
+      wasFlagHandled = false
   of actionInstall:
     case f
     of "depsonly", "d":
@@ -356,7 +450,10 @@ proc parseFlag*(flag, val: string, result: var Options, kind = cmdLongOption) =
     of "passnim", "p":
       result.action.passNimFlags.add(val)
     else:
-      wasFlagHandled = false
+      if not isGlobalFlag:
+        result.action.passNimFlags.add(getFlagString(kind, flag, val))
+      else:
+        wasFlagHandled = false
   of actionInit:
     case f
     of "git", "hg":
@@ -376,10 +473,13 @@ proc parseFlag*(flag, val: string, result: var Options, kind = cmdLongOption) =
     result.showHelp = false
     result.setRunOptions(flag, getFlagString(kind, flag, val), false)
   of actionCustom:
-    if result.action.command.normalize == "test":
-      if f == "continue" or f == "c":
-        result.continueTestsOnFailure = true
-    result.action.flags[flag] = val
+    if not isGlobalFlag:
+      if result.action.command.normalize == "test":
+        if f == "continue" or f == "c":
+          result.continueTestsOnFailure = true
+
+      # Set run flags for custom task
+      result.action.custRunFlags.add(getFlagString(kind, flag, val))
   else:
     wasFlagHandled = false
 
@@ -413,6 +513,12 @@ proc handleUnknownFlags(options: var Options) =
     # ActionRun uses flags that come before the command as compilation flags
     # and flags that come after as run flags.
     options.action.compileFlags =
+      map(options.unknownFlags, x => getFlagString(x[0], x[1], x[2]))
+    options.unknownFlags = @[]
+  elif options.action.typ == actionCustom:
+    # actionCustom uses flags that come before the command as compilation flags
+    # and flags that come after as run flags.
+    options.action.custCompileFlags =
       map(options.unknownFlags, x => getFlagString(x[0], x[1], x[2]))
     options.unknownFlags = @[]
   else:
@@ -507,6 +613,8 @@ proc briefClone*(options: Options): Options =
   newOptions.nimbleDir = options.nimbleDir
   newOptions.forcePrompts = options.forcePrompts
   newOptions.pkgInfoCache = options.pkgInfoCache
+  newOptions.verbosity = options.verbosity
+  newOptions.nim = options.nim
   return newOptions
 
 proc shouldRemoveTmp*(options: Options, file: string): bool =
@@ -522,6 +630,8 @@ proc getCompilationFlags*(options: var Options): var seq[string] =
     return options.action.compileOptions
   of actionRun:
     return options.action.compileFlags
+  of actionCustom:
+    return options.action.custCompileFlags
   else:
     assert false
 
@@ -541,7 +651,7 @@ proc getCompilationBinary*(options: Options, pkgInfo: PackageInfo): Option[strin
       if optRunFile.get("").len > 0:
         optRunFile.get()
       elif pkgInfo.bin.len == 1:
-        pkgInfo.bin[0]
+        toSeq(pkgInfo.bin.keys)[0]
       else:
         ""
 
@@ -549,3 +659,6 @@ proc getCompilationBinary*(options: Options, pkgInfo: PackageInfo): Option[strin
       return some(runFile.changeFileExt(ExeExt))
   else:
     discard
+
+proc isInstallingTopLevel*(options: Options, dir: string): bool =
+  return options.startDir == dir

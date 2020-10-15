@@ -6,6 +6,13 @@ language](https://nim-lang.org).
 Interested in learning **how to create a package**? Skip directly to that section
 [here](#creating-packages).
 
+This documentation is for the latest commit of Nimble. Nim releases ship with a
+specific version of Nimble and may not contain all the features and fixes described
+here. `nimble -v` will display the version of Nimble in use and corresponding
+documentation can be found [here](https://github.com/nim-lang/nimble/releases).
+
+The Nimble change log can be found [here](https://github.com/nim-lang/nimble/blob/master/changelog.markdown).
+
 ## Contents
 
 - [Requirements](#requirements)
@@ -13,6 +20,7 @@ Interested in learning **how to create a package**? Skip directly to that sectio
 - [Nimble usage](#nimble-usage)
   - [nimble refresh](#nimble-refresh)
   - [nimble install](#nimble-install)
+  - [nimble develop](#nimble-develop)
   - [nimble uninstall](#nimble-uninstall)
   - [nimble build](#nimble-build)
   - [nimble run](#nimble-run)
@@ -182,9 +190,14 @@ The latter command will install a version which is greater than ``0.5``.
 
 If you don't specify a parameter and there is a ``package.nimble`` file in your
 current working directory then Nimble will install the package residing in
-the current working directory. This can be useful for developers who are testing
-locally their ``.nimble`` files before submitting them to the official package
+the current working directory. This can be useful for developers who are locally
+testing their ``.nimble`` files before submitting them to the official package
 list. See the [Creating Packages](#creating-packages) section for more info on this.
+
+Nim flags provided to `nimble install` will be forwarded to the compiler when
+building any binaries. Such compiler flags can be made persistent by using Nim
+[configuration](https://nim-lang.org/docs/nimc.html#compiler-usage-configuration-files)
+files.
 
 #### Package URLs
 
@@ -238,6 +251,11 @@ their ``.nimble`` package. This command will build the package with default
 flags, i.e. a debug build which includes stack traces but no GDB debug
 information. The ``install`` command will build the package in release mode
 instead.
+
+Nim flags provided to `nimble build` will be forwarded to the compiler. Such
+compiler flags can be made persistent by using Nim
+[configuration](https://nim-lang.org/docs/nimc.html#compiler-usage-configuration-files)
+files.
 
 ### nimble run
 
@@ -337,6 +355,9 @@ Outputs information about the package in the current working directory in
 an ini-compatible format. Useful for tools wishing to read metadata about
 Nimble packages who do not want to use the NimScript evaluator.
 
+The format can be specified with `--json` or `--ini` (and defaults to `--ini`).
+Use `nimble dump pkg` to dump information about provided `pkg` instad.
+
 ## Configuration
 
 At startup Nimble will attempt to read ``~/.config/nimble/nimble.ini`` on Linux
@@ -379,9 +400,6 @@ You can currently configure the following in this file:
 * ``httpProxy`` - The URL of the proxy to use when downloading package listings.
   Nimble will also attempt to read the ``http_proxy`` and ``https_proxy``
   environment variables.
-  **Default: ""**
-* ``nimLibPrefix`` - Specifies the Nim standard library prefix to help Nimble
-  find the Nim standard library.
   **Default: ""**
 
 ## Creating Packages
@@ -493,6 +511,18 @@ also return ``false`` from these blocks to stop further execution.
 The ``nimscriptapi.nim`` module specifies this and includes other definitions
 which are also useful. Take a look at it for more information.
 
+Tasks support two kinds of flags: `nimble <compflags> task <runflags>`. Compile
+flags are those specified before the task name and are forwarded to the Nim
+compiler that runs the `.nimble` task. This enables setting `--define:xxx`
+values that can be checked with `when defined(xxx)` in the task, and other
+compiler flags that are applicable in Nimscript mode. Run flags are those after
+the task name and are available as command line arguments to the task. They can
+be accessed per usual from `commandLineParams: seq[string]`.
+
+In order to forward compiler flags to `exec("nim ...")` calls executed within a
+custom task, the user needs to specify these flags as run flags which will then
+need to be manually accessed and forwarded in the task.
+
 ### Project structure
 
 For a package named "foobar", the recommended project structure is the following:
@@ -574,7 +604,9 @@ your ``tests`` directory with the following contents:
 ```
 
 Nimble offers a pre-defined ``test`` task which compiles and runs all files
-in the ``tests`` directory beginning with 't' in their filename.
+in the ``tests`` directory beginning with 't' in their filename. Nim flags
+provided to `nimble test` will be forwarded to the compiler when building
+the tests.
 
 You may wish to override this ``test`` task in your ``.nimble`` file. This
 is particularly useful when you have a single test suite program. Just add
@@ -602,11 +634,10 @@ determined by the nature of your package, that is, whether your package exposes
 only one module or multiple modules.
 
 If your package exposes only a single module, then that module should be
-present in the root directory (the directory with the .nimble file) of your Git
-repository, and should be named whatever your package's name is. A good example
-of this is the [jester](https://github.com/dom96/jester) package which exposes
-the ``jester`` module. In this case the jester package is imported with
-``import jester``.
+present in the source directory of your Git repository, and should be named
+whatever your package's name is. A good example of this is the
+[jester](https://github.com/dom96/jester) package which exposes the ``jester``
+module. In this case the jester package is imported with ``import jester``.
 
 If your package exposes multiple modules then the modules should be in a
 ``PackageName`` directory. This will allow for a certain measure of isolation
@@ -650,11 +681,15 @@ file, copy it into ``$nimbleDir/pkgs/pkgname-ver/`` and subsequently create a
 symlink to the binary in ``$nimbleDir/bin/``. On Windows a stub .cmd file is
 created instead.
 
-Other files will be copied in the same way as they are for library packages.
+The binary can be named differently than the source file with the ``namedBin``
+table:
 
-Binary packages should not install .nim files so include ``skipExt = @["nim"]``
-in your .nimble file, unless you intend for your package to be a binary/library
-combo.
+```nim
+namedBin["main"] = "mymain"
+namedBin = {"main": "mymain", "main2": "other-main"}.toTable()
+```
+
+Note that `namedBin` entries override duplicates in `bin`.
 
 Dependencies are automatically installed before building.
 It's a good idea to test that the dependencies you specified are correct by
@@ -663,18 +698,15 @@ of your package.
 
 ### Hybrids
 
-One thing to note about binary packages that contain source files aside from
-the one(s) specified in `bin` (or that also expose multiple library modules, as
-above) is that a binary may share the name of the package: this will mean
-that you will not be able to put your additional .nim files in a ``pkgname``
-directory. The reason for this is that binaries on some operating systems do
-not have an extension, so they will clash with a directory of the same name.
+Binary packages will not install .nim files so include ``installExt = @["nim"]``
+in your .nimble file if you intend for your package to be a hybrid binary/library
+combo.
 
-If this is the case, you should place your additional .nim files in a directory
-with `pkg` appended after the name of the project. For instance, if you were
-building a binary named `project`, you would put any additional source files in
-a directory called `projectpkg`. From within project.nim you would then import
-those modules namespaced with `projectpkg/`.
+Historically, binaries that shared the name of a ``pkgname`` directory that
+contains additional .nim files required workarounds. This is now handled behind 
+the scenes by appending a ``.out`` extension to the binary and is transparent to
+commands like `nimble run` or symlinks which can still refer to the original
+binary name.
 
 ### Dependencies
 
@@ -740,43 +772,6 @@ installing your package (on macOS):
   Hint: To install them you may be able to run:
   Hint:   brew install openssl
 ```
-
-### Nim compiler
-
-The Nim compiler cannot read .nimble files. Its knowledge of Nimble is
-limited to the ``nimblePath`` feature which allows it to use packages installed
-in Nimble's package directory when compiling your software. This means that
-it cannot resolve dependencies, and it can only use the latest version of a
-package when compiling.
-
-When Nimble builds your package it actually executes the Nim compiler.
-It resolves the dependencies and feeds the path of each package to
-the compiler so that it knows precisely which version to use.
-
-This means that you can safely compile using the compiler when developing your
-software, but you should use Nimble to build the package before publishing it
-to ensure that the dependencies you specified are correct.
-
-### Compile with `nim` after changing the nimble directory
-
-The Nim compiler has been preconfigured to look at the default nimble directory while compiling,
-so no extra step is required to use nimble managed packages in your code.
-However, if you are using a custom `nimbleDir`, you need to specify the
-`--nimblePath:PATH` option. For example,
-if your `nimble` directory is located at `/some/custom/path/nimble`, this should work:
-
-```
-nim c --nimblePath:/some/custom/path/nimble/pkgs main.nim
-```
-
-Some code editors rely on `nim check` to check for errors under the hood (e.g. VScode),
-and the editor extension may not allow users to pass custom option to `nim check`, which
-will cause `nim check` to scream `Error: cannot open file:<the_package>`. In this case,
-you will have to use [Nim compiler's configuration files](https://nim-lang.org/docs/nimc.html#compiler-usage-configuration-files). Simply add the line:
-```
-nimblePath = "/some/custom/path/nimble/pkgs"
-```
-to the `nim.cfg` located in any directory listed in the [documentation](https://nim-lang.org/docs/nimc.html#compiler-usage-configuration-files), this should resolve the problem.
 
 ### Versions
 
@@ -871,12 +866,12 @@ Nimble includes a ``publish`` command which does this for you automatically.
   if this option is specified nothing else will be installed except the dirs
   listed here, the files listed in ``installFiles``, the files which share the
   extensions listed in ``installExt``, the .nimble file and the binary
-  (if ``bin`` is specified). Separated by commas.
+  (if ``bin`` / ``namedBin`` is specified). Separated by commas.
 * ``installFiles`` - A list of files which should be exclusively installed,
   this complements ``installDirs`` and ``installExt``. Only the files listed
   here, directories listed in ``installDirs``, files which share the extension
-  listed in ``installExt``, the .nimble file and the binary (if ``bin`` is
-  specified) will be installed. Separated by commas.
+  listed in ``installExt``, the .nimble file and the binary (if ``bin`` / ``namedBin``
+  is specified) will be installed. Separated by commas.
 * ``installExt`` - A list of file extensions which should be exclusively
   installed, this complements ``installDirs`` and ``installFiles``.
   Separated by commas.
@@ -890,6 +885,10 @@ Nimble includes a ``publish`` command which does this for you automatically.
 * ``bin`` - A list of files which should be built separated by commas with
   no file extension required. This option turns your package into a *binary
   package*, Nimble will build the files specified and install them appropriately.
+* ``namedBin`` - A list of name:value files which should be built with specified
+  name, no file extension required. This option turns your package into a *binary
+  package*, Nimble will build the files specified and install them approriately.
+  `namedBin` entries override duplicates in `bin`.
 * ``backend`` - Specifies the backend which will be used to build the files
   listed in ``bin``. Possible values include: ``c``, ``cc``, ``cpp``, ``objc``,
   ``js``.
@@ -906,16 +905,80 @@ Nimble includes a ``publish`` command which does this for you automatically.
 
 ## Nimble's folder structure and packages
 
-Nimble stores everything that has been installed in ``~/.nimble`` on Unix systems
-and in your ``$home/.nimble`` on Windows. Libraries are stored in
-``$nimbleDir/pkgs``, and binaries are stored in ``$nimbleDir/bin``. Most Nimble
-packages will provide ``.nim`` files and some documentation. The Nim
-compiler is aware of Nimble and will automatically find the modules so you can
-``import modulename`` and have that working without additional setup.
+Nimble stores all installed packages and metadata in ``$HOME/.nimble`` by default.
+Libraries are stored in ``$nimbleDir/pkgs``, and compiled binaries are linked in
+``$nimbleDir/bin``. The Nim compiler is aware of Nimble and will automatically
+find modules so you can ``import modulename`` and have that working without
+additional setup.
 
 However, some Nimble packages can provide additional tools or commands. If you
 don't add their location (``$nimbleDir/bin``) to your ``$PATH`` they will not
 work properly and you won't be able to run them.
+
+If the ``nimbledeps`` directory exists next to the package ``.nimble`` file,
+Nimble will use that directory as ``$nimbleDir`` and ``$HOME/.nimble`` will be
+ignored. This allows for project local dependencies and isolation from other
+projects. The `-l | --localdeps` flag can be used to setup a project in local
+dependency mode.
+
+Nimble also allows overriding ``$nimbleDir`` on the command line with the
+``--nimbleDir`` flag or the ``NIMBLE_DIR`` environment variable if required.
+
+If the default ``$HOME/.nimble`` is overridden by one of the above methods,
+Nimble automatically adds ``$nimbleDir/bin`` to the PATH for all child processes.
+In addition, the ``NIMBLE_DIR`` environment variable is also set to the specified
+``$nimbleDir`` to inform child Nimble processes invoked in tasks.
+
+### Nim compiler
+
+The Nim compiler cannot read ``.nimble`` files. Its knowledge of Nimble is
+limited to the ``nimblePath`` feature which allows it to use packages installed
+in Nimble's package directory when compiling your software. This means that
+it cannot resolve dependencies, and it can only use the latest version of a
+package when compiling.
+
+When Nimble builds your package it actually executes the Nim compiler.
+It resolves the dependencies and feeds the path of each package to
+the compiler so that it knows precisely which version to use.
+
+This means that you can safely compile using the compiler when developing your
+software, but you should use Nimble to build the package before publishing it
+to ensure that the dependencies you specified are correct.
+
+### Compile with `nim` after changing the Nimble directory
+
+The Nim compiler has been preconfigured to look at the default ``$HOME/.nimble``
+directory while compiling, so no extra step is required to use Nimble managed
+packages. However, if a custom ``$nimbleDir`` is in use by one of the methods
+mentioned earlier, you need to specify the ``--nimblePath:PATH`` option to Nim.
+
+For example, if your Nimble directory is located at `/some/custom/path/nimble`,
+this should work:
+
+```
+nim c --nimblePath:/some/custom/path/nimble/pkgs main.nim
+```
+
+In the case of package local dependencies with ``nimbledeps``:
+
+```
+nim c --nimblePath:nimbledeps/pkgs main.nim
+```
+
+Some code editors rely on `nim check` to check for errors under the hood (e.g.
+VScode), and the editor extension may not allow users to pass custom option to
+`nim check`, which will cause `nim check` to scream `Error: cannot open file:<the_package>`.
+In this case, you will have to use the Nim compiler's configuration file capability.
+Simply add the following line to the `nim.cfg` located in any directory listed
+in the [documentation](https://nim-lang.org/docs/nimc.html#compiler-usage-configuration-files).
+```
+nimblePath = "/some/custom/path/nimble/pkgs"
+```
+
+For project local dependencies:
+```
+nimblePath = "$project/nimbledeps/pkgs"
+```
 
 ## Troubleshooting
 

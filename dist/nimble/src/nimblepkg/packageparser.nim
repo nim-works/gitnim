@@ -1,7 +1,7 @@
 # Copyright (C) Dominik Picheta. All rights reserved.
 # BSD License. Look at license.txt for more info.
 import parsecfg, sets, streams, strutils, os, tables, sugar
-from sequtils import apply, map
+from sequtils import apply, map, toSeq
 
 import version, tools, common, nimscriptwrapper, options, packageinfo, cli
 
@@ -99,7 +99,7 @@ proc validatePackageStructure(pkgInfo: PackageInfo, options: Options) =
   ## https://github.com/nim-lang/nimble/issues/144
   let
     realDir = pkgInfo.getRealDir()
-    normalizedBinNames = pkgInfo.bin.map(
+    normalizedBinNames = toSeq(pkgInfo.bin.keys).map(
       (x) => x.changeFileExt("").toLowerAscii()
     )
     correctDir =
@@ -256,14 +256,24 @@ proc readPackageInfoFromNimble(path: string; result: var PackageInfo) =
             result.installExt.add(ev.value.multiSplit)
           of "bin":
             for i in ev.value.multiSplit:
-              if i.splitFile().ext == ".nim":
-                raise newException(NimbleError, "`bin` entry should not be a source file: " & i)
-              result.bin.add(i.addFileExt(ExeExt))
+              var (src, bin) = if '=' notin i: (i, i) else:
+                let spl = i.split('=', 1)
+                (spl[0], spl[1])
+              if src.splitFile().ext == ".nim":
+                raise newException(NimbleError, "`bin` entry should not be a source file: " & src)
+              if result.backend == "js":
+                bin = bin.addFileExt(".js")
+              else:
+                bin = bin.addFileExt(ExeExt)
+              result.bin[bin] = src
           of "backend":
             result.backend = ev.value.toLowerAscii()
             case result.backend.normalize
             of "javascript": result.backend = "js"
             else: discard
+          of "nimbletasks":
+            for i in ev.value.multiSplit:
+              result.nimbleTasks.incl(i.normalize)
           of "beforehooks":
             for i in ev.value.multiSplit:
               result.preHooks.incl(i.normalize)
