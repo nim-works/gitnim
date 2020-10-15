@@ -134,7 +134,8 @@ proc dbQuote*(s: string): string =
     of '\'': result.add "\\'"
     of '\\': result.add "\\\\"
     of '_': result.add "\\_"
-    else: result.add c
+    of Letters+Digits: result.add c
+    else: result.add "\\" & $ord(c)
   add(result, '\'')
 
 proc dbFormat(formatstr: SqlQuery, args: varargs[string]): string =
