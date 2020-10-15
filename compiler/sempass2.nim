@@ -809,7 +809,8 @@ proc trackCall(tracked: PEffects; n: PNode) =
 
   if a.kind == nkSym and a.sym.name.s.len > 0 and a.sym.name.s[0] == '=' and
         tracked.owner.kind != skMacro:
-    let opKind = find(AttachedOpToStr, a.sym.name.s.normalize)
+    var opKind = find(AttachedOpToStr, a.sym.name.s.normalize)
+    if a.sym.name.s.normalize == "=": opKind = attachedAsgn.int
     if opKind != -1:
       # rebind type bounds operations after createTypeBoundOps call
       let t = n[1].typ.skipTypes({tyAlias, tyVar})
@@ -1065,7 +1066,10 @@ proc track(tracked: PEffects, n: PNode) =
     for i in 0..<n.len:
       track(tracked, n[i])
       if tracked.owner.kind != skMacro:
-        createTypeBoundOps(tracked, n[i].typ, n.info)
+        if n[i].kind == nkExprColonExpr:
+          createTypeBoundOps(tracked, n[i][0].typ, n.info)
+        else:
+          createTypeBoundOps(tracked, n[i].typ, n.info)
       checkForSink(tracked.config, tracked.owner, n[i])
   of nkPragmaBlock:
     let pragmaList = n[0]

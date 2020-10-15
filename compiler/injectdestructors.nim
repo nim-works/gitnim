@@ -235,7 +235,7 @@ template isUnpackedTuple(n: PNode): bool =
 
 proc checkForErrorPragma(c: Con; t: PType; ri: PNode; opname: string) =
   var m = "'" & opname & "' is not available for type <" & typeToString(t) & ">"
-  if opname == "=" and ri != nil:
+  if (opname == "=" or opname == "=copy") and ri != nil:
     m.add "; requires a copy because it's not the last read of '"
     m.add renderTree(ri)
     m.add '\''
@@ -319,7 +319,7 @@ proc genCopy(c: var Con; dest, ri: PNode): PNode =
   if tfHasOwned in t.flags and ri.kind != nkNilLit:
     # try to improve the error message here:
     if c.otherRead == nil: discard isLastRead(ri, c)
-    c.checkForErrorPragma(t, ri, "=")
+    c.checkForErrorPragma(t, ri, "=copy")
   result = c.genCopyNoCheck(dest, ri)
 
 proc genDiscriminantAsgn(c: var Con; s: var Scope; n: PNode): PNode =
@@ -411,7 +411,9 @@ proc passCopyToSink(n: PNode; c: var Con; s: var Scope): PNode =
         "if possible, rearrange your program's control flow to prevent it") % $n)
   else:
     if c.graph.config.selectedGC in {gcArc, gcOrc}:
-      assert(not containsGarbageCollectedRef(n.typ))
+      assert(not containsManagedMemory(n.typ))
+    if n.typ.skipTypes(abstractInst).kind in {tyOpenArray, tyVarargs}:
+      localError(c.graph.config, n.info, "cannot create an implicit openArray copy to be passed to a sink parameter")
     result.add newTree(nkAsgn, tmp, p(n, c, s, normal))
   # Since we know somebody will take over the produced copy, there is
   # no need to destroy it.
@@ -593,6 +595,18 @@ template handleNestedTempl(n, processCall: untyped, willProduceStmt = false) =
     result.add processScope(c, bodyScope, bodyResult)
     dec c.inLoop
 
+  of nkParForStmt:
+    inc c.inLoop
+    result = shallowCopy(n)
+    let last = n.len-1
+    for i in 0..<last-1:
+      result[i] = n[i]
+    result[last-1] = p(n[last-1], c, s, normal)
+    var bodyScope = nestedScope(s)
+    let bodyResult = p(n[last], c, bodyScope, normal)
+    result[last] = processScope(c, bodyScope, bodyResult)
+    dec c.inLoop
+
   of nkBlockStmt, nkBlockExpr:
     result = copyNode(n)
     result.add n[0]
@@ -668,7 +682,7 @@ proc pRaiseStmt(n: PNode, c: var Con; s: var Scope): PNode =
 
 proc p(n: PNode; c: var Con; s: var Scope; mode: ProcessMode): PNode =
   if n.kind in {nkStmtList, nkStmtListExpr, nkBlockStmt, nkBlockExpr, nkIfStmt,
-                nkIfExpr, nkCaseStmt, nkWhen, nkWhileStmt, nkTryStmt}:
+                nkIfExpr, nkCaseStmt, nkWhen, nkWhileStmt, nkParForStmt, nkTryStmt}:
     template process(child, s): untyped = p(child, c, s, mode)
     handleNestedTempl(n, process)
   elif mode == sinkArg:
