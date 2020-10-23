@@ -349,7 +349,7 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Authors:</th><td> Andreas Rumpf, Zahary Karadjov</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.4.0</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.4.1</td></tr>
 </tbody></table><blockquote><p>&quot;Complexity&quot; seems to be a lot like &quot;energy&quot;: you can transfer it from the end user to one/some of the other players, but the total amount seems to remain pretty much constant for a given task. -- Ran</p></blockquote>
 
 <h1><a class="toc-backref" id="about-this-document" href="#about-this-document">About this document</a></h1><p><strong>Note</strong>: This document is a draft! Several of Nim's features may need more precise wording. This manual is constantly evolving into a proper specification.</p>
@@ -1786,7 +1786,13 @@ return &quot;ambiguous&quot;</pre>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">p</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">discardable</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
   <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Operator">+</span> <span class="Identifier">y</span>
 
-<span class="Identifier">p</span><span class="Punctuation">(</span><span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">4</span><span class="Punctuation">)</span> <span class="Comment"># now valid</span></pre><p>An empty <tt class="docutils literal"><span class="pre">discard</span></tt> statement is often used as a null statement:</p>
+<span class="Identifier">p</span><span class="Punctuation">(</span><span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">4</span><span class="Punctuation">)</span> <span class="Comment"># now valid</span></pre><p>however the discardable pragma does not work on templates as templates substitute the AST in place. For example:</p>
+<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">push</span> <span class="Identifier">discardable</span> <span class="Operator">.</span><span class="Punctuation">}</span>
+<span class="Keyword">template</span> <span class="Identifier">example</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span> <span class="StringLit">&quot;https://nim-lang.org&quot;</span>
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">pop</span><span class="Operator">.</span><span class="Punctuation">}</span>
+
+<span class="Identifier">example</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>This template will resolve into &quot;<a class="reference external" href="https://nim-lang.org">https://nim-lang.org</a>&quot; which is a string literal and since {.discardable.} doesn't apply to literals, the compiler will error.</p>
+<p>An empty <tt class="docutils literal"><span class="pre">discard</span></tt> statement is often used as a null statement:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">classify</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span> <span class="Operator">=</span>
   <span class="Keyword">case</span> <span class="Identifier">s</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span>
   <span class="Keyword">of</span> <span class="Identifier">SymChars</span><span class="Punctuation">,</span> <span class="CharLit">'_'</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;an identifier&quot;</span>
@@ -3660,7 +3666,7 @@ static int cvariable = 420;
   <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">emit</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="LongStringLit">&quot;&quot;&quot;fprintf(stdout, &quot;%d\n&quot;, cvariable + (int)&quot;&quot;&quot;</span><span class="Punctuation">,</span> <span class="Identifier">nimVar</span><span class="Punctuation">,</span> <span class="StringLit">&quot;);&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Punctuation">}</span>
 <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">pop</span><span class="Operator">.</span><span class="Punctuation">}</span>
 
-<span class="Identifier">embedsC</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p><tt class="docutils literal"><span class="pre">nimbase.h</span></tt> defines <tt class="docutils literal"><span class="pre">NIM_EXTERNC</span></tt> C macro that can be used for <tt class="docutils literal"><span class="pre">extern &quot;C&quot;</span></tt> code to work with both <tt class="docutils literal"><span class="pre">nim c</span></tt> and <tt class="docutils literal"><span class="pre">nim cpp</span></tt>, eg:</p>
+<span class="Identifier">embedsC</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p><tt class="docutils literal"><span class="pre">nimbase.h</span></tt> defines <tt class="docutils literal"><span class="pre">NIM_EXTERNC</span></tt> C macro that can be used for <tt class="docutils literal"><span class="pre">extern &quot;C&quot;</span></tt> code to work with both <tt class="docutils literal"><span class="pre">nim c</span></tt> and <tt class="docutils literal"><span class="pre">nim cpp</span></tt>, e.g.:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">foobar</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importc</span><span class="Punctuation">:</span><span class="StringLit">&quot;$1&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
 <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">emit</span><span class="Punctuation">:</span> <span class="LongStringLit">&quot;&quot;&quot;
 #include &lt;stdio.h&gt;
@@ -3997,7 +4003,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-15 15:42:22 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-23 01:22:41 UTC</small>
       </div>
     </div>
   </div>
