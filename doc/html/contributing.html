@@ -115,6 +115,7 @@ function main() {
 <li><a class="reference" id="the-git-stuff_toc" href="#the-git-stuff">The Git stuff</a></li>
 <ul class="simple"><li><a class="reference" id="the-git-stuff-general-commit-rules_toc" href="#the-git-stuff-general-commit-rules">General commit rules</a></li>
 <li><a class="reference" id="the-git-stuff-continuous-integration-ci_toc" href="#the-git-stuff-continuous-integration-ci">Continuous Integration (CI)</a></li>
+<li><a class="reference" id="the-git-stuff-debugging-ci-failures-flaky-tests-etc_toc" href="#the-git-stuff-debugging-ci-failures-flaky-tests-etc">Debugging CI failures, flaky tests, etc</a></li>
 <li><a class="reference" id="the-git-stuff-code-reviews_toc" href="#the-git-stuff-code-reviews">Code reviews</a></li>
 </ul><li><a class="reference" id="documentation-style_toc" href="#documentation-style">Documentation Style</a></li>
 <ul class="simple"><li><a class="reference" id="documentation-style-general-guidelines_toc" href="#documentation-style-general-guidelines">General Guidelines</a></li>
@@ -129,10 +130,16 @@ function main() {
 <li><a class="reference" id="evolving-the-stdlib-syntactic-helpers-can-start-as-experimental-stdlib-modules_toc" href="#evolving-the-stdlib-syntactic-helpers-can-start-as-experimental-stdlib-modules">Syntactic helpers can start as experimental stdlib modules</a></li>
 <li><a class="reference" id="evolving-the-stdlib-other-new-stdlib-modules-do-not-start-as-stdlib-modules_toc" href="#evolving-the-stdlib-other-new-stdlib-modules-do-not-start-as-stdlib-modules">Other new stdlib modules do not start as stdlib modules</a></li>
 <li><a class="reference" id="evolving-the-stdlib-little-additions-are-acceptable_toc" href="#evolving-the-stdlib-little-additions-are-acceptable">Little additions are acceptable</a></li>
+<li><a class="reference" id="evolving-the-stdlib-conventions_toc" href="#evolving-the-stdlib-conventions">Conventions</a></li>
 </ul>
 </ul>
 
   </div>
+  &nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/doc/contributing.rst#L1"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/doc/contributing.rst#L1" class="link-seesrc" target="_blank" >Edit</a>
+
   <div class="nine columns" id="content">
   <div id="tocRoot"></div>
   
@@ -311,8 +318,17 @@ git diff --check --cached || exit $?</pre></li>
 </ol>
 
 <h2><a class="toc-backref" id="the-git-stuff-continuous-integration-ci" href="#the-git-stuff-continuous-integration-ci">Continuous Integration (CI)</a></h2><ol class="simple"><li>Continuous Integration is by default run on every push in a PR; this clogs the CI pipeline and affects other PR's; if you don't need it (e.g. for WIP or documentation only changes), add <tt class="docutils literal"><span class="pre">[ci skip]</span></tt> to your commit message title. This convention is supported by <a class="reference external" href="https://www.appveyor.com/docs/how-to/filtering-commits/#skip-directive-in-commit-message">Appveyor</a> and <a class="reference external" href="https://docs.travis-ci.com/user/customizing-the-build/#skipping-a-build">Travis</a>.</li>
-<li>Consider enabling CI (travis and appveyor) in your own Nim fork, and waiting for CI to be green in that fork (fixing bugs as needed) before opening your PR in original Nim repo, so as to reduce CI congestion. Same applies for updates on a PR: you can test commits on a separate private branch before updating the main PR.</li>
+<li>Consider enabling CI (azure, github actions and builds.sr.ht) in your own Nim fork, and waiting for CI to be green in that fork (fixing bugs as needed) before opening your PR in original Nim repo, so as to reduce CI congestion. Same applies for updates on a PR: you can test commits on a separate private branch before updating the main PR.</li>
 </ol>
+
+<h2><a class="toc-backref" id="the-git-stuff-debugging-ci-failures-flaky-tests-etc" href="#the-git-stuff-debugging-ci-failures-flaky-tests-etc">Debugging CI failures, flaky tests, etc</a></h2><ol class="simple"><li>First check the CI logs and search for <tt class="docutils literal"><span class="pre">FAIL</span></tt> to find why CI failed; if the failure seems related to your PR, try to fix the code instead of restarting CI.</li>
+<li>If CI failure seems unrelated to your PR, it could be caused by a flaky test. File a bug for it if it isn't already reported. A PR push (or opening/closing PR) will re-trigger all CI jobs (even successful ones, which can be wasteful). Instead, follow these instructions to only restart the jobs that failed:</li>
+</ol>
+<blockquote><p><ul class="simple"><li>Azure: if on your own fork, it's possible from inside azure console (e.g. <tt class="docutils literal"><span class="pre">dev.azure.com/username/username/_build/results?buildId=1430&amp;view=results</span></tt>) via <tt class="docutils literal"><span class="pre">rerun failed jobs</span></tt> on top. If either on you own fork or in Nim repo, it's possible from inside github UI under checks tab, see <a class="reference external" href="https://github.com/timotheecour/Nim/issues/211#issuecomment-629751569">https://github.com/timotheecour/Nim/issues/211#issuecomment-629751569</a></li>
+<li>github actions: under &quot;Checks&quot; tab, click &quot;Re-run jobs&quot; in the right.</li>
+<li>builds.sr.ht: create a sourcehut account so you can restart a PR job as illustrated</li>
+</ul>
+</p></blockquote>
 
 <h2><a class="toc-backref" id="the-git-stuff-code-reviews" href="#the-git-stuff-code-reviews">Code reviews</a></h2><ol class="simple"><li>Whenever possible, use github's new 'Suggested change' in code reviews, which saves time explaining the change or applying it; see also <a class="reference external" href="https://forum.nim-lang.org/t/4317">https://forum.nim-lang.org/t/4317</a></li>
 <li>When reviewing large diffs that may involve code moving around, github's interface doesn't help much as it doesn't highlight moves. Instead you can use something like this, see visual results <a class="reference external" href="https://github.com/nim-lang/Nim/pull/10431#issuecomment-456968196">here</a>:<pre class="listing">
@@ -426,6 +442,9 @@ git diff --color-moved-ws=allow-indentation-change --color-moved=blocks HEAD^</p
 <ol class="simple"><li>It makes Nim easier to learn and use in the long run. (&quot;Why does sequtils lack a <tt class="docutils literal"><span class="pre">countIt</span></tt>? Because version 1.0 happens to have lacked it? Silly...&quot;)</li>
 <li>To encourage contributions. Contributors often start with PRs that add simple things and then they stay and also fix bugs. Nim is an open source project and lives from people's contributions and involvement. Newly introduced issues have to be balanced against motivating new people. We know where to find perfectly designed pieces of software that have no bugs -- these are the systems that nobody uses.</li>
 </ol>
+
+<h2><a class="toc-backref" id="evolving-the-stdlib-conventions" href="#evolving-the-stdlib-conventions">Conventions</a></h2><p>1. New stdlib modules should go under <tt class="docutils literal"><span class="pre">Nim/lib/std/</span></tt>. The rationale is to require users to import via <tt class="docutils literal"><span class="pre">import std/foo</span></tt> instead of <tt class="docutils literal"><span class="pre">import foo</span></tt>, which would cause potential conflicts with nimble packages. Note that this still applies for new modules in existing logical directories, e.g.: use <tt class="docutils literal"><span class="pre">lib/std/collections/foo.nim</span></tt>, not <tt class="docutils literal"><span class="pre">lib/pure/collections/foo.nim</span></tt>.</p>
+<p>2. New module names should prefer plural form whenever possible, e.g.: <tt class="docutils literal"><span class="pre">std/sums.nim</span></tt> instead of <tt class="docutils literal"><span class="pre">std/sum.nim</span></tt>. In particular, this reduces chances of conflicts between module name and the symbols it defines. Furthermore, is should use <tt class="docutils literal"><span class="pre">snake_case</span></tt> and not use capital letters, which cause issues when going from an OS without case sensitivity to an OS without it. </p>
 </p>
   
   </div>
@@ -435,7 +454,7 @@ git diff --color-moved-ws=allow-indentation-change --color-moved=blocks HEAD^</p
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-23 01:22:28 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-23 01:16:11 UTC</small>
       </div>
     </div>
   </div>

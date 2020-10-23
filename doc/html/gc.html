@@ -64,7 +64,7 @@ function main() {
   <div class="container">
     <h1 class="title">Nim's Memory Management</h1>
     <table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Author:</th><td> Andreas Rumpf</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.4.1</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.5.1</td></tr>
 </tbody></table><blockquote><p>&quot;The road to hell is paved with good intentions.&quot;</p></blockquote>
 
 <h1 id="introduction">Introduction</h1><p>This document describes how the multi-paradigm memory management strategies work. How to tune the garbage collectors for your needs, like (soft) <span id="realtime-systems_1">realtime systems</span>, and how the memory management strategies that are not garbage collectors work.</p>
@@ -75,7 +75,7 @@ function main() {
 <li><tt class="docutils literal"><span class="pre">--gc:boehm</span></tt>. Boehm based garbage collector, it offers a shared heap.</li>
 <li><tt class="docutils literal"><span class="pre">--gc:go</span></tt>. Go's garbage collector, useful for interoperability with Go. Offers a shared heap.</li>
 <li><tt class="docutils literal"><span class="pre">--gc:arc</span></tt>. Plain reference counting with <a class="reference external" href="destructors.html#move-semantics">move semantic optimizations</a>, offers a shared heap. It offers deterministic performance for <span id="hard-realtime_1">hard realtime</span> systems. Reference cycles cause memory leaks, beware.</li>
-<li><tt class="docutils literal"><span class="pre">--gc:orc</span></tt>. Same as <tt class="docutils literal"><span class="pre">-gc:arc</span></tt> but adds a cycle collector based on &quot;trial deletion&quot;. Unfortunately that makes its performance profile hard to reason about so it is less useful for hard realtime systems.</li>
+<li><tt class="docutils literal"><span class="pre">--gc:orc</span></tt>. Same as <tt class="docutils literal"><span class="pre">--gc:arc</span></tt> but adds a cycle collector based on &quot;trial deletion&quot;. Unfortunately that makes its performance profile hard to reason about so it is less useful for hard realtime systems.</li>
 <li><tt class="docutils literal"><span class="pre">--gc:none</span></tt>. No memory management strategy nor garbage collector. Allocated memory is simply never freed. You should use <tt class="docutils literal"><span class="pre">--gc:arc</span></tt> instead.</li>
 </ul>
 <table border="1" class="docutils"><tr><th>Memory Management</th><th>Heap</th><th>Reference Cycles</th><th>Stop-The-World</th><th>Command line switch</th></tr>
@@ -120,7 +120,7 @@ function main() {
 <p>These numbers are usually only for the running thread, not for the whole heap, with the exception of <tt class="docutils literal"><span class="pre">--gc:boehm</span></tt> and <tt class="docutils literal"><span class="pre">--gc:go</span></tt>.</p>
 <p>In addition to <tt class="docutils literal"><span class="pre">GC_ref</span></tt> and <tt class="docutils literal"><span class="pre">GC_unref</span></tt> you can avoid the garbage collector by manually allocating memory with procs like <tt class="docutils literal"><span class="pre">alloc</span></tt>, <tt class="docutils literal"><span class="pre">alloc0</span></tt>, <tt class="docutils literal"><span class="pre">allocShared</span></tt>, <tt class="docutils literal"><span class="pre">allocShared0</span></tt> or <tt class="docutils literal"><span class="pre">allocCStringArray</span></tt>. The garbage collector won't try to free them, you need to call their respective <em>dealloc</em> pairs (<tt class="docutils literal"><span class="pre">dealloc</span></tt>, <tt class="docutils literal"><span class="pre">deallocShared</span></tt>, <tt class="docutils literal"><span class="pre">deallocCStringArray</span></tt>, etc) when you are done with them or they will leak.</p>
 
-<h1 id="heap-dump">Heap dump</h1><p>The heap dump feature is still in its infancy, but it already proved useful for us, so it might be useful for you. To get a heap dump, compile with <tt class="docutils literal"><span class="pre">-d:nimTypeNames</span></tt> and call <tt class="docutils literal"><span class="pre">dumpNumberOfInstances</span></tt> at a strategic place in your program. This produces a list of used types in your program and for every type the total amount of object instances for this type as well as the total amount of bytes these instances take up. This list is currently unsorted! You need to use external shell script hacking to sort it.</p>
+<h1 id="heap-dump">Heap dump</h1><p>The heap dump feature is still in its infancy, but it already proved useful for us, so it might be useful for you. To get a heap dump, compile with <tt class="docutils literal"><span class="pre">-d:nimTypeNames</span></tt> and call <tt class="docutils literal"><span class="pre">dumpNumberOfInstances</span></tt> at a strategic place in your program. This produces a list of used types in your program and for every type the total amount of object instances for this type as well as the total amount of bytes these instances take up.</p>
 <p>The numbers count the number of objects in all garbage collector heaps, they refer to all running threads, not only to the current thread. (The current thread would be the thread that calls <tt class="docutils literal"><span class="pre">dumpNumberOfInstances</span></tt>.) This might change in later versions. </p>
 
 
@@ -129,7 +129,7 @@ function main() {
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-23 01:22:41 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-23 01:16:23 UTC</small>
       </div>
     </div>
   </div>

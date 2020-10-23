@@ -2102,7 +2102,7 @@ const
     ##   when (NimMajor, NimMinor, NimPatch) >= (1, 3, 1): discard
     # see also std/private/since
 
-  NimMinor* {.intdefine.}: int = 4
+  NimMinor* {.intdefine.}: int = 5
     ## is the minor number of Nim's version.
     ## Odd for devel, even for releases.
 
