@@ -150,11 +150,18 @@ function main() {
   <li><a class="reference" href="#Feature"
     title="Feature = enum
   implicitDeref, dotOperators, callOperator, parallel, destructor, notnil,
-  dynamicBindSym, forLoopMacros, caseStmtMacros, codeReordering, compiletimeFFI,
+  dynamicBindSym, forLoopMacros, caseStmtMacros, codeReordering, compiletimeFFI, ## This requires building nim with `-d:nimHasLibFFI`
+                                                                                  ## which itself requires `nimble install libffi`, see #10150
+                                                                                  ## Note: this feature can&apos;t be localized with {.push.}
   vmopsDanger, strictFuncs, views">Feature</a></li>
   <li><a class="reference" href="#LegacyFeature"
     title="LegacyFeature = enum
-  allowSemcheckedAstModification, checkUnsignedConversions">LegacyFeature</a></li>
+  allowSemcheckedAstModification, ## Allows to modify a NimNode where the type has already been
+                                   ## flagged with nfSem. If you actually do this, it will cause
+                                   ## bugs.
+  checkUnsignedConversions ## Historically and especially in version 1.0.0 of the language
+                           ## conversions to unsigned numbers were checked. In 1.0.4 they
+                           ## are not anymore.">LegacyFeature</a></li>
   <li><a class="reference" href="#SymbolFilesOption"
     title="SymbolFilesOption = enum
   disabledSf, writeOnlySf, readOnlySf, v2Sf">SymbolFilesOption</a></li>
@@ -167,7 +174,8 @@ function main() {
   excNone, excSetjmp, excCpp, excGoto, excQuirky">ExceptionSystem</a></li>
   <li><a class="reference" href="#CfileFlag"
     title="CfileFlag {.pure.} = enum
-  Cached, External">CfileFlag</a></li>
+  Cached,                   ## no need to recompile this time
+  External                   ## file was introduced via .compile pragma">CfileFlag</a></li>
   <li><a class="reference" href="#Cfile"
     title="Cfile = object
   nimname*: string
@@ -773,7 +781,9 @@ class="link-seesrc" target="_blank">Source</a>
 <a id="Feature"></a>
 <dt><pre><a href="options.html#Feature"><span class="Identifier">Feature</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">implicitDeref</span><span class="Other">,</span> <span class="Identifier">dotOperators</span><span class="Other">,</span> <span class="Identifier">callOperator</span><span class="Other">,</span> <span class="Identifier">parallel</span><span class="Other">,</span> <span class="Identifier">destructor</span><span class="Other">,</span> <span class="Identifier">notnil</span><span class="Other">,</span>
-  <span class="Identifier">dynamicBindSym</span><span class="Other">,</span> <span class="Identifier">forLoopMacros</span><span class="Other">,</span> <span class="Identifier">caseStmtMacros</span><span class="Other">,</span> <span class="Identifier">codeReordering</span><span class="Other">,</span> <span class="Identifier">compiletimeFFI</span><span class="Other">,</span>
+  <span class="Identifier">dynamicBindSym</span><span class="Other">,</span> <span class="Identifier">forLoopMacros</span><span class="Other">,</span> <span class="Identifier">caseStmtMacros</span><span class="Other">,</span> <span class="Identifier">codeReordering</span><span class="Other">,</span> <span class="Identifier">compiletimeFFI</span><span class="Other">,</span> <span class="Comment">## This requires building nim with `-d:nimHasLibFFI`</span>
+                                                                                  <span class="Comment">## which itself requires `nimble install libffi`, see #10150</span>
+                                                                                  <span class="Comment">## Note: this feature can't be localized with {.push.}</span>
   <span class="Identifier">vmopsDanger</span><span class="Other">,</span> <span class="Identifier">strictFuncs</span><span class="Other">,</span> <span class="Identifier">views</span></pre></dt>
 <dd>
 
@@ -786,7 +796,12 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="LegacyFeature"></a>
 <dt><pre><a href="options.html#LegacyFeature"><span class="Identifier">LegacyFeature</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">allowSemcheckedAstModification</span><span class="Other">,</span> <span class="Identifier">checkUnsignedConversions</span></pre></dt>
+  <span class="Identifier">allowSemcheckedAstModification</span><span class="Other">,</span> <span class="Comment">## Allows to modify a NimNode where the type has already been</span>
+                                   <span class="Comment">## flagged with nfSem. If you actually do this, it will cause</span>
+                                   <span class="Comment">## bugs.</span>
+  <span class="Identifier">checkUnsignedConversions</span> <span class="Comment">## Historically and especially in version 1.0.0 of the language</span>
+                           <span class="Comment">## conversions to unsigned numbers were checked. In 1.0.4 they</span>
+                           <span class="Comment">## are not anymore.</span></pre></dt>
 <dd>
 
 
@@ -835,7 +850,8 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="CfileFlag"></a>
 <dt><pre><a href="options.html#CfileFlag"><span class="Identifier">CfileFlag</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">pure</span></span><span class="Other">.}</span></span> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">Cached</span><span class="Other">,</span> <span class="Identifier">External</span></pre></dt>
+  <span class="Identifier">Cached</span><span class="Other">,</span>                   <span class="Comment">## no need to recompile this time</span>
+  <span class="Identifier">External</span>                   <span class="Comment">## file was introduced via .compile pragma</span></pre></dt>
 <dd>
 
 
@@ -1954,7 +1970,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-23 01:17:25 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-03 00:43:32 UTC</small>
       </div>
     </div>
   </div>

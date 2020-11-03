@@ -10,7 +10,6 @@ ccThisCall	ast.html#ccThisCall	TCallingConvention.ccThisCall
 ccClosure	ast.html#ccClosure	TCallingConvention.ccClosure	
 ccNoConvention	ast.html#ccNoConvention	TCallingConvention.ccNoConvention	
 TCallingConvention	ast.html#TCallingConvention	ast: TCallingConvention	
-CallingConvToStr	ast.html#CallingConvToStr	ast: CallingConvToStr	
 nkNone	ast.html#nkNone	TNodeKind.nkNone	
 nkEmpty	ast.html#nkEmpty	TNodeKind.nkEmpty	
 nkIdent	ast.html#nkIdent	TNodeKind.nkIdent	
@@ -698,6 +697,9 @@ mSymIsInstantiationOf	ast.html#mSymIsInstantiationOf	TMagic.mSymIsInstantiationO
 mNodeId	ast.html#mNodeId	TMagic.mNodeId	
 TMagic	ast.html#TMagic	ast: TMagic	
 ctfeWhitelist	ast.html#ctfeWhitelist	ast: ctfeWhitelist	
+ItemId	ast.html#ItemId	ast: ItemId	
+TIdObj	ast.html#TIdObj	ast: TIdObj	
+PIdObj	ast.html#PIdObj	ast: PIdObj	
 PNode	ast.html#PNode	ast: PNode	
 TNodeSeq	ast.html#TNodeSeq	ast: TNodeSeq	
 PType	ast.html#PType	ast: PType	
@@ -807,6 +809,11 @@ nkStrKinds	ast.html#nkStrKinds	ast: nkStrKinds
 skLocalVars	ast.html#skLocalVars	ast: skLocalVars	
 skProcKinds	ast.html#skProcKinds	ast: skProcKinds	
 getnimblePkg	ast.html#getnimblePkg,PSym	ast: getnimblePkg(a: PSym): PSym	
+id	ast.html#id.t,PIdObj	ast: id(a: PIdObj): int	
+IdGenerator	ast.html#IdGenerator	ast: IdGenerator	
+PackageModuleId	ast.html#PackageModuleId	ast: PackageModuleId	
+idGeneratorFromModule	ast.html#idGeneratorFromModule,PSym	ast: idGeneratorFromModule(m: PSym): IdGenerator	
+nextId	ast.html#nextId,IdGenerator	ast: nextId(x: IdGenerator): ItemId	
 getnimblePkgId	ast.html#getnimblePkgId,PSym	ast: getnimblePkgId(a: PSym): int	
 ggDebug	ast.html#ggDebug	ast: ggDebug	
 isCallExpr	ast.html#isCallExpr,PNode	ast: isCallExpr(n: PNode): bool	
@@ -826,7 +833,7 @@ newTree	ast.html#newTree,TNodeKind,varargs[PNode]	ast: newTree(kind: TNodeKind; 
 newTreeI	ast.html#newTreeI,TNodeKind,TLineInfo,varargs[PNode]	ast: newTreeI(kind: TNodeKind; info: TLineInfo; children: varargs[PNode]): PNode	
 newTreeIT	ast.html#newTreeIT,TNodeKind,TLineInfo,PType,varargs[PNode]	ast: newTreeIT(kind: TNodeKind; info: TLineInfo; typ: PType; children: varargs[PNode]): PNode	
 previouslyInferred	ast.html#previouslyInferred.t,PType	ast: previouslyInferred(t: PType): PType	
-newSym	ast.html#newSym,TSymKind,PIdent,PSym,TLineInfo,TOptions	ast: newSym(symKind: TSymKind; name: PIdent; owner: PSym; info: TLineInfo;\n       options: TOptions = {}): PSym	
+newSym	ast.html#newSym,TSymKind,PIdent,ItemId,PSym,TLineInfo,TOptions	ast: newSym(symKind: TSymKind; name: PIdent; id: ItemId; owner: PSym;\n       info: TLineInfo; options: TOptions = {}): PSym	
 astdef	ast.html#astdef,PSym	ast: astdef(s: PSym): PNode	
 isMetaType	ast.html#isMetaType,PType	ast: isMetaType(t: PType): bool	
 isUnresolvedStatic	ast.html#isUnresolvedStatic,PType	ast: isUnresolvedStatic(t: PType): bool	
@@ -861,13 +868,13 @@ UnknownLockLevel	ast.html#UnknownLockLevel	ast: UnknownLockLevel
 AttachedOpToStr	ast.html#AttachedOpToStr	ast: AttachedOpToStr	
 `$`	ast.html#$,TLockLevel	ast: `$`(x: TLockLevel): string	
 `$`	ast.html#$,PSym	ast: `$`(s: PSym): string	
-newType	ast.html#newType,TTypeKind,PSym	ast: newType(kind: TTypeKind; owner: PSym): PType	
+newType	ast.html#newType,TTypeKind,ItemId,PSym	ast: newType(kind: TTypeKind; id: ItemId; owner: PSym): PType	
 newSons	ast.html#newSons,Indexable,int	ast: newSons(father: Indexable; length: int)	
 assignType	ast.html#assignType,PType,PType	ast: assignType(dest, src: PType)	
-copyType	ast.html#copyType,PType,PSym,bool	ast: copyType(t: PType; owner: PSym; keepId: bool): PType	
+copyType	ast.html#copyType,PType,ItemId,PSym	ast: copyType(t: PType; id: ItemId; owner: PSym): PType	
 exactReplica	ast.html#exactReplica,PType	ast: exactReplica(t: PType): PType	
-copySym	ast.html#copySym,PSym	ast: copySym(s: PSym): PSym	
-createModuleAlias	ast.html#createModuleAlias,PSym,PIdent,TLineInfo,TOptions	ast: createModuleAlias(s: PSym; newIdent: PIdent; info: TLineInfo; options: TOptions): PSym	
+copySym	ast.html#copySym,PSym,ItemId	ast: copySym(s: PSym; id: ItemId): PSym	
+createModuleAlias	ast.html#createModuleAlias,PSym,ItemId,PIdent,TLineInfo,TOptions	ast: createModuleAlias(s: PSym; id: ItemId; newIdent: PIdent; info: TLineInfo;\n                  options: TOptions): PSym	
 initStrTable	ast.html#initStrTable,TStrTable	ast: initStrTable(x: var TStrTable)	
 newStrTable	ast.html#newStrTable	ast: newStrTable(): TStrTable	
 initIdTable	ast.html#initIdTable,TIdTable	ast: initIdTable(x: var TIdTable)	
@@ -918,8 +925,8 @@ isAtom	ast.html#isAtom,PNode	ast: isAtom(n: PNode): bool
 isEmptyType	ast.html#isEmptyType,PType	ast: isEmptyType(t: PType): bool	
 makeStmtList	ast.html#makeStmtList,PNode	ast: makeStmtList(n: PNode): PNode	
 skipStmtList	ast.html#skipStmtList,PNode	ast: skipStmtList(n: PNode): PNode	
-toVar	ast.html#toVar,PType,TTypeKind	ast: toVar(typ: PType; kind: TTypeKind): PType	
-toRef	ast.html#toRef,PType	ast: toRef(typ: PType): PType	
+toVar	ast.html#toVar,PType,TTypeKind,IdGenerator	ast: toVar(typ: PType; kind: TTypeKind; idgen: IdGenerator): PType	
+toRef	ast.html#toRef,PType,IdGenerator	ast: toRef(typ: PType; idgen: IdGenerator): PType	
 toObject	ast.html#toObject,PType	ast: toObject(typ: PType): PType	
 isImportedException	ast.html#isImportedException,PType,ConfigRef	ast: isImportedException(t: PType; conf: ConfigRef): bool	
 isInfixAs	ast.html#isInfixAs,PNode	ast: isInfixAs(n: PNode): bool	
@@ -936,7 +943,7 @@ isClosureIterator	ast.html#isClosureIterator,PType	ast: isClosureIterator(typ: P
 isClosure	ast.html#isClosure,PType	ast: isClosure(typ: PType): bool	
 isSinkParam	ast.html#isSinkParam,PSym	ast: isSinkParam(s: PSym): bool	
 isSinkType	ast.html#isSinkType,PType	ast: isSinkType(t: PType): bool	
-newProcType	ast.html#newProcType,TLineInfo,PSym	ast: newProcType(info: TLineInfo; owner: PSym): PType	
+newProcType	ast.html#newProcType,TLineInfo,ItemId,PSym	ast: newProcType(info: TLineInfo; id: ItemId; owner: PSym): PType	
 addParam	ast.html#addParam,PType,PSym	ast: addParam(procType: PType; param: PSym)	
 destructor	ast.html#destructor.t,PType	ast: destructor(t: PType): PSym	
 assignment	ast.html#assignment.t,PType	ast: assignment(t: PType): PSym	

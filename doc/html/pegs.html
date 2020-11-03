@@ -114,13 +114,32 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#PegKind"
     title="PegKind = enum
-  pkEmpty, pkAny, pkAnyRune, pkNewLine, pkLetter, pkLower, pkUpper, pkTitle,
-  pkWhitespace, pkTerminal, pkTerminalIgnoreCase, pkTerminalIgnoreStyle, pkChar,
-  pkCharChoice, pkNonTerminal, pkSequence, pkOrderedChoice, pkGreedyRep,
-  pkGreedyRepChar, pkGreedyRepSet, pkGreedyAny, pkOption, pkAndPredicate,
-  pkNotPredicate, pkCapture, pkBackRef, pkBackRefIgnoreCase,
-  pkBackRefIgnoreStyle, pkSearch, pkCapturedSearch, pkRule, pkList,
-  pkStartAnchor">PegKind</a></li>
+  pkEmpty, pkAny,           ## any character (.)
+  pkAnyRune,                ## any Unicode character (_)
+  pkNewLine,                ## CR-LF, LF, CR
+  pkLetter,                 ## Unicode letter
+  pkLower,                  ## Unicode lower case letter
+  pkUpper,                  ## Unicode upper case letter
+  pkTitle,                  ## Unicode title character
+  pkWhitespace,             ## Unicode whitespace character
+  pkTerminal, pkTerminalIgnoreCase, pkTerminalIgnoreStyle, pkChar, ## single character to match
+  pkCharChoice, pkNonTerminal, pkSequence, ## a b c ... --&gt; Internal DSL: peg(a, b, c)
+  pkOrderedChoice,          ## a / b / ... --&gt; Internal DSL: a / b or /[a, b, c]
+  pkGreedyRep,              ## a*     --&gt; Internal DSL: *a
+                             ## a+     --&gt; (a a*)
+  pkGreedyRepChar,          ## x* where x is a single character (superop)
+  pkGreedyRepSet,           ## [set]* (superop)
+  pkGreedyAny,              ## .* or _* (superop)
+  pkOption,                 ## a?     --&gt; Internal DSL: ?a
+  pkAndPredicate,           ## &amp;a     --&gt; Internal DSL: &amp;a
+  pkNotPredicate,           ## !a     --&gt; Internal DSL: !a
+  pkCapture,                ## {a}    --&gt; Internal DSL: capture(a)
+  pkBackRef,                ## $i     --&gt; Internal DSL: backref(i)
+  pkBackRefIgnoreCase, pkBackRefIgnoreStyle, pkSearch, ## @a     --&gt; Internal DSL: !*a
+  pkCapturedSearch,         ## {@} a  --&gt; Internal DSL: !*\a
+  pkRule,                   ## a &lt;- b
+  pkList,                   ## a, b
+  pkStartAnchor              ## ^      --&gt; Internal DSL: startAnchor()">PegKind</a></li>
   <li><a class="reference" href="#NonTerminalFlag"
     title="NonTerminalFlag = enum
   ntDeclared, ntUsed">NonTerminalFlag</a></li>
@@ -656,13 +675,32 @@ expr &lt;- seqExpr (ig &quot;/&quot; expr)*</pre>
 <dl class="item">
 <a id="PegKind"></a>
 <dt><pre><a href="pegs.html#PegKind"><span class="Identifier">PegKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">pkEmpty</span><span class="Other">,</span> <span class="Identifier">pkAny</span><span class="Other">,</span> <span class="Identifier">pkAnyRune</span><span class="Other">,</span> <span class="Identifier">pkNewLine</span><span class="Other">,</span> <span class="Identifier">pkLetter</span><span class="Other">,</span> <span class="Identifier">pkLower</span><span class="Other">,</span> <span class="Identifier">pkUpper</span><span class="Other">,</span> <span class="Identifier">pkTitle</span><span class="Other">,</span>
-  <span class="Identifier">pkWhitespace</span><span class="Other">,</span> <span class="Identifier">pkTerminal</span><span class="Other">,</span> <span class="Identifier">pkTerminalIgnoreCase</span><span class="Other">,</span> <span class="Identifier">pkTerminalIgnoreStyle</span><span class="Other">,</span> <span class="Identifier">pkChar</span><span class="Other">,</span>
-  <span class="Identifier">pkCharChoice</span><span class="Other">,</span> <span class="Identifier">pkNonTerminal</span><span class="Other">,</span> <span class="Identifier">pkSequence</span><span class="Other">,</span> <span class="Identifier">pkOrderedChoice</span><span class="Other">,</span> <span class="Identifier">pkGreedyRep</span><span class="Other">,</span>
-  <span class="Identifier">pkGreedyRepChar</span><span class="Other">,</span> <span class="Identifier">pkGreedyRepSet</span><span class="Other">,</span> <span class="Identifier">pkGreedyAny</span><span class="Other">,</span> <span class="Identifier">pkOption</span><span class="Other">,</span> <span class="Identifier">pkAndPredicate</span><span class="Other">,</span>
-  <span class="Identifier">pkNotPredicate</span><span class="Other">,</span> <span class="Identifier">pkCapture</span><span class="Other">,</span> <span class="Identifier">pkBackRef</span><span class="Other">,</span> <span class="Identifier">pkBackRefIgnoreCase</span><span class="Other">,</span>
-  <span class="Identifier">pkBackRefIgnoreStyle</span><span class="Other">,</span> <span class="Identifier">pkSearch</span><span class="Other">,</span> <span class="Identifier">pkCapturedSearch</span><span class="Other">,</span> <span class="Identifier">pkRule</span><span class="Other">,</span> <span class="Identifier">pkList</span><span class="Other">,</span>
-  <span class="Identifier">pkStartAnchor</span></pre></dt>
+  <span class="Identifier">pkEmpty</span><span class="Other">,</span> <span class="Identifier">pkAny</span><span class="Other">,</span>           <span class="Comment">## any character (.)</span>
+  <span class="Identifier">pkAnyRune</span><span class="Other">,</span>                <span class="Comment">## any Unicode character (_)</span>
+  <span class="Identifier">pkNewLine</span><span class="Other">,</span>                <span class="Comment">## CR-LF, LF, CR</span>
+  <span class="Identifier">pkLetter</span><span class="Other">,</span>                 <span class="Comment">## Unicode letter</span>
+  <span class="Identifier">pkLower</span><span class="Other">,</span>                  <span class="Comment">## Unicode lower case letter</span>
+  <span class="Identifier">pkUpper</span><span class="Other">,</span>                  <span class="Comment">## Unicode upper case letter</span>
+  <span class="Identifier">pkTitle</span><span class="Other">,</span>                  <span class="Comment">## Unicode title character</span>
+  <span class="Identifier">pkWhitespace</span><span class="Other">,</span>             <span class="Comment">## Unicode whitespace character</span>
+  <span class="Identifier">pkTerminal</span><span class="Other">,</span> <span class="Identifier">pkTerminalIgnoreCase</span><span class="Other">,</span> <span class="Identifier">pkTerminalIgnoreStyle</span><span class="Other">,</span> <span class="Identifier">pkChar</span><span class="Other">,</span> <span class="Comment">## single character to match</span>
+  <span class="Identifier">pkCharChoice</span><span class="Other">,</span> <span class="Identifier">pkNonTerminal</span><span class="Other">,</span> <span class="Identifier">pkSequence</span><span class="Other">,</span> <span class="Comment">## a b c ... --&gt; Internal DSL: peg(a, b, c)</span>
+  <span class="Identifier">pkOrderedChoice</span><span class="Other">,</span>          <span class="Comment">## a / b / ... --&gt; Internal DSL: a / b or /[a, b, c]</span>
+  <span class="Identifier">pkGreedyRep</span><span class="Other">,</span>              <span class="Comment">## a*     --&gt; Internal DSL: *a</span>
+                             <span class="Comment">## a+     --&gt; (a a*)</span>
+  <span class="Identifier">pkGreedyRepChar</span><span class="Other">,</span>          <span class="Comment">## x* where x is a single character (superop)</span>
+  <span class="Identifier">pkGreedyRepSet</span><span class="Other">,</span>           <span class="Comment">## [set]* (superop)</span>
+  <span class="Identifier">pkGreedyAny</span><span class="Other">,</span>              <span class="Comment">## .* or _* (superop)</span>
+  <span class="Identifier">pkOption</span><span class="Other">,</span>                 <span class="Comment">## a?     --&gt; Internal DSL: ?a</span>
+  <span class="Identifier">pkAndPredicate</span><span class="Other">,</span>           <span class="Comment">## &amp;a     --&gt; Internal DSL: &amp;a</span>
+  <span class="Identifier">pkNotPredicate</span><span class="Other">,</span>           <span class="Comment">## !a     --&gt; Internal DSL: !a</span>
+  <span class="Identifier">pkCapture</span><span class="Other">,</span>                <span class="Comment">## {a}    --&gt; Internal DSL: capture(a)</span>
+  <span class="Identifier">pkBackRef</span><span class="Other">,</span>                <span class="Comment">## $i     --&gt; Internal DSL: backref(i)</span>
+  <span class="Identifier">pkBackRefIgnoreCase</span><span class="Other">,</span> <span class="Identifier">pkBackRefIgnoreStyle</span><span class="Other">,</span> <span class="Identifier">pkSearch</span><span class="Other">,</span> <span class="Comment">## @a     --&gt; Internal DSL: !*a</span>
+  <span class="Identifier">pkCapturedSearch</span><span class="Other">,</span>         <span class="Comment">## {@} a  --&gt; Internal DSL: !*\a</span>
+  <span class="Identifier">pkRule</span><span class="Other">,</span>                   <span class="Comment">## a &lt;- b</span>
+  <span class="Identifier">pkList</span><span class="Other">,</span>                   <span class="Comment">## a, b</span>
+  <span class="Identifier">pkStartAnchor</span>              <span class="Comment">## ^      --&gt; Internal DSL: startAnchor()</span></pre></dt>
 <dd>
 
 
@@ -1788,7 +1826,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-23 01:16:47 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-03 00:42:51 UTC</small>
       </div>
     </div>
   </div>

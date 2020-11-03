@@ -103,6 +103,7 @@ function main() {
 <li><a class="reference" id="basic-usage-creating-a-table_toc" href="#basic-usage-creating-a-table">Creating a table</a></li>
 <li><a class="reference" id="basic-usage-inserting-data_toc" href="#basic-usage-inserting-data">Inserting data</a></li>
 <li><a class="reference" id="basic-usage-larger-example_toc" href="#basic-usage-larger-example">Larger example</a></li>
+<li><a class="reference" id="basic-usage-storing-binary-data-example_toc" href="#basic-usage-storing-binary-data-example">Storing binary data example</a></li>
 </ul><li><a class="reference" id="note_toc" href="#note">Note</a></li>
 <li><a class="reference" id="see-also_toc" href="#see-also">See also</a></li>
 <li>
@@ -366,6 +367,51 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">echo</span> <span class="StringLit">&quot;Inserted item: &quot;</span><span class="Punctuation">,</span> <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">getValue</span><span class="Punctuation">(</span><span class="RawData">sql&quot;SELECT name FROM my_table WHERE id=?&quot;</span><span class="Punctuation">,</span> <span class="Identifier">id</span><span class="Punctuation">)</span>
 
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
+<h2><a class="toc-backref" id="basic-usage-storing-binary-data-example" href="#basic-usage-storing-binary-data-example">Storing binary data example</a></h2><pre class="listing"><span class="Keyword">import</span> <span class="Identifier">random</span>
+
+<span class="Comment">## Generate random float datas</span>
+<span class="Keyword">var</span> <span class="Identifier">orig</span> <span class="Operator">=</span> <span class="Identifier">newSeq</span><span class="Punctuation">[</span><span class="Identifier">float64</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="DecNumber">150</span><span class="Punctuation">)</span>
+<span class="Identifier">randomize</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+<span class="Keyword">for</span> <span class="Identifier">x</span> <span class="Keyword">in</span> <span class="Identifier">orig</span><span class="Operator">.</span><span class="Identifier">mitems</span><span class="Punctuation">:</span>
+  <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Identifier">rand</span><span class="Punctuation">(</span><span class="FloatNumber">1.0</span><span class="Punctuation">)</span><span class="Operator">/</span><span class="FloatNumber">10.0</span>
+
+<span class="Keyword">let</span> <span class="Identifier">db</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;mysqlite.db&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span>
+<span class="Keyword">block</span><span class="Punctuation">:</span> <span class="Comment">## Create database</span>
+  <span class="Comment">## Binary datas needs to be of type BLOB in SQLite</span>
+  <span class="Keyword">let</span> <span class="Identifier">createTableStr</span> <span class="Operator">=</span> <span class="LongStringLit">sql&quot;&quot;&quot;CREATE TABLE test(
+    id INTEGER NOT NULL PRIMARY KEY,
+    data BLOB
+  )
+  &quot;&quot;&quot;</span>
+  <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">exec</span><span class="Punctuation">(</span><span class="Identifier">createTableStr</span><span class="Punctuation">)</span>
+
+<span class="Keyword">block</span><span class="Punctuation">:</span> <span class="Comment">## Insert data</span>
+  <span class="Keyword">var</span> <span class="Identifier">id</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
+  <span class="Comment">## Data needs to be converted to seq[byte] to be interpreted as binary by bindParams</span>
+  <span class="Keyword">var</span> <span class="Identifier">dbuf</span> <span class="Operator">=</span> <span class="Identifier">newSeq</span><span class="Punctuation">[</span><span class="Identifier">byte</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">orig</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Operator">*</span><span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">float64</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+  <span class="Identifier">copyMem</span><span class="Punctuation">(</span><span class="Identifier">unsafeAddr</span><span class="Punctuation">(</span><span class="Identifier">dbuf</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">unsafeAddr</span><span class="Punctuation">(</span><span class="Identifier">orig</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">dbuf</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Punctuation">)</span>
+  
+  <span class="Comment">## Use prepared statement to insert binary data into database</span>
+  <span class="Keyword">var</span> <span class="Identifier">insertStmt</span> <span class="Operator">=</span> <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">prepare</span><span class="Punctuation">(</span><span class="StringLit">&quot;INSERT INTO test (id, data) VALUES (?, ?)&quot;</span><span class="Punctuation">)</span>
+  <span class="Identifier">insertStmt</span><span class="Operator">.</span><span class="Identifier">bindParams</span><span class="Punctuation">(</span><span class="Identifier">id</span><span class="Punctuation">,</span> <span class="Identifier">dbuf</span><span class="Punctuation">)</span>
+  <span class="Keyword">let</span> <span class="Identifier">bres</span> <span class="Operator">=</span> <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">tryExec</span><span class="Punctuation">(</span><span class="Identifier">insertStmt</span><span class="Punctuation">)</span>
+  <span class="Comment">## Check insert</span>
+  <span class="Identifier">doAssert</span><span class="Punctuation">(</span><span class="Identifier">bres</span><span class="Punctuation">)</span>
+  <span class="Comment"># Destroy statement</span>
+  <span class="Identifier">finalize</span><span class="Punctuation">(</span><span class="Identifier">insertStmt</span><span class="Punctuation">)</span>
+
+<span class="Keyword">block</span><span class="Punctuation">:</span> <span class="Comment">## Use getValue to select data</span>
+  <span class="Keyword">var</span> <span class="Identifier">dataTest</span> <span class="Operator">=</span> <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">getValue</span><span class="Punctuation">(</span><span class="RawData">sql&quot;SELECT data FROM test WHERE id = ?&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">)</span>
+  <span class="Comment">## Calculate sequence size from buffer size</span>
+  <span class="Keyword">let</span> <span class="Identifier">seqSize</span> <span class="Operator">=</span> <span class="Identifier">int</span><span class="Punctuation">(</span><span class="Identifier">dataTest</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Operator">*</span><span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">byte</span><span class="Punctuation">)</span><span class="Operator">/</span><span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">float64</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+  <span class="Comment">## Copy binary string data in dataTest into a seq</span>
+  <span class="Keyword">var</span> <span class="Identifier">res</span><span class="Punctuation">:</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">float64</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Identifier">newSeq</span><span class="Punctuation">[</span><span class="Identifier">float64</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">seqSize</span><span class="Punctuation">)</span>
+  <span class="Identifier">copyMem</span><span class="Punctuation">(</span><span class="Identifier">unsafeAddr</span><span class="Punctuation">(</span><span class="Identifier">res</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Keyword">addr</span><span class="Punctuation">(</span><span class="Identifier">dataTest</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">dataTest</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Punctuation">)</span>
+  
+  <span class="Comment">## Check datas obtained is identical</span>
+  <span class="Identifier">doAssert</span> <span class="Identifier">res</span> <span class="Operator">==</span> <span class="Identifier">orig</span>
+
+<span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 <h1><a class="toc-backref" id="note" href="#note">Note</a></h1><p>This module does not implement any ORM features such as mapping the types from the schema. Instead, a <tt class="docutils literal"><span class="pre">seq[string]</span></tt> is returned for each row.</p>
 <p>The reasoning is as follows:</p>
 <ol class="simple"><li>it's close to what many DBs offer natively (char**)</li>
@@ -393,9 +439,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Encapsulates a database connection.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L126"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L177"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L126" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L177" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Row"></a>
@@ -404,9 +450,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 A row of a dataset. <tt class="docutils literal"><span class="pre">NULL</span></tt> database values will be converted to an empty string.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L127"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L178"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L127" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L178" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="InstantRow"></a>
@@ -415,9 +461,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 A handle that can be used to get a row's column text on demand.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L129"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L180"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L129" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L180" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="SqlPrepared"></a>
@@ -426,9 +472,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 a identifier for the prepared queries
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L131"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L182"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L131" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L182" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -446,9 +492,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L412"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L467"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L412" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L467" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="len,InstantRow"></a>
@@ -461,9 +507,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L428"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L483"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L428" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L483" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="finalize,SqlPrepared"></a>
@@ -472,9 +518,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L726"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L789"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L726" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L789" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="dbQuote,string"></a>
@@ -486,9 +532,9 @@ Escapes the <tt class="docutils literal"><span class="pre">'</span></tt> (single
 <pre class="listing"><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">dbQuote</span><span class="Punctuation">(</span><span class="StringLit">&quot;&apos;&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&apos;&apos;&apos;&apos;&quot;</span><span class="Whitespace">
 </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">dbQuote</span><span class="Punctuation">(</span><span class="StringLit">&quot;A Foobar&apos;s pen.&quot;</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;&apos;A Foobar&apos;&apos;s pen.&apos;&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L149"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L200"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L149" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L200" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tryExec,DbConn,SqlPrepared"></a>
@@ -498,9 +544,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L202"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L253"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L202" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L253" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindParam,SqlPrepared,int,int32"></a>
@@ -510,9 +556,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Binds a int32  to the specified paramIndex.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L736"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L799"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L736" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L799" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindParam,SqlPrepared,int,int64"></a>
@@ -522,9 +568,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Binds a int64  to the specified paramIndex.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L741"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L804"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L741" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L804" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindParam,SqlPrepared,int,float64"></a>
@@ -534,9 +580,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Binds a 64bit float to the specified paramIndex.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L753"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L816"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L753" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L816" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindParam,SqlPrepared,int,string"></a>
@@ -546,9 +592,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Binds a string to the specified paramIndex. if copy is true then SQLite makes its own private copy of the data immediately
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L764"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L827"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L764" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L827" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindParam,SqlPrepared,int,openArray[byte]"></a>
@@ -558,9 +604,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 binds a blob to the specified paramIndex. if copy is true then SQLite makes its own private copy of the data immediately
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L770"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L833"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L770" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L833" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindParam,SqlPrepared,int,int"></a>
@@ -570,9 +616,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Binds a int  to the specified paramIndex.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L746"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L809"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L746" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L809" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindNull,SqlPrepared,int"></a>
@@ -581,9 +627,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets the bindparam at the specified paramIndex to null (default behaviour by sqlite).
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L758"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L821"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L758" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L821" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="dbError,DbConn"></a>
@@ -597,9 +643,9 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">dbError</span><span class="Punctuation">(</span><span class="Identifier">db</span><span class="Punctuation">)</span>
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L133"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L184"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L133" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L184" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="prepare,DbConn,string"></a>
@@ -608,9 +654,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">SqlPrepared</span></tt> statement.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L172"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L223"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L172" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L223" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tryExec,DbConn,SqlQuery,varargs[string,]"></a>
@@ -625,9 +671,9 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">dbError</span><span class="Punctuation">(</span><span class="Identifier">db</span><span class="Punctuation">)</span>
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L178"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L229"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L178" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L229" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="exec,DbConn,SqlQuery,varargs[string,]"></a>
@@ -646,9 +692,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Keyword">finally</span><span class="Punctuation">:</span>
   <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L211"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L262"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L211" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L262" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="close,DbConn"></a>
@@ -660,9 +706,9 @@ class="link-seesrc" target="_blank">Source</a>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">db</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;mytest.db&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L679"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L742"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L679" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L742" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="open,string,string,string,string"></a>
@@ -681,9 +727,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Keyword">except</span><span class="Punctuation">:</span>
   <span class="Identifier">stderr</span><span class="Operator">.</span><span class="Identifier">writeLine</span><span class="Punctuation">(</span><span class="Identifier">getCurrentExceptionMsg</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L690"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L753"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L690" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L753" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="unsafeColumnAt,InstantRow,int32"></a>
@@ -697,9 +743,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L420"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L475"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L420" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L475" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getRow,DbConn,SqlQuery,varargs[string,]"></a>
@@ -730,9 +776,9 @@ class="link-seesrc" target="_blank">Source</a>
                    <span class="DecNumber">1</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="Punctuation">]</span>
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L436"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L491"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L436" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L491" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getAllRows,DbConn,SqlQuery,varargs[string,]"></a>
@@ -753,9 +799,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">doAssert</span> <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">getAllRows</span><span class="Punctuation">(</span><span class="RawData">sql&quot;SELECT id, name FROM my_table&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="Identifier">Row</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;item#1&quot;</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">Row</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;2&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;item#2&quot;</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">]</span>
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L472"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L527"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L472" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L527" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getAllRows,DbConn,SqlPrepared"></a>
@@ -765,9 +811,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L494"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L549"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L494" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L549" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getValue,DbConn,SqlQuery,varargs[string,]"></a>
@@ -792,9 +838,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L531"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L586"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L531" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L586" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getValue,DbConn,SqlPrepared"></a>
@@ -804,9 +850,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L567"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L626"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L567" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L626" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tryInsertID,DbConn,SqlQuery,varargs[string,]"></a>
@@ -823,9 +869,9 @@ class="link-seesrc" target="_blank">Source</a>
                         <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="StringLit">&quot;item#1&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">-</span><span class="DecNumber">1</span>
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L580"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L643"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L580" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L643" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="insertID,DbConn,SqlQuery,varargs[string,]"></a>
@@ -850,9 +896,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L608"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L671"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L608" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L671" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tryInsert,DbConn,SqlQuery,string,varargs[string,]"></a>
@@ -863,9 +909,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 same as tryInsertID
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L637"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L700"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L637" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L700" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="insert,DbConn,SqlQuery,string,varargs[string,]"></a>
@@ -876,9 +922,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 same as insertId
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L643"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L706"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L643" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L706" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="execAffectedRows,DbConn,SqlQuery,varargs[string,]"></a>
@@ -900,9 +946,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L650"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L713"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L650" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L713" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="execAffectedRows,DbConn,SqlPrepared"></a>
@@ -912,9 +958,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L674"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L737"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L674" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L737" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setEncoding,DbConn,string"></a>
@@ -926,9 +972,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Note:</strong> The encoding cannot be changed once it's been set. According to SQLite3 documentation, any attempt to change the encoding after the database is created will be silently ignored.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L714"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L777"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L714" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L777" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -962,9 +1008,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L250"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L305"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L305" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fastRows.i,DbConn,SqlPrepared"></a>
@@ -974,9 +1020,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L291"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L346"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L291" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L346" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="instantRows.i,DbConn,SqlQuery,varargs[string,]"></a>
@@ -1009,9 +1055,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L303"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L358"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L303" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L358" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="instantRows.i,DbConn,SqlPrepared"></a>
@@ -1021,9 +1067,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L343"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L398"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L343" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L398" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="instantRows.i,DbConn,DbColumns,SqlQuery,varargs[string,]"></a>
@@ -1055,9 +1101,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L374"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L429"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L374" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L429" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rows.i,DbConn,SqlQuery,varargs[string,]"></a>
@@ -1084,9 +1130,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 <span class="Identifier">db</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L500"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L555"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L500" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L555" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rows.i,DbConn,SqlPrepared"></a>
@@ -1096,9 +1142,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L527"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L582"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L527" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L582" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1112,9 +1158,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L777"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L840"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L777" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L840" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1128,9 +1174,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Raises a <tt class="docutils literal"><span class="pre">DbError</span></tt> exception.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L729"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L792"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L729" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L792" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="exec.t,DbConn,SqlPrepared,varargs[typed]"></a>
@@ -1139,9 +1185,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L793"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/db_sqlite.nim#L856"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L793" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/db_sqlite.nim#L856" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1159,7 +1205,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-23 01:17:20 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-03 00:43:27 UTC</small>
       </div>
     </div>
   </div>

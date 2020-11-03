@@ -805,8 +805,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/hlo.nim
   cp compiler/idents.nim $nimbleDir/compiler/idents.nim
   chmod 644 $nimbleDir/compiler/idents.nim
-  cp compiler/idgen.nim $nimbleDir/compiler/idgen.nim
-  chmod 644 $nimbleDir/compiler/idgen.nim
   cp compiler/importer.nim $nimbleDir/compiler/importer.nim
   chmod 644 $nimbleDir/compiler/importer.nim
   cp compiler/incremental.nim $nimbleDir/compiler/incremental.nim

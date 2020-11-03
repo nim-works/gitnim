@@ -149,10 +149,17 @@ function main() {
   fixups*: seq[TPosition]">TBlock</a></li>
   <li><a class="reference" href="#TEvalMode"
     title="TEvalMode = enum
-  emRepl, emConst, emOptimize, emStaticExpr, emStaticStmt">TEvalMode</a></li>
+  emRepl,                   ## evaluate because in REPL mode
+  emConst,                  ## evaluate for &apos;const&apos; according to spec
+  emOptimize,               ## evaluate for optimization purposes (same as
+                             ## emConst?)
+  emStaticExpr,             ## evaluate for enforced compile time eval
+                             ## (&apos;static&apos; context)
+  emStaticStmt               ## &apos;static&apos; as an expression">TEvalMode</a></li>
   <li><a class="reference" href="#TSandboxFlag"
     title="TSandboxFlag = enum
-  allowCast, allowInfiniteLoops">TSandboxFlag</a></li>
+  allowCast,                ## allow unsafe language feature: &apos;cast&apos;
+  allowInfiniteLoops         ## allow endless loops">TSandboxFlag</a></li>
   <li><a class="reference" href="#TSandboxFlags"
     title="TSandboxFlags = set[TSandboxFlag]">TSandboxFlags</a></li>
   <li><a class="reference" href="#TSlotKind"
@@ -292,13 +299,13 @@ function main() {
 
   </ul>
   <ul class="simple nested-toc-section">newCtx
-      <li><a class="reference" href="#newCtx%2CPSym%2CIdentCache%2CModuleGraph"
-    title="newCtx(module: PSym; cache: IdentCache; g: ModuleGraph): PCtx">newCtx,<wbr>PSym,<wbr>IdentCache,<wbr>ModuleGraph</a></li>
+      <li><a class="reference" href="#newCtx%2CPSym%2CIdentCache%2CModuleGraph%2CIdGenerator"
+    title="newCtx(module: PSym; cache: IdentCache; g: ModuleGraph; idgen: IdGenerator): PCtx">newCtx,<wbr>PSym,<wbr>IdentCache,<wbr>ModuleGraph,<wbr>IdGenerator</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">refresh
-      <li><a class="reference" href="#refresh%2CPCtx%2CPSym"
-    title="refresh(c: PCtx; module: PSym)">refresh,<wbr>PCtx,<wbr>PSym</a></li>
+      <li><a class="reference" href="#refresh%2CPCtx%2CPSym%2CIdGenerator"
+    title="refresh(c: PCtx; module: PSym; idgen: IdGenerator)">refresh,<wbr>PCtx,<wbr>PSym,<wbr>IdGenerator</a></li>
 
   </ul>
 
@@ -447,7 +454,13 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="TEvalMode"></a>
 <dt><pre><a href="vmdef.html#TEvalMode"><span class="Identifier">TEvalMode</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">emRepl</span><span class="Other">,</span> <span class="Identifier">emConst</span><span class="Other">,</span> <span class="Identifier">emOptimize</span><span class="Other">,</span> <span class="Identifier">emStaticExpr</span><span class="Other">,</span> <span class="Identifier">emStaticStmt</span></pre></dt>
+  <span class="Identifier">emRepl</span><span class="Other">,</span>                   <span class="Comment">## evaluate because in REPL mode</span>
+  <span class="Identifier">emConst</span><span class="Other">,</span>                  <span class="Comment">## evaluate for 'const' according to spec</span>
+  <span class="Identifier">emOptimize</span><span class="Other">,</span>               <span class="Comment">## evaluate for optimization purposes (same as</span>
+                             <span class="Comment">## emConst?)</span>
+  <span class="Identifier">emStaticExpr</span><span class="Other">,</span>             <span class="Comment">## evaluate for enforced compile time eval</span>
+                             <span class="Comment">## ('static' context)</span>
+  <span class="Identifier">emStaticStmt</span>               <span class="Comment">## 'static' as an expression</span></pre></dt>
 <dd>
 
 reason for evaluation
@@ -459,7 +472,8 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="TSandboxFlag"></a>
 <dt><pre><a href="vmdef.html#TSandboxFlag"><span class="Identifier">TSandboxFlag</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">allowCast</span><span class="Other">,</span> <span class="Identifier">allowInfiniteLoops</span></pre></dt>
+  <span class="Identifier">allowCast</span><span class="Other">,</span>                <span class="Comment">## allow unsafe language feature: 'cast'</span>
+  <span class="Identifier">allowInfiniteLoops</span>         <span class="Comment">## allow endless loops</span></pre></dt>
 <dd>
 
 what the evaluation engine should allow
@@ -848,9 +862,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L302"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L303"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L302" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L303" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="largeInstrs"></a>
@@ -860,24 +874,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L303"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L304"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L303" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L304" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="slotSomeTemp"></a>
 <dt><pre><a href="vmdef.html#slotSomeTemp"><span class="Identifier">slotSomeTemp</span></a> <span class="Other">=</span> <span class="DecNumber">slotTempUnknown</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L306"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L306" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="relativeJumps"></a>
-<dt><pre><a href="vmdef.html#relativeJumps"><span class="Identifier">relativeJumps</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">opcTJmp</span><span class="Other">,</span> <span class="DecNumber">opcFJmp</span><span class="Other">,</span> <span class="DecNumber">opcJmp</span><span class="Other">,</span> <span class="DecNumber">opcJmpBack</span><span class="Other">}</span></pre></dt>
 <dd>
 
 
@@ -887,15 +890,26 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L307" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="relativeJumps"></a>
+<dt><pre><a href="vmdef.html#relativeJumps"><span class="Identifier">relativeJumps</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">opcTJmp</span><span class="Other">,</span> <span class="DecNumber">opcFJmp</span><span class="Other">,</span> <span class="DecNumber">opcJmp</span><span class="Other">,</span> <span class="DecNumber">opcJmpBack</span><span class="Other">}</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L308"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L308" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="nimNodeFlag"></a>
 <dt><pre><a href="vmdef.html#nimNodeFlag"><span class="Identifier">nimNodeFlag</span></a> <span class="Other">=</span> <span class="DecNumber">16</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L310"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L311"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L310" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L311" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -903,9 +917,9 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="12">
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
-<a id="newCtx,PSym,IdentCache,ModuleGraph"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#newCtx%2CPSym%2CIdentCache%2CModuleGraph"><span class="Identifier">newCtx</span></a><span class="Other">(</span><span class="Identifier">module</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">cache</span><span class="Other">:</span> <a href="idents.html#IdentCache"><span class="Identifier">IdentCache</span></a><span class="Other">;</span> <span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#PCtx"><span class="Identifier">PCtx</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="newCtx,PSym,IdentCache,ModuleGraph,IdGenerator"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#newCtx%2CPSym%2CIdentCache%2CModuleGraph%2CIdGenerator"><span class="Identifier">newCtx</span></a><span class="Other">(</span><span class="Identifier">module</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">cache</span><span class="Other">:</span> <a href="idents.html#IdentCache"><span class="Identifier">IdentCache</span></a><span class="Other">;</span> <span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">idgen</span><span class="Other">:</span> <a href="ast.html#IdGenerator"><span class="Identifier">IdGenerator</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#PCtx"><span class="Identifier">PCtx</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -915,8 +929,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L285" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="refresh,PCtx,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#refresh%2CPCtx%2CPSym"><span class="Identifier">refresh</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="vmdef.html#PCtx"><span class="Identifier">PCtx</span></a><span class="Other">;</span> <span class="Identifier">module</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="refresh,PCtx,PSym,IdGenerator"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#refresh%2CPCtx%2CPSym%2CIdGenerator"><span class="Identifier">refresh</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="vmdef.html#PCtx"><span class="Identifier">PCtx</span></a><span class="Other">;</span> <span class="Identifier">module</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">idgen</span><span class="Other">:</span> <a href="ast.html#IdGenerator"><span class="Identifier">IdGenerator</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -933,9 +947,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L297"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L298"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L297" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L298" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -949,24 +963,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L312"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L312" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regA.t,TInstr"></a>
-<dt><pre><span class="Keyword">template</span> <a href="#regA.t%2CTInstr"><span class="Identifier">regA</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L313"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L313" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="regB.t,TInstr"></a>
-<dt><pre><span class="Keyword">template</span> <a href="#regB.t%2CTInstr"><span class="Identifier">regB</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a></pre></dt>
+<a id="regA.t,TInstr"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#regA.t%2CTInstr"><span class="Identifier">regA</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a></pre></dt>
 <dd>
 
 
@@ -976,8 +979,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L314" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="regC.t,TInstr"></a>
-<dt><pre><span class="Keyword">template</span> <a href="#regC.t%2CTInstr"><span class="Identifier">regC</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a></pre></dt>
+<a id="regB.t,TInstr"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#regB.t%2CTInstr"><span class="Identifier">regB</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a></pre></dt>
 <dd>
 
 
@@ -987,8 +990,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L315" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="regBx.t,TInstr"></a>
-<dt><pre><span class="Keyword">template</span> <a href="#regBx.t%2CTInstr"><span class="Identifier">regBx</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+<a id="regC.t,TInstr"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#regC.t%2CTInstr"><span class="Identifier">regC</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a></pre></dt>
 <dd>
 
 
@@ -998,15 +1001,26 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="regBx.t,TInstr"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#regBx.t%2CTInstr"><span class="Identifier">regBx</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L317"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L317" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="jmpDiff.t,TInstr"></a>
 <dt><pre><span class="Keyword">template</span> <a href="#jmpDiff.t%2CTInstr"><span class="Identifier">jmpDiff</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L318"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L319"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L318" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L319" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1019,7 +1033,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-23 01:17:26 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-03 00:43:33 UTC</small>
       </div>
     </div>
   </div>
