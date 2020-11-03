@@ -1,6 +1,10 @@
 # [gitnim linux_x64](https://gitnim.com/)
 choosenim for choosey nimions
 
+or
+
+_git: is there anything it *can't* do?_
+
 ## Installation
 
 Clone repository.
@@ -27,34 +31,43 @@ List available releases:
 git nim
 ```
 
-Choose a release:
+Choose a release by branch or tag:
 
 ```bash
 git nim 1.3.5
+```
+or
+```bash
+git nim devel
 ```
 
 ## Advanced Usage
 
 ### Creating Your Own Nim Distribution
 ```bash
-git checkout -b "myDistro"
+git checkout -b "my favorite nims"
 ```
 
 ### Publishing Your Nim Distribution
 ```bash
 git remote rename origin upstream
-git remote add origin "my git remote"
-git push --set-upstream "my git remote" "my branch"
+git remote add origin "git@github.com:your_name/gitnim.git"
+git push --set-upstream origin "your branch name"
 ```
 
 ### Adding a Custom Release Tag
 ```bash
-git tag -a "some alias"
+git tag -a "tag_name" -m "your description"
 ```
 
 ### Sharing Your Tags With Others
 ```bash
 git push --tags
+```
+
+### Revoking Your Tags With Others
+```bash
+git push --delete origin "tag_name"
 ```
 
 ### Adding a Friend's Tags
