@@ -1021,7 +1021,9 @@ function addChar(x_1505031, c_1505032) {
   
 }
 var globalRaiseHook_1357018 = [null];
-var localRaiseHook_1357023 = [null];
+if (globalThis.localRaiseHook_1357023 === undefined) {
+  localRaiseHook_1357023 = [null];
+}
 var outOfMemHook_1357026 = [null];
 var unhandledExceptionHook_1357031 = [null];
 if (!Math.trunc) {

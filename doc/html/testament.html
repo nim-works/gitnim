@@ -63,9 +63,9 @@ function main() {
 <div class="document" id="documentId">
   <div class="container">
     <h1 class="title">testament</h1>
-    Testament is an advanced automatic unittests runner for Nim tests, is used for the development of Nim itself, offers process isolation for your tests, it can generate statistics about test cases, supports multiple targets (C, C++, ObjectiveC, JavaScript, etc), simulated <a class="reference external" href="https://en.wikipedia.org/wiki/Dry_run_(testing)">Dry-Runs</a>, has logging, can generate HTML reports, skip tests from a file and more, so can be useful to run your tests, even the most complex ones.
-<h1 id="test-files-location">Test files location</h1><p>By default Testament looks for test files on <tt class="docutils literal"><span class="pre">&quot;./tests/*.nim&quot;</span></tt>, you can overwrite this pattern glob using <tt class="docutils literal"><span class="pre">pattern &lt;glob&gt;</span></tt>, the default working directory path can be changed using <tt class="docutils literal"><span class="pre">--directory:&quot;folder/subfolder/&quot;</span></tt>.</p>
-<p>Testament uses the nim compiler on <tt class="docutils literal"><span class="pre">PATH</span></tt> you can change that using <tt class="docutils literal"><span class="pre">--nim:&quot;folder/subfolder/nim&quot;</span></tt>, running JavaScript tests with <tt class="docutils literal"><span class="pre">--targets:&quot;js&quot;</span></tt> requires a working NodeJS on <tt class="docutils literal"><span class="pre">PATH</span></tt>.</p>
+    Testament is an advanced automatic unittests runner for Nim tests, is used for the development of Nim itself, offers process isolation for your tests, it can generate statistics about test cases, supports multiple targets (C, C++, ObjectiveC, JavaScript, etc), simulated <a class="reference external" href="https://en.wikipedia.org/wiki/Dry_run_(testing)">Dry-Runs</a>, has logging, can generate HTML reports, skip tests from a file, and more, so can be useful to run your tests, even the most complex ones.
+<h1 id="test-files-location">Test files location</h1><p>By default Testament looks for test files on <tt class="docutils literal"><span class="pre">&quot;./tests/*.nim&quot;</span></tt>. You can overwrite this pattern glob using <tt class="docutils literal"><span class="pre">pattern &lt;glob&gt;</span></tt>. The default working directory path can be changed using <tt class="docutils literal"><span class="pre">--directory:&quot;folder/subfolder/&quot;</span></tt>.</p>
+<p>Testament uses the <tt class="docutils literal"><span class="pre">nim</span></tt> compiler on <tt class="docutils literal"><span class="pre">PATH</span></tt>. You can change that using <tt class="docutils literal"><span class="pre">--nim:&quot;folder/subfolder/nim&quot;</span></tt>. Running JavaScript tests with <tt class="docutils literal"><span class="pre">--targets:&quot;js&quot;</span></tt> requires a working NodeJS on <tt class="docutils literal"><span class="pre">PATH</span></tt>.</p>
 
 <h1 id="options">Options</h1><ul class="simple"><li><tt class="docutils literal"><span class="pre">--print</span></tt>                   Also print results to the console</li>
 <li><tt class="docutils literal"><span class="pre">--simulate</span></tt>                See what tests would be run but don't run them (for debugging)</li>
@@ -86,43 +86,89 @@ $ testament run test0.nim
   PASS: tests/test0.nim C                                       ( 0.2 sec)
 
 $ testament r test0
-  PASS: tests/test0.nim C                                       ( 0.2 sec)
-
-$</pre>
+  PASS: tests/test0.nim C                                       ( 0.2 sec)</pre>
 <h1 id="running-all-tests-from-a-directory">Running all tests from a directory</h1><pre class="listing">
-$ testament pattern &quot;tests/*.nim&quot;</pre>
+$ testament pattern &quot;tests/*.nim&quot;</pre><p>To recursively search for all tests in a directory, use</p>
+<pre class="listing">
+$ testament pattern &quot;tests/**/*.nim&quot;</pre>
 <h1 id="html-reports">HTML Reports</h1><p>Generate HTML Reports <tt class="docutils literal"><span class="pre">testresults.html</span></tt> from unittests, you have to run at least 1 test <em>before</em> generating a report:</p>
 <pre class="listing">
 $ testament html</pre>
 <h1 id="writing-unitests">Writing Unitests</h1><p>Example &quot;template&quot; <strong>to edit</strong> and write a Testament unittest:</p>
 <pre class="listing"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
   
-  action: &quot;run&quot;     # What to do, one of &quot;compile&quot; OR &quot;run&quot;.
+  # What actions to expect completion on.
+  # Options:
+  #   &quot;compile&quot;: expect successful compilation
+  #   &quot;run&quot;: expect successful compilation and execution
+  #   &quot;reject&quot;: expect failed compilation
+  action: &quot;run&quot;
   
-  exitcode: 0       # This is the Exit Code the test should return, zero typically.
+  # The exit code that the test is expected to return. Typically, the default
+  # value of 0 is fine. Note that if the test will be run by valgrind, then
+  # the test will exit with either a code of 0 on success or 1 on failure.
+  exitcode: 0
   
-  output: &quot;&quot;        # This is the Standard Output the test should print, if any.
+  # Provide an `output` string to assert that the test prints to standard out
+  # exatly the expected string. Provide an `outputsub` string to assert that
+  # the string given here is a substring of the standard out output of the
+  # test.
+  output: &quot;&quot;
+  outputsub: &quot;&quot;
   
-  input:  &quot;&quot;        # This is the Standard Input the test should take, if any.
+  # Whether to sort the output lines before comparing them to the desired
+  # output.
+  sortoutput: true
   
-  errormsg: &quot;&quot;      # Error message the test should print, if any.
+  # Each line in the string given here appears in the same order in the
+  # compiler output, but there may be more lines that appear before, after, or
+  # in between them.
+  nimout: '''
+a very long,
+multi-line
+string'''
   
-  batchable: true   # Can be run in batch mode, or not.
+  # This is the Standard Input the test should take, if any.
+  input: &quot;&quot;
   
-  joinable: true    # Can be run Joined with other tests to run all togheter, or not.
+  # Error message the test should print, if any.
+  errormsg: &quot;&quot;
   
+  # Can be run in batch mode, or not.
+  batchable: true
+  
+  # Can be run Joined with other tests to run all togheter, or not.
+  joinable: true
+  
+  # On Linux 64-bit machines, whether to use Valgrind to check for bad memory
+  # accesses or memory leaks. On other architectures, the test will be run
+  # as-is, without Valgrind.
+  # Options:
+  #   true: run the test with Valgrind
+  #   false: run the without Valgrind
+  #   &quot;leaks&quot;: run the test with Valgrind, but do not check for memory leaks
   valgrind: false   # Can use Valgrind to check for memory leaks, or not (Linux 64Bit only).
   
-  cmd: &quot;nim c -r $file&quot; # Command the test should use to run.
+  # Command the test should use to run. If left out or an empty string is
+  # provided, the command is taken to be:
+  # &quot;nim $target --hints:on -d:testing --nimblePath:tests/deps $options $file&quot;
+  # You can use the $target, $options, and $file placeholders in your own
+  # command, too.
+  cmd: &quot;nim c -r $file&quot;
   
-  maxcodesize: 666  # Maximum generated temporary intermediate code file size for the test.
+  # Maximum generated temporary intermediate code file size for the test.
+  maxcodesize: 666
   
-  timeout: 666      # Timeout microseconds to run the test.
+  # Timeout seconds to run the test. Fractional values are supported.
+  timeout: 1.5
   
-  target: &quot;c js&quot;    # Targets to run the test into (C, C++, JavaScript, etc).
+  # Targets to run the test into (C, C++, JavaScript, etc).
+  target: &quot;c js&quot;
   
-  disabled: &quot;bsd&quot;   # Disable the test by condition, here BSD is disabled just as an example.
-  disabled: &quot;win&quot;   # Can disable multiple OSes at once
+  # Conditions that will skip this test. Use of multiple &quot;disabled&quot; clauses
+  # is permitted.
+  disabled: &quot;bsd&quot;   # Can disable OSes...
+  disabled: &quot;win&quot;
   disabled: &quot;32bit&quot; # ...or architectures
   disabled: &quot;i386&quot;
   disabled: &quot;azure&quot; # ...or pipeline runners
@@ -131,9 +177,9 @@ $ testament html</pre>
 &quot;&quot;&quot;</span>
 <span class="Identifier">assert</span> <span class="Identifier">true</span>
 <span class="Identifier">assert</span> <span class="DecNumber">42</span> <span class="Operator">==</span> <span class="DecNumber">42</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Assert error message&quot;</span></pre><ul class="simple"><li>As you can see the &quot;Spec&quot; is just a <tt class="docutils literal"><span class="pre">discard &quot;&quot;&quot; &quot;&quot;&quot;</span></tt>.</li>
-<li>Spec has sane defaults, so you dont need to provide them all, any simple assert will work Ok.</li>
+<li>Spec has sane defaults, so you don't need to provide them all, any simple assert will work just fine.</li>
 <li><a class="reference external" href="https://github.com/nim-lang/Nim/blob/devel/testament/specs.nim#L238">This is not the full spec of Testament, check the Testament Spec on GitHub, see parseSpec().</a></li>
-<li><a class="reference external" href="https://github.com/nim-lang/Nim/tree/devel/tests">Nim itself uses Testament, so theres plenty of test examples.</a></li>
+<li><a class="reference external" href="https://github.com/nim-lang/Nim/tree/devel/tests">Nim itself uses Testament, so there are plenty of test examples.</a></li>
 <li>Has some built-in CI compatibility, like Azure Pipelines, etc.</li>
 <li><a class="reference external" href="https://github.com/nim-lang/Nim/blob/9a110047cbe2826b1d4afe63e3a1f5a08422b73f/tests/effects/teffects1.nim">Testament supports inlined error messages on Unittests, basically comments with the expected error directly on the code.</a></li>
 </ul>
@@ -165,7 +211,7 @@ $ testament html</pre>
 &quot;&quot;&quot;</span>
 <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">js</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
   <span class="Keyword">import</span> <span class="Identifier">jsconsole</span>
-  <span class="Identifier">console</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="StringLit">&quot;My Frontend Project&quot;</span><span class="Punctuation">)</span></pre><p>Compile time tests:</p>
+  <span class="Identifier">console</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="StringLit">&quot;My Frontend Project&quot;</span><span class="Punctuation">)</span></pre><p>Compile-time tests:</p>
 <pre class="listing"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
   action: &quot;compile&quot;
 &quot;&quot;&quot;</span>
@@ -180,7 +226,7 @@ $ testament html</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-28 00:53:05 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-06 00:43:15 UTC</small>
       </div>
     </div>
   </div>

@@ -119,17 +119,38 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#XmlEventKind"
     title="XmlEventKind = enum
-  xmlError, xmlEof, xmlCharData, xmlWhitespace, xmlComment, xmlPI,
-  xmlElementStart, xmlElementEnd, xmlElementOpen, xmlAttribute, xmlElementClose,
-  xmlCData, xmlEntity, xmlSpecial">XmlEventKind</a></li>
+  xmlError,                 ## an error occurred during parsing
+  xmlEof,                   ## end of file reached
+  xmlCharData,              ## character data
+  xmlWhitespace,            ## whitespace has been parsed
+  xmlComment,               ## a comment has been parsed
+  xmlPI,                    ## processing instruction (``&lt;?name something ?&gt;``)
+  xmlElementStart,          ## ``&lt;elem&gt;``
+  xmlElementEnd,            ## ``&lt;/elem&gt;``
+  xmlElementOpen,           ## ``&lt;elem
+  xmlAttribute,             ## ``key = &quot;value&quot;`` pair
+  xmlElementClose,          ## ``&gt;``
+  xmlCData,                 ## ``&lt;![CDATA[`` ... data ... ``]]&gt;``
+  xmlEntity,                ## &amp;entity;
+  xmlSpecial                 ## ``&lt;! ... data ... &gt;``">XmlEventKind</a></li>
   <li><a class="reference" href="#XmlErrorKind"
     title="XmlErrorKind = enum
-  errNone, errEndOfCDataExpected, errNameExpected, errSemicolonExpected,
-  errQmGtExpected, errGtExpected, errEqExpected, errQuoteExpected,
-  errEndOfCommentExpected, errAttributeValueExpected">XmlErrorKind</a></li>
+  errNone,                  ## no error
+  errEndOfCDataExpected,    ## ``]]&gt;`` expected
+  errNameExpected,          ## name expected
+  errSemicolonExpected,     ## ``;`` expected
+  errQmGtExpected,          ## ``?&gt;`` expected
+  errGtExpected,            ## ``&gt;`` expected
+  errEqExpected,            ## ``=`` expected
+  errQuoteExpected,         ## ``&quot;`` or ``&apos;`` expected
+  errEndOfCommentExpected,  ## ``--&gt;`` expected
+  errAttributeValueExpected  ## non-empty attribute value expected">XmlErrorKind</a></li>
   <li><a class="reference" href="#XmlParseOption"
     title="XmlParseOption = enum
-  reportWhitespace, reportComments, allowUnquotedAttribs, allowEmptyAttribs">XmlParseOption</a></li>
+  reportWhitespace,         ## report whitespace
+  reportComments,           ## report comments
+  allowUnquotedAttribs,     ## allow unquoted attribute values (for HTML)
+  allowEmptyAttribs          ## allow empty attributes (without explicit value)">XmlParseOption</a></li>
   <li><a class="reference" href="#XmlParser"
     title="XmlParser = object of BaseLexer
   a, b, c: string
@@ -328,9 +349,20 @@ function main() {
 <dl class="item">
 <a id="XmlEventKind"></a>
 <dt><pre><a href="parsexml.html#XmlEventKind"><span class="Identifier">XmlEventKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">xmlError</span><span class="Other">,</span> <span class="Identifier">xmlEof</span><span class="Other">,</span> <span class="Identifier">xmlCharData</span><span class="Other">,</span> <span class="Identifier">xmlWhitespace</span><span class="Other">,</span> <span class="Identifier">xmlComment</span><span class="Other">,</span> <span class="Identifier">xmlPI</span><span class="Other">,</span>
-  <span class="Identifier">xmlElementStart</span><span class="Other">,</span> <span class="Identifier">xmlElementEnd</span><span class="Other">,</span> <span class="Identifier">xmlElementOpen</span><span class="Other">,</span> <span class="Identifier">xmlAttribute</span><span class="Other">,</span> <span class="Identifier">xmlElementClose</span><span class="Other">,</span>
-  <span class="Identifier">xmlCData</span><span class="Other">,</span> <span class="Identifier">xmlEntity</span><span class="Other">,</span> <span class="Identifier">xmlSpecial</span></pre></dt>
+  <span class="Identifier">xmlError</span><span class="Other">,</span>                 <span class="Comment">## an error occurred during parsing</span>
+  <span class="Identifier">xmlEof</span><span class="Other">,</span>                   <span class="Comment">## end of file reached</span>
+  <span class="Identifier">xmlCharData</span><span class="Other">,</span>              <span class="Comment">## character data</span>
+  <span class="Identifier">xmlWhitespace</span><span class="Other">,</span>            <span class="Comment">## whitespace has been parsed</span>
+  <span class="Identifier">xmlComment</span><span class="Other">,</span>               <span class="Comment">## a comment has been parsed</span>
+  <span class="Identifier">xmlPI</span><span class="Other">,</span>                    <span class="Comment">## processing instruction (``&lt;?name something ?&gt;``)</span>
+  <span class="Identifier">xmlElementStart</span><span class="Other">,</span>          <span class="Comment">## ``&lt;elem&gt;``</span>
+  <span class="Identifier">xmlElementEnd</span><span class="Other">,</span>            <span class="Comment">## ``&lt;/elem&gt;``</span>
+  <span class="Identifier">xmlElementOpen</span><span class="Other">,</span>           <span class="Comment">## ``&lt;elem</span>
+  <span class="Identifier">xmlAttribute</span><span class="Other">,</span>             <span class="Comment">## ``key = &quot;value&quot;`` pair</span>
+  <span class="Identifier">xmlElementClose</span><span class="Other">,</span>          <span class="Comment">## ``&gt;``</span>
+  <span class="Identifier">xmlCData</span><span class="Other">,</span>                 <span class="Comment">## ``&lt;![CDATA[`` ... data ... ``]]&gt;``</span>
+  <span class="Identifier">xmlEntity</span><span class="Other">,</span>                <span class="Comment">## &amp;entity;</span>
+  <span class="Identifier">xmlSpecial</span>                 <span class="Comment">## ``&lt;! ... data ... &gt;``</span></pre></dt>
 <dd>
 
 enumeration of all events that may occur when parsing
@@ -342,9 +374,16 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="XmlErrorKind"></a>
 <dt><pre><a href="parsexml.html#XmlErrorKind"><span class="Identifier">XmlErrorKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">errNone</span><span class="Other">,</span> <span class="Identifier">errEndOfCDataExpected</span><span class="Other">,</span> <span class="Identifier">errNameExpected</span><span class="Other">,</span> <span class="Identifier">errSemicolonExpected</span><span class="Other">,</span>
-  <span class="Identifier">errQmGtExpected</span><span class="Other">,</span> <span class="Identifier">errGtExpected</span><span class="Other">,</span> <span class="Identifier">errEqExpected</span><span class="Other">,</span> <span class="Identifier">errQuoteExpected</span><span class="Other">,</span>
-  <span class="Identifier">errEndOfCommentExpected</span><span class="Other">,</span> <span class="Identifier">errAttributeValueExpected</span></pre></dt>
+  <span class="Identifier">errNone</span><span class="Other">,</span>                  <span class="Comment">## no error</span>
+  <span class="Identifier">errEndOfCDataExpected</span><span class="Other">,</span>    <span class="Comment">## ``]]&gt;`` expected</span>
+  <span class="Identifier">errNameExpected</span><span class="Other">,</span>          <span class="Comment">## name expected</span>
+  <span class="Identifier">errSemicolonExpected</span><span class="Other">,</span>     <span class="Comment">## ``;`` expected</span>
+  <span class="Identifier">errQmGtExpected</span><span class="Other">,</span>          <span class="Comment">## ``?&gt;`` expected</span>
+  <span class="Identifier">errGtExpected</span><span class="Other">,</span>            <span class="Comment">## ``&gt;`` expected</span>
+  <span class="Identifier">errEqExpected</span><span class="Other">,</span>            <span class="Comment">## ``=`` expected</span>
+  <span class="Identifier">errQuoteExpected</span><span class="Other">,</span>         <span class="Comment">## ``&quot;`` or ``'`` expected</span>
+  <span class="Identifier">errEndOfCommentExpected</span><span class="Other">,</span>  <span class="Comment">## ``--&gt;`` expected</span>
+  <span class="Identifier">errAttributeValueExpected</span>  <span class="Comment">## non-empty attribute value expected</span></pre></dt>
 <dd>
 
 enumeration that lists all errors that can occur
@@ -356,7 +395,10 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="XmlParseOption"></a>
 <dt><pre><a href="parsexml.html#XmlParseOption"><span class="Identifier">XmlParseOption</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">reportWhitespace</span><span class="Other">,</span> <span class="Identifier">reportComments</span><span class="Other">,</span> <span class="Identifier">allowUnquotedAttribs</span><span class="Other">,</span> <span class="Identifier">allowEmptyAttribs</span></pre></dt>
+  <span class="Identifier">reportWhitespace</span><span class="Other">,</span>         <span class="Comment">## report whitespace</span>
+  <span class="Identifier">reportComments</span><span class="Other">,</span>           <span class="Comment">## report comments</span>
+  <span class="Identifier">allowUnquotedAttribs</span><span class="Other">,</span>     <span class="Comment">## allow unquoted attribute values (for HTML)</span>
+  <span class="Identifier">allowEmptyAttribs</span>          <span class="Comment">## allow empty attributes (without explicit value)</span></pre></dt>
 <dd>
 
 options for the XML parser
@@ -619,7 +661,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-28 00:53:57 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-06 00:44:04 UTC</small>
       </div>
     </div>
   </div>

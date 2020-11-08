@@ -108,8 +108,21 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#MemoryOrder"
     title="MemoryOrder {.importcpp: &quot;std::memory_order&quot;.} = enum
-  moRelaxed, moConsume, moAcquire, moRelease, moAcquireRelease,
-  moSequentiallyConsistent">MemoryOrder</a></li>
+  moRelaxed, ## No ordering constraints. Only the atomicity and ordering against
+              ## other atomic operations is guaranteed.
+  moConsume, ## This ordering is currently discouraged as it&apos;s semantics are
+              ## being revised. Acquire operations should be preferred.
+  moAcquire, ## When applied to a load operation, no reads or writes in the
+              ## current thread can be reordered before this operation.
+  moRelease, ## When applied to a store operation, no reads or writes in the
+              ## current thread can be reorderd after this operation.
+  moAcquireRelease, ## When applied to a read-modify-write operation, this behaves like
+                     ## both an acquire and a release operation.
+  moSequentiallyConsistent ## Behaves like Acquire when applied to load, like Release when
+                           ## applied to a store and like AcquireRelease when applied to a
+                           ## read-modify-write operation.
+                           ## Also guarantees that all threads observe the same total ordering
+                           ## with other moSequentiallyConsistent operations.">MemoryOrder</a></li>
   <li><a class="reference" href="#Atomic"
     title="Atomic[T] {.importcpp: &quot;std::atomic&quot;.} = object">Atomic</a></li>
   <li><a class="reference" href="#AtomicFlag"
@@ -249,8 +262,21 @@ function main() {
 <dl class="item">
 <a id="MemoryOrder"></a>
 <dt><pre><a href="atomics.html#MemoryOrder"><span class="Identifier">MemoryOrder</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">importcpp</span><span class="Other">:</span> <span class="StringLit">&quot;std::memory_order&quot;</span></span><span class="Other">.}</span></span> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">moRelaxed</span><span class="Other">,</span> <span class="Identifier">moConsume</span><span class="Other">,</span> <span class="Identifier">moAcquire</span><span class="Other">,</span> <span class="Identifier">moRelease</span><span class="Other">,</span> <span class="Identifier">moAcquireRelease</span><span class="Other">,</span>
-  <span class="Identifier">moSequentiallyConsistent</span></pre></dt>
+  <span class="Identifier">moRelaxed</span><span class="Other">,</span> <span class="Comment">## No ordering constraints. Only the atomicity and ordering against</span>
+              <span class="Comment">## other atomic operations is guaranteed.</span>
+  <span class="Identifier">moConsume</span><span class="Other">,</span> <span class="Comment">## This ordering is currently discouraged as it's semantics are</span>
+              <span class="Comment">## being revised. Acquire operations should be preferred.</span>
+  <span class="Identifier">moAcquire</span><span class="Other">,</span> <span class="Comment">## When applied to a load operation, no reads or writes in the</span>
+              <span class="Comment">## current thread can be reordered before this operation.</span>
+  <span class="Identifier">moRelease</span><span class="Other">,</span> <span class="Comment">## When applied to a store operation, no reads or writes in the</span>
+              <span class="Comment">## current thread can be reorderd after this operation.</span>
+  <span class="Identifier">moAcquireRelease</span><span class="Other">,</span> <span class="Comment">## When applied to a read-modify-write operation, this behaves like</span>
+                     <span class="Comment">## both an acquire and a release operation.</span>
+  <span class="Identifier">moSequentiallyConsistent</span> <span class="Comment">## Behaves like Acquire when applied to load, like Release when</span>
+                           <span class="Comment">## applied to a store and like AcquireRelease when applied to a</span>
+                           <span class="Comment">## read-modify-write operation.</span>
+                           <span class="Comment">## Also guarantees that all threads observe the same total ordering</span>
+                           <span class="Comment">## with other moSequentiallyConsistent operations.</span></pre></dt>
 <dd>
 
 Specifies how non-atomic operations can be reordered around atomic operations.
@@ -550,7 +576,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-28 00:53:50 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-06 00:43:57 UTC</small>
       </div>
     </div>
   </div>

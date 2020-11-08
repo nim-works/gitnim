@@ -108,17 +108,35 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#JsonEventKind"
     title="JsonEventKind = enum
-  jsonError, jsonEof, jsonString, jsonInt, jsonFloat, jsonTrue, jsonFalse,
-  jsonNull, jsonObjectStart, jsonObjectEnd, jsonArrayStart, jsonArrayEnd">JsonEventKind</a></li>
+  jsonError,                ## an error occurred during parsing
+  jsonEof,                  ## end of file reached
+  jsonString,               ## a string literal
+  jsonInt,                  ## an integer literal
+  jsonFloat,                ## a float literal
+  jsonTrue,                 ## the value ``true``
+  jsonFalse,                ## the value ``false``
+  jsonNull,                 ## the value ``null``
+  jsonObjectStart,          ## start of an object: the ``{`` token
+  jsonObjectEnd,            ## end of an object: the ``}`` token
+  jsonArrayStart,           ## start of an array: the ``[`` token
+  jsonArrayEnd               ## end of an array: the ``]`` token">JsonEventKind</a></li>
   <li><a class="reference" href="#TokKind"
     title="TokKind = enum
   tkError, tkEof, tkString, tkInt, tkFloat, tkTrue, tkFalse, tkNull, tkCurlyLe,
   tkCurlyRi, tkBracketLe, tkBracketRi, tkColon, tkComma">TokKind</a></li>
   <li><a class="reference" href="#JsonError_2"
     title="JsonError = enum
-  errNone, errInvalidToken, errStringExpected, errColonExpected,
-  errCommaExpected, errBracketRiExpected, errCurlyRiExpected, errQuoteExpected,
-  errEOC_Expected, errEofExpected, errExprExpected">JsonError</a></li>
+  errNone,                  ## no error
+  errInvalidToken,          ## invalid token
+  errStringExpected,        ## string expected
+  errColonExpected,         ## ``:`` expected
+  errCommaExpected,         ## ``,`` expected
+  errBracketRiExpected,     ## ``]`` expected
+  errCurlyRiExpected,       ## ``}`` expected
+  errQuoteExpected,         ## ``&quot;`` or ``&apos;`` expected
+  errEOC_Expected,          ## ``*/`` expected
+  errEofExpected,           ## EOF expected
+  errExprExpected            ## expr expected">JsonError</a></li>
   <li><a class="reference" href="#JsonParser"
     title="JsonParser = object of BaseLexer
   a*: string
@@ -251,8 +269,18 @@ function main() {
 <dl class="item">
 <a id="JsonEventKind"></a>
 <dt><pre><a href="parsejson.html#JsonEventKind"><span class="Identifier">JsonEventKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">jsonError</span><span class="Other">,</span> <span class="Identifier">jsonEof</span><span class="Other">,</span> <span class="Identifier">jsonString</span><span class="Other">,</span> <span class="Identifier">jsonInt</span><span class="Other">,</span> <span class="Identifier">jsonFloat</span><span class="Other">,</span> <span class="Identifier">jsonTrue</span><span class="Other">,</span> <span class="Identifier">jsonFalse</span><span class="Other">,</span>
-  <span class="Identifier">jsonNull</span><span class="Other">,</span> <span class="Identifier">jsonObjectStart</span><span class="Other">,</span> <span class="Identifier">jsonObjectEnd</span><span class="Other">,</span> <span class="Identifier">jsonArrayStart</span><span class="Other">,</span> <span class="Identifier">jsonArrayEnd</span></pre></dt>
+  <span class="Identifier">jsonError</span><span class="Other">,</span>                <span class="Comment">## an error occurred during parsing</span>
+  <span class="Identifier">jsonEof</span><span class="Other">,</span>                  <span class="Comment">## end of file reached</span>
+  <span class="Identifier">jsonString</span><span class="Other">,</span>               <span class="Comment">## a string literal</span>
+  <span class="Identifier">jsonInt</span><span class="Other">,</span>                  <span class="Comment">## an integer literal</span>
+  <span class="Identifier">jsonFloat</span><span class="Other">,</span>                <span class="Comment">## a float literal</span>
+  <span class="Identifier">jsonTrue</span><span class="Other">,</span>                 <span class="Comment">## the value ``true``</span>
+  <span class="Identifier">jsonFalse</span><span class="Other">,</span>                <span class="Comment">## the value ``false``</span>
+  <span class="Identifier">jsonNull</span><span class="Other">,</span>                 <span class="Comment">## the value ``null``</span>
+  <span class="Identifier">jsonObjectStart</span><span class="Other">,</span>          <span class="Comment">## start of an object: the ``{`` token</span>
+  <span class="Identifier">jsonObjectEnd</span><span class="Other">,</span>            <span class="Comment">## end of an object: the ``}`` token</span>
+  <span class="Identifier">jsonArrayStart</span><span class="Other">,</span>           <span class="Comment">## start of an array: the ``[`` token</span>
+  <span class="Identifier">jsonArrayEnd</span>               <span class="Comment">## end of an array: the ``]`` token</span></pre></dt>
 <dd>
 
 enumeration of all events that may occur when parsing
@@ -277,9 +305,17 @@ class="link-seesrc" target="_blank">Source</a>
 </dd>
 <a id="JsonError_2"></a>
 <dt><pre><a href="parsejson.html#JsonError"><span class="Identifier">JsonError</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">errNone</span><span class="Other">,</span> <span class="Identifier">errInvalidToken</span><span class="Other">,</span> <span class="Identifier">errStringExpected</span><span class="Other">,</span> <span class="Identifier">errColonExpected</span><span class="Other">,</span>
-  <span class="Identifier">errCommaExpected</span><span class="Other">,</span> <span class="Identifier">errBracketRiExpected</span><span class="Other">,</span> <span class="Identifier">errCurlyRiExpected</span><span class="Other">,</span> <span class="Identifier">errQuoteExpected</span><span class="Other">,</span>
-  <span class="Identifier">errEOC_Expected</span><span class="Other">,</span> <span class="Identifier">errEofExpected</span><span class="Other">,</span> <span class="Identifier">errExprExpected</span></pre></dt>
+  <span class="Identifier">errNone</span><span class="Other">,</span>                  <span class="Comment">## no error</span>
+  <span class="Identifier">errInvalidToken</span><span class="Other">,</span>          <span class="Comment">## invalid token</span>
+  <span class="Identifier">errStringExpected</span><span class="Other">,</span>        <span class="Comment">## string expected</span>
+  <span class="Identifier">errColonExpected</span><span class="Other">,</span>         <span class="Comment">## ``:`` expected</span>
+  <span class="Identifier">errCommaExpected</span><span class="Other">,</span>         <span class="Comment">## ``,`` expected</span>
+  <span class="Identifier">errBracketRiExpected</span><span class="Other">,</span>     <span class="Comment">## ``]`` expected</span>
+  <span class="Identifier">errCurlyRiExpected</span><span class="Other">,</span>       <span class="Comment">## ``}`` expected</span>
+  <span class="Identifier">errQuoteExpected</span><span class="Other">,</span>         <span class="Comment">## ``&quot;`` or ``'`` expected</span>
+  <span class="Identifier">errEOC_Expected</span><span class="Other">,</span>          <span class="Comment">## ``*/`` expected</span>
+  <span class="Identifier">errEofExpected</span><span class="Other">,</span>           <span class="Comment">## EOF expected</span>
+  <span class="Identifier">errExprExpected</span>            <span class="Comment">## expr expected</span></pre></dt>
 <dd>
 
 enumeration that lists all errors that can occur
@@ -548,7 +584,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-10-28 00:53:25 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-06 00:43:34 UTC</small>
       </div>
     </div>
   </div>
