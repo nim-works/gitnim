@@ -487,8 +487,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/wrappers/pcre.nim
   cp lib/wrappers/tinyc.nim $libdir/wrappers/tinyc.nim
   chmod 644 $libdir/wrappers/tinyc.nim
-  cp lib/wrappers/iup.nim $libdir/wrappers/iup.nim
-  chmod 644 $libdir/wrappers/iup.nim
   cp lib/wrappers/postgres.nim $libdir/wrappers/postgres.nim
   chmod 644 $libdir/wrappers/postgres.nim
   cp lib/nimhcr.nim.cfg $libdir/nimhcr.nim.cfg
@@ -567,6 +565,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/stackframes.nim
   cp lib/std/exitprocs.nim $libdir/std/exitprocs.nim
   chmod 644 $libdir/std/exitprocs.nim
+  cp lib/std/enumutils.nim $libdir/std/enumutils.nim
+  chmod 644 $libdir/std/enumutils.nim
   cp lib/std/time_t.nim $libdir/std/time_t.nim
   chmod 644 $libdir/std/time_t.nim
   cp lib/std/wrapnils.nim $libdir/std/wrapnils.nim

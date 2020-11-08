@@ -951,7 +951,7 @@ stmt = (IND{&gt;} complexOrSimpleStmt^+(IND{=} / ';') DED)
 <li>Ordinal values have the smallest possible value. Trying to count further down than the smallest value produces a panic or a static error.</li>
 <li>Ordinal values have the largest possible value. Trying to count further than the largest value produces a panic or a static error.</li>
 </ul>
-<p>Integers, bool, characters, and enumeration types (and subranges of these types) belong to ordinal types. For reasons of simplicity of implementation the types <tt class="docutils literal"><span class="pre">uint</span></tt> and <tt class="docutils literal"><span class="pre">uint64</span></tt> are not ordinal types. (This will be changed in later versions of the language.)</p>
+<p>Integers, bool, characters, and enumeration types (and subranges of these types) belong to ordinal types.</p>
 <p>A distinct type is an ordinal type if its base type is an ordinal type.</p>
 
 <h2><a class="toc-backref" id="types-preminusdefined-integer-types" href="#types-preminusdefined-integer-types">Pre-defined integer types</a></h2><p>These integer types are pre-defined:</p>
@@ -1840,7 +1840,19 @@ return &quot;ambiguous&quot;</pre>
     <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Identifier">a</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
   <span class="Keyword">else</span><span class="Punctuation">:</span>
     <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Identifier">a</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-  <span class="Comment"># use x</span></pre>
+  <span class="Comment"># use x</span></pre><p><tt class="docutils literal"><span class="pre">requiresInit</span></tt> pragma can also be applyied to <tt class="docutils literal"><span class="pre">distinct</span></tt> types.</p>
+<p>Given the following distinct type definitions:</p>
+<pre class="listing"><span class="Keyword">type</span>
+  <span class="Identifier">DistinctObject</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">requiresInit</span><span class="Punctuation">,</span> <span class="Identifier">borrow</span><span class="Punctuation">:</span> <span class="Punctuation">`</span><span class="Operator">.</span><span class="Punctuation">`</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">distinct</span> <span class="Identifier">MyObject</span>
+  <span class="Identifier">DistinctString</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">requiresInit</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">distinct</span> <span class="Identifier">string</span></pre><p>The following code blocks will fail to compile:</p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">foo</span><span class="Punctuation">:</span> <span class="Identifier">DistinctFoo</span>
+<span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">x</span> <span class="Operator">=</span> <span class="StringLit">&quot;test&quot;</span>
+<span class="Identifier">doAssert</span> <span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">x</span> <span class="Operator">==</span> <span class="StringLit">&quot;test&quot;</span></pre><pre class="listing"><span class="Keyword">var</span> <span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">DistinctString</span>
+<span class="Identifier">s</span> <span class="Operator">=</span> <span class="StringLit">&quot;test&quot;</span>
+<span class="Identifier">doAssert</span> <span class="Identifier">s</span> <span class="Operator">==</span> <span class="StringLit">&quot;test&quot;</span></pre><p>But these ones will compile successfully:</p>
+<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">foo</span> <span class="Operator">=</span> <span class="Identifier">DistinctFoo</span><span class="Punctuation">(</span><span class="Identifier">Foo</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="StringLit">&quot;test&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+<span class="Identifier">doAssert</span> <span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">x</span> <span class="Operator">==</span> <span class="StringLit">&quot;test&quot;</span></pre><pre class="listing"><span class="Keyword">let</span> <span class="Identifier">s</span> <span class="Operator">=</span> <span class="StringLit">&quot;test&quot;</span>
+<span class="Identifier">doAssert</span> <span class="Identifier">s</span> <span class="Operator">==</span> <span class="StringLit">&quot;test&quot;</span></pre>
 <h2><a class="toc-backref" id="statements-and-expressions-let-statement" href="#statements-and-expressions-let-statement">Let statement</a></h2><p>A <tt class="docutils literal"><span class="pre">let</span></tt> statement declares new local and global <span id="single-assignment_1">single assignment</span> variables and binds a value to them. The syntax is the same as that of the <tt class="docutils literal"><span class="pre">var</span></tt> statement, except that the keyword <tt class="docutils literal"><span class="pre">var</span></tt> is replaced by the keyword <tt class="docutils literal"><span class="pre">let</span></tt>. Let variables are not l-values and can thus not be passed to <tt class="docutils literal"><span class="pre">var</span></tt> parameters nor can their address be taken. They cannot be assigned new values.</p>
 <p>For let variables, the same pragmas are available as for ordinary variables.</p>
 <p>As <tt class="docutils literal"><span class="pre">let</span></tt> statements are immutable after creation they need to define a value when they are declared. The only exception to this is if the <tt class="docutils literal"><span class="pre">{.importc.}</span></tt> pragma (or any of the other <tt class="docutils literal"><span class="pre">importX</span></tt> pragmas) is applied, in this case the value is expected to come from native code, typically a C/C++ <tt class="docutils literal"><span class="pre">const</span></tt>.</p>
@@ -2442,10 +2454,11 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 <span class="Identifier">invoke</span><span class="Punctuation">(</span><span class="Identifier">count2</span><span class="Punctuation">)</span></pre><p>Closure iterators and inline iterators have some restrictions:</p>
 <ol class="simple"><li>For now, a closure iterator cannot be executed at compile time.</li>
 <li><tt class="docutils literal"><span class="pre">return</span></tt> is allowed in a closure iterator but not in an inline iterator (but rarely useful) and ends the iteration.</li>
-<li>Neither inline nor closure iterators can be recursive.</li>
+<li>Neither inline nor closure iterators can be (directly)* recursive.</li>
 <li>Neither inline nor closure iterators have the special <tt class="docutils literal"><span class="pre">result</span></tt> variable.</li>
 <li>Closure iterators are not supported by the js backend.</li>
 </ol>
+<p>(*) Closure iterators can be co-recursive with a factory proc which results in similar syntax to a recursive iterator.  More details follow.</p>
 <p>Iterators that are neither marked <tt class="docutils literal"><span class="pre">{.closure.}</span></tt> nor <tt class="docutils literal"><span class="pre">{.inline.}</span></tt> explicitly default to being inline, but this may change in future versions of the implementation.</p>
 <p>The <tt class="docutils literal"><span class="pre">iterator</span></tt> type is always of the calling convention <tt class="docutils literal"><span class="pre">closure</span></tt> implicitly; the following example shows how to use iterators to implement a <span id="collaborative-tasking_1">collaborative tasking</span> system:</p>
 <pre class="listing"><span class="Comment"># simple tasking:</span>
@@ -2509,7 +2522,30 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 <span class="Keyword">let</span> <span class="Identifier">foo</span> <span class="Operator">=</span> <span class="Identifier">mycount</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">4</span><span class="Punctuation">)</span>
 
 <span class="Keyword">for</span> <span class="Identifier">f</span> <span class="Keyword">in</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-  <span class="Identifier">echo</span> <span class="Identifier">f</span></pre>
+  <span class="Identifier">echo</span> <span class="Identifier">f</span></pre><p>The call can be made more like an inline iterator with a for loop macro:</p>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">macros</span>
+<span class="Keyword">macro</span> <span class="Identifier">toItr</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">ForLoopStmt</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">untyped</span> <span class="Operator">=</span>
+  <span class="Keyword">let</span> <span class="Identifier">expr</span> <span class="Operator">=</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span>
+  <span class="Keyword">let</span> <span class="Identifier">call</span> <span class="Operator">=</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">]</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">]</span> <span class="Comment"># Get foo out of toItr(foo)</span>
+  <span class="Keyword">let</span> <span class="Identifier">body</span> <span class="Operator">=</span> <span class="Identifier">x</span><span class="Punctuation">[</span><span class="DecNumber">2</span><span class="Punctuation">]</span>
+  <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">quote</span> <span class="Keyword">do</span><span class="Punctuation">:</span>
+    <span class="Keyword">block</span><span class="Punctuation">:</span>
+      <span class="Keyword">let</span> <span class="Identifier">itr</span> <span class="Operator">=</span> <span class="Punctuation">`</span><span class="Identifier">call</span><span class="Punctuation">`</span>
+      <span class="Keyword">for</span> <span class="Punctuation">`</span><span class="Identifier">expr</span><span class="Punctuation">`</span> <span class="Keyword">in</span> <span class="Identifier">itr</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+          <span class="Punctuation">`</span><span class="Identifier">body</span><span class="Punctuation">`</span>
+
+<span class="Keyword">for</span> <span class="Identifier">f</span> <span class="Keyword">in</span> <span class="Identifier">toItr</span><span class="Punctuation">(</span><span class="Identifier">mycount</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">4</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Comment"># using early `proc mycount`</span>
+  <span class="Identifier">echo</span> <span class="Identifier">f</span></pre><p>Because of full backend function call aparatus involvment, closure iterator invocation is typically higher cost than inline iterators.  Adornment by a macro wrapper at the call site like this is a possibly useful reminder.</p>
+<p>The factory <tt class="docutils literal"><span class="pre">proc</span></tt>, as an ordinary procedure, can be recursive.  The above macro allows such recursion to look much like a recursive iterator would.  For example:</p>
+<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">recCountDown</span><span class="Punctuation">(</span><span class="Identifier">n</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Keyword">iterator</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span>
+  <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Keyword">iterator</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span>
+    <span class="Keyword">if</span> <span class="Identifier">n</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span><span class="Punctuation">:</span>
+      <span class="Keyword">yield</span> <span class="Identifier">n</span>
+      <span class="Keyword">for</span> <span class="Identifier">e</span> <span class="Keyword">in</span> <span class="Identifier">toItr</span><span class="Punctuation">(</span><span class="Identifier">recCountDown</span><span class="Punctuation">(</span><span class="Identifier">n</span> <span class="Operator">-</span> <span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+          <span class="Keyword">yield</span> <span class="Identifier">e</span>
+
+<span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="Identifier">toItr</span><span class="Punctuation">(</span><span class="Identifier">recCountDown</span><span class="Punctuation">(</span><span class="DecNumber">6</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Comment"># Emits: 6 5 4 3 2 1</span>
+  <span class="Identifier">echo</span> <span class="Identifier">i</span></pre>
 <h1><a class="toc-backref" id="converters" href="#converters">Converters</a></h1><p>A converter is like an ordinary proc except that it enhances the &quot;implicitly convertible&quot; type relation (see <a class="reference external" href="#type-relations-convertible-relation">Convertible relation</a>):</p>
 <pre class="listing"><span class="Comment"># bad style ahead: Nim is not C.</span>
 <span class="Keyword">converter</span> <span class="Identifier">toBool</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">bool</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Operator">!=</span> <span class="DecNumber">0</span>
@@ -2740,8 +2776,8 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 
 <span class="Keyword">iterator</span> <span class="Identifier">preorder</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">root</span><span class="Punctuation">:</span> <span class="Identifier">BinaryTree</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">T</span> <span class="Operator">=</span>
   <span class="Comment"># Preorder traversal of a binary tree.</span>
-  <span class="Comment"># Since recursive iterators are not yet implemented,</span>
-  <span class="Comment"># this uses an explicit stack (which is more efficient anyway):</span>
+  <span class="Comment"># This uses an explicit stack (which is more efficient than</span>
+  <span class="Comment"># a recursive iterator factory).</span>
   <span class="Keyword">var</span> <span class="Identifier">stack</span><span class="Punctuation">:</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">BinaryTree</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="Identifier">root</span><span class="Punctuation">]</span>
   <span class="Keyword">while</span> <span class="Identifier">stack</span><span class="Operator">.</span><span class="Identifier">len</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span><span class="Punctuation">:</span>
     <span class="Keyword">var</span> <span class="Identifier">n</span> <span class="Operator">=</span> <span class="Identifier">stack</span><span class="Operator">.</span><span class="Identifier">pop</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
@@ -4008,7 +4044,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-03 00:42:25 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-08 00:43:38 UTC</small>
       </div>
     </div>
   </div>
