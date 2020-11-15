@@ -39,32 +39,32 @@ var NTI503316668 = {size: 0,kind: 25,base: null,node: null,finalizer: null};
 var NTI503316485 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316573 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316571 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
-var NTI503317906 = {size: 0,kind: 25,base: null,node: null,finalizer: null};
-var NTI503317897 = {size: 0,kind: 25,base: null,node: null,finalizer: null};
-var NTI503317896 = {size: 0, kind: 18, base: null, node: null, finalizer: null};
+var NTI503317908 = {size: 0,kind: 25,base: null,node: null,finalizer: null};
+var NTI503317899 = {size: 0,kind: 25,base: null,node: null,finalizer: null};
+var NTI503317898 = {size: 0, kind: 18, base: null, node: null, finalizer: null};
 var NTI503316665 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
-var NTI503317904 = {size: 0, kind: 18, base: null, node: null, finalizer: null};
+var NTI503317906 = {size: 0, kind: 18, base: null, node: null, finalizer: null};
 var NTI503316667 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
 var NTI503316549 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316547 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
-var NTI503316939 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
+var NTI503316941 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI503316553 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316551 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
+var NTI503316939 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI503316937 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
-var NTI503316935 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI503316569 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316567 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
+var NTI503316935 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI503316933 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
-var NTI503316931 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI503316557 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316555 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
-var NTI503316929 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
-var NTI503316953 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
+var NTI503316931 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
+var NTI503316955 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI503316561 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316559 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
-var NTI503316951 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
+var NTI503316953 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI33554473 = {size: 0,kind: 31,base: null,node: null,finalizer: null};
-var NTI503317045 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
+var NTI503317047 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI503316565 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316563 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
 var NTI33554493 = {size: 0,kind: 1,base: null,node: null,finalizer: null};
@@ -75,12 +75,12 @@ var NTI503316523 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
 var NTI503316521 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316519 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
 var NTI503316513 = {size: 0, kind: 14, base: null, node: null, finalizer: null};
-var NTI503316893 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
-var NTI503316891 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
-var NTI503316889 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
+var NTI503316894 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
+var NTI503316892 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
+var NTI503316890 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI503316517 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI503316515 = {size: 0,kind: 22,base: null,node: null,finalizer: null};
-var NTI503318758 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
+var NTI503318760 = {size: 0,kind: 24,base: null,node: null,finalizer: null};
 var NTI33556244 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI33556252 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI33556169 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
@@ -118,9 +118,9 @@ NTI33556252.base = NTI33556222;
 var NNI33556244 = {kind: 2, len: 0, offset: 0, typ: null, name: null, sons: []};
 NTI33556244.node = NNI33556244;
 NTI33556244.base = NTI33556222;
-NTI503316889.base = NTI503316515;
-NTI503316891.base = NTI503316515;
-NTI503316893.base = NTI503316515;
+NTI503316890.base = NTI503316515;
+NTI503316892.base = NTI503316515;
+NTI503316894.base = NTI503316515;
 var NNI503316513 = {kind: 2, offset: 0, typ: null, name: null, len: 12, sons: {"1": {kind: 1, offset: 1, typ: NTI503316513, name: "ElementNode", len: 0, sons: null}, 
 "2": {kind: 1, offset: 2, typ: NTI503316513, name: "AttributeNode", len: 0, sons: null}, 
 "3": {kind: 1, offset: 3, typ: NTI503316513, name: "TextNode", len: 0, sons: null}, 
@@ -138,11 +138,11 @@ var NNI503316511 = {kind: 2, len: 0, offset: 0, typ: null, name: null, sons: []}
 NTI503316511.node = NNI503316511;
 NTI503316511.base = NTI33556169;
 NTI503316509.base = NTI503316511;
-NTI503317045.base = NTI503316523;
+NTI503317047.base = NTI503316523;
 var NNI503316565 = {kind: 2, len: 10, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "acceptCharset", len: 0, typ: NTI33554444, name: "acceptCharset", sons: null}, 
 {kind: 1, offset: "action", len: 0, typ: NTI33554444, name: "action", sons: null}, 
 {kind: 1, offset: "autocomplete", len: 0, typ: NTI33554444, name: "autocomplete", sons: null}, 
-{kind: 1, offset: "elements", len: 0, typ: NTI503317045, name: "elements", sons: null}, 
+{kind: 1, offset: "elements", len: 0, typ: NTI503317047, name: "elements", sons: null}, 
 {kind: 1, offset: "encoding", len: 0, typ: NTI33554444, name: "encoding", sons: null}, 
 {kind: 1, offset: "enctype", len: 0, typ: NTI33554444, name: "enctype", sons: null}, 
 {kind: 1, offset: "length", len: 0, typ: NTI33554473, name: "length", sons: null}, 
@@ -160,8 +160,8 @@ var NNI503316561 = {kind: 2, len: 5, offset: 0, typ: null, name: null, sons: [{k
 NTI503316561.node = NNI503316561;
 NTI503316561.base = NTI503316525;
 NTI503316559.base = NTI503316561;
-NTI503316951.base = NTI503316559;
 NTI503316953.base = NTI503316559;
+NTI503316955.base = NTI503316559;
 var NNI503316525 = {kind: 2, len: 20, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "className", len: 0, typ: NTI33554444, name: "className", sons: null}, 
 {kind: 1, offset: "classList", len: 0, typ: NTI503316509, name: "classList", sons: null}, 
 {kind: 1, offset: "checked", len: 0, typ: NTI33554493, name: "checked", sons: null}, 
@@ -171,8 +171,8 @@ var NNI503316525 = {kind: 2, len: 20, offset: 0, typ: null, name: null, sons: [{
 {kind: 1, offset: "form", len: 0, typ: NTI503316563, name: "form", sons: null}, 
 {kind: 1, offset: "name", len: 0, typ: NTI33554444, name: "name", sons: null}, 
 {kind: 1, offset: "readOnly", len: 0, typ: NTI33554493, name: "readOnly", sons: null}, 
-{kind: 1, offset: "options", len: 0, typ: NTI503316951, name: "options", sons: null}, 
-{kind: 1, offset: "selectedOptions", len: 0, typ: NTI503316953, name: "selectedOptions", sons: null}, 
+{kind: 1, offset: "options", len: 0, typ: NTI503316953, name: "options", sons: null}, 
+{kind: 1, offset: "selectedOptions", len: 0, typ: NTI503316955, name: "selectedOptions", sons: null}, 
 {kind: 1, offset: "clientWidth", len: 0, typ: NTI33554473, name: "clientWidth", sons: null}, 
 {kind: 1, offset: "clientHeight", len: 0, typ: NTI33554473, name: "clientHeight", sons: null}, 
 {kind: 1, offset: "contentEditable", len: 0, typ: NTI33554444, name: "contentEditable", sons: null}, 
@@ -191,8 +191,8 @@ var NNI503316557 = {kind: 2, len: 3, offset: 0, typ: null, name: null, sons: [{k
 NTI503316557.node = NNI503316557;
 NTI503316557.base = NTI503316525;
 NTI503316555.base = NTI503316557;
-NTI503316929.base = NTI503316555;
-NTI503316931.base = NTI503316563;
+NTI503316931.base = NTI503316555;
+NTI503316933.base = NTI503316563;
 var NNI503316569 = {kind: 2, len: 8, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "border", len: 0, typ: NTI33554473, name: "border", sons: null}, 
 {kind: 1, offset: "complete", len: 0, typ: NTI33554493, name: "complete", sons: null}, 
 {kind: 1, offset: "height", len: 0, typ: NTI33554473, name: "height", sons: null}, 
@@ -204,8 +204,8 @@ var NNI503316569 = {kind: 2, len: 8, offset: 0, typ: null, name: null, sons: [{k
 NTI503316569.node = NNI503316569;
 NTI503316569.base = NTI503316525;
 NTI503316567.base = NTI503316569;
-NTI503316933.base = NTI503316567;
-NTI503316935.base = NTI503316523;
+NTI503316935.base = NTI503316567;
+NTI503316937.base = NTI503316523;
 var NNI503316553 = {kind: 2, len: 6, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "height", len: 0, typ: NTI33554473, name: "height", sons: null}, 
 {kind: 1, offset: "hspace", len: 0, typ: NTI33554473, name: "hspace", sons: null}, 
 {kind: 1, offset: "src", len: 0, typ: NTI33554444, name: "src", sons: null}, 
@@ -215,7 +215,7 @@ var NNI503316553 = {kind: 2, len: 6, offset: 0, typ: null, name: null, sons: [{k
 NTI503316553.node = NNI503316553;
 NTI503316553.base = NTI503316525;
 NTI503316551.base = NTI503316553;
-NTI503316937.base = NTI503316551;
+NTI503316939.base = NTI503316551;
 var NNI503316549 = {kind: 2, len: 4, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "target", len: 0, typ: NTI33554444, name: "target", sons: null}, 
 {kind: 1, offset: "text", len: 0, typ: NTI33554444, name: "text", sons: null}, 
 {kind: 1, offset: "x", len: 0, typ: NTI33554473, name: "x", sons: null}, 
@@ -223,15 +223,16 @@ var NNI503316549 = {kind: 2, len: 4, offset: 0, typ: null, name: null, sons: [{k
 NTI503316549.node = NNI503316549;
 NTI503316549.base = NTI503316525;
 NTI503316547.base = NTI503316549;
-NTI503316939.base = NTI503316547;
-var NNI503317896 = {kind: 1, offset: "then", len: 0, typ: NTI503317897, name: "then", sons: null};
-NTI503317896.node = NNI503317896;
-NTI503316665.base = NTI503317896;
-var NNI503317904 = {kind: 2, len: 2, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "ready", len: 0, typ: NTI503316665, name: "ready", sons: null}, 
-{kind: 1, offset: "onloadingdone", len: 0, typ: NTI503317906, name: "onloadingdone", sons: null}]};
-NTI503317904.node = NNI503317904;
-NTI503316667.base = NTI503317904;
-var NNI503316521 = {kind: 2, len: 22, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "activeElement", len: 0, typ: NTI503316523, name: "activeElement", sons: null}, 
+NTI503316941.base = NTI503316547;
+var NNI503317898 = {kind: 1, offset: "then", len: 0, typ: NTI503317899, name: "then", sons: null};
+NTI503317898.node = NNI503317898;
+NTI503316665.base = NTI503317898;
+var NNI503317906 = {kind: 2, len: 2, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "ready", len: 0, typ: NTI503316665, name: "ready", sons: null}, 
+{kind: 1, offset: "onloadingdone", len: 0, typ: NTI503317908, name: "onloadingdone", sons: null}]};
+NTI503317906.node = NNI503317906;
+NTI503316667.base = NTI503317906;
+var NNI503316521 = {kind: 2, len: 23, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "activeElement", len: 0, typ: NTI503316523, name: "activeElement", sons: null}, 
+{kind: 1, offset: "documentElement", len: 0, typ: NTI503316523, name: "documentElement", sons: null}, 
 {kind: 1, offset: "alinkColor", len: 0, typ: NTI33554444, name: "alinkColor", sons: null}, 
 {kind: 1, offset: "bgColor", len: 0, typ: NTI33554444, name: "bgColor", sons: null}, 
 {kind: 1, offset: "body", len: 0, typ: NTI503316523, name: "body", sons: null}, 
@@ -246,12 +247,12 @@ var NNI503316521 = {kind: 2, len: 22, offset: 0, typ: null, name: null, sons: [{
 {kind: 1, offset: "title", len: 0, typ: NTI33554444, name: "title", sons: null}, 
 {kind: 1, offset: "URL", len: 0, typ: NTI33554444, name: "URL", sons: null}, 
 {kind: 1, offset: "vlinkColor", len: 0, typ: NTI33554444, name: "vlinkColor", sons: null}, 
-{kind: 1, offset: "anchors", len: 0, typ: NTI503316929, name: "anchors", sons: null}, 
-{kind: 1, offset: "forms", len: 0, typ: NTI503316931, name: "forms", sons: null}, 
-{kind: 1, offset: "images", len: 0, typ: NTI503316933, name: "images", sons: null}, 
-{kind: 1, offset: "applets", len: 0, typ: NTI503316935, name: "applets", sons: null}, 
-{kind: 1, offset: "embeds", len: 0, typ: NTI503316937, name: "embeds", sons: null}, 
-{kind: 1, offset: "links", len: 0, typ: NTI503316939, name: "links", sons: null}, 
+{kind: 1, offset: "anchors", len: 0, typ: NTI503316931, name: "anchors", sons: null}, 
+{kind: 1, offset: "forms", len: 0, typ: NTI503316933, name: "forms", sons: null}, 
+{kind: 1, offset: "images", len: 0, typ: NTI503316935, name: "images", sons: null}, 
+{kind: 1, offset: "applets", len: 0, typ: NTI503316937, name: "applets", sons: null}, 
+{kind: 1, offset: "embeds", len: 0, typ: NTI503316939, name: "embeds", sons: null}, 
+{kind: 1, offset: "links", len: 0, typ: NTI503316941, name: "links", sons: null}, 
 {kind: 1, offset: "fonts", len: 0, typ: NTI503316667, name: "fonts", sons: null}]};
 NTI503316521.node = NNI503316521;
 NTI503316521.base = NTI503316517;
@@ -627,9 +628,9 @@ var NNI503316573 = {kind: 2, len: 368, offset: 0, typ: null, name: null, sons: [
 NTI503316573.node = NNI503316573;
 NTI503316573.base = NTI33556169;
 NTI503316571.base = NTI503316573;
-var NNI503316517 = {kind: 2, len: 22, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "attributes", len: 0, typ: NTI503316889, name: "attributes", sons: null}, 
-{kind: 1, offset: "childNodes", len: 0, typ: NTI503316891, name: "childNodes", sons: null}, 
-{kind: 1, offset: "children", len: 0, typ: NTI503316893, name: "children", sons: null}, 
+var NNI503316517 = {kind: 2, len: 22, offset: 0, typ: null, name: null, sons: [{kind: 1, offset: "attributes", len: 0, typ: NTI503316890, name: "attributes", sons: null}, 
+{kind: 1, offset: "childNodes", len: 0, typ: NTI503316892, name: "childNodes", sons: null}, 
+{kind: 1, offset: "children", len: 0, typ: NTI503316894, name: "children", sons: null}, 
 {kind: 1, offset: "data", len: 0, typ: NTI33554444, name: "data", sons: null}, 
 {kind: 1, offset: "firstChild", len: 0, typ: NTI503316515, name: "firstChild", sons: null}, 
 {kind: 1, offset: "lastChild", len: 0, typ: NTI503316515, name: "lastChild", sons: null}, 
@@ -677,7 +678,7 @@ NTI503316485.node = NNI503316485;
 NTI503316485.base = NTI33556169;
 NTI503316517.base = NTI503316485;
 NTI503316515.base = NTI503316517;
-NTI503318758.base = NTI503316515;
+NTI503318760.base = NTI503316515;
 NTI402654405.base = NTI33554444;
 var NNI33556256 = {kind: 2, len: 0, offset: 0, typ: null, name: null, sons: []};
 NTI33556256.node = NNI33556256;
@@ -1816,7 +1817,7 @@ function fuzzyMatch_520093708(pattern_520093710, str_520093711) {
     
     var colontmp__402654719 = nimMax(0, score_520093727);
     var colontmp__402654720 = (0 < score_520093727);
-    nimCopy(result_520093715, {Field0: colontmp__402654719, Field1: colontmp__402654720}, NTI520093712);
+    result_520093715 = nimCopy(result_520093715, {Field0: colontmp__402654719, Field1: colontmp__402654720}, NTI520093712);
 
   return result_520093715;
 
@@ -1896,7 +1897,7 @@ function dosearch_402654381(value_402654383) {
 
     stuff_402654390 = doc.documentElement;
     
-    db_402654369[0] = nimCopy(null, stuff_402654390.getElementsByClassName("reference"), NTI503318758);
+    db_402654369[0] = nimCopy(null, stuff_402654390.getElementsByClassName("reference"), NTI503318760);
     contents_402654371[0] = nimCopy(null, [], NTI402654405);
     L1: do {
       var ahref_402654441 = null;

@@ -555,6 +555,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/with.nim
   cp lib/std/effecttraits.nim $libdir/std/effecttraits.nim
   chmod 644 $libdir/std/effecttraits.nim
+  cp lib/std/packedsets.nim $libdir/std/packedsets.nim
+  chmod 644 $libdir/std/packedsets.nim
   cp lib/std/varints.nim $libdir/std/varints.nim
   chmod 644 $libdir/std/varints.nim
   cp lib/std/enumerate.nim $libdir/std/enumerate.nim
