@@ -148,9 +148,9 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/pathutils.nim
     rm -f $nimbleDir/compiler/patterns.nim
     rm -f $nimbleDir/compiler/platform.nim
-    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/itersgen.nim
     rm -f $nimbleDir/compiler/plugins/active.nim
+    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/pluginsupport.nim
     rm -f $nimbleDir/compiler/pragmas.nim
     rm -f $nimbleDir/compiler/prefixmatches.nim

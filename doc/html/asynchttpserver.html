@@ -97,7 +97,7 @@ function main() {
   </div>
   
   <ul class="simple simple-toc" id="toc-list">
-<li><a class="reference" id="basic-usage_toc" href="#basic-usage">Basic usage</a></li>
+<li><a class="reference" id="example_toc" href="#example">Example</a></li>
 <li>
   <a class="reference reference-toplevel" href="#6" id="56">Imports</a>
   <ul class="simple simple-toc-section">
@@ -149,9 +149,9 @@ function main() {
 
   </ul>
   <ul class="simple nested-toc-section">acceptRequest
-      <li><a class="reference" href="#acceptRequest%2CAsyncHttpServer%2CPort%2Cproc%28Request%29"
-    title="acceptRequest(server: AsyncHttpServer; port: Port; callback: proc (
-    request: Request): Future[void] {.closure, gcsafe.}): owned(Future[void])">acceptRequest,<wbr>AsyncHttpServer,<wbr>Port,<wbr>proc(Request)</a></li>
+      <li><a class="reference" href="#acceptRequest%2CAsyncHttpServer%2Cproc%28Request%29"
+    title="acceptRequest(server: AsyncHttpServer; callback: proc (request: Request): Future[
+    void] {.closure, gcsafe.}): owned(Future[void])">acceptRequest,<wbr>AsyncHttpServer,<wbr>proc(Request)</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">sendHeaders
@@ -170,10 +170,10 @@ function main() {
 
   </ul>
   <ul class="simple nested-toc-section">serve
-      <li><a class="reference" href="#serve%2CAsyncHttpServer%2CPort%2Cproc%28Request%29%2Cstring%2Cint"
+      <li><a class="reference" href="#serve%2CAsyncHttpServer%2CPort%2Cproc%28Request%29%2Cstring"
     title="serve(server: AsyncHttpServer; port: Port;
       callback: proc (request: Request): Future[void] {.closure, gcsafe.};
-      address = &quot;&quot;; assumedDescriptorsPerRequest = 5): owned(Future[void])">serve,<wbr>AsyncHttpServer,<wbr>Port,<wbr>proc(Request),<wbr>string,<wbr>int</a></li>
+      address = &quot;&quot;; assumedDescriptorsPerRequest = -1): owned(Future[void])">serve,<wbr>AsyncHttpServer,<wbr>Port,<wbr>proc(Request),<wbr>string</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">shouldAcceptRequest
@@ -205,7 +205,7 @@ class="link-seesrc" target="_blank">Source</a>
   <p class="module-desc"><p>This module implements a high performance asynchronous HTTP server.</p>
 <p>This HTTP server has not been designed to be used in production, but for testing applications locally. Because of this, when deploying your application in production you should use a reverse proxy (for example nginx) instead of allowing users to connect directly to this server.</p>
 
-<h1><a class="toc-backref" id="basic-usage" href="#basic-usage">Basic usage</a></h1><p>This example will create an HTTP server on port 8080. The server will respond to all requests with a <tt class="docutils literal"><span class="pre">200 OK</span></tt> response code and &quot;Hello World&quot; as the response body.</p>
+<h1><a class="toc-backref" id="example" href="#example">Example</a></h1><p>This example will create an HTTP server on port 8080. The server will respond to all requests with a <tt class="docutils literal"><span class="pre">200 OK</span></tt> response code and &quot;Hello World&quot; as the response body.</p>
 <pre class="listing"><span class="Keyword">import</span> <span class="Identifier">asynchttpserver</span><span class="Punctuation">,</span> <span class="Identifier">asyncdispatch</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">main</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">async</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
@@ -215,11 +215,10 @@ class="link-seesrc" target="_blank">Source</a>
         <span class="StringLit">&quot;Content-type&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;text/plain; charset=utf-8&quot;</span><span class="Punctuation">}</span>
     <span class="Identifier">await</span> <span class="Identifier">req</span><span class="Operator">.</span><span class="Identifier">respond</span><span class="Punctuation">(</span><span class="Identifier">Http200</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Hello World&quot;</span><span class="Punctuation">,</span> <span class="Identifier">headers</span><span class="Operator">.</span><span class="Identifier">newHttpHeaders</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
   
-  <span class="Identifier">server</span><span class="Operator">.</span><span class="Identifier">listen</span> <span class="Identifier">Port</span><span class="Punctuation">(</span><span class="DecNumber">5555</span><span class="Punctuation">)</span>
+  <span class="Identifier">server</span><span class="Operator">.</span><span class="Identifier">listen</span> <span class="Identifier">Port</span><span class="Punctuation">(</span><span class="DecNumber">8080</span><span class="Punctuation">)</span>
   <span class="Keyword">while</span> <span class="Identifier">true</span><span class="Punctuation">:</span>
-    <span class="Keyword">if</span> <span class="Identifier">server</span><span class="Operator">.</span><span class="Identifier">shouldAcceptRequest</span><span class="Punctuation">(</span><span class="DecNumber">5</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-      <span class="Keyword">var</span> <span class="Punctuation">(</span><span class="Identifier">address</span><span class="Punctuation">,</span> <span class="Identifier">client</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Identifier">await</span> <span class="Identifier">server</span><span class="Operator">.</span><span class="Identifier">socket</span><span class="Operator">.</span><span class="Identifier">acceptAddr</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-      <span class="Identifier">asyncCheck</span> <span class="Identifier">processClient</span><span class="Punctuation">(</span><span class="Identifier">server</span><span class="Punctuation">,</span> <span class="Identifier">client</span><span class="Punctuation">,</span> <span class="Identifier">address</span><span class="Punctuation">,</span> <span class="Identifier">cb</span><span class="Punctuation">)</span>
+    <span class="Keyword">if</span> <span class="Identifier">server</span><span class="Operator">.</span><span class="Identifier">shouldAcceptRequest</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+      <span class="Identifier">asyncCheck</span> <span class="Identifier">server</span><span class="Operator">.</span><span class="Identifier">acceptRequest</span><span class="Punctuation">(</span><span class="Identifier">cb</span><span class="Punctuation">)</span>
     <span class="Keyword">else</span><span class="Punctuation">:</span>
       <span class="Identifier">poll</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 
@@ -247,9 +246,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L60"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L59"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L60" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L59" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="AsyncHttpServer"></a>
@@ -264,9 +263,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L69"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L68"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L69" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L68" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -281,9 +280,9 @@ class="link-seesrc" target="_blank">Source</a>
 fallback value for 
 when <tt class="docutils literal"><span class="pre">maxDescriptors</span></tt> is not available. This can be set on the command line during compilation via <tt class="docutils literal"><span class="pre">-d:nimMaxDescriptorsFallback=N</span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L309"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L308"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L309" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L308" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -298,9 +297,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new <tt class="docutils literal"><span class="pre">AsyncHttpServer</span></tt> instance.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L76"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L75"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L76" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L75" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sendHeaders,Request,HttpHeaders"></a>
@@ -310,9 +309,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sends the specified headers to the requesting client.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L85"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L84"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L85" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L84" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="respond,Request,HttpCode,string,HttpHeaders"></a>
@@ -333,9 +332,9 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Keyword">else</span><span class="Punctuation">:</span>
     <span class="Identifier">await</span> <span class="Identifier">req</span><span class="Operator">.</span><span class="Identifier">respond</span><span class="Punctuation">(</span><span class="Identifier">Http404</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Not Found&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L91"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L90"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L91" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L90" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="listen,AsyncHttpServer,Port,string"></a>
@@ -346,9 +345,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Listen to the given port and address.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L314"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L313"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L314" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L313" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="shouldAcceptRequest,AsyncHttpServer,int"></a>
@@ -359,28 +358,28 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns true if the process's current number of opened file descriptors is still within the maximum limit and so it's reasonable to accept yet another request.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L328"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L327"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L327" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="acceptRequest,AsyncHttpServer,Port,proc(Request)"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#acceptRequest%2CAsyncHttpServer%2CPort%2Cproc%28Request%29"><span class="Identifier">acceptRequest</span></a><span class="Other">(</span><span class="Identifier">server</span><span class="Other">:</span> <a href="asynchttpserver.html#AsyncHttpServer"><span class="Identifier">AsyncHttpServer</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span> <span class="Identifier">callback</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span>
-    <span class="Identifier">request</span><span class="Other">:</span> <a href="asynchttpserver.html#Request"><span class="Identifier">Request</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">closure</span><span class="Other">,</span> <span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="acceptRequest,AsyncHttpServer,proc(Request)"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#acceptRequest%2CAsyncHttpServer%2Cproc%28Request%29"><span class="Identifier">acceptRequest</span></a><span class="Other">(</span><span class="Identifier">server</span><span class="Other">:</span> <a href="asynchttpserver.html#AsyncHttpServer"><span class="Identifier">AsyncHttpServer</span></a><span class="Other">;</span> <span class="Identifier">callback</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">request</span><span class="Other">:</span> <a href="asynchttpserver.html#Request"><span class="Identifier">Request</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span>
+    <a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">closure</span><span class="Other">,</span> <span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Accepts a single request. Write an explicit loop around this proc so that errors can be handled properly.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L337"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L336"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L337" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L336" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="serve,AsyncHttpServer,Port,proc(Request),string,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#serve%2CAsyncHttpServer%2CPort%2Cproc%28Request%29%2Cstring%2Cint"><span class="Identifier">serve</span></a><span class="Other">(</span><span class="Identifier">server</span><span class="Other">:</span> <a href="asynchttpserver.html#AsyncHttpServer"><span class="Identifier">AsyncHttpServer</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span>
+<a id="serve,AsyncHttpServer,Port,proc(Request),string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#serve%2CAsyncHttpServer%2CPort%2Cproc%28Request%29%2Cstring"><span class="Identifier">serve</span></a><span class="Other">(</span><span class="Identifier">server</span><span class="Other">:</span> <a href="asynchttpserver.html#AsyncHttpServer"><span class="Identifier">AsyncHttpServer</span></a><span class="Other">;</span> <span class="Identifier">port</span><span class="Other">:</span> <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a><span class="Other">;</span>
            <span class="Identifier">callback</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">request</span><span class="Other">:</span> <a href="asynchttpserver.html#Request"><span class="Identifier">Request</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">closure</span><span class="Other">,</span> <span class="Identifier">gcsafe</span></span><span class="Other">.}</span></span><span class="Other">;</span>
-           <span class="Identifier">address</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">assumedDescriptorsPerRequest</span> <span class="Other">=</span> <span class="DecNumber">5</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+           <span class="Identifier">address</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">assumedDescriptorsPerRequest</span> <span class="Other">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#void"><span class="Identifier">void</span></a><span class="Other">]</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">TimeEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
@@ -391,9 +390,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>You should prefer to call <tt class="docutils literal"><span class="pre">acceptRequest</span></tt> instead with a custom server loop so that you're in control over the error handling and logging.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L346"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L345"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L346" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L345" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="close,AsyncHttpServer"></a>
@@ -403,9 +402,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Terminates the async http server instance.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L369"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asynchttpserver.nim#L368"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L369" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asynchttpserver.nim#L368" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -423,7 +422,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-15 00:47:54 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-21 00:43:35 UTC</small>
       </div>
     </div>
   </div>
