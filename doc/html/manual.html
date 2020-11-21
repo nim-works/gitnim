@@ -113,6 +113,7 @@ function main() {
 <li><a class="reference" id="lexical-analysis-multiline-comments_toc" href="#lexical-analysis-multiline-comments">Multiline comments</a></li>
 <li><a class="reference" id="lexical-analysis-identifiers-amp-keywords_toc" href="#lexical-analysis-identifiers-amp-keywords">Identifiers &amp; Keywords</a></li>
 <li><a class="reference" id="lexical-analysis-identifier-equality_toc" href="#lexical-analysis-identifier-equality">Identifier equality</a></li>
+<li><a class="reference" id="lexical-analysis-stropping_toc" href="#lexical-analysis-stropping">Stropping</a></li>
 <li><a class="reference" id="lexical-analysis-string-literals_toc" href="#lexical-analysis-string-literals">String literals</a></li>
 <li><a class="reference" id="lexical-analysis-triple-quoted-string-literals_toc" href="#lexical-analysis-triple-quoted-string-literals">Triple quoted string literals</a></li>
 <li><a class="reference" id="lexical-analysis-raw-string-literals_toc" href="#lexical-analysis-raw-string-literals">Raw string literals</a></li>
@@ -460,6 +461,21 @@ proc p[T](x: T) = discard
 <p>Note that this rule also applies to keywords, meaning that <tt class="docutils literal"><span class="pre">notin</span></tt> is the same as <tt class="docutils literal"><span class="pre">notIn</span></tt> and <tt class="docutils literal"><span class="pre">not_in</span></tt> (all-lowercase version (<tt class="docutils literal"><span class="pre">notin</span></tt>, <tt class="docutils literal"><span class="pre">isnot</span></tt>) is the preferred way of writing keywords).</p>
 <p>Historically, Nim was a fully <span id="styleminusinsensitive_1">style-insensitive</span> language. This meant that it was not case-sensitive and underscores were ignored and there was not even a distinction between <tt class="docutils literal"><span class="pre">foo</span></tt> and <tt class="docutils literal"><span class="pre">Foo</span></tt>.</p>
 
+<h2><a class="toc-backref" id="lexical-analysis-stropping" href="#lexical-analysis-stropping">Stropping</a></h2><p>If a keyword is enclosed in backticks it loses its keyword property and becomes an ordinary identifier.</p>
+<p>Examples</p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Punctuation">`</span><span class="Keyword">var</span><span class="Punctuation">`</span> <span class="Operator">=</span> <span class="StringLit">&quot;Hello Stropping&quot;</span></pre><pre class="listing"><span class="Keyword">type</span> <span class="Keyword">Type</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+  <span class="Punctuation">`</span><span class="Identifier">int</span><span class="Punctuation">`</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
+
+<span class="Keyword">let</span> <span class="Punctuation">`</span><span class="Keyword">object</span><span class="Punctuation">`</span> <span class="Operator">=</span> <span class="Keyword">Type</span><span class="Punctuation">(</span><span class="Punctuation">`</span><span class="Identifier">int</span><span class="Punctuation">`</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">)</span>
+<span class="Identifier">assert</span> <span class="Punctuation">`</span><span class="Keyword">object</span><span class="Punctuation">`</span> <span class="Keyword">is</span> <span class="Keyword">Type</span>
+<span class="Identifier">assert</span> <span class="Punctuation">`</span><span class="Keyword">object</span><span class="Punctuation">`</span><span class="Operator">.</span><span class="Punctuation">`</span><span class="Identifier">int</span><span class="Punctuation">`</span> <span class="Operator">==</span> <span class="DecNumber">9</span>
+
+<span class="Keyword">var</span> <span class="Punctuation">`</span><span class="Keyword">var</span><span class="Punctuation">`</span> <span class="Operator">=</span> <span class="DecNumber">42</span>
+<span class="Keyword">let</span> <span class="Punctuation">`</span><span class="Keyword">let</span><span class="Punctuation">`</span> <span class="Operator">=</span> <span class="DecNumber">8</span>
+<span class="Identifier">assert</span> <span class="Punctuation">`</span><span class="Keyword">var</span><span class="Punctuation">`</span> <span class="Operator">+</span> <span class="Punctuation">`</span><span class="Keyword">let</span><span class="Punctuation">`</span> <span class="Operator">==</span> <span class="DecNumber">50</span>
+
+<span class="Keyword">const</span> <span class="Punctuation">`</span><span class="Identifier">assert</span><span class="Punctuation">`</span> <span class="Operator">=</span> <span class="Identifier">true</span>
+<span class="Identifier">assert</span> <span class="Punctuation">`</span><span class="Identifier">assert</span><span class="Punctuation">`</span></pre>
 <h2><a class="toc-backref" id="lexical-analysis-string-literals" href="#lexical-analysis-string-literals">String literals</a></h2><p>Terminal symbol in the grammar: <tt class="docutils literal"><span class="pre">STR_LIT</span></tt>.</p>
 <p>String literals can be delimited by matching double quotes, and can contain the following <span id="escape-sequences_1">escape sequences</span>:</p>
 <table border="1" class="docutils"><tr><th>Escape sequence</th><th>Meaning</th></tr>
@@ -2604,10 +2620,10 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
   <span class="Identifier">LoadError</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">Exception</span></pre><p>Ending the custom exception's name with <tt class="docutils literal"><span class="pre">Error</span></tt> is recommended.</p>
 <p>Custom exceptions can be raised like any others, e.g.:</p>
 <pre class="listing"><span class="Keyword">raise</span> <span class="Identifier">newException</span><span class="Punctuation">(</span><span class="Identifier">LoadError</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Failed to load data&quot;</span><span class="Punctuation">)</span></pre>
-<h2><a class="toc-backref" id="exception-handling-defer-statement" href="#exception-handling-defer-statement">Defer statement</a></h2><p>Instead of a <tt class="docutils literal"><span class="pre">try finally</span></tt> statement a <tt class="docutils literal"><span class="pre">defer</span></tt> statement can be used.</p>
+<h2><a class="toc-backref" id="exception-handling-defer-statement" href="#exception-handling-defer-statement">Defer statement</a></h2><p>Instead of a <tt class="docutils literal"><span class="pre">try finally</span></tt> statement a <tt class="docutils literal"><span class="pre">defer</span></tt> statement can be used, which avoids lexical nesting and offers more flexibility in terms of scoping as shown below.</p>
 <p>Any statements following the <tt class="docutils literal"><span class="pre">defer</span></tt> in the current block will be considered to be in an implicit try block:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">main</span> <span class="Operator">=</span>
-  <span class="Keyword">var</span> <span class="Identifier">f</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;numbers.txt&quot;</span><span class="Punctuation">)</span>
+  <span class="Keyword">var</span> <span class="Identifier">f</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;numbers.txt&quot;</span><span class="Punctuation">,</span> <span class="Identifier">fmWrite</span><span class="Punctuation">)</span>
   <span class="Keyword">defer</span><span class="Punctuation">:</span> <span class="Identifier">close</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">)</span>
   <span class="Identifier">f</span><span class="Operator">.</span><span class="Identifier">write</span> <span class="StringLit">&quot;abc&quot;</span>
   <span class="Identifier">f</span><span class="Operator">.</span><span class="Identifier">write</span> <span class="StringLit">&quot;def&quot;</span></pre><p>Is rewritten to:</p>
@@ -2617,7 +2633,27 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
     <span class="Identifier">f</span><span class="Operator">.</span><span class="Identifier">write</span> <span class="StringLit">&quot;abc&quot;</span>
     <span class="Identifier">f</span><span class="Operator">.</span><span class="Identifier">write</span> <span class="StringLit">&quot;def&quot;</span>
   <span class="Keyword">finally</span><span class="Punctuation">:</span>
-    <span class="Identifier">close</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">)</span></pre><p>Top-level <tt class="docutils literal"><span class="pre">defer</span></tt> statements are not supported since it's unclear what such a statement should refer to.</p>
+    <span class="Identifier">close</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">)</span></pre><p>When <tt class="docutils literal"><span class="pre">defer</span></tt> is at the outermost scope of a template/macro, its scope extends to the block where the template is called from:</p>
+<pre class="listing"><span class="Keyword">template</span> <span class="Identifier">safeOpenDefer</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">,</span> <span class="Identifier">path</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">var</span> <span class="Identifier">f</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="Identifier">path</span><span class="Punctuation">,</span> <span class="Identifier">fmWrite</span><span class="Punctuation">)</span>
+  <span class="Keyword">defer</span><span class="Punctuation">:</span> <span class="Identifier">close</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">)</span>
+
+<span class="Keyword">template</span> <span class="Identifier">safeOpenFinally</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">,</span> <span class="Identifier">path</span><span class="Punctuation">,</span> <span class="Identifier">body</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">var</span> <span class="Identifier">f</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="Identifier">path</span><span class="Punctuation">,</span> <span class="Identifier">fmWrite</span><span class="Punctuation">)</span>
+  <span class="Keyword">try</span><span class="Punctuation">:</span> <span class="Identifier">body</span> <span class="Comment"># without `defer`, `body` must be specified as parameter</span>
+  <span class="Keyword">finally</span><span class="Punctuation">:</span> <span class="Identifier">close</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">)</span>
+
+<span class="Keyword">block</span><span class="Punctuation">:</span>
+  <span class="Identifier">safeOpenDefer</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">,</span> <span class="StringLit">&quot;/tmp/z01.txt&quot;</span><span class="Punctuation">)</span>
+  <span class="Identifier">f</span><span class="Operator">.</span><span class="Identifier">write</span> <span class="StringLit">&quot;abc&quot;</span>
+<span class="Keyword">block</span><span class="Punctuation">:</span>
+  <span class="Identifier">safeOpenFinally</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">,</span> <span class="StringLit">&quot;/tmp/z01.txt&quot;</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+    <span class="Identifier">f</span><span class="Operator">.</span><span class="Identifier">write</span> <span class="StringLit">&quot;abc&quot;</span> <span class="Comment"># adds a lexical scope</span>
+<span class="Keyword">block</span><span class="Punctuation">:</span>
+  <span class="Keyword">var</span> <span class="Identifier">f</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;/tmp/z01.txt&quot;</span><span class="Punctuation">,</span> <span class="Identifier">fmWrite</span><span class="Punctuation">)</span>
+  <span class="Keyword">try</span><span class="Punctuation">:</span>
+    <span class="Identifier">f</span><span class="Operator">.</span><span class="Identifier">write</span> <span class="StringLit">&quot;abc&quot;</span> <span class="Comment"># adds a lexical scope</span>
+  <span class="Keyword">finally</span><span class="Punctuation">:</span> <span class="Identifier">close</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">)</span></pre><p>Top-level <tt class="docutils literal"><span class="pre">defer</span></tt> statements are not supported since it's unclear what such a statement should refer to.</p>
 
 <h2><a class="toc-backref" id="exception-handling-raise-statement" href="#exception-handling-raise-statement">Raise statement</a></h2><p>Example:</p>
 <pre class="listing"><span class="Keyword">raise</span> <span class="Identifier">newException</span><span class="Punctuation">(</span><span class="Identifier">IOError</span><span class="Punctuation">,</span> <span class="StringLit">&quot;IO failed&quot;</span><span class="Punctuation">)</span></pre><p>Apart from built-in operations like array indexing, memory allocation, etc. the <tt class="docutils literal"><span class="pre">raise</span></tt> statement is the only way to raise an exception.</p>
@@ -4027,7 +4063,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-11 00:40:48 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-21 00:44:21 UTC</small>
       </div>
     </div>
   </div>

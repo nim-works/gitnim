@@ -1049,6 +1049,10 @@ proc genAsgnAux(p: PProc, x, y: PNode, noCopyNeeded: bool) =
   var a, b: TCompRes
   var xtyp = mapType(p, x.typ)
 
+  # disable `[]=` for cstring
+  if x.kind == nkBracketExpr and x.len >= 2 and x[0].typ.skipTypes(abstractInst).kind == tyCString:
+    localError(p.config, x.info, "cstring doesn't support `[]=` operator")
+
   gen(p, x, a)
   genLineDir(p, y)
   gen(p, y, b)
@@ -2204,11 +2208,17 @@ proc genConv(p: PProc, n: PNode, r: var TCompRes) =
   if dest.kind == src.kind:
     # no-op conversion
     return
-  case dest.kind:
-  of tyBool:
+  let toInt = (dest.kind in tyInt..tyInt32)
+  let fromInt = (src.kind in tyInt..tyInt32)
+  let toUint = (dest.kind in tyUInt..tyUInt32)
+  let fromUint = (src.kind in tyUInt..tyUInt32)
+  if toUint and (fromInt or fromUint):
+    let trimmer = unsignedTrimmer(dest.size)
+    r.res = "($1 $2)" % [r.res, trimmer]
+  elif dest.kind == tyBool:
     r.res = "(!!($1))" % [r.res]
     r.kind = resExpr
-  of tyInt:
+  elif toInt:
     r.res = "(($1)|0)" % [r.res]
   else:
     # TODO: What types must we handle here?
@@ -2406,8 +2416,7 @@ proc genCast(p: PProc, n: PNode, r: var TCompRes) =
     r.res = "($1 $2)" % [r.res, trimmer]
   elif toInt:
     if fromInt:
-      let trimmer = unsignedTrimmer(dest.size)
-      r.res = "($1 $2)" % [r.res, trimmer]
+      return
     elif fromUint:
       if src.size == 4 and dest.size == 4:
         # XXX prevent multi evaluations
