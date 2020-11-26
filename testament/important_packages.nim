@@ -63,10 +63,10 @@ pkg "nimsl", true
 pkg "nimsvg"
 # pkg "nimterop", true
 # pkg "nimx", true, "nim c --threads:on test/main.nim"
-pkg "norm", true, "nim c -r tests/tsqliterows.nim"
+# pkg "norm", true, "nim c -r tests/tsqliterows.nim"
 pkg "npeg"
 pkg "ormin", true, "nim c -o:orminn ormin.nim"
-pkg "parsetoml"
+# pkg "parsetoml"
 pkg "patty"
 pkg "plotly", true, "nim c --oldgensym:on examples/all.nim"
 pkg "pnm"
