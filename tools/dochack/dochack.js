@@ -2,14 +2,6 @@
 var framePtr = null;
 var excHandler = 0;
 var lastJSError = null;
-if (typeof Int8Array === 'undefined') Int8Array = Array;
-if (typeof Int16Array === 'undefined') Int16Array = Array;
-if (typeof Int32Array === 'undefined') Int32Array = Array;
-if (typeof Uint8Array === 'undefined') Uint8Array = Array;
-if (typeof Uint16Array === 'undefined') Uint16Array = Array;
-if (typeof Uint32Array === 'undefined') Uint32Array = Array;
-if (typeof Float32Array === 'undefined') Float32Array = Array;
-if (typeof Float64Array === 'undefined') Float64Array = Array;
 var NTI10416058 = {size: 0, kind: 18, base: null, node: null, finalizer: null};
 var NTI1194653 = {size: 0, kind: 17, base: null, node: null, finalizer: null};
 var NTI10575580 = {size: 0,kind: 24,base: null,node: null,finalizer: null};

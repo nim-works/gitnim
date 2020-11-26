@@ -1085,7 +1085,7 @@ proc safeLen*(n: PNode): int {.inline.} =
 
 proc safeArrLen*(n: PNode): int {.inline.} =
   ## works for array-like objects (strings passed as openArray in VM).
-  if n.kind in {nkStrLit..nkTripleStrLit}:result = n.strVal.len
+  if n.kind in {nkStrLit..nkTripleStrLit}: result = n.strVal.len
   elif n.kind in {nkNone..nkFloat128Lit}: result = 0
   else: result = n.len
 
@@ -1805,6 +1805,7 @@ proc toVar*(typ: PType; kind: TTypeKind): PType =
 proc toRef*(typ: PType): PType =
   ## If ``typ`` is a tyObject then it is converted into a `ref <typ>` and
   ## returned. Otherwise ``typ`` is simply returned as-is.
+  result = typ
   if typ.skipTypes({tyAlias, tyGenericInst}).kind == tyObject:
     result = newType(tyRef, typ.owner)
     rawAddSon(result, typ)
