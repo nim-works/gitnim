@@ -131,12 +131,13 @@ function main() {
     title="TBackend = enum
   backendInvalid = &quot;&quot;, backendC = &quot;c&quot;, backendCpp = &quot;cpp&quot;, backendJs = &quot;js&quot;,
   backendObjc = &quot;objc&quot;">TBackend</a></li>
-  <li><a class="reference" href="#TCommands"
-    title="TCommands = enum
-  cmdNone, cmdCompileToC, cmdCompileToCpp, cmdCompileToOC, cmdCompileToJS,
-  cmdCompileToLLVM, cmdInterpret, cmdPretty, cmdDoc, cmdGenDepend, cmdDump,
-  cmdCheck, cmdParse, cmdScan, cmdIdeTools, cmdDef, cmdRst2html, cmdRst2tex,
-  cmdInteractive, cmdRun, cmdJsonScript, cmdCompileToBackend">TCommands</a></li>
+  <li><a class="reference" href="#Command"
+    title="Command = enum
+  cmdNone, cmdUnknown, cmdCompileToC, cmdCompileToCpp, cmdCompileToOC,
+  cmdCompileToJS, cmdCrun, cmdTcc, cmdCheck, cmdParse, cmdScan, cmdIdeTools,
+  cmdNimscript, cmdDoc0, cmdDoc2, cmdRst2html, cmdRst2tex, cmdJsondoc0,
+  cmdJsondoc, cmdCtags, cmdBuildindex, cmdGendepend, cmdDump, cmdInteractive,
+  cmdNop, cmdJsonscript, cmdNimfix">Command</a></li>
   <li><a class="reference" href="#TStringSeq"
     title="TStringSeq = seq[string]">TStringSeq</a></li>
   <li><a class="reference" href="#TGCMode"
@@ -224,7 +225,7 @@ function main() {
   evalTemplateCounter*: int
   evalMacroCounter*: int
   exitcode*: int8
-  cmd*: TCommands
+  cmd*: Command
   cmdInput*: string
   projectIsCmd*: bool
   implicitCmd*: bool
@@ -323,6 +324,11 @@ function main() {
   <li><a class="reference" href="#harmlessOptions"
     title="harmlessOptions = {optForceFullMake, optNoLinking, optRun, optUseColors,
                    optStdout}">harmlessOptions</a></li>
+  <li><a class="reference" href="#cmdBackends"
+    title="cmdBackends = {cmdCompileToC, cmdCompileToCpp, cmdCompileToOC, cmdCompileToJS,
+               cmdCrun}">cmdBackends</a></li>
+  <li><a class="reference" href="#cmdDocLike"
+    title="cmdDocLike = {cmdDoc0, cmdDoc2, cmdJsondoc0, cmdJsondoc, cmdCtags, cmdBuildindex}">cmdDocLike</a></li>
   <li><a class="reference" href="#oldExperimentalFeatures"
     title="oldExperimentalFeatures = {implicitDeref, dotOperators, callOperator, parallel}">oldExperimentalFeatures</a></li>
   <li><a class="reference" href="#ChecksOptions"
@@ -728,19 +734,20 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L110" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="TCommands"></a>
-<dt><pre><a href="options.html#TCommands"><span class="Identifier">TCommands</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">cmdNone</span><span class="Other">,</span> <span class="Identifier">cmdCompileToC</span><span class="Other">,</span> <span class="Identifier">cmdCompileToCpp</span><span class="Other">,</span> <span class="Identifier">cmdCompileToOC</span><span class="Other">,</span> <span class="Identifier">cmdCompileToJS</span><span class="Other">,</span>
-  <span class="Identifier">cmdCompileToLLVM</span><span class="Other">,</span> <span class="Identifier">cmdInterpret</span><span class="Other">,</span> <span class="Identifier">cmdPretty</span><span class="Other">,</span> <span class="Identifier">cmdDoc</span><span class="Other">,</span> <span class="Identifier">cmdGenDepend</span><span class="Other">,</span> <span class="Identifier">cmdDump</span><span class="Other">,</span>
-  <span class="Identifier">cmdCheck</span><span class="Other">,</span> <span class="Identifier">cmdParse</span><span class="Other">,</span> <span class="Identifier">cmdScan</span><span class="Other">,</span> <span class="Identifier">cmdIdeTools</span><span class="Other">,</span> <span class="Identifier">cmdDef</span><span class="Other">,</span> <span class="Identifier">cmdRst2html</span><span class="Other">,</span> <span class="Identifier">cmdRst2tex</span><span class="Other">,</span>
-  <span class="Identifier">cmdInteractive</span><span class="Other">,</span> <span class="Identifier">cmdRun</span><span class="Other">,</span> <span class="Identifier">cmdJsonScript</span><span class="Other">,</span> <span class="Identifier">cmdCompileToBackend</span></pre></dt>
+<a id="Command"></a>
+<dt><pre><a href="options.html#Command"><span class="Identifier">Command</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">cmdNone</span><span class="Other">,</span> <span class="Identifier">cmdUnknown</span><span class="Other">,</span> <span class="Identifier">cmdCompileToC</span><span class="Other">,</span> <span class="Identifier">cmdCompileToCpp</span><span class="Other">,</span> <span class="Identifier">cmdCompileToOC</span><span class="Other">,</span>
+  <span class="Identifier">cmdCompileToJS</span><span class="Other">,</span> <span class="Identifier">cmdCrun</span><span class="Other">,</span> <span class="Identifier">cmdTcc</span><span class="Other">,</span> <span class="Identifier">cmdCheck</span><span class="Other">,</span> <span class="Identifier">cmdParse</span><span class="Other">,</span> <span class="Identifier">cmdScan</span><span class="Other">,</span> <span class="Identifier">cmdIdeTools</span><span class="Other">,</span>
+  <span class="Identifier">cmdNimscript</span><span class="Other">,</span> <span class="Identifier">cmdDoc0</span><span class="Other">,</span> <span class="Identifier">cmdDoc2</span><span class="Other">,</span> <span class="Identifier">cmdRst2html</span><span class="Other">,</span> <span class="Identifier">cmdRst2tex</span><span class="Other">,</span> <span class="Identifier">cmdJsondoc0</span><span class="Other">,</span>
+  <span class="Identifier">cmdJsondoc</span><span class="Other">,</span> <span class="Identifier">cmdCtags</span><span class="Other">,</span> <span class="Identifier">cmdBuildindex</span><span class="Other">,</span> <span class="Identifier">cmdGendepend</span><span class="Other">,</span> <span class="Identifier">cmdDump</span><span class="Other">,</span> <span class="Identifier">cmdInteractive</span><span class="Other">,</span>
+  <span class="Identifier">cmdNop</span><span class="Other">,</span> <span class="Identifier">cmdJsonscript</span><span class="Other">,</span> <span class="Identifier">cmdNimfix</span></pre></dt>
 <dd>
 
-
+Nim's commands
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L120"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L119"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L120" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L119" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TStringSeq"></a>
@@ -749,9 +756,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L141"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L151"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L141" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L151" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TGCMode"></a>
@@ -762,9 +769,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L142"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L152"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L142" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L152" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="IdeCmd"></a>
@@ -775,9 +782,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L148"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L158"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L148" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L158" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Feature"></a>
@@ -791,9 +798,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 experimental features; DO NOT RENAME THESE!
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L152"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L162"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L152" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L162" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="LegacyFeature"></a>
@@ -808,9 +815,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L171"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L181"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L171" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L181" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="SymbolFilesOption"></a>
@@ -820,9 +827,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L181"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L191"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L181" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TSystemCC"></a>
@@ -833,9 +840,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L184"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L194"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L184" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L194" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ExceptionSystem"></a>
@@ -845,9 +852,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L188"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L198"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L188" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L198" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="CfileFlag"></a>
@@ -858,9 +865,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L195"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L205"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L195" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L205" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Cfile"></a>
@@ -874,9 +881,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L199"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L209"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L199" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L209" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="CfileList"></a>
@@ -885,9 +892,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L204"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L214"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L204" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L214" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Suggest"></a>
@@ -913,9 +920,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L206"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L216"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L206" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L216" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Suggestions"></a>
@@ -924,9 +931,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L224"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L234"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L224" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L234" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ProfileInfo"></a>
@@ -938,9 +945,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L226"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L236"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L226" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L236" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ProfileData"></a>
@@ -951,9 +958,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L230"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L240"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L230" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L240" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ConfigRef"></a>
@@ -969,7 +976,7 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">evalTemplateCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">evalMacroCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">exitcode</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int8</span>
-  <span class="Identifier">cmd</span><span class="Operator">*</span><span class="Other">:</span> <a href="options.html#TCommands"><span class="Identifier">TCommands</span></a>
+  <span class="Identifier">cmd</span><span class="Operator">*</span><span class="Other">:</span> <a href="options.html#Command"><span class="Identifier">Command</span></a>
   <span class="Identifier">cmdInput</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
   <span class="Identifier">projectIsCmd</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">implicitCmd</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
@@ -1054,9 +1061,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 every global configuration fields marked with '*' are subject to the incremental compilation mechanisms (+) means &quot;part of the dependency&quot;
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L233"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L243"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L233" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L243" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1131,15 +1138,38 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L106" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="cmdBackends"></a>
+<dt><pre><a href="options.html#cmdBackends"><span class="Identifier">cmdBackends</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">cmdCompileToC</span><span class="Other">,</span> <span class="DecNumber">cmdCompileToCpp</span><span class="Other">,</span> <span class="DecNumber">cmdCompileToOC</span><span class="Other">,</span> <span class="DecNumber">cmdCompileToJS</span><span class="Other">,</span>
+               <span class="DecNumber">cmdCrun</span><span class="Other">}</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L147"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L147" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="cmdDocLike"></a>
+<dt><pre><a href="options.html#cmdDocLike"><span class="Identifier">cmdDocLike</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">cmdDoc0</span><span class="Other">,</span> <span class="DecNumber">cmdDoc2</span><span class="Other">,</span> <span class="DecNumber">cmdJsondoc0</span><span class="Other">,</span> <span class="DecNumber">cmdJsondoc</span><span class="Other">,</span> <span class="DecNumber">cmdCtags</span><span class="Other">,</span> <span class="DecNumber">cmdBuildindex</span><span class="Other">}</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L148"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L148" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="oldExperimentalFeatures"></a>
 <dt><pre><a href="options.html#oldExperimentalFeatures"><span class="Identifier">oldExperimentalFeatures</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">implicitDeref</span><span class="Other">,</span> <span class="DecNumber">dotOperators</span><span class="Other">,</span> <span class="DecNumber">callOperator</span><span class="Other">,</span> <span class="DecNumber">parallel</span><span class="Other">}</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L372"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L382"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L372" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L382" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ChecksOptions"></a>
@@ -1150,9 +1180,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L375"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L385"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L375" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L385" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="DefaultOptions"></a>
@@ -1164,9 +1194,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L379"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L389"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L379" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L389" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="DefaultGlobalOptions"></a>
@@ -1176,123 +1206,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L383"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L393"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L383" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L393" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="genSubDir"></a>
 <dt><pre><a href="options.html#genSubDir"><span class="Identifier">genSubDir</span></a> <span class="Other">=</span> <span class="StringLit">r&quot;nimcache&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L545"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L545" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="NimExt"></a>
-<dt><pre><a href="options.html#NimExt"><span class="Identifier">NimExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;nim&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L546"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L546" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="RodExt"></a>
-<dt><pre><a href="options.html#RodExt"><span class="Identifier">RodExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;rod&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L547"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L547" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="HtmlExt"></a>
-<dt><pre><a href="options.html#HtmlExt"><span class="Identifier">HtmlExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;html&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L548"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L548" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="JsonExt"></a>
-<dt><pre><a href="options.html#JsonExt"><span class="Identifier">JsonExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;json&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L549"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L549" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="TagsExt"></a>
-<dt><pre><a href="options.html#TagsExt"><span class="Identifier">TagsExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;tags&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L550"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L550" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="TexExt"></a>
-<dt><pre><a href="options.html#TexExt"><span class="Identifier">TexExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;tex&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L551"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L551" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="IniExt"></a>
-<dt><pre><a href="options.html#IniExt"><span class="Identifier">IniExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;ini&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L552"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L552" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="DefaultConfig"></a>
-<dt><pre><a href="options.html#DefaultConfig"><span class="Identifier">DefaultConfig</span></a> <span class="Other">=</span> <span class="StringLit">r&quot;nim.cfg&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L553"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L553" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="DefaultConfigNims"></a>
-<dt><pre><a href="options.html#DefaultConfigNims"><span class="Identifier">DefaultConfigNims</span></a> <span class="Other">=</span> <span class="StringLit">r&quot;config.nims&quot;</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L554"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L554" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="DocConfig"></a>
-<dt><pre><a href="options.html#DocConfig"><span class="Identifier">DocConfig</span></a> <span class="Other">=</span> <span class="StringLit">r&quot;nimdoc.cfg&quot;</span></pre></dt>
 <dd>
 
 
@@ -1302,8 +1222,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L555" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="DocTexConfig"></a>
-<dt><pre><a href="options.html#DocTexConfig"><span class="Identifier">DocTexConfig</span></a> <span class="Other">=</span> <span class="StringLit">r&quot;nimdoc.tex.cfg&quot;</span></pre></dt>
+<a id="NimExt"></a>
+<dt><pre><a href="options.html#NimExt"><span class="Identifier">NimExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;nim&quot;</span></pre></dt>
 <dd>
 
 
@@ -1313,8 +1233,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L556" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="htmldocsDir"></a>
-<dt><pre><a href="options.html#htmldocsDir"><span class="Identifier">htmldocsDir</span></a> <span class="Other">=</span> <span class="StringLit">&quot;htmldocs&quot;</span></pre></dt>
+<a id="RodExt"></a>
+<dt><pre><a href="options.html#RodExt"><span class="Identifier">RodExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;rod&quot;</span></pre></dt>
 <dd>
 
 
@@ -1324,8 +1244,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L557" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="docRootDefault"></a>
-<dt><pre><a href="options.html#docRootDefault"><span class="Identifier">docRootDefault</span></a> <span class="Other">=</span> <span class="StringLit">&quot;@default&quot;</span></pre></dt>
+<a id="HtmlExt"></a>
+<dt><pre><a href="options.html#HtmlExt"><span class="Identifier">HtmlExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;html&quot;</span></pre></dt>
 <dd>
 
 
@@ -1335,8 +1255,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L558" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="oKeepVariableNames"></a>
-<dt><pre><a href="options.html#oKeepVariableNames"><span class="Identifier">oKeepVariableNames</span></a> <span class="Other">=</span> <span class="DecNumber">true</span></pre></dt>
+<a id="JsonExt"></a>
+<dt><pre><a href="options.html#JsonExt"><span class="Identifier">JsonExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;json&quot;</span></pre></dt>
 <dd>
 
 
@@ -1344,6 +1264,116 @@ class="link-seesrc" target="_blank">Source</a>
 href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L559"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L559" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="TagsExt"></a>
+<dt><pre><a href="options.html#TagsExt"><span class="Identifier">TagsExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;tags&quot;</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L560"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L560" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="TexExt"></a>
+<dt><pre><a href="options.html#TexExt"><span class="Identifier">TexExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;tex&quot;</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L561"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L561" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="IniExt"></a>
+<dt><pre><a href="options.html#IniExt"><span class="Identifier">IniExt</span></a> <span class="Other">=</span> <span class="StringLit">&quot;ini&quot;</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L562"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L562" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="DefaultConfig"></a>
+<dt><pre><a href="options.html#DefaultConfig"><span class="Identifier">DefaultConfig</span></a> <span class="Other">=</span> <span class="StringLit">r&quot;nim.cfg&quot;</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L563"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L563" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="DefaultConfigNims"></a>
+<dt><pre><a href="options.html#DefaultConfigNims"><span class="Identifier">DefaultConfigNims</span></a> <span class="Other">=</span> <span class="StringLit">r&quot;config.nims&quot;</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L564"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L564" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="DocConfig"></a>
+<dt><pre><a href="options.html#DocConfig"><span class="Identifier">DocConfig</span></a> <span class="Other">=</span> <span class="StringLit">r&quot;nimdoc.cfg&quot;</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L565"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L565" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="DocTexConfig"></a>
+<dt><pre><a href="options.html#DocTexConfig"><span class="Identifier">DocTexConfig</span></a> <span class="Other">=</span> <span class="StringLit">r&quot;nimdoc.tex.cfg&quot;</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L566"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L566" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="htmldocsDir"></a>
+<dt><pre><a href="options.html#htmldocsDir"><span class="Identifier">htmldocsDir</span></a> <span class="Other">=</span> <span class="StringLit">&quot;htmldocs&quot;</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L567"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L567" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="docRootDefault"></a>
+<dt><pre><a href="options.html#docRootDefault"><span class="Identifier">docRootDefault</span></a> <span class="Other">=</span> <span class="StringLit">&quot;@default&quot;</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L568"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L568" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="oKeepVariableNames"></a>
+<dt><pre><a href="options.html#oKeepVariableNames"><span class="Identifier">oKeepVariableNames</span></a> <span class="Other">=</span> <span class="DecNumber">true</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L569"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L569" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1357,9 +1387,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 if <tt class="docutils literal"><span class="pre">result</span></tt> was already assigned to a value (that wasn't <tt class="docutils literal"><span class="pre">def</span></tt>), this is a noop.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L335"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L345"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L335" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L345" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setNoteDefaults,ConfigRef,TNoteKind"></a>
@@ -1369,9 +1399,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L343"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L353"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L343" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L353" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setNote,ConfigRef,TNoteKind"></a>
@@ -1381,9 +1411,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L350"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L360"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L350" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L360" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasHint,ConfigRef,TNoteKind"></a>
@@ -1392,9 +1422,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L355"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L365"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L355" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L365" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasWarn,ConfigRef,TNoteKind"></a>
@@ -1403,9 +1433,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L361"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L371"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L361" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L371" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hcrOn,ConfigRef"></a>
@@ -1414,9 +1444,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L364"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L374"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L364" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L374" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getDateStr"></a>
@@ -1425,9 +1455,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L398"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L408"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L398" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L408" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getClockStr"></a>
@@ -1436,9 +1466,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L401"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L411"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L401" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L411" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newConfigRef"></a>
@@ -1447,9 +1477,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L413"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L423"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L413" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L423" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newPartialConfigRef"></a>
@@ -1458,9 +1488,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 create a new ConfigRef that is only good enough for error reporting.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L472"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L482"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L472" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L482" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cppDefine,ConfigRef,string"></a>
@@ -1469,9 +1499,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L483"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L493"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L483" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L493" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isDefined,ConfigRef,string"></a>
@@ -1480,9 +1510,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L486"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L496"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L486" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L496" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="importantComments,ConfigRef"></a>
@@ -1491,9 +1521,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L534"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L544"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L534" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L544" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="usesWriteBarrier,ConfigRef"></a>
@@ -1502,9 +1532,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L535"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L545"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L535" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L545" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mainCommandArg,ConfigRef"></a>
@@ -1513,9 +1543,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 This is intended for commands like check or parse which will work on the main project file unless explicitly given a specific file argument
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L561"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L571"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L561" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L571" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="existsConfigVar,ConfigRef,string"></a>
@@ -1524,9 +1554,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L570"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L580"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L570" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L580" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getConfigVar,ConfigRef,string,string"></a>
@@ -1536,37 +1566,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L573"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L583"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L573" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L583" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setConfigVar,ConfigRef,string,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#setConfigVar%2CConfigRef%2Cstring%2Cstring"><span class="Identifier">setConfigVar</span></a><span class="Other">(</span><span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">,</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L576"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L576" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="getOutFile,ConfigRef,RelativeFile,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getOutFile%2CConfigRef%2CRelativeFile%2Cstring"><span class="Identifier">getOutFile</span></a><span class="Other">(</span><span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="pathutils.html#RelativeFile"><span class="Identifier">RelativeFile</span></a><span class="Other">;</span> <span class="Identifier">ext</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="pathutils.html#AbsoluteFile"><span class="Identifier">AbsoluteFile</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L579"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L579" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="absOutFile,ConfigRef"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#absOutFile%2CConfigRef"><span class="Identifier">absOutFile</span></a><span class="Other">(</span><span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span><span class="Other">:</span> <a href="pathutils.html#AbsoluteFile"><span class="Identifier">AbsoluteFile</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1576,6 +1582,30 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L586" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="getOutFile,ConfigRef,RelativeFile,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#getOutFile%2CConfigRef%2CRelativeFile%2Cstring"><span class="Identifier">getOutFile</span></a><span class="Other">(</span><span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="pathutils.html#RelativeFile"><span class="Identifier">RelativeFile</span></a><span class="Other">;</span> <span class="Identifier">ext</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="pathutils.html#AbsoluteFile"><span class="Identifier">AbsoluteFile</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L589"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L589" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="absOutFile,ConfigRef"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#absOutFile%2CConfigRef"><span class="Identifier">absOutFile</span></a><span class="Other">(</span><span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span><span class="Other">:</span> <a href="pathutils.html#AbsoluteFile"><span class="Identifier">AbsoluteFile</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L596"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L596" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="prepareToWriteOutput,ConfigRef"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#prepareToWriteOutput%2CConfigRef"><span class="Identifier">prepareToWriteOutput</span></a><span class="Other">(</span><span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span><span class="Other">:</span> <a href="pathutils.html#AbsoluteFile"><span class="Identifier">AbsoluteFile</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
@@ -1583,9 +1613,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Create the output directory and returns a full path to the output file
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L593"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L603"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L593" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L603" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getPrefixDir,ConfigRef"></a>
@@ -1601,9 +1631,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>and <tt class="docutils literal"><span class="pre">result/lib/system.nim</span></tt></p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L598"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L608"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L598" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L608" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setDefaultLibpath,ConfigRef"></a>
@@ -1613,9 +1643,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L609"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L619"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L609" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L619" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="canonicalizePath,ConfigRef,AbsoluteFile"></a>
@@ -1625,9 +1655,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L633"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L643"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L633" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L643" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="removeTrailingDirSep,string"></a>
@@ -1636,9 +1666,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L636"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L646"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L636" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L646" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="disableNimblePath,ConfigRef"></a>
@@ -1647,9 +1677,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L642"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L652"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L642" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L652" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="clearNimblePath,ConfigRef"></a>
@@ -1658,9 +1688,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L647"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L657"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L647" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L657" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getNimbleFile,ConfigRef,string"></a>
@@ -1729,9 +1759,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L659"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L669"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L659" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L669" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pathSubs,ConfigRef,string,string"></a>
@@ -1741,9 +1771,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L669"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L679"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L669" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L679" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toGeneratedFile,ConfigRef,AbsoluteFile,string"></a>
@@ -1753,9 +1783,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 converts &quot;/home/a/mymodule.nim&quot;, &quot;rod&quot; to &quot;/home/a/nimcache/mymodule.rod&quot;
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L690"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L700"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L690" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L700" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="completeGeneratedFilePath,ConfigRef,AbsoluteFile,bool"></a>
@@ -1768,9 +1798,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L695"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L705"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L695" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L705" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getRelativePathFromConfigPath,ConfigRef,AbsoluteFile"></a>
@@ -1780,9 +1810,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L742"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L752"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L742" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L752" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="findFile,ConfigRef,string"></a>
@@ -1792,9 +1822,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L752"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L762"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L752" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L762" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="findModule,ConfigRef,string,string"></a>
@@ -1804,9 +1834,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L773"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L783"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L773" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L783" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="findProjectNimFile,ConfigRef,string"></a>
@@ -1816,9 +1846,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L794"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L804"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L794" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L804" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="inclDynlibOverride,ConfigRef,string"></a>
@@ -1827,9 +1857,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L842"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L852"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L842" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L852" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isDynlibOverride,ConfigRef,string"></a>
@@ -1838,9 +1868,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L845"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L855"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L845" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L855" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="parseIdeCmd,string"></a>
@@ -1849,9 +1879,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L849"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L859"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L849" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L859" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$,IdeCmd"></a>
@@ -1860,9 +1890,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L865"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L875"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L865" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L875" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="floatInt64Align,ConfigRef"></a>
@@ -1871,9 +1901,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns either 4 or 8 depending on reasons.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L881"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L891"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L881" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L891" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setOutFile,ConfigRef"></a>
@@ -1882,9 +1912,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L891"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L901"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L891" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L901" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1899,9 +1929,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L681"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L691"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L681" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L691" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1915,9 +1945,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 do not stop after first error (but honor --errorMax if provided)
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L339"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L349"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L339" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L349" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="depConfigFields.t"></a>
@@ -1926,9 +1956,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L366"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L376"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L366" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L376" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newPackageCache.t"></a>
@@ -1937,9 +1967,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L404"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L414"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L404" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L414" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="compilationCachePresent.t,ConfigRef"></a>
@@ -1948,9 +1978,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L537"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L547"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L537" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L547" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="optPreserveOrigSource.t,ConfigRef"></a>
@@ -1959,9 +1989,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L541"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/options.nim#L551"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L541" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/options.nim#L551" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1974,7 +2004,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-11-26 00:47:50 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-12-04 00:48:16 UTC</small>
       </div>
     </div>
   </div>
