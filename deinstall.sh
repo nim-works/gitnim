@@ -96,6 +96,11 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/gorgeimpl.nim
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
+    rm -f $nimbleDir/compiler/ic/from_packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/to_packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/bitabs.nim
+    rm -f $nimbleDir/compiler/ic/design.rst
     rm -f $nimbleDir/compiler/idents.nim
     rm -f $nimbleDir/compiler/importer.nim
     rm -f $nimbleDir/compiler/incremental.nim

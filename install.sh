@@ -99,6 +99,7 @@ if [ $# -eq 1 ] ; then
   mkdir -p $libdir/std
   mkdir -p $libdir/std/private
   mkdir -p $nimbleDir/compiler
+  mkdir -p $nimbleDir/compiler/ic
   mkdir -p $nimbleDir/compiler/nimfix
   mkdir -p $nimbleDir/compiler/plugins
   mkdir -p $nimbleDir/doc
@@ -807,6 +808,16 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/guards.nim
   cp compiler/hlo.nim $nimbleDir/compiler/hlo.nim
   chmod 644 $nimbleDir/compiler/hlo.nim
+  cp compiler/ic/from_packed_ast.nim $nimbleDir/compiler/ic/from_packed_ast.nim
+  chmod 644 $nimbleDir/compiler/ic/from_packed_ast.nim
+  cp compiler/ic/to_packed_ast.nim $nimbleDir/compiler/ic/to_packed_ast.nim
+  chmod 644 $nimbleDir/compiler/ic/to_packed_ast.nim
+  cp compiler/ic/packed_ast.nim $nimbleDir/compiler/ic/packed_ast.nim
+  chmod 644 $nimbleDir/compiler/ic/packed_ast.nim
+  cp compiler/ic/bitabs.nim $nimbleDir/compiler/ic/bitabs.nim
+  chmod 644 $nimbleDir/compiler/ic/bitabs.nim
+  cp compiler/ic/design.rst $nimbleDir/compiler/ic/design.rst
+  chmod 644 $nimbleDir/compiler/ic/design.rst
   cp compiler/idents.nim $nimbleDir/compiler/idents.nim
   chmod 644 $nimbleDir/compiler/idents.nim
   cp compiler/importer.nim $nimbleDir/compiler/importer.nim

@@ -144,6 +144,20 @@ window.addEventListener('DOMContentLoaded', main);
   efInCall, efFromHlo, efNoSem2Check, efNoUndeclared">TExprFlag</a></li>
   <li><a class="reference" href="#TExprFlags"
     title="TExprFlags = set[TExprFlag]">TExprFlags</a></li>
+  <li><a class="reference" href="#ImportMode"
+    title="ImportMode = enum
+  importAll, importSet, importExcept">ImportMode</a></li>
+  <li><a class="reference" href="#ImportedModule"
+    title="ImportedModule = object
+  m*: PSym
+  case mode*: ImportMode
+  of importAll:
+    nil
+  of importSet:
+      imported*: IntSet
+
+  of importExcept:
+      exceptSet*: IntSet">ImportedModule</a></li>
   <li><a class="reference" href="#PContext"
     title="PContext = ref TContext">PContext</a></li>
   <li><a class="reference" href="#TContext"
@@ -151,14 +165,14 @@ window.addEventListener('DOMContentLoaded', main);
   enforceVoidContext*: PType
   module*: PSym
   currentScope*: PScope
-  importTable*: PScope
+  moduleScope*: PScope
+  imports*: seq[ImportedModule]
   topLevelScope*: PScope
   p*: PProcCon
   matchedConcept*: ptr TMatchedConcept
   friendModules*: seq[PSym]
   instCounter*: int
   templInstCounter*: ref int
-  ambiguousSymbols*: IntSet
   inGenericContext*: int
   inStaticContext*: int
   inUnrolledContext*: int
@@ -205,6 +219,7 @@ window.addEventListener('DOMContentLoaded', main);
   signatures*: TStrTable
   recursiveDep*: string
   suggestionsMade*: bool
+  isAmbiguous*: bool
   features*: set[Feature]
   inTypeContext*: int
   typesWithOps*: seq[(PType, PType)]
@@ -409,6 +424,11 @@ window.addEventListener('DOMContentLoaded', main);
     title="fillTypeS(dest: PType; kind: TTypeKind; c: PContext)">fillTypeS,<wbr>PType,<wbr>TTypeKind,<wbr>PContext</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">addPureEnum
+      <li><a class="reference" href="#addPureEnum%2CPContext%2CPSym"
+    title="addPureEnum(c: PContext; e: PSym)">addPureEnum,<wbr>PContext,<wbr>PSym</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">makeRangeType
       <li><a class="reference" href="#makeRangeType%2CPContext%2CBiggestInt%2CBiggestInt%2CTLineInfo%2CPType"
     title="makeRangeType(c: PContext; first, last: BiggestInt; info: TLineInfo;
@@ -607,8 +627,9 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L71" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="PContext"></a>
-<dt><pre><a href="semdata.html#PContext"><span class="Identifier">PContext</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <a href="semdata.html#TContext"><span class="Identifier">TContext</span></a></pre></dt>
+<a id="ImportMode"></a>
+<dt><pre><a href="semdata.html#ImportMode"><span class="Identifier">ImportMode</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">importAll</span><span class="Other">,</span> <span class="Identifier">importSet</span><span class="Other">,</span> <span class="Identifier">importExcept</span></pre></dt>
 <dd>
 
 
@@ -618,19 +639,52 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L73" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="ImportedModule"></a>
+<dt><pre><a href="semdata.html#ImportedModule"><span class="Identifier">ImportedModule</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">m</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
+  <span class="Keyword">case</span> <span class="Identifier">mode</span><span class="Operator">*</span><span class="Other">:</span> <a href="semdata.html#ImportMode"><span class="Identifier">ImportMode</span></a>
+  <span class="Keyword">of</span> <span class="Identifier">importAll</span><span class="Other">:</span>
+    <span class="Keyword">nil</span>
+  <span class="Keyword">of</span> <span class="Identifier">importSet</span><span class="Other">:</span>
+      <span class="Identifier">imported</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">IntSet</span>
+
+  <span class="Keyword">of</span> <span class="Identifier">importExcept</span><span class="Other">:</span>
+      <span class="Identifier">exceptSet</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">IntSet</span>
+
+  </pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L75"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L75" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="PContext"></a>
+<dt><pre><a href="semdata.html#PContext"><span class="Identifier">PContext</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <a href="semdata.html#TContext"><span class="Identifier">TContext</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L84"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L84" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="TContext"></a>
 <dt><pre><a href="semdata.html#TContext"><span class="Identifier">TContext</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="modulegraphs.html#TPassContext"><span class="Identifier">TPassContext</span></a>
   <span class="Identifier">enforceVoidContext</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a>
   <span class="Identifier">module</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
   <span class="Identifier">currentScope</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a>
-  <span class="Identifier">importTable</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a>
+  <span class="Identifier">moduleScope</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a>
+  <span class="Identifier">imports</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="semdata.html#ImportedModule"><span class="Identifier">ImportedModule</span></a><span class="Other">]</span>
   <span class="Identifier">topLevelScope</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a>
   <span class="Identifier">p</span><span class="Operator">*</span><span class="Other">:</span> <a href="semdata.html#PProcCon"><span class="Identifier">PProcCon</span></a>
   <span class="Identifier">matchedConcept</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="semdata.html#TMatchedConcept"><span class="Identifier">TMatchedConcept</span></a>
   <span class="Identifier">friendModules</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span>
   <span class="Identifier">instCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">templInstCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ref</span> <span class="Identifier">int</span>
-  <span class="Identifier">ambiguousSymbols</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">IntSet</span>
   <span class="Identifier">inGenericContext</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">inStaticContext</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">inUnrolledContext</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
@@ -677,6 +731,7 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">signatures</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#TStrTable"><span class="Identifier">TStrTable</span></a>
   <span class="Identifier">recursiveDep</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
   <span class="Identifier">suggestionsMade</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
+  <span class="Identifier">isAmbiguous</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">features</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="options.html#Feature"><span class="Identifier">Feature</span></a><span class="Other">]</span>
   <span class="Identifier">inTypeContext</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">typesWithOps</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">,</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">]</span>
@@ -688,9 +743,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L74"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L85"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L74" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L85" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -705,9 +760,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L150"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L160"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L150" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L160" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="filename,PContext"></a>
@@ -716,9 +771,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L154"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L164"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L154" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L164" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="scopeDepth,PContext"></a>
@@ -727,9 +782,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L158"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L168"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L158" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L168" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getCurrOwner,PContext"></a>
@@ -738,9 +793,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L162"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L172"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L162" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L172" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pushOwner,PContext,PSym"></a>
@@ -749,9 +804,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L169"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L179"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L169" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L179" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="popOwner,PContext"></a>
@@ -762,9 +817,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L172"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L182"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L172" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L182" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lastOptionEntry,PContext"></a>
@@ -773,9 +828,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L176"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L186"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L176" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L186" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="popProcCon,PContext"></a>
@@ -784,9 +839,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L179"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L189"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L179" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L189" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="put,PProcCon,PSym,PSym"></a>
@@ -795,9 +850,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L181"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L191"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L181" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="get,PProcCon,PSym"></a>
@@ -806,9 +861,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L188"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L198"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L188" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L198" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getGenSym,PContext,PSym"></a>
@@ -817,9 +872,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L192"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L202"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L192" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L202" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="considerGenSyms,PContext,PNode"></a>
@@ -828,9 +883,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L203"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L213"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L203" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L213" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newOptionEntry,ConfigRef"></a>
@@ -839,9 +894,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L212"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L222"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L212" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L222" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pushOptionEntry,PContext"></a>
@@ -850,9 +905,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L220"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L230"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L220" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L230" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="popOptionEntry,PContext"></a>
@@ -861,9 +916,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L231"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L241"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L231" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L241" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newContext,ModuleGraph,PSym"></a>
@@ -873,9 +928,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L238"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L248"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L248" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addConverter,PContext,PSym"></a>
@@ -884,9 +939,20 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L264"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L273"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L264" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L273" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="addPureEnum,PContext,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addPureEnum%2CPContext%2CPSym"><span class="Identifier">addPureEnum</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">e</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L277"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L277" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addPattern,PContext,PSym"></a>
@@ -895,9 +961,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L267"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L280"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L267" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L280" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newLib,TLibKind"></a>
@@ -906,9 +972,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L270"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L284"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L270" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L284" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addToLib,PLib,PSym"></a>
@@ -917,9 +983,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L274"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L288"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L274" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newTypeS,TTypeKind,PContext"></a>
@@ -928,9 +994,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L279"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L293"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L279" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L293" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="makePtrType,PSym,PType,IdGenerator"></a>
@@ -940,37 +1006,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L282"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L296"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L282" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L296" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="makePtrType,PContext,PType"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#makePtrType%2CPContext%2CPType"><span class="Identifier">makePtrType</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">baseType</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L286"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L286" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="makeTypeWithModifier,PContext,TTypeKind,PType"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#makeTypeWithModifier%2CPContext%2CTTypeKind%2CPType"><span class="Identifier">makeTypeWithModifier</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">modifier</span><span class="Other">:</span> <a href="ast.html#TTypeKind"><span class="Identifier">TTypeKind</span></a><span class="Other">;</span> <span class="Identifier">baseType</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L289"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L289" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="makeVarType,PContext,PType"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#makeVarType%2CPContext%2CPType"><span class="Identifier">makeVarType</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">baseType</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">;</span> <span class="Identifier">kind</span> <span class="Other">=</span> <span class="Identifier">tyVar</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -980,6 +1022,30 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L300" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="makeTypeWithModifier,PContext,TTypeKind,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#makeTypeWithModifier%2CPContext%2CTTypeKind%2CPType"><span class="Identifier">makeTypeWithModifier</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">modifier</span><span class="Other">:</span> <a href="ast.html#TTypeKind"><span class="Identifier">TTypeKind</span></a><span class="Other">;</span> <span class="Identifier">baseType</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L303"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L303" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="makeVarType,PContext,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#makeVarType%2CPContext%2CPType"><span class="Identifier">makeVarType</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">baseType</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">;</span> <span class="Identifier">kind</span> <span class="Other">=</span> <span class="Identifier">tyVar</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L314"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L314" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="makeVarType,PSym,PType,IdGenerator"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#makeVarType%2CPSym%2CPType%2CIdGenerator"><span class="Identifier">makeVarType</span></a><span class="Other">(</span><span class="Identifier">owner</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">baseType</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">;</span> <span class="Identifier">idgen</span><span class="Other">:</span> <a href="ast.html#IdGenerator"><span class="Identifier">IdGenerator</span></a><span class="Other">;</span> <span class="Identifier">kind</span> <span class="Other">=</span> <span class="Identifier">tyVar</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
@@ -987,9 +1053,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L307"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L321"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L307" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L321" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="makeTypeDesc,PContext,PType"></a>
@@ -998,9 +1064,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L314"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L328"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L314" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="makeTypeSymNode,PContext,PType,TLineInfo"></a>
@@ -1011,9 +1077,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L322"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L336"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L322" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L336" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="makeTypeFromExpr,PContext,PNode"></a>
@@ -1022,9 +1088,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L331"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L345"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L331" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L345" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newTypeWithSons,PSym,TTypeKind,seq[PType],IdGenerator"></a>
@@ -1034,9 +1100,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L336"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L350"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L336" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L350" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newTypeWithSons,PContext,TTypeKind,seq[PType]"></a>
@@ -1046,35 +1112,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L341"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L355"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L341" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L355" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="makeStaticExpr,PContext,PNode"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#makeStaticExpr%2CPContext%2CPNode"><span class="Identifier">makeStaticExpr</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L346"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L346" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="makeAndType,PContext,PType,PType"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#makeAndType%2CPContext%2CPType%2CPType"><span class="Identifier">makeAndType</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">t1</span><span class="Other">,</span> <span class="Identifier">t2</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L352"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L352" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="makeOrType,PContext,PType,PType"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#makeOrType%2CPContext%2CPType%2CPType"><span class="Identifier">makeOrType</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">t1</span><span class="Other">,</span> <span class="Identifier">t2</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1084,15 +1128,37 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L360" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="makeAndType,PContext,PType,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#makeAndType%2CPContext%2CPType%2CPType"><span class="Identifier">makeAndType</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">t1</span><span class="Other">,</span> <span class="Identifier">t2</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L366"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L366" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="makeOrType,PContext,PType,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#makeOrType%2CPContext%2CPType%2CPType"><span class="Identifier">makeOrType</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">t1</span><span class="Other">,</span> <span class="Identifier">t2</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L374"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L374" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="makeNotType,PContext,PType"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#makeNotType%2CPContext%2CPType"><span class="Identifier">makeNotType</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">t1</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L377"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L391"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L377" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L391" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="makeRangeWithStaticExpr,PContext,PNode"></a>
@@ -1103,9 +1169,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L388"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L402"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L388" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L402" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errorType,PContext"></a>
@@ -1114,9 +1180,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 creates a type representing an error state
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L400"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L414"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L400" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L414" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errorNode,PContext,PNode"></a>
@@ -1125,9 +1191,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L405"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L419"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L405" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L419" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fillTypeS,PType,TTypeKind,PContext"></a>
@@ -1136,9 +1202,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L409"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L423"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L409" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L423" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="makeRangeType,PContext,BiggestInt,BiggestInt,TLineInfo,PType"></a>
@@ -1150,9 +1216,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L414"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L428"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L414" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L428" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="markIndirect,PContext,PSym"></a>
@@ -1161,9 +1227,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L424"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L438"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L424" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L438" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="illFormedAst,PNode,ConfigRef"></a>
@@ -1174,9 +1240,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L429"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L443"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L429" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L443" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="illFormedAstLocal,PNode,ConfigRef"></a>
@@ -1187,9 +1253,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L432"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L446"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L432" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L446" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="checkSonsLen,PNode,int,ConfigRef"></a>
@@ -1200,9 +1266,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L435"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L449"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L435" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L449" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="checkMinSonsLen,PNode,int,ConfigRef"></a>
@@ -1213,9 +1279,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L438"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L452"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L438" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L452" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isTopLevel,PContext"></a>
@@ -1224,9 +1290,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L441"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L455"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L441" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L455" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pushCaseContext,PContext,PNode"></a>
@@ -1235,9 +1301,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L444"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L458"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L444" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L458" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="popCaseContext,PContext"></a>
@@ -1246,9 +1312,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L447"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L461"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L447" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L461" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setCaseContextIdx,PContext,int"></a>
@@ -1257,9 +1323,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L450"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L464"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L450" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L464" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1273,9 +1339,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L148"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L158"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L148" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L158" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rangeHasUnresolvedStatic.t,PType"></a>
@@ -1284,9 +1350,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L397"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/semdata.nim#L411"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L397" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/semdata.nim#L411" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1299,7 +1365,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-12-17 00:50:41 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-12-18 00:51:02 UTC</small>
       </div>
     </div>
   </div>

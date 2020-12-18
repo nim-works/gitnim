@@ -112,8 +112,9 @@ window.addEventListener('DOMContentLoaded', main);
   m*: PSym
   mode*: TOverloadIterMode
   symChoiceIndex*: int
-  scope*: PScope
-  inSymChoice: IntSet">TOverloadIter</a></li>
+  currentScope: PScope
+  importIdx: int
+  marked: IntSet">TOverloadIter</a></li>
   <li><a class="reference" href="#TLookupFlag"
     title="TLookupFlag = enum
   checkAmbiguity, checkUndeclared, checkModule, checkPureEnumFields">TLookupFlag</a></li>
@@ -138,6 +139,11 @@ window.addEventListener('DOMContentLoaded', main);
     title="addInterfaceDecl(c: PContext; sym: PSym)">addInterfaceDecl,<wbr>PContext,<wbr>PSym</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">searchInScopesFilterBy
+      <li><a class="reference" href="#searchInScopesFilterBy%2CPContext%2CPIdent%2CTSymKinds"
+    title="searchInScopesFilterBy(c: PContext; s: PIdent; filter: TSymKinds): seq[PSym]">searchInScopesFilterBy,<wbr>PContext,<wbr>PIdent,<wbr>TSymKinds</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">wrongRedefinition
       <li><a class="reference" href="#wrongRedefinition%2CPContext%2CTLineInfo%2Cstring%2CTLineInfo"
     title="wrongRedefinition(c: PContext; info: TLineInfo; s: string;
@@ -147,6 +153,11 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple nested-toc-section">errorUndeclaredIdentifier
       <li><a class="reference" href="#errorUndeclaredIdentifier%2CPContext%2CTLineInfo%2Cstring"
     title="errorUndeclaredIdentifier(c: PContext; info: TLineInfo; name: string)">errorUndeclaredIdentifier,<wbr>PContext,<wbr>TLineInfo,<wbr>string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">someSymFromImportTable
+      <li><a class="reference" href="#someSymFromImportTable%2CPContext%2CPIdent%2Cbool"
+    title="someSymFromImportTable(c: PContext; name: PIdent; ambiguous: var bool): PSym">someSymFromImportTable,<wbr>PContext,<wbr>PIdent,<wbr>bool</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">addInterfaceDeclAt
@@ -217,10 +228,8 @@ window.addEventListener('DOMContentLoaded', main);
 
   </ul>
   <ul class="simple nested-toc-section">searchInScopes
-      <li><a class="reference" href="#searchInScopes%2CPContext%2CPIdent"
-    title="searchInScopes(c: PContext; s: PIdent): PSym">searchInScopes,<wbr>PContext,<wbr>PIdent</a></li>
-  <li><a class="reference" href="#searchInScopes%2CPContext%2CPIdent%2CTSymKinds"
-    title="searchInScopes(c: PContext; s: PIdent; filter: TSymKinds): PSym">searchInScopes,<wbr>PContext,<wbr>PIdent,<wbr>TSymKinds</a></li>
+      <li><a class="reference" href="#searchInScopes%2CPContext%2CPIdent%2Cbool"
+    title="searchInScopes(c: PContext; s: PIdent; ambiguous: var bool): PSym">searchInScopes,<wbr>PContext,<wbr>PIdent,<wbr>bool</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">errorUseQualifier
@@ -289,8 +298,12 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#15" id="65">Iterators</a>
   <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#walkScopes.i%2CPScope"
-    title="walkScopes(scope: PScope): PScope">walkScopes</a></li>
+      <li><a class="reference" href="#localScopesFrom.i%2CPContext%2CPScope"
+    title="localScopesFrom(c: PContext; scope: PScope): PScope">localScopesFrom</a></li>
+  <li><a class="reference" href="#importedItems.i%2CPContext%2CPIdent"
+    title="importedItems(c: PContext; name: PIdent): PSym">importedItems</a></li>
+  <li><a class="reference" href="#allSyms.i%2CPContext"
+    title="allSyms(c: PContext): (PSym, int, bool)">allSyms</a></li>
 
   </ul>
 </li>
@@ -331,9 +344,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L146"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L238"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L146" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TOverloadIter"></a>
@@ -342,16 +355,17 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">m</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
   <span class="Identifier">mode</span><span class="Operator">*</span><span class="Other">:</span> <a href="lookups.html#TOverloadIterMode"><span class="Identifier">TOverloadIterMode</span></a>
   <span class="Identifier">symChoiceIndex</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">scope</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a>
-  <span class="Identifier">inSymChoice</span><span class="Other">:</span> <span class="Identifier">IntSet</span>
+  <span class="Identifier">currentScope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a>
+  <span class="Identifier">importIdx</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">marked</span><span class="Other">:</span> <span class="Identifier">IntSet</span>
 </pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L149"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L241"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L149" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L241" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TLookupFlag"></a>
@@ -361,9 +375,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L327"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L430"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L327" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L430" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -436,9 +450,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L83"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L88"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L83" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L88" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isShadowScope,PScope"></a>
@@ -447,9 +461,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L94"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L99"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L94" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L99" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="localSearchInScope,PContext,PIdent"></a>
@@ -458,20 +472,33 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L96"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L102"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L96" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L102" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="searchInScopes,PContext,PIdent"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#searchInScopes%2CPContext%2CPIdent"><span class="Identifier">searchInScopes</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="someSymFromImportTable,PContext,PIdent,bool"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#someSymFromImportTable%2CPContext%2CPIdent%2Cbool"><span class="Identifier">someSymFromImportTable</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">ambiguous</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L104"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L176"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L104" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L176" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="searchInScopes,PContext,PIdent,bool"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#searchInScopes%2CPContext%2CPIdent%2Cbool"><span class="Identifier">searchInScopes</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">ambiguous</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L187"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L187" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="debugScopes,PContext,int"></a>
@@ -483,21 +510,21 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L110"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L193"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L110" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L193" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="searchInScopes,PContext,PIdent,TSymKinds"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#searchInScopes%2CPContext%2CPIdent%2CTSymKinds"><span class="Identifier">searchInScopes</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">filter</span><span class="Other">:</span> <a href="ast.html#TSymKinds"><span class="Identifier">TSymKinds</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+<a id="searchInScopesFilterBy,PContext,PIdent,TSymKinds"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#searchInScopesFilterBy%2CPContext%2CPIdent%2CTSymKinds"><span class="Identifier">searchInScopesFilterBy</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">filter</span><span class="Other">:</span> <a href="ast.html#TSymKinds"><span class="Identifier">TSymKinds</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L120"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L203"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L120" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L203" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errorSym,PContext,PNode"></a>
@@ -508,9 +535,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 creates an error symbol to avoid cascading errors (for IDE support)
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L129"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L221"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L129" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L221" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getSymRepr,ConfigRef,PSym"></a>
@@ -520,9 +547,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L157"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L250"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L157" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="wrongRedefinition,PContext,TLineInfo,string,TLineInfo"></a>
@@ -534,9 +561,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L188"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L281"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L188" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L281" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addDecl,PContext,PSym,TLineInfo"></a>
@@ -547,9 +574,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L195"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L288"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L195" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addDecl,PContext,PSym"></a>
@@ -560,9 +587,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L200"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L293"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L200" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L293" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addPrelimDecl,PContext,PSym"></a>
@@ -571,9 +598,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L205"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L298"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L205" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L298" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addDeclAt,PContext,PScope,PSym"></a>
@@ -584,9 +611,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L208"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L301"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L208" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L301" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addInterfaceDeclAt,PContext,PScope,PSym"></a>
@@ -597,9 +624,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L219"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L312"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L219" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L312" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addOverloadableSymAt,PContext,PScope,PSym"></a>
@@ -610,9 +637,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L223"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L316"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L223" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addInterfaceDecl,PContext,PSym"></a>
@@ -623,9 +650,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L233"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L326"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L233" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L326" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addInterfaceOverloadableSymAt,PContext,PScope,PSym"></a>
@@ -636,9 +663,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L238"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L331"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L331" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="openShadowScope,PContext"></a>
@@ -647,9 +674,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L243"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L336"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L243" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L336" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="closeShadowScope,PContext"></a>
@@ -658,9 +685,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L248"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L341"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L248" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L341" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mergeShadowScope,PContext"></a>
@@ -671,9 +698,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L251"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L344"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L251" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L344" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errorUseQualifier,PContext,TLineInfo,PSym"></a>
@@ -684,9 +711,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L277"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L370"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L277" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L370" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errorUndeclaredIdentifier,PContext,TLineInfo,string"></a>
@@ -697,9 +724,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L291"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L392"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L291" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L392" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lookUp,PContext,PNode"></a>
@@ -710,9 +737,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L300"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L401"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L300" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L401" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="qualifiedLookUp,PContext,PNode,set[TLookupFlag]"></a>
@@ -723,9 +750,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L330"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L433"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L330" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L433" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="initOverloadIter,TOverloadIter,PContext,PNode"></a>
@@ -736,9 +763,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L381"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L495"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L381" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L495" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lastOverloadScope,TOverloadIter"></a>
@@ -747,9 +774,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L431"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L556"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L431" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L556" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="nextOverloadIter,TOverloadIter,PContext,PNode"></a>
@@ -760,9 +787,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L438"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L589"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L438" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L589" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pickSym,PContext,PNode,set[TSymKind],TSymFlags"></a>
@@ -773,9 +800,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L483"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L668"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L483" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L668" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -783,15 +810,38 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="15">
 <h1><a class="toc-backref" href="#15">Iterators</a></h1>
 <dl class="item">
-<a id="walkScopes.i,PScope"></a>
-<dt><pre><span class="Keyword">iterator</span> <a href="#walkScopes.i%2CPScope"><span class="Identifier">walkScopes</span></a><span class="Other">(</span><span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="localScopesFrom.i,PContext,PScope"></a>
+<dt><pre><span class="Keyword">iterator</span> <a href="#localScopesFrom.i%2CPContext%2CPScope"><span class="Identifier">localScopesFrom</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L77"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L83"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L77" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L83" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="importedItems.i,PContext,PIdent"></a>
+<dt><pre><span class="Keyword">iterator</span> <a href="#importedItems.i%2CPContext%2CPIdent"><span class="Identifier">importedItems</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L144"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L144" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="allSyms.i,PContext"></a>
+<dt><pre><span class="Keyword">iterator</span> <a href="#allSyms.i%2CPContext"><span class="Identifier">allSyms</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">bool</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L158"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L158" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -820,7 +870,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-12-17 00:50:41 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-12-18 00:51:02 UTC</small>
       </div>
     </div>
   </div>
