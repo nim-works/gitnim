@@ -1819,23 +1819,11 @@ function escapeCString_10575537(x_10575540, x_10575540_Idx) {
           if (!(i_10595080 < L_10595081)) break L3;
             c_10575542 = x_10575540[x_10575540_Idx].charCodeAt(chckIndx(i_10595080, 0, (x_10575540[x_10575540_Idx]).length-1));
             switch (c_10575542) {
-            case 38:
-              s_10575541.push.apply(s_10575541, makeNimstrLit("&amp;"));;
-              break;
             case 60:
               s_10575541.push.apply(s_10575541, makeNimstrLit("&lt;"));;
               break;
             case 62:
               s_10575541.push.apply(s_10575541, makeNimstrLit("&gt;"));;
-              break;
-            case 34:
-              s_10575541.push.apply(s_10575541, makeNimstrLit("&quot;"));;
-              break;
-            case 39:
-              s_10575541.push.apply(s_10575541, makeNimstrLit("&#039;"));;
-              break;
-            case 47:
-              s_10575541.push.apply(s_10575541, makeNimstrLit("&#x2F;"));;
               break;
             default: 
               addChar(s_10575541, c_10575542);;
