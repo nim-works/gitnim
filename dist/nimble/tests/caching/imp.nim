@@ -1,2 +1,0 @@
-proc impTest*() =
-  echo "imported"
