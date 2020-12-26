@@ -1,1 +1,0 @@
-echo "subbin-1"
