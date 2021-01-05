@@ -82,8 +82,6 @@ if [ $# -eq 1 ] ; then
   mkdir -p $libdir/impure/nre/private
   mkdir -p $libdir/core
   mkdir -p $libdir/packages/docutils
-  mkdir -p $libdir/fusion
-  mkdir -p $libdir/fusion/htmlparser
   mkdir -p $libdir/system
   mkdir -p $libdir/system/mm
   mkdir -p $libdir/wrappers
@@ -226,20 +224,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/packages/docutils/rst.nim
   cp lib/system.nim $libdir/system.nim
   chmod 644 $libdir/system.nim
-  cp lib/fusion/compat.nim $libdir/fusion/compat.nim
-  chmod 644 $libdir/fusion/compat.nim
-  cp lib/fusion/filepermissions.nim $libdir/fusion/filepermissions.nim
-  chmod 644 $libdir/fusion/filepermissions.nim
-  cp lib/fusion/htmlparser/xmltree.nim $libdir/fusion/htmlparser/xmltree.nim
-  chmod 644 $libdir/fusion/htmlparser/xmltree.nim
-  cp lib/fusion/htmlparser/parsexml.nim $libdir/fusion/htmlparser/parsexml.nim
-  chmod 644 $libdir/fusion/htmlparser/parsexml.nim
-  cp lib/fusion/pools.nim $libdir/fusion/pools.nim
-  chmod 644 $libdir/fusion/pools.nim
-  cp lib/fusion/btreetables.nim $libdir/fusion/btreetables.nim
-  chmod 644 $libdir/fusion/btreetables.nim
-  cp lib/fusion/htmlparser.nim $libdir/fusion/htmlparser.nim
-  chmod 644 $libdir/fusion/htmlparser.nim
   cp lib/system/nimscript.nim $libdir/system/nimscript.nim
   chmod 644 $libdir/system/nimscript.nim
   cp lib/system/repr_v2.nim $libdir/system/repr_v2.nim
@@ -702,8 +686,12 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/private/globs.nim
   cp lib/std/private/miscdollars.nim $libdir/std/private/miscdollars.nim
   chmod 644 $libdir/std/private/miscdollars.nim
+  cp lib/std/private/asciitables.nim $libdir/std/private/asciitables.nim
+  chmod 644 $libdir/std/private/asciitables.nim
   cp lib/std/private/underscored_calls.nim $libdir/std/private/underscored_calls.nim
   chmod 644 $libdir/std/private/underscored_calls.nim
+  cp lib/std/private/strimpl.nim $libdir/std/private/strimpl.nim
+  chmod 644 $libdir/std/private/strimpl.nim
   cp lib/std/private/decode_helpers.nim $libdir/std/private/decode_helpers.nim
   chmod 644 $libdir/std/private/decode_helpers.nim
   cp lib/std/private/since.nim $libdir/std/private/since.nim
@@ -734,8 +722,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/packedsets.nim
   cp compiler/aliases.nim $nimbleDir/compiler/aliases.nim
   chmod 644 $nimbleDir/compiler/aliases.nim
-  cp compiler/asciitables.nim $nimbleDir/compiler/asciitables.nim
-  chmod 644 $nimbleDir/compiler/asciitables.nim
   cp compiler/ast.nim $nimbleDir/compiler/ast.nim
   chmod 644 $nimbleDir/compiler/ast.nim
   cp compiler/astalgo.nim $nimbleDir/compiler/astalgo.nim
@@ -808,12 +794,12 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/guards.nim
   cp compiler/hlo.nim $nimbleDir/compiler/hlo.nim
   chmod 644 $nimbleDir/compiler/hlo.nim
-  cp compiler/ic/from_packed_ast.nim $nimbleDir/compiler/ic/from_packed_ast.nim
-  chmod 644 $nimbleDir/compiler/ic/from_packed_ast.nim
   cp compiler/ic/to_packed_ast.nim $nimbleDir/compiler/ic/to_packed_ast.nim
   chmod 644 $nimbleDir/compiler/ic/to_packed_ast.nim
   cp compiler/ic/packed_ast.nim $nimbleDir/compiler/ic/packed_ast.nim
   chmod 644 $nimbleDir/compiler/ic/packed_ast.nim
+  cp compiler/ic/rodfiles.nim $nimbleDir/compiler/ic/rodfiles.nim
+  chmod 644 $nimbleDir/compiler/ic/rodfiles.nim
   cp compiler/ic/bitabs.nim $nimbleDir/compiler/ic/bitabs.nim
   chmod 644 $nimbleDir/compiler/ic/bitabs.nim
   cp compiler/ic/design.rst $nimbleDir/compiler/ic/design.rst
@@ -822,8 +808,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/idents.nim
   cp compiler/importer.nim $nimbleDir/compiler/importer.nim
   chmod 644 $nimbleDir/compiler/importer.nim
-  cp compiler/incremental.nim $nimbleDir/compiler/incremental.nim
-  chmod 644 $nimbleDir/compiler/incremental.nim
   cp compiler/index.nim $nimbleDir/compiler/index.nim
   chmod 644 $nimbleDir/compiler/index.nim
   cp compiler/injectdestructors.nim $nimbleDir/compiler/injectdestructors.nim
@@ -876,6 +860,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/msgs.nim
   cp compiler/ndi.nim $nimbleDir/compiler/ndi.nim
   chmod 644 $nimbleDir/compiler/ndi.nim
+  cp compiler/nilcheck.nim $nimbleDir/compiler/nilcheck.nim
+  chmod 644 $nimbleDir/compiler/nilcheck.nim
   cp compiler/nim.cfg $nimbleDir/compiler/nim.cfg
   chmod 644 $nimbleDir/compiler/nim.cfg
   cp compiler/nim.nim $nimbleDir/compiler/nim.nim
@@ -944,10 +930,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/renderverbatim.nim
   cp compiler/reorder.nim $nimbleDir/compiler/reorder.nim
   chmod 644 $nimbleDir/compiler/reorder.nim
-  cp compiler/rod.nim $nimbleDir/compiler/rod.nim
-  chmod 644 $nimbleDir/compiler/rod.nim
-  cp compiler/rodimpl.nim $nimbleDir/compiler/rodimpl.nim
-  chmod 644 $nimbleDir/compiler/rodimpl.nim
   cp compiler/rodutils.nim $nimbleDir/compiler/rodutils.nim
   chmod 644 $nimbleDir/compiler/rodutils.nim
   cp compiler/ropes.nim $nimbleDir/compiler/ropes.nim

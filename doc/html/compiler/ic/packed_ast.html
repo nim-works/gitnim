@@ -104,14 +104,18 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#SymId"
     title="SymId = distinct int32">SymId</a></li>
-  <li><a class="reference" href="#TypeId"
-    title="TypeId = distinct int32">TypeId</a></li>
   <li><a class="reference" href="#ModuleId"
     title="ModuleId = distinct int32">ModuleId</a></li>
   <li><a class="reference" href="#NodePos"
     title="NodePos = distinct int">NodePos</a></li>
   <li><a class="reference" href="#NodeId"
     title="NodeId = distinct int32">NodeId</a></li>
+  <li><a class="reference" href="#PackedItemId"
+    title="PackedItemId = object
+  module*: LitId
+  item*: int32">PackedItemId</a></li>
+  <li><a class="reference" href="#TypeId"
+    title="TypeId = PackedItemId">TypeId</a></li>
   <li><a class="reference" href="#PackedLineInfo"
     title="PackedLineInfo = object
   line*: uint16
@@ -128,13 +132,13 @@ window.addEventListener('DOMContentLoaded', main);
     title="PackedSym = object
   kind*: TSymKind
   name*: LitId
-  typeId*: TypeId
+  typ*: TypeId
   flags*: TSymFlags
   magic*: TMagic
   info*: PackedLineInfo
-  ast*: NodePos
-  owner*: ItemId
-  guard*: ItemId
+  ast*: NodeId
+  owner*: PackedItemId
+  guard*: PackedItemId
   bitsize*: int
   alignment*: int
   options*: TOptions
@@ -149,55 +153,45 @@ window.addEventListener('DOMContentLoaded', main);
   <li><a class="reference" href="#PackedType"
     title="PackedType = object
   kind*: TTypeKind
-  nodekind*: TNodeKind
+  callConv*: TCallingConvention
   flags*: TTypeFlags
-  types*: int32
-  nodes*: int32
-  methods*: int32
-  nodeflags*: TNodeFlags
-  info*: PackedLineInfo
-  sym*: ItemId
-  owner*: ItemId
-  attachedOps*: array[TTypeAttachedOp, ItemId]
+  types*: seq[TypeId]
+  n*: NodeId
+  methods*: seq[(int, PackedItemId)]
+  sym*: PackedItemId
+  owner*: PackedItemId
+  attachedOps*: array[TTypeAttachedOp, PackedItemId]
   size*: BiggestInt
   align*: int16
   paddingAtEnd*: int16
   lockLevel*: TLockLevel
   typeInst*: TypeId
-  nonUniqueId*: ItemId">PackedType</a></li>
-  <li><a class="reference" href="#Node"
-    title="Node = object
+  nonUniqueId*: int32">PackedType</a></li>
+  <li><a class="reference" href="#PackedNode"
+    title="PackedNode = object
   kind*: TNodeKind
   flags*: TNodeFlags
   operand*: int32
   typeId*: TypeId
-  info*: PackedLineInfo">Node</a></li>
+  info*: PackedLineInfo">PackedNode</a></li>
   <li><a class="reference" href="#ModulePhase"
     title="ModulePhase = enum
   preLookup, lookedUpTopLevelStmts">ModulePhase</a></li>
-  <li><a class="reference" href="#Module"
-    title="Module = object
+  <li><a class="reference" href="#GenericKey"
+    title="GenericKey = object
+  module*: int32
   name*: string
-  file*: AbsoluteFile
-  ast*: PackedTree
-  phase*: ModulePhase
-  iface*: Table[string, seq[SymId]]">Module</a></li>
-  <li><a class="reference" href="#Program"
-    title="Program = ref object
-  modules*: seq[Module]">Program</a></li>
+  types*: seq[MD5Digest]">GenericKey</a></li>
+  <li><a class="reference" href="#PackedTree"
+    title="PackedTree = object
+  nodes*: seq[PackedNode]">PackedTree</a></li>
   <li><a class="reference" href="#Shared"
     title="Shared = ref object
   syms*: seq[PackedSym]
-  types*: seq[seq[Node]]
+  types*: seq[PackedType]
   strings*: BiTable[string]
   integers*: BiTable[BiggestInt]
-  floats*: BiTable[BiggestFloat]
-  config*: ConfigRef">Shared</a></li>
-  <li><a class="reference" href="#PackedTree"
-    title="PackedTree = object
-  nodes*: seq[Node]
-  toPosition*: Table[SymId, NodePos]
-  sh*: Shared">PackedTree</a></li>
+  floats*: BiTable[BiggestFloat]">Shared</a></li>
 
   </ul>
 </li>
@@ -240,6 +234,14 @@ window.addEventListener('DOMContentLoaded', main);
     title="routinePragmasPos = 6">routinePragmasPos</a></li>
   <li><a class="reference" href="#routineBodyPos"
     title="routineBodyPos = 7">routineBodyPos</a></li>
+  <li><a class="reference" href="#nkModuleRef"
+    title="nkModuleRef = nkNone">nkModuleRef</a></li>
+  <li><a class="reference" href="#nilTypeId"
+    title="nilTypeId = (module: 0&apos;u, item: -1)">nilTypeId</a></li>
+  <li><a class="reference" href="#nilItemId"
+    title="nilItemId = (module: 0&apos;u, item: -1)">nilItemId</a></li>
+  <li><a class="reference" href="#emptyNodeId"
+    title="emptyNodeId = -1&apos;i32">emptyNodeId</a></li>
   <li><a class="reference" href="#externIntLit"
     title="externIntLit = {nkCharLit, nkIntLit, nkInt8Lit, nkInt16Lit, nkInt64Lit,
                 nkUIntLit, nkUInt8Lit, nkUInt16Lit, nkUInt32Lit, nkUInt64Lit}">externIntLit</a></li>
@@ -255,20 +257,14 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">declareSym
-      <li><a class="reference" href="#declareSym%2CPackedTree%2CTSymKind%2CLitId%2CPackedLineInfo"
-    title="declareSym(tree: var PackedTree; kind: TSymKind; name: LitId;
-           info: PackedLineInfo): SymId">declareSym,<wbr>PackedTree,<wbr>TSymKind,<wbr>LitId,<wbr>PackedLineInfo</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">addSymDef
+      <ul class="simple nested-toc-section">addSymDef
       <li><a class="reference" href="#addSymDef%2CPackedTree%2CSymId%2CPackedLineInfo"
     title="addSymDef(tree: var PackedTree; s: SymId; info: PackedLineInfo)">addSymDef,<wbr>PackedTree,<wbr>SymId,<wbr>PackedLineInfo</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">debug
-      <li><a class="reference" href="#debug%2CPackedTree"
-    title="debug(tree: PackedTree)">debug,<wbr>PackedTree</a></li>
+      <li><a class="reference" href="#debug%2CPackedTree%2CShared"
+    title="debug(tree: PackedTree; sh: Shared)">debug,<wbr>PackedTree,<wbr>Shared</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">info
@@ -276,15 +272,10 @@ window.addEventListener('DOMContentLoaded', main);
     title="info(tree: PackedTree; n: NodePos): PackedLineInfo">info,<wbr>PackedTree,<wbr>NodePos</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">strLit
-      <li><a class="reference" href="#strLit%2CPackedTree%2CNodePos"
-    title="strLit(tree: PackedTree; n: NodePos): lent string">strLit,<wbr>PackedTree,<wbr>NodePos</a></li>
-
-  </ul>
   <ul class="simple nested-toc-section">prepare
-      <li><a class="reference" href="#prepare%2CPackedTree%2CTNodeKind%2CTNodeFlags%2CTypeId%2CPackedLineInfo"
+      <li><a class="reference" href="#prepare%2CPackedTree%2CTNodeKind%2CTNodeFlags%2CPackedItemId%2CPackedLineInfo"
     title="prepare(tree: var PackedTree; kind: TNodeKind; flags: TNodeFlags;
-        typeId: TypeId; info: PackedLineInfo): PatchPos">prepare,<wbr>PackedTree,<wbr>TNodeKind,<wbr>TNodeFlags,<wbr>TypeId,<wbr>PackedLineInfo</a></li>
+        typeId: TypeId; info: PackedLineInfo): PatchPos">prepare,<wbr>PackedTree,<wbr>TNodeKind,<wbr>TNodeFlags,<wbr>PackedItemId,<wbr>PackedLineInfo</a></li>
   <li><a class="reference" href="#prepare%2CPackedTree%2CPackedTree%2CNodePos"
     title="prepare(dest: var PackedTree; source: PackedTree; sourcePos: NodePos): PatchPos">prepare,<wbr>PackedTree,<wbr>PackedTree,<wbr>NodePos</a></li>
 
@@ -299,19 +290,9 @@ window.addEventListener('DOMContentLoaded', main);
     title="ithSon(tree: PackedTree; n: NodePos; i: int): NodePos">ithSon,<wbr>PackedTree,<wbr>NodePos,<wbr>int</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">filenameVal
-      <li><a class="reference" href="#filenameVal%2CPackedTree%2CNodePos"
-    title="filenameVal(tree: PackedTree; n: NodePos): string">filenameVal,<wbr>PackedTree,<wbr>NodePos</a></li>
-
-  </ul>
   <ul class="simple nested-toc-section">addSym
-      <li><a class="reference" href="#addSym%2CPackedTree%2CSymId%2CPackedLineInfo"
-    title="addSym(tree: var PackedTree; s: SymId; info: PackedLineInfo)">addSym,<wbr>PackedTree,<wbr>SymId,<wbr>PackedLineInfo</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">strVal
-      <li><a class="reference" href="#strVal%2CPackedTree%2CNodePos"
-    title="strVal(tree: PackedTree; n: NodePos): string">strVal,<wbr>PackedTree,<wbr>NodePos</a></li>
+      <li><a class="reference" href="#addSym%2CPackedTree%2Cint32%2CPackedLineInfo"
+    title="addSym(tree: var PackedTree; s: int32; info: PackedLineInfo)">addSym,<wbr>PackedTree,<wbr>int32,<wbr>PackedLineInfo</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">newTreeFrom
@@ -319,26 +300,14 @@ window.addEventListener('DOMContentLoaded', main);
     title="newTreeFrom(old: PackedTree): PackedTree">newTreeFrom,<wbr>PackedTree</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">add
-      <li><a class="reference" href="#add%2CPackedTree%2CTNodeKind%2Cstring%2CPackedLineInfo"
-    title="add(tree: var PackedTree; kind: TNodeKind; token: string; info: PackedLineInfo)">add,<wbr>PackedTree,<wbr>TNodeKind,<wbr>string,<wbr>PackedLineInfo</a></li>
-  <li><a class="reference" href="#add%2CPackedTree%2CTNodeKind%2CPackedLineInfo"
-    title="add(tree: var PackedTree; kind: TNodeKind; info: PackedLineInfo)">add,<wbr>PackedTree,<wbr>TNodeKind,<wbr>PackedLineInfo</a></li>
-
-  </ul>
   <ul class="simple nested-toc-section">sons2
       <li><a class="reference" href="#sons2%2CPackedTree%2CNodePos"
     title="sons2(tree: PackedTree; n: NodePos): (NodePos, NodePos)">sons2,<wbr>PackedTree,<wbr>NodePos</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">identAsStr
-      <li><a class="reference" href="#identAsStr%2CPackedTree%2CNodePos"
-    title="identAsStr(tree: PackedTree; n: NodePos): lent string">identAsStr,<wbr>PackedTree,<wbr>NodePos</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">hasPragma
-      <li><a class="reference" href="#hasPragma%2CPackedTree%2CNodePos%2Cstring"
-    title="hasPragma(tree: PackedTree; n: NodePos; pragma: string): bool">hasPragma,<wbr>PackedTree,<wbr>NodePos,<wbr>string</a></li>
+  <ul class="simple nested-toc-section">getNodeId
+      <li><a class="reference" href="#getNodeId%2CPackedTree"
+    title="getNodeId(tree: PackedTree): NodeId">getNodeId,<wbr>PackedTree</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">hasAtLeastXsons
@@ -361,9 +330,12 @@ window.addEventListener('DOMContentLoaded', main);
     title="sons3(tree: PackedTree; n: NodePos): (NodePos, NodePos, NodePos)">sons3,<wbr>PackedTree,<wbr>NodePos</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">@
-      <li><a class="reference" href="#%40%2CPackedTree%2CLitId"
-    title="`@`(tree: PackedTree; lit: LitId): lent string">@,<wbr>PackedTree,<wbr>LitId</a></li>
+  <ul class="simple nested-toc-section">toString
+      <li><a class="reference" href="#toString%2CPackedTree%2CNodePos%2CShared%2Cint%2Cstring"
+    title="toString(tree: PackedTree; n: NodePos; sh: Shared; nesting: int;
+         result: var string)">toString,<wbr>PackedTree,<wbr>NodePos,<wbr>Shared,<wbr>int,<wbr>string</a></li>
+  <li><a class="reference" href="#toString%2CPackedTree%2CNodePos%2CShared"
+    title="toString(tree: PackedTree; n: NodePos; sh: Shared): string">toString,<wbr>PackedTree,<wbr>NodePos,<wbr>Shared</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">throwAwayLastNode
@@ -374,18 +346,6 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple nested-toc-section">isAtom
       <li><a class="reference" href="#isAtom%2CPackedTree%2Cint"
     title="isAtom(tree: PackedTree; pos: int): bool">isAtom,<wbr>PackedTree,<wbr>int</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">copySym
-      <li><a class="reference" href="#copySym%2CPackedTree%2CPackedTree%2CSymId"
-    title="copySym(dest: var PackedTree; tree: PackedTree; s: SymId): SymId">copySym,<wbr>PackedTree,<wbr>PackedTree,<wbr>SymId</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">toString
-      <li><a class="reference" href="#toString%2CPackedTree%2CNodePos%2Cint%2Cstring"
-    title="toString(tree: PackedTree; n: NodePos; nesting: int; result: var string)">toString,<wbr>PackedTree,<wbr>NodePos,<wbr>int,<wbr>string</a></li>
-  <li><a class="reference" href="#toString%2CPackedTree%2CNodePos"
-    title="toString(tree: PackedTree; n: NodePos): string">toString,<wbr>PackedTree,<wbr>NodePos</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">litId
@@ -420,9 +380,11 @@ window.addEventListener('DOMContentLoaded', main);
     title="kind(tree: PackedTree; n: NodePos): TNodeKind">kind,<wbr>PackedTree,<wbr>NodePos</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">litIdFromName
-      <li><a class="reference" href="#litIdFromName%2CPackedTree%2Cstring"
-    title="litIdFromName(tree: PackedTree; name: string): LitId">litIdFromName,<wbr>PackedTree,<wbr>string</a></li>
+  <ul class="simple nested-toc-section">hash
+      <li><a class="reference" href="#hash%2CGenericKey"
+    title="hash(key: GenericKey): Hash">hash,<wbr>GenericKey</a></li>
+  <li><a class="reference" href="#hash%2CSymId"
+    title="hash(a: SymId): Hash">hash,<wbr>SymId</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">==
@@ -430,20 +392,13 @@ window.addEventListener('DOMContentLoaded', main);
     title="`==`(a, b: SymId): bool">==,<wbr>SymId,<wbr>SymId</a></li>
   <li><a class="reference" href="#%3D%3D%2CNodePos%2CNodePos"
     title="`==`(a, b: NodePos): bool">==,<wbr>NodePos,<wbr>NodePos</a></li>
-  <li><a class="reference" href="#%3D%3D%2CTypeId%2CTypeId"
-    title="`==`(a, b: TypeId): bool">==,<wbr>TypeId,<wbr>TypeId</a></li>
-  <li><a class="reference" href="#%3D%3D%2CModuleId%2CModuleId"
-    title="`==`(a, b: ModuleId): bool">==,<wbr>ModuleId,<wbr>ModuleId</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">hash
-      <li><a class="reference" href="#hash%2CSymId"
-    title="hash(a: SymId): Hash">hash,<wbr>SymId</a></li>
+  <li><a class="reference" href="#%3D%3D%2CNodeId%2CNodeId"
+    title="`==`(a, b: NodeId): bool">==,<wbr>NodeId,<wbr>NodeId</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">[]
       <li><a class="reference" href="#%5B%5D%2CPackedTree%2Cint"
-    title="`[]`(tree: PackedTree; i: int): lent Node">[],<wbr>PackedTree,<wbr>int</a></li>
+    title="`[]`(tree: PackedTree; i: int): lent PackedNode">[],<wbr>PackedTree,<wbr>int</a></li>
 
   </ul>
 
@@ -470,6 +425,10 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#parent.t%2CNodePos"
     title="parent(n: NodePos): NodePos">parent</a></li>
+  <li><a class="reference" href="#typ.t%2CNodePos"
+    title="typ(n: NodePos): PackedItemId">typ</a></li>
+  <li><a class="reference" href="#flags.t%2CNodePos"
+    title="flags(n: NodePos): TNodeFlags">flags</a></li>
   <li><a class="reference" href="#kind.t%2CNodePos"
     title="kind(n: NodePos): TNodeKind">kind</a></li>
   <li><a class="reference" href="#info.t%2CNodePos"
@@ -478,8 +437,6 @@ window.addEventListener('DOMContentLoaded', main);
     title="litId(n: NodePos): LitId">litId</a></li>
   <li><a class="reference" href="#symId.t%2CNodePos"
     title="symId(n: NodePos): SymId">symId</a></li>
-  <li><a class="reference" href="#identId.t%2CNodePos"
-    title="identId(n: NodePos): LitId">identId</a></li>
   <li><a class="reference" href="#copyInto.t%2C%2C%2C"
     title="copyInto(dest, n, body)">copyInto</a></li>
   <li><a class="reference" href="#copyIntoKind.t%2C%2C%2C%2C"
@@ -503,7 +460,7 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="bitabs.html">bitabs</a>, <a class="reference external" href="../ast.html">../ast</a>, <a class="reference external" href="../lineinfos.html">../lineinfos</a>, <a class="reference external" href="../options.html">../options</a>, <a class="reference external" href="../pathutils.html">../pathutils</a>
+<a class="reference external" href="bitabs.html">bitabs</a>, <a class="reference external" href="../ast.html">../ast</a>, <a class="reference external" href="../options.html">../options</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -519,8 +476,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L45" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="TypeId"></a>
-<dt><pre><a href="packed_ast.html#TypeId"><span class="Identifier">TypeId</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <span class="Identifier">int32</span></pre></dt>
+<a id="ModuleId"></a>
+<dt><pre><a href="packed_ast.html#ModuleId"><span class="Identifier">ModuleId</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <span class="Identifier">int32</span></pre></dt>
 <dd>
 
 
@@ -530,8 +487,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L46" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="ModuleId"></a>
-<dt><pre><a href="packed_ast.html#ModuleId"><span class="Identifier">ModuleId</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <span class="Identifier">int32</span></pre></dt>
+<a id="NodePos"></a>
+<dt><pre><a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <span class="Identifier">int</span></pre></dt>
 <dd>
 
 
@@ -541,26 +498,40 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L47" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="NodePos"></a>
-<dt><pre><a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <span class="Identifier">int</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L48"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L48" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
 <a id="NodeId"></a>
 <dt><pre><a href="packed_ast.html#NodeId"><span class="Identifier">NodeId</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <span class="Identifier">int32</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L50"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L49"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L50" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L49" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="PackedItemId"></a>
+<dt><pre><a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">module</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a>
+  <span class="Identifier">item</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
+</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L51"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L51" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="TypeId"></a>
+<dt><pre><a href="packed_ast.html#TypeId"><span class="Identifier">TypeId</span></a> <span class="Other">=</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L55"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L55" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="PackedLineInfo"></a>
@@ -573,9 +544,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L52"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L65"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L52" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L65" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="PackedLib"></a>
@@ -590,22 +561,22 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L57"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L70"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L57" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L70" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="PackedSym"></a>
 <dt><pre><a href="packed_ast.html#PackedSym"><span class="Identifier">PackedSym</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TSymKind"><span class="Identifier">TSymKind</span></a>
   <span class="Identifier">name</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a>
-  <span class="Identifier">typeId</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#TypeId"><span class="Identifier">TypeId</span></a>
+  <span class="Identifier">typ</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#TypeId"><span class="Identifier">TypeId</span></a>
   <span class="Identifier">flags</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TSymFlags"><span class="Identifier">TSymFlags</span></a>
   <span class="Identifier">magic</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TMagic"><span class="Identifier">TMagic</span></a>
   <span class="Identifier">info</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedLineInfo"><span class="Identifier">PackedLineInfo</span></a>
-  <span class="Identifier">ast</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a>
-  <span class="Identifier">owner</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#ItemId"><span class="Identifier">ItemId</span></a>
-  <span class="Identifier">guard</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#ItemId"><span class="Identifier">ItemId</span></a>
+  <span class="Identifier">ast</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#NodeId"><span class="Identifier">NodeId</span></a>
+  <span class="Identifier">owner</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a>
+  <span class="Identifier">guard</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a>
   <span class="Identifier">bitsize</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">alignment</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">options</span><span class="Operator">*</span><span class="Other">:</span> <a href="../options.html#TOptions"><span class="Identifier">TOptions</span></a>
@@ -622,42 +593,40 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L64"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L77"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L64" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L77" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="PackedType"></a>
 <dt><pre><a href="packed_ast.html#PackedType"><span class="Identifier">PackedType</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TTypeKind"><span class="Identifier">TTypeKind</span></a>
-  <span class="Identifier">nodekind</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TNodeKind"><span class="Identifier">TNodeKind</span></a>
+  <span class="Identifier">callConv</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TCallingConvention"><span class="Identifier">TCallingConvention</span></a>
   <span class="Identifier">flags</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TTypeFlags"><span class="Identifier">TTypeFlags</span></a>
-  <span class="Identifier">types</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
-  <span class="Identifier">nodes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
-  <span class="Identifier">methods</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
-  <span class="Identifier">nodeflags</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TNodeFlags"><span class="Identifier">TNodeFlags</span></a>
-  <span class="Identifier">info</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedLineInfo"><span class="Identifier">PackedLineInfo</span></a>
-  <span class="Identifier">sym</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#ItemId"><span class="Identifier">ItemId</span></a>
-  <span class="Identifier">owner</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#ItemId"><span class="Identifier">ItemId</span></a>
-  <span class="Identifier">attachedOps</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">TTypeAttachedOp</span><span class="Other">,</span> <a href="../ast.html#ItemId"><span class="Identifier">ItemId</span></a><span class="Other">]</span>
+  <span class="Identifier">types</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#TypeId"><span class="Identifier">TypeId</span></a><span class="Other">]</span>
+  <span class="Identifier">n</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#NodeId"><span class="Identifier">NodeId</span></a>
+  <span class="Identifier">methods</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">,</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">)</span><span class="Other">]</span>
+  <span class="Identifier">sym</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a>
+  <span class="Identifier">owner</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a>
+  <span class="Identifier">attachedOps</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">TTypeAttachedOp</span><span class="Other">,</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">]</span>
   <span class="Identifier">size</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">BiggestInt</span>
   <span class="Identifier">align</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int16</span>
   <span class="Identifier">paddingAtEnd</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int16</span>
   <span class="Identifier">lockLevel</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TLockLevel"><span class="Identifier">TLockLevel</span></a>
   <span class="Identifier">typeInst</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#TypeId"><span class="Identifier">TypeId</span></a>
-  <span class="Identifier">nonUniqueId</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#ItemId"><span class="Identifier">ItemId</span></a>
+  <span class="Identifier">nonUniqueId</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
 </pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L85"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L98"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L85" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L98" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="Node"></a>
-<dt><pre><a href="packed_ast.html#Node"><span class="Identifier">Node</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+<a id="PackedNode"></a>
+<dt><pre><a href="packed_ast.html#PackedNode"><span class="Identifier">PackedNode</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TNodeKind"><span class="Identifier">TNodeKind</span></a>
   <span class="Identifier">flags</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#TNodeFlags"><span class="Identifier">TNodeFlags</span></a>
   <span class="Identifier">operand</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
@@ -668,9 +637,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L105"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L118"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L105" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L118" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ModulePhase"></a>
@@ -680,68 +649,50 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L115"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L115" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="Module"></a>
-<dt><pre><a href="packed_ast.html#Module"><span class="Identifier">Module</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">name</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
-  <span class="Identifier">file</span><span class="Operator">*</span><span class="Other">:</span> <a href="../pathutils.html#AbsoluteFile"><span class="Identifier">AbsoluteFile</span></a>
-  <span class="Identifier">ast</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a>
-  <span class="Identifier">phase</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#ModulePhase"><span class="Identifier">ModulePhase</span></a>
-  <span class="Identifier">iface</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a><span class="Other">]</span><span class="Other">]</span>
-</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L118"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L118" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="Program"></a>
-<dt><pre><a href="packed_ast.html#Program"><span class="Identifier">Program</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
-  <span class="Identifier">modules</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#Module"><span class="Identifier">Module</span></a><span class="Other">]</span>
-</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L125"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L125" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="Shared"></a>
-<dt><pre><a href="packed_ast.html#Shared"><span class="Identifier">Shared</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
-  <span class="Identifier">syms</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#PackedSym"><span class="Identifier">PackedSym</span></a><span class="Other">]</span>
-  <span class="Identifier">types</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#Node"><span class="Identifier">Node</span></a><span class="Other">]</span><span class="Other">]</span>
-  <span class="Identifier">strings</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#BiTable"><span class="Identifier">BiTable</span></a><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span>
-  <span class="Identifier">integers</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#BiTable"><span class="Identifier">BiTable</span></a><span class="Other">[</span><span class="Identifier">BiggestInt</span><span class="Other">]</span>
-  <span class="Identifier">floats</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#BiTable"><span class="Identifier">BiTable</span></a><span class="Other">[</span><span class="Identifier">BiggestFloat</span><span class="Other">]</span>
-  <span class="Identifier">config</span><span class="Operator">*</span><span class="Other">:</span> <a href="../options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a>
-</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L128"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L128" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="GenericKey"></a>
+<dt><pre><a href="packed_ast.html#GenericKey"><span class="Identifier">GenericKey</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">module</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
+  <span class="Identifier">name</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
+  <span class="Identifier">types</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">MD5Digest</span><span class="Other">]</span>
+</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L131"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L131" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="PackedTree"></a>
 <dt><pre><a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">nodes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#Node"><span class="Identifier">Node</span></a><span class="Other">]</span>
-  <span class="Identifier">toPosition</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a><span class="Other">,</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">]</span>
-  <span class="Identifier">sh</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#Shared"><span class="Identifier">Shared</span></a>
+  <span class="Identifier">nodes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#PackedNode"><span class="Identifier">PackedNode</span></a><span class="Other">]</span>
 </pre></dt>
 <dd>
 
 usually represents a full Nim module
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L136"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L136" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="Shared"></a>
+<dt><pre><a href="packed_ast.html#Shared"><span class="Identifier">Shared</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
+  <span class="Identifier">syms</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#PackedSym"><span class="Identifier">PackedSym</span></a><span class="Other">]</span>
+  <span class="Identifier">types</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#PackedType"><span class="Identifier">PackedType</span></a><span class="Other">]</span>
+  <span class="Identifier">strings</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#BiTable"><span class="Identifier">BiTable</span></a><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span>
+  <span class="Identifier">integers</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#BiTable"><span class="Identifier">BiTable</span></a><span class="Other">[</span><span class="Identifier">BiggestInt</span><span class="Other">]</span>
+  <span class="Identifier">floats</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#BiTable"><span class="Identifier">BiTable</span></a><span class="Other">[</span><span class="Identifier">BiggestFloat</span><span class="Other">]</span>
+</pre></dt>
+<dd>
+
+
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L140"
 class="link-seesrc" target="_blank">Source</a>
@@ -951,6 +902,50 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L39" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="nkModuleRef"></a>
+<dt><pre><a href="packed_ast.html#nkModuleRef"><span class="Identifier">nkModuleRef</span></a> <span class="Other">=</span> <span class="DecNumber">nkNone</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L42"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L42" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="nilTypeId"></a>
+<dt><pre><a href="packed_ast.html#nilTypeId"><span class="Identifier">nilTypeId</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">module</span><span class="Other">:</span> <span class="DecNumber">0'u</span><span class="Other">,</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="DecNumber">-1</span><span class="Other">)</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L58"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L58" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="nilItemId"></a>
+<dt><pre><a href="packed_ast.html#nilItemId"><span class="Identifier">nilItemId</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">module</span><span class="Other">:</span> <span class="DecNumber">0'u</span><span class="Other">,</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="DecNumber">-1</span><span class="Other">)</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L59"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L59" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="emptyNodeId"></a>
+<dt><pre><a href="packed_ast.html#emptyNodeId"><span class="Identifier">emptyNodeId</span></a> <span class="Other">=</span> <span class="DecNumber">-1'i32</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L62"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L62" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="externIntLit"></a>
 <dt><pre><a href="packed_ast.html#externIntLit"><span class="Identifier">externIntLit</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">nkCharLit</span><span class="Other">,</span> <span class="DecNumber">nkIntLit</span><span class="Other">,</span> <span class="DecNumber">nkInt8Lit</span><span class="Other">,</span> <span class="DecNumber">nkInt16Lit</span><span class="Other">,</span> <span class="DecNumber">nkInt64Lit</span><span class="Other">,</span>
                 <span class="DecNumber">nkUIntLit</span><span class="Other">,</span> <span class="DecNumber">nkUInt8Lit</span><span class="Other">,</span> <span class="DecNumber">nkUInt16Lit</span><span class="Other">,</span> <span class="DecNumber">nkUInt32Lit</span><span class="Other">,</span> <span class="DecNumber">nkUInt64Lit</span><span class="Other">}</span></pre></dt>
@@ -958,9 +953,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L368"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L398"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L368" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L398" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="externSIntLit"></a>
@@ -969,9 +964,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L379"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L409"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L379" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L409" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="externUIntLit"></a>
@@ -980,9 +975,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L380"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L410"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L380" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L410" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="directIntLit"></a>
@@ -991,9 +986,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L381"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L411"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L381" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L411" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1001,52 +996,8 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="12">
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
-<a id="==,SymId,SymId"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%3D%3D%2CSymId%2CSymId"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L145"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L145" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="hash,SymId"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#hash%2CSymId"><span class="Identifier">hash</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Hash</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L146"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L146" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="==,NodePos,NodePos"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%3D%3D%2CNodePos%2CNodePos"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L148"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L148" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="==,TypeId,TypeId"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%3D%3D%2CTypeId%2CTypeId"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="packed_ast.html#TypeId"><span class="Identifier">TypeId</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L149"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L149" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="==,ModuleId,ModuleId"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%3D%3D%2CModuleId%2CModuleId"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="packed_ast.html#ModuleId"><span class="Identifier">ModuleId</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="hash,GenericKey"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#hash%2CGenericKey"><span class="Identifier">hash</span></a><span class="Other">(</span><span class="Identifier">key</span><span class="Other">:</span> <a href="packed_ast.html#GenericKey"><span class="Identifier">GenericKey</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Hash</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1056,20 +1007,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L150" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="declareSym,PackedTree,TSymKind,LitId,PackedLineInfo"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#declareSym%2CPackedTree%2CTSymKind%2CLitId%2CPackedLineInfo"><span class="Identifier">declareSym</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="../ast.html#TSymKind"><span class="Identifier">TSymKind</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a><span class="Other">;</span>
-                <span class="Identifier">info</span><span class="Other">:</span> <a href="packed_ast.html#PackedLineInfo"><span class="Identifier">PackedLineInfo</span></a><span class="Other">)</span><span class="Other">:</span> <a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L152"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L152" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="newTreeFrom,PackedTree"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#newTreeFrom%2CPackedTree"><span class="Identifier">newTreeFrom</span></a><span class="Other">(</span><span class="Identifier">old</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">)</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="==,SymId,SymId"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#%3D%3D%2CSymId%2CSymId"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1079,20 +1018,41 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L157" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="litIdFromName,PackedTree,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#litIdFromName%2CPackedTree%2Cstring"><span class="Identifier">litIdFromName</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="hash,SymId"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#hash%2CSymId"><span class="Identifier">hash</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Hash</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L161"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L158"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L161" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L158" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="add,PackedTree,TNodeKind,string,PackedLineInfo"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#add%2CPackedTree%2CTNodeKind%2Cstring%2CPackedLineInfo"><span class="Identifier">add</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="../ast.html#TNodeKind"><span class="Identifier">TNodeKind</span></a><span class="Other">;</span> <span class="Identifier">token</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
-         <span class="Identifier">info</span><span class="Other">:</span> <a href="packed_ast.html#PackedLineInfo"><span class="Identifier">PackedLineInfo</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="==,NodePos,NodePos"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#%3D%3D%2CNodePos%2CNodePos"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L160"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L160" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="==,NodeId,NodeId"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#%3D%3D%2CNodeId%2CNodeId"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="packed_ast.html#NodeId"><span class="Identifier">NodeId</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L162"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L162" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="newTreeFrom,PackedTree"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#newTreeFrom%2CPackedTree"><span class="Identifier">newTreeFrom</span></a><span class="Other">(</span><span class="Identifier">old</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">)</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -1102,27 +1062,15 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L164" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="add,PackedTree,TNodeKind,PackedLineInfo"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#add%2CPackedTree%2CTNodeKind%2CPackedLineInfo"><span class="Identifier">add</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="../ast.html#TNodeKind"><span class="Identifier">TNodeKind</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="packed_ast.html#PackedLineInfo"><span class="Identifier">PackedLineInfo</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L167"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L167" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
 <a id="throwAwayLastNode,PackedTree"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#throwAwayLastNode%2CPackedTree"><span class="Identifier">throwAwayLastNode</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L170"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L184"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L170" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L184" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addIdent,PackedTree,LitId,PackedLineInfo"></a>
@@ -1132,21 +1080,21 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L173"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L187"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L173" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L187" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="addSym,PackedTree,SymId,PackedLineInfo"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addSym%2CPackedTree%2CSymId%2CPackedLineInfo"><span class="Identifier">addSym</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="packed_ast.html#PackedLineInfo"><span class="Identifier">PackedLineInfo</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+<a id="addSym,PackedTree,int32,PackedLineInfo"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addSym%2CPackedTree%2Cint32%2CPackedLineInfo"><span class="Identifier">addSym</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">int32</span><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="packed_ast.html#PackedLineInfo"><span class="Identifier">PackedLineInfo</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L176"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L190"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L176" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L190" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addModuleId,PackedTree,ModuleId,PackedLineInfo"></a>
@@ -1156,9 +1104,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L179"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L193"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L179" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L193" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addSymDef,PackedTree,SymId,PackedLineInfo"></a>
@@ -1168,9 +1116,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L182"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L196"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L182" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L196" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isAtom,PackedTree,int"></a>
@@ -1179,9 +1127,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L185"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L199"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L185" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L199" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="copyTree,PackedTree,PackedTree,NodePos"></a>
@@ -1191,34 +1139,22 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L187"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L201"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L187" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L201" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="copySym,PackedTree,PackedTree,SymId"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#copySym%2CPackedTree%2CPackedTree%2CSymId"><span class="Identifier">copySym</span></a><span class="Other">(</span><span class="Identifier">dest</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a><span class="Other">)</span><span class="Other">:</span> <a href="packed_ast.html#SymId"><span class="Identifier">SymId</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L197"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L197" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="prepare,PackedTree,TNodeKind,TNodeFlags,TypeId,PackedLineInfo"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#prepare%2CPackedTree%2CTNodeKind%2CTNodeFlags%2CTypeId%2CPackedLineInfo"><span class="Identifier">prepare</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="../ast.html#TNodeKind"><span class="Identifier">TNodeKind</span></a><span class="Other">;</span> <span class="Identifier">flags</span><span class="Other">:</span> <a href="../ast.html#TNodeFlags"><span class="Identifier">TNodeFlags</span></a><span class="Other">;</span>
+<a id="prepare,PackedTree,TNodeKind,TNodeFlags,PackedItemId,PackedLineInfo"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#prepare%2CPackedTree%2CTNodeKind%2CTNodeFlags%2CPackedItemId%2CPackedLineInfo"><span class="Identifier">prepare</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="../ast.html#TNodeKind"><span class="Identifier">TNodeKind</span></a><span class="Other">;</span> <span class="Identifier">flags</span><span class="Other">:</span> <a href="../ast.html#TNodeFlags"><span class="Identifier">TNodeFlags</span></a><span class="Other">;</span>
              <span class="Identifier">typeId</span><span class="Other">:</span> <a href="packed_ast.html#TypeId"><span class="Identifier">TypeId</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="packed_ast.html#PackedLineInfo"><span class="Identifier">PackedLineInfo</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">PatchPos</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L211"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L226"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L211" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L226" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="prepare,PackedTree,PackedTree,NodePos"></a>
@@ -1228,9 +1164,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L215"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L231"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L215" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L231" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="patch,PackedTree,PatchPos"></a>
@@ -1239,9 +1175,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L219"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L235"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L219" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L235" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="len,PackedTree"></a>
@@ -1250,20 +1186,21 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L225"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L241"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L225" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L241" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="[],PackedTree,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%2CPackedTree%2Cint"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">lent</span> <a href="packed_ast.html#Node"><span class="Identifier">Node</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#%5B%5D%2CPackedTree%2Cint"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">lent</span> <a href="packed_ast.html#PackedNode"><span class="Identifier">PackedNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L227"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L243"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L227" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L243" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasXsons,PackedTree,NodePos,int"></a>
@@ -1272,9 +1209,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L290"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L308"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L290" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L308" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hasAtLeastXsons,PackedTree,NodePos,int"></a>
@@ -1284,9 +1221,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L296"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L314"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L296" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L314" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="firstSon,PackedTree,NodePos"></a>
@@ -1296,9 +1233,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L304"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L322"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L304" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L322" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="kind,PackedTree,NodePos"></a>
@@ -1308,9 +1245,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L305"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L324"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L305" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L324" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="litId,PackedTree,NodePos"></a>
@@ -1319,9 +1256,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L306"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L326"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L306" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L326" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="info,PackedTree,NodePos"></a>
@@ -1331,9 +1268,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L307"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L328"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L307" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sons2,PackedTree,NodePos"></a>
@@ -1343,9 +1280,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L312"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L339"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L312" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L339" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sons3,PackedTree,NodePos"></a>
@@ -1355,9 +1292,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L318"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L345"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L318" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L345" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ithSon,PackedTree,NodePos,int"></a>
@@ -1367,21 +1304,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L325"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L352"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L325" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="@,PackedTree,LitId"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%40%2CPackedTree%2CLitId"><span class="Identifier">`@`</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">lit</span><span class="Other">:</span> <a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">lent</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L333"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L333" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L352" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="firstSon,NodePos"></a>
@@ -1390,100 +1315,56 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L341"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L370"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L341" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L370" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="strLit,PackedTree,NodePos"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#strLit%2CPackedTree%2CNodePos"><span class="Identifier">strLit</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">lent</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="toString,PackedTree,NodePos,Shared,int,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#toString%2CPackedTree%2CNodePos%2CShared%2Cint%2Cstring"><span class="Identifier">toString</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">;</span> <span class="Identifier">sh</span><span class="Other">:</span> <a href="packed_ast.html#Shared"><span class="Identifier">Shared</span></a><span class="Other">;</span> <span class="Identifier">nesting</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
+              <span class="Identifier">result</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L343"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L413"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L343" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L413" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="strVal,PackedTree,NodePos"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#strVal%2CPackedTree%2CNodePos"><span class="Identifier">strVal</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L347"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L347" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="filenameVal,PackedTree,NodePos"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#filenameVal%2CPackedTree%2CNodePos"><span class="Identifier">filenameVal</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L352"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L352" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="identAsStr,PackedTree,NodePos"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#identAsStr%2CPackedTree%2CNodePos"><span class="Identifier">identAsStr</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">lent</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+<a id="toString,PackedTree,NodePos,Shared"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#toString%2CPackedTree%2CNodePos%2CShared"><span class="Identifier">toString</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">;</span> <span class="Identifier">sh</span><span class="Other">:</span> <a href="packed_ast.html#Shared"><span class="Identifier">Shared</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L363"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L448"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L363" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L448" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="toString,PackedTree,NodePos,int,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#toString%2CPackedTree%2CNodePos%2Cint%2Cstring"><span class="Identifier">toString</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">;</span> <span class="Identifier">nesting</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">result</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="debug,PackedTree,Shared"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#debug%2CPackedTree%2CShared"><span class="Identifier">debug</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">sh</span><span class="Other">:</span> <a href="packed_ast.html#Shared"><span class="Identifier">Shared</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L383"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L452"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L383" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L452" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="toString,PackedTree,NodePos"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#toString%2CPackedTree%2CNodePos"><span class="Identifier">toString</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="getNodeId,PackedTree"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#getNodeId%2CPackedTree"><span class="Identifier">getNodeId</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">)</span><span class="Other">:</span> <a href="packed_ast.html#NodeId"><span class="Identifier">NodeId</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L417"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L489"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L417" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="debug,PackedTree"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#debug%2CPackedTree"><span class="Identifier">debug</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L421"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L421" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="hasPragma,PackedTree,NodePos,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#hasPragma%2CPackedTree%2CNodePos%2Cstring"><span class="Identifier">hasPragma</span></a><span class="Other">(</span><span class="Identifier">tree</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">;</span> <span class="Identifier">pragma</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L444"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L444" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L489" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1498,9 +1379,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L236"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L253"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L236" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L253" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sons.i,PackedTree,PackedTree,NodePos"></a>
@@ -1510,9 +1391,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L245"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L262"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L245" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L262" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isons.i,PackedTree,PackedTree,NodePos"></a>
@@ -1522,9 +1403,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L250"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L267"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L267" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sonsFrom1.i,PackedTree,NodePos"></a>
@@ -1533,9 +1414,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L256"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L274"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L256" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L274" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sonsWithoutLast2.i,PackedTree,NodePos"></a>
@@ -1545,9 +1426,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L267"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L285"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L267" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L285" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1561,9 +1442,31 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L288"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L306"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L306" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="typ.t,NodePos"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#typ.t%2CNodePos"><span class="Identifier">typ</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L331"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L331" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="flags.t,NodePos"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#flags.t%2CNodePos"><span class="Identifier">flags</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../ast.html#TNodeFlags"><span class="Identifier">TNodeFlags</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L333"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L333" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="kind.t,NodePos"></a>
@@ -1572,9 +1475,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L335"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L364"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L335" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L364" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="info.t,NodePos"></a>
@@ -1583,9 +1486,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L336"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L365"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L336" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L365" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="litId.t,NodePos"></a>
@@ -1594,9 +1497,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L337"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L366"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L337" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L366" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="symId.t,NodePos"></a>
@@ -1605,20 +1508,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L339"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L368"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L339" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="identId.t,NodePos"></a>
-<dt><pre><span class="Keyword">template</span> <a href="#identId.t%2CNodePos"><span class="Identifier">identId</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="packed_ast.html#NodePos"><span class="Identifier">NodePos</span></a><span class="Other">)</span><span class="Other">:</span> <a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L432"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L432" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L368" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="copyInto.t,,,"></a>
@@ -1627,9 +1519,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L434"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L466"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L434" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L466" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="copyIntoKind.t,,,,"></a>
@@ -1638,9 +1530,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L439"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/packed_ast.nim#L471"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L439" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/packed_ast.nim#L471" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1653,7 +1545,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-12-18 00:51:02 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-04 21:55:38 UTC</small>
       </div>
     </div>
   </div>

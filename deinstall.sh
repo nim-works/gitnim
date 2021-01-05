@@ -59,7 +59,6 @@ if [ $# -eq 1 ] ; then
   rm -rf $libdir
 
     rm -f $nimbleDir/compiler/aliases.nim
-    rm -f $nimbleDir/compiler/asciitables.nim
     rm -f $nimbleDir/compiler/ast.nim
     rm -f $nimbleDir/compiler/astalgo.nim
     rm -f $nimbleDir/compiler/bitsets.nim
@@ -96,14 +95,13 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/gorgeimpl.nim
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
-    rm -f $nimbleDir/compiler/ic/from_packed_ast.nim
     rm -f $nimbleDir/compiler/ic/to_packed_ast.nim
     rm -f $nimbleDir/compiler/ic/packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/rodfiles.nim
     rm -f $nimbleDir/compiler/ic/bitabs.nim
     rm -f $nimbleDir/compiler/ic/design.rst
     rm -f $nimbleDir/compiler/idents.nim
     rm -f $nimbleDir/compiler/importer.nim
-    rm -f $nimbleDir/compiler/incremental.nim
     rm -f $nimbleDir/compiler/index.nim
     rm -f $nimbleDir/compiler/injectdestructors.nim
     rm -f $nimbleDir/compiler/installer.ini
@@ -130,6 +128,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/modules.nim
     rm -f $nimbleDir/compiler/msgs.nim
     rm -f $nimbleDir/compiler/ndi.nim
+    rm -f $nimbleDir/compiler/nilcheck.nim
     rm -f $nimbleDir/compiler/nim.cfg
     rm -f $nimbleDir/compiler/nim.nim
     rm -f $nimbleDir/compiler/nimblecmd.nim
@@ -164,8 +163,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/renderer.nim
     rm -f $nimbleDir/compiler/renderverbatim.nim
     rm -f $nimbleDir/compiler/reorder.nim
-    rm -f $nimbleDir/compiler/rod.nim
-    rm -f $nimbleDir/compiler/rodimpl.nim
     rm -f $nimbleDir/compiler/rodutils.nim
     rm -f $nimbleDir/compiler/ropes.nim
     rm -f $nimbleDir/compiler/saturate.nim
