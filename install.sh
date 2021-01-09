@@ -674,6 +674,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/compilesettings.nim
   cp lib/std/jsonutils.nim $libdir/std/jsonutils.nim
   chmod 644 $libdir/std/jsonutils.nim
+  cp lib/std/socketstreams.nim $libdir/std/socketstreams.nim
+  chmod 644 $libdir/std/socketstreams.nim
   cp lib/std/with.nim $libdir/std/with.nim
   chmod 644 $libdir/std/with.nim
   cp lib/std/exitprocs.nim $libdir/std/exitprocs.nim
@@ -730,8 +732,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/bitsets.nim
   cp compiler/btrees.nim $nimbleDir/compiler/btrees.nim
   chmod 644 $nimbleDir/compiler/btrees.nim
-  cp compiler/canonicalizer.nim $nimbleDir/compiler/canonicalizer.nim
-  chmod 644 $nimbleDir/compiler/canonicalizer.nim
+  cp compiler/canonicalizer_unused.nim $nimbleDir/compiler/canonicalizer_unused.nim
+  chmod 644 $nimbleDir/compiler/canonicalizer_unused.nim
   cp compiler/ccgcalls.nim $nimbleDir/compiler/ccgcalls.nim
   chmod 644 $nimbleDir/compiler/ccgcalls.nim
   cp compiler/ccgexprs.nim $nimbleDir/compiler/ccgexprs.nim

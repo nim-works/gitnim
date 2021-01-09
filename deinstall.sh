@@ -63,7 +63,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/astalgo.nim
     rm -f $nimbleDir/compiler/bitsets.nim
     rm -f $nimbleDir/compiler/btrees.nim
-    rm -f $nimbleDir/compiler/canonicalizer.nim
+    rm -f $nimbleDir/compiler/canonicalizer_unused.nim
     rm -f $nimbleDir/compiler/ccgcalls.nim
     rm -f $nimbleDir/compiler/ccgexprs.nim
     rm -f $nimbleDir/compiler/ccgliterals.nim
