@@ -161,9 +161,9 @@ proc refresh() =
     let dist = "dist"
     if not dirExists dist:
       createDir dist
-      git("submodule add --depth 1 $1 dist" % [ distribution().quoteShell ])
+      git(["submodule", "add", distribution().quoteShell, dist ])
     elif not fileExists dist / ".git":
-      git("submodule update --init --depth 1 dist")
+      git(["submodule", "update", "--init", "--depth 1", dist])
   withinDistribution:
     git("fetch --all --prune")
     git("pull")
