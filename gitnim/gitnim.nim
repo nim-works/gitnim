@@ -212,8 +212,8 @@ proc refresh() =
     info "fetching the current distribution..."
     git "pull", capture
     for kind, package in walkDir".":
-      if kind == pcDir:
-        let module = lastPathPart package
+      let module = lastPathPart package
+      if kind == pcDir and not module.startsWith("."):
         info "updating $#..." % [ module ]
         git ["submodule", "update", "--init", "--depth=1", module], capture
 
