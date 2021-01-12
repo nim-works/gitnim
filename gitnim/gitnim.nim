@@ -14,10 +14,18 @@ const
   defaultProcess = {poStdErrToStdOut, poParentStreams}
   capture = {poStdErrToStdOut}
 
+proc originURL(): string {.compileTime.} =
+  ## guess the origin url for automatic embed
+  let url = parseUri staticExec"git remote get-url origin"
+  if url.path.startsWith "/":
+    result = $url
+  else:
+    result = "(origin url unknown)"
+
 # these will change towards our nightlies soon
 const
   binsURL: string = "NIM_BINS"
-  embBINS: string = staticExec"git remote get-url origin"
+  embBINS: string = originURL()
   bins {.used, strdefine.}: string = getEnv(binsURL, embBINS)
 
 # use the above to guess the distribution URL
@@ -136,7 +144,7 @@ proc run(exe: string; args: openArray[string];
     if not result.ok:
       notice exe & " " & arguments.join(" ")
 
-proc git(args: openArray[string]; options = defaultProcess): string
+proc git(args: openArray[string]; options = capture): string
   {.discardable.} =
   ## run git with some arguments
   var also = @args
@@ -148,7 +156,7 @@ proc git(args: openArray[string]; options = defaultProcess): string
   else:
     crash ran.output
 
-proc git(args: string; options = defaultProcess): string
+proc git(args: string; options = capture): string
   {.discardable.} =
   ## run git with some arguments
   git(args.split, options = options)
@@ -156,7 +164,7 @@ proc git(args: string; options = defaultProcess): string
 proc currentNimBranch(): string =
   withinNimDirectory:
     result = git(["branch", "--show-current",
-                  "--format=%(objectname)"], capture)
+                  "--format=%(objectname)"])
   if result == "":
     crash "unable to determine branch"
 
@@ -177,11 +185,26 @@ proc nim(args: openArray[string]; options = defaultProcess): string =
 
 template refreshDistribution() =
   withinDistribution:
-    var branch = currentNimVersion()
-    if run("git", ["checkout", branch], capture).ok:
+    let branch = currentNimVersion()
+    let ran = run("git", ["checkout", branch], capture)
+    if ran.ok:
       info "using the $# distribution branch" % [ branch ]
     else:
       warn "the $# distribution branch is not available" % [ branch ]
+      notice ran.output
+
+template repointDistribution() =
+  withinDistribution:
+    for kind, package in walkDir".":
+      let module = lastPathPart package
+      if kind == pcDir and not module.startsWith("."):
+        if fileExists package / ".git":
+          stderr.write "."
+          git ["submodule", "update", "--init", module]
+        else:
+          stderr.write "+"
+          git ["submodule", "update", "--init", "--depth=1", module]
+    stderr.write "\n"
 
 proc switch(branch: string): bool =
   ## switch compiler and distribution branches
@@ -191,31 +214,28 @@ proc switch(branch: string): bool =
     if result:
       info "using the $# compiler branch" % [ branch ]
       refreshDistribution()
+      repointDistribution()
     else:
       warn switch.output
 
 proc refresh() =
   withinNimDirectory:
-    git "fetch --all", capture
+    git "fetch --all"
     let dist = "dist"
     if not dirExists dist:
       createDir dist
-      git ["submodule", "add", distribution().quoteShell, dist ], capture
+      git ["submodule", "add", distribution().quoteShell, dist ]
     elif not dirExists ".git" / "modules" / dist:
-      git ["submodule", "update", "--init", dist], capture
+      git ["submodule", "update", "--init", dist]
     elif not fileExists dist / ".gitmodules":
-      git ["submodule", "update", "--init", dist], capture
+      git ["submodule", "update", "--init", dist]
   withinDistribution:
     info "querying for new distributions..."
-    git "fetch --all --prune", capture
+    git "fetch --all --prune"
     refreshDistribution()
     info "fetching the current distribution..."
-    git "pull", capture
-    for kind, package in walkDir".":
-      let module = lastPathPart package
-      if kind == pcDir and not module.startsWith("."):
-        info "updating $#..." % [ module ]
-        git ["submodule", "update", "--init", "--depth=1", module], capture
+    git "pull --rebase=merges --autostash"
+    repointDistribution()
 
 when isMainModule:
   let logger = newCuteConsoleLogger()
@@ -228,9 +248,9 @@ when isMainModule:
     refresh()
     withinNimDirectory:
       info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
-      info git("branch --all --sort=version:refname --verbose", capture)
+      info git "branch --all --sort=version:refname --verbose"
       info "or you can specify one of these tags; eg. `git nim latest`:"
-      info git("tag --list -n2 --sort=version:refname", capture)
+      info git "tag --list -n2 --sort=version:refname"
   else:
     if switch paramStr(1):
       info nim ["--version"]
