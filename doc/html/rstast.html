@@ -111,11 +111,12 @@ window.addEventListener('DOMContentLoaded', main);
   rnDescription, rnLiteralBlock, rnQuotedLiteralBlock, rnLineBlock,
   rnLineBlockItem, rnBlockQuote, rnTable, rnGridTable, rnMarkdownTable,
   rnTableRow, rnTableHeaderCell, rnTableDataCell, rnLabel, rnFootnote,
-  rnCitation, rnStandaloneHyperlink, rnHyperlink, rnRef, rnDirective, rnDirArg,
-  rnRaw, rnTitle, rnContents, rnImage, rnFigure, rnCodeBlock, rnAdmonition,
-  rnRawHtml, rnRawLatex, rnContainer, rnIndex, rnSubstitutionDef, rnGeneralRole,
-  rnSub, rnSup, rnIdx, rnEmphasis, rnStrongEmphasis, rnTripleEmphasis,
-  rnInterpretedText, rnInlineLiteral, rnSubstitutionReferences, rnSmiley, rnLeaf">RstNodeKind</a></li>
+  rnCitation, rnStandaloneHyperlink, rnHyperlink, rnRef, rnInternalRef,
+  rnDirective, rnDirArg, rnRaw, rnTitle, rnContents, rnImage, rnFigure,
+  rnCodeBlock, rnAdmonition, rnRawHtml, rnRawLatex, rnContainer, rnIndex,
+  rnSubstitutionDef, rnGeneralRole, rnSub, rnSup, rnIdx, rnEmphasis,
+  rnStrongEmphasis, rnTripleEmphasis, rnInterpretedText, rnInlineLiteral,
+  rnInlineTarget, rnSubstitutionReferences, rnSmiley, rnLeaf">RstNodeKind</a></li>
   <li><a class="reference" href="#PRstNode"
     title="PRstNode = ref RstNode">PRstNode</a></li>
   <li><a class="reference" href="#RstNodeSeq"
@@ -126,7 +127,9 @@ window.addEventListener('DOMContentLoaded', main);
   text*: string              ## valid for leafs in the AST; and the title of
                              ## the document or the section; and rnEnumList
                              ## and rnAdmonition; and rnLineBlockItem
-  level*: int                ## valid for some node kinds
+  level*: int                ## valid for headlines/overlines only
+  anchor*: string            ## anchor, internal link target
+                             ## (aka HTML id tag, aka Latex label/hypertarget)
   sons*: RstNodeSeq          ## the node&apos;s sons">RstNode</a></li>
 
   </ul>
@@ -208,11 +211,12 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">rnDescription</span><span class="Other">,</span> <span class="Identifier">rnLiteralBlock</span><span class="Other">,</span> <span class="Identifier">rnQuotedLiteralBlock</span><span class="Other">,</span> <span class="Identifier">rnLineBlock</span><span class="Other">,</span>
   <span class="Identifier">rnLineBlockItem</span><span class="Other">,</span> <span class="Identifier">rnBlockQuote</span><span class="Other">,</span> <span class="Identifier">rnTable</span><span class="Other">,</span> <span class="Identifier">rnGridTable</span><span class="Other">,</span> <span class="Identifier">rnMarkdownTable</span><span class="Other">,</span>
   <span class="Identifier">rnTableRow</span><span class="Other">,</span> <span class="Identifier">rnTableHeaderCell</span><span class="Other">,</span> <span class="Identifier">rnTableDataCell</span><span class="Other">,</span> <span class="Identifier">rnLabel</span><span class="Other">,</span> <span class="Identifier">rnFootnote</span><span class="Other">,</span>
-  <span class="Identifier">rnCitation</span><span class="Other">,</span> <span class="Identifier">rnStandaloneHyperlink</span><span class="Other">,</span> <span class="Identifier">rnHyperlink</span><span class="Other">,</span> <span class="Identifier">rnRef</span><span class="Other">,</span> <span class="Identifier">rnDirective</span><span class="Other">,</span> <span class="Identifier">rnDirArg</span><span class="Other">,</span>
-  <span class="Identifier">rnRaw</span><span class="Other">,</span> <span class="Identifier">rnTitle</span><span class="Other">,</span> <span class="Identifier">rnContents</span><span class="Other">,</span> <span class="Identifier">rnImage</span><span class="Other">,</span> <span class="Identifier">rnFigure</span><span class="Other">,</span> <span class="Identifier">rnCodeBlock</span><span class="Other">,</span> <span class="Identifier">rnAdmonition</span><span class="Other">,</span>
-  <span class="Identifier">rnRawHtml</span><span class="Other">,</span> <span class="Identifier">rnRawLatex</span><span class="Other">,</span> <span class="Identifier">rnContainer</span><span class="Other">,</span> <span class="Identifier">rnIndex</span><span class="Other">,</span> <span class="Identifier">rnSubstitutionDef</span><span class="Other">,</span> <span class="Identifier">rnGeneralRole</span><span class="Other">,</span>
-  <span class="Identifier">rnSub</span><span class="Other">,</span> <span class="Identifier">rnSup</span><span class="Other">,</span> <span class="Identifier">rnIdx</span><span class="Other">,</span> <span class="Identifier">rnEmphasis</span><span class="Other">,</span> <span class="Identifier">rnStrongEmphasis</span><span class="Other">,</span> <span class="Identifier">rnTripleEmphasis</span><span class="Other">,</span>
-  <span class="Identifier">rnInterpretedText</span><span class="Other">,</span> <span class="Identifier">rnInlineLiteral</span><span class="Other">,</span> <span class="Identifier">rnSubstitutionReferences</span><span class="Other">,</span> <span class="Identifier">rnSmiley</span><span class="Other">,</span> <span class="Identifier">rnLeaf</span></pre></dt>
+  <span class="Identifier">rnCitation</span><span class="Other">,</span> <span class="Identifier">rnStandaloneHyperlink</span><span class="Other">,</span> <span class="Identifier">rnHyperlink</span><span class="Other">,</span> <span class="Identifier">rnRef</span><span class="Other">,</span> <span class="Identifier">rnInternalRef</span><span class="Other">,</span>
+  <span class="Identifier">rnDirective</span><span class="Other">,</span> <span class="Identifier">rnDirArg</span><span class="Other">,</span> <span class="Identifier">rnRaw</span><span class="Other">,</span> <span class="Identifier">rnTitle</span><span class="Other">,</span> <span class="Identifier">rnContents</span><span class="Other">,</span> <span class="Identifier">rnImage</span><span class="Other">,</span> <span class="Identifier">rnFigure</span><span class="Other">,</span>
+  <span class="Identifier">rnCodeBlock</span><span class="Other">,</span> <span class="Identifier">rnAdmonition</span><span class="Other">,</span> <span class="Identifier">rnRawHtml</span><span class="Other">,</span> <span class="Identifier">rnRawLatex</span><span class="Other">,</span> <span class="Identifier">rnContainer</span><span class="Other">,</span> <span class="Identifier">rnIndex</span><span class="Other">,</span>
+  <span class="Identifier">rnSubstitutionDef</span><span class="Other">,</span> <span class="Identifier">rnGeneralRole</span><span class="Other">,</span> <span class="Identifier">rnSub</span><span class="Other">,</span> <span class="Identifier">rnSup</span><span class="Other">,</span> <span class="Identifier">rnIdx</span><span class="Other">,</span> <span class="Identifier">rnEmphasis</span><span class="Other">,</span>
+  <span class="Identifier">rnStrongEmphasis</span><span class="Other">,</span> <span class="Identifier">rnTripleEmphasis</span><span class="Other">,</span> <span class="Identifier">rnInterpretedText</span><span class="Other">,</span> <span class="Identifier">rnInlineLiteral</span><span class="Other">,</span>
+  <span class="Identifier">rnInlineTarget</span><span class="Other">,</span> <span class="Identifier">rnSubstitutionReferences</span><span class="Other">,</span> <span class="Identifier">rnSmiley</span><span class="Other">,</span> <span class="Identifier">rnLeaf</span></pre></dt>
 <dd>
 
 the possible node kinds of an PRstNode
@@ -228,9 +232,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 an RST node
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L71"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L72"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L71" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L72" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="RstNodeSeq"></a>
@@ -239,9 +243,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L72"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L73"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L72" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L73" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="RstNode"></a>
@@ -250,16 +254,18 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">text</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>              <span class="Comment">## valid for leafs in the AST; and the title of</span>
                              <span class="Comment">## the document or the section; and rnEnumList</span>
                              <span class="Comment">## and rnAdmonition; and rnLineBlockItem</span>
-  <span class="Identifier">level</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>                <span class="Comment">## valid for some node kinds</span>
+  <span class="Identifier">level</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>                <span class="Comment">## valid for headlines/overlines only</span>
+  <span class="Identifier">anchor</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>            <span class="Comment">## anchor, internal link target</span>
+                             <span class="Comment">## (aka HTML id tag, aka Latex label/hypertarget)</span>
   <span class="Identifier">sons</span><span class="Operator">*</span><span class="Other">:</span> <a href="rstast.html#RstNodeSeq"><span class="Identifier">RstNodeSeq</span></a>          <span class="Comment">## the node's sons</span>
   </pre></dt>
 <dd>
 
 an RST node's description
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L73"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L74"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L73" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L74" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -273,9 +279,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L81"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L84"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L81" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L84" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newRstNode,RstNodeKind"></a>
@@ -284,9 +290,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L84"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L87"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L84" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L87" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newRstNode,RstNodeKind,string"></a>
@@ -295,24 +301,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L89"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L92"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L89" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L92" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lastSon,PRstNode"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#lastSon%2CPRstNode"><span class="Identifier">lastSon</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L93"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L93" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="add,PRstNode,PRstNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#add%2CPRstNode%2CPRstNode"><span class="Identifier">add</span></a><span class="Other">(</span><span class="Identifier">father</span><span class="Other">,</span> <span class="Identifier">son</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -322,8 +317,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L96" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="add,PRstNode,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#add%2CPRstNode%2Cstring"><span class="Identifier">add</span></a><span class="Other">(</span><span class="Identifier">father</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="add,PRstNode,PRstNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#add%2CPRstNode%2CPRstNode"><span class="Identifier">add</span></a><span class="Other">(</span><span class="Identifier">father</span><span class="Other">,</span> <span class="Identifier">son</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -333,8 +328,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L99" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="addIfNotNil,PRstNode,PRstNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addIfNotNil%2CPRstNode%2CPRstNode"><span class="Identifier">addIfNotNil</span></a><span class="Other">(</span><span class="Identifier">father</span><span class="Other">,</span> <span class="Identifier">son</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="add,PRstNode,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#add%2CPRstNode%2Cstring"><span class="Identifier">add</span></a><span class="Other">(</span><span class="Identifier">father</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 
@@ -344,6 +339,17 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L102" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="addIfNotNil,PRstNode,PRstNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addIfNotNil%2CPRstNode%2CPRstNode"><span class="Identifier">addIfNotNil</span></a><span class="Other">(</span><span class="Identifier">father</span><span class="Other">,</span> <span class="Identifier">son</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L105"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L105" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="renderRstToRst,PRstNode,string"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#renderRstToRst%2CPRstNode%2Cstring"><span class="Identifier">renderRstToRst</span></a><span class="Other">(</span><span class="Identifier">n</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">;</span> <span class="Identifier">result</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
@@ -351,9 +357,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 renders <tt class="docutils literal"><span class="pre">n</span></tt> into its string representation and appends to <tt class="docutils literal"><span class="pre">result</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L295"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L298"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L295" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L298" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="renderRstToJson,PRstNode"></a>
@@ -368,9 +374,9 @@ Writes the given RST node as JSON that is in the form<pre>{
 }</pre>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L314"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L317"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L314" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L317" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="renderRstToStr,PRstNode,int"></a>
@@ -379,9 +385,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Writes the parsed RST <tt class="docutils literal"><span class="pre">node</span></tt> into a compact string representation in the format (one line per every sub-node): <tt class="docutils literal"><span class="pre">indent - kind - text - level (if non-zero)</span></tt> (suitable for debugging of RST parsing).
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L325"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstast.nim#L328"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L325" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstast.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -394,7 +400,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-11 00:57:17 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-12 01:01:01 UTC</small>
       </div>
     </div>
   </div>
