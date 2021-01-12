@@ -17,7 +17,7 @@ const
 const
   binsURL: string = "NIM_BINS"
   embBINS: string = staticExec"git remote get-url origin"
-  bins {.strdefine.}: string = getEnv(binsURL, embBINS)
+  bins {.used, strdefine.}: string = getEnv(binsURL, embBINS)
 
 # use the above to guess the distribution URL
 proc toDist(u: string): string {.compileTime.} =
@@ -34,7 +34,7 @@ proc toDist(u: string): string {.compileTime.} =
 const
   distURL: string = "NIM_DIST"
   embDIST: string = embBINS.toDist
-  dist {.strdefine.}: string = getEnv(distURL, embDIST)
+  dist {.used, strdefine.}: string = getEnv(distURL, embDIST)
   dir = "dist"
 
 static:
