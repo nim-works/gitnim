@@ -178,8 +178,8 @@ template refreshDistribution() =
     var branch = currentNimVersion()
     if run("git", ["checkout", branch], {poStdErrToStdOut}).ok:
       info "using the $1 distribution branch" % [ branch ]
-      return
-  warn "the $1 distribution branch is not available" % [ branch ]
+    else:
+      warn "the $1 distribution branch is not available" % [ branch ]
 
 proc switch(branch: string): bool =
   ## switch compiler and distribution branches
