@@ -200,11 +200,11 @@ proc refresh() =
     let dist = "dist"
     if not dirExists dist:
       createDir dist
-      git ["submodule", "add", distribution().quoteShell, dist ]
+      git ["submodule", "add", distribution().quoteShell, dist ], capture
     elif not dirExists ".git" / "modules" / dist:
-      git ["submodule", "update", "--init", dist]
+      git ["submodule", "update", "--init", dist], capture
     elif not fileExists dist / ".gitmodules":
-      git ["submodule", "update", "--init", dist]
+      git ["submodule", "update", "--init", dist], capture
   withinDistribution:
     info "querying for new distributions..."
     git "fetch --all --prune", capture
@@ -215,7 +215,7 @@ proc refresh() =
       if kind == pcDir:
         let module = lastPathPart package
         info "updating $#..." % [ module ]
-        git ["submodule", "update", "--init", "--depth=1", module]
+        git ["submodule", "update", "--init", "--depth=1", module], capture
 
 when isMainModule:
   let logger = newCuteConsoleLogger()
