@@ -196,7 +196,7 @@ proc switch(branch: string): bool =
 
 proc refresh() =
   withinNimDirectory:
-    git"fetch --all"
+    git "fetch --all", capture
     let dist = "dist"
     if not dirExists dist:
       createDir dist
