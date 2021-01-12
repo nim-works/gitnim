@@ -80,8 +80,9 @@ template withinDirectory(path: typed; body: untyped) =
   else:
     raise newException(ValueError, $path & " is not a directory")
 
+let nimDirectory = parentDir getAppDir()
 template withinNimDirectory(body: untyped) =
-  withinDirectory getAppDir().parentDir:
+  withinDirectory nimDirectory:
     body
 
 template withinDistribution(body: untyped) =
@@ -115,7 +116,7 @@ proc run(exe: string; args: openArray[string];
       opts.incl poInteractive
       opts.incl poParentStreams
       # the user wants interactivity
-      let process = startProcess(command, getAppDir(),
+      let process = startProcess(command, nimDirectory,
                                  args = arguments, options = opts)
       result = RunOutput(ok: process.waitForExit == 0)
       when gitnimDebug:
