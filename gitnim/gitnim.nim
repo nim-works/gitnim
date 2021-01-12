@@ -15,14 +15,18 @@ const
 
 # these will change towards our nightlies soon
 const
-  envURL: string = "GITNIM_URL"
+  envURL: string = "NIM_BINS"
   embURL: string = staticExec"git remote get-url origin"
   URL {.strdefine.}: string = getEnv(envURL, embURL)
 
 # use the above to guess the distribution URL
 proc toDist(u: string): string {.compileTime.} =
-  var url = parseUri(u)
-  url.path = parentDir(url.path) / "dist"
+  var url = parseUri u
+  # support for paths is inconsistent, so we do this simply
+  url.path = parentDir url.path
+  if not url.path.endsWith "/":
+    url.path.add "/"
+  url.path.add "dist"
   result = $url
 
 const
@@ -87,10 +91,9 @@ proc run(exe: string; args: openArray[string];
   ## run a program with arguments
   var
     command = findExe(exe)
-    arguments: seq[string]
+    arguments: seq[string] = @args
     opts = options
-  for a in args:
-    arguments.add a
+
   block ran:
     if command == "":
       result = RunOutput(output: "unable to find $# in path" % [ exe ])
@@ -146,8 +149,8 @@ proc nim(args: openArray[string]; options = defaultProcess): string =
   run(findExe"nim", args, options = options).output
 
 proc refresh() =
-  discard git("fetch --all")
   withinDirectory getAppDir().parentDir:
+    discard git("fetch --all")
     let dist = "dist"
     if not dirExists dist:
       createDir dist
