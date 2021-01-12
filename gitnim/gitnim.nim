@@ -12,29 +12,37 @@ import cutelog
 const
   gitnimDebug {.booldefine.} = false
   defaultProcess = {poStdErrToStdOut, poParentStreams}
+  capture = {poStdErrToStdOut}
 
 # these will change towards our nightlies soon
 const
-  envURL: string = "GITNIM_URL"
-  embURL: string = staticExec"git remote get-url origin"
-  URL {.strdefine.}: string = getEnv(envURL, embURL)
+  binsURL: string = "NIM_BINS"
+  embBINS: string = staticExec"git remote get-url origin"
+  bins {.used, strdefine.}: string = getEnv(binsURL, embBINS)
 
 # use the above to guess the distribution URL
 proc toDist(u: string): string {.compileTime.} =
-  var url = parseUri(u)
-  url.path = parentDir(url.path) / "dist"
+  var url = parseUri u
+  # support for paths is inconsistent, so we do this simply
+  if url.hostname != "":
+    # it's a URL; use a peer of the gitnim repo
+    url.path = parentDir url.path
+  if not url.path.endsWith "/":
+    url.path.add "/"
+  url.path.add "dist"
   result = $url
 
 const
   distURL: string = "NIM_DIST"
-  embDist: string = embURL.toDist
-  dist {.strdefine.}: string = getEnv(distURL, embDIST)
+  embDIST: string = embBINS.toDist
+  dist {.used, strdefine.}: string = getEnv(distURL, embDIST)
+  dir = "dist"
 
 static:
-  hint "gitnim uses following url by default:"
-  hint URL
-  hint "via setting the $" & envURL & ", or"
-  hint "via passing --define:URL=\"...\""
+  hint "gitnim uses following nightlies repository:"
+  hint embBINS
+  hint "via setting the $" & binsURL & ", or"
+  hint "via passing --define:bins=\"...\""
   hint "gitnim uses the following distribution url:"
   hint dist
   hint "via setting the $" & distURL & ", or"
@@ -52,7 +60,7 @@ type
 
 macro repo(): untyped =
   let getEnv = bindSym"getEnv"
-  result = getEnv.newCall(envURL.newLit, URL.newLit)
+  result = getEnv.newCall(binsURL.newLit, embBINS.newLit)
 
 template crash(why: string) {.used.} =
   error why
@@ -74,23 +82,28 @@ template withinDirectory(path: typed; body: untyped) =
   else:
     raise newException(ValueError, $path & " is not a directory")
 
+let nimDirectory = parentDir getAppDir()
+template withinNimDirectory(body: untyped) =
+  withinDirectory nimDirectory:
+    body
+
 template withinDistribution(body: untyped) =
   ## do something within the distribution directory
-  let dist = getAppDir().parentDir / "dist"
-  if dirExists dist:
-    if fileExists dist / ".git":
-      withinDirectory dist:
-        body
+  let dist = nimDirectory / dir
+  withinNimDirectory:
+    if dirExists dist:
+      if fileExists dist / ".git":
+        withinDirectory dist:
+          body
 
 proc run(exe: string; args: openArray[string];
          options = defaultProcess): RunOutput =
   ## run a program with arguments
   var
     command = findExe(exe)
-    arguments: seq[string]
+    arguments: seq[string] = @args
     opts = options
-  for a in args:
-    arguments.add a
+
   block ran:
     if command == "":
       result = RunOutput(output: "unable to find $# in path" % [ exe ])
@@ -105,8 +118,7 @@ proc run(exe: string; args: openArray[string];
       opts.incl poInteractive
       opts.incl poParentStreams
       # the user wants interactivity
-      let process = startProcess(command, getAppDir(),
-                                 args = arguments, options = opts)
+      let process = startProcess(command, args = arguments, options = opts)
       result = RunOutput(ok: process.waitForExit == 0)
       when gitnimDebug:
         debug $process.waitForExit
@@ -128,7 +140,7 @@ proc git(args: openArray[string]; options = defaultProcess): string
   {.discardable.} =
   ## run git with some arguments
   var also = @args
-  if stdout.isAtty and args.anyIt "--sort" in it:
+  if stdout.isAtty and args.anyIt it.startsWith("--sort"):
     also.insert("--color", 1)
   let ran = run("git", also, options = options)
   if ran.ok:
@@ -141,35 +153,69 @@ proc git(args: string; options = defaultProcess): string
   ## run git with some arguments
   git(args.split, options = options)
 
+proc currentNimBranch(): string =
+  withinNimDirectory:
+    result = git(["branch", "--show-current",
+                  "--format=%(objectname)"], capture)
+  if result == "":
+    crash "unable to determine branch"
+
+proc currentNimVersion(): string =
+  ## kinda brittle, but what can you do?
+  withinNimDirectory:
+    let ran = run("bin" / "nim", ["--version"], capture)
+    if not ran.ok:
+      crash "unable to determine nim version"
+    else:
+      #Nim Compiler Version 1.5.1 [Linux: amd64]
+      let header = splitLines(ran.output)[0]
+      result = splitWhitespace(header)[3]
+
 proc nim(args: openArray[string]; options = defaultProcess): string =
   ## run nim with some arguments
   run(findExe"nim", args, options = options).output
 
-proc refresh() =
-  discard git("fetch --all")
-  withinDirectory getAppDir().parentDir:
-    let dist = "dist"
-    if not dirExists dist:
-      createDir dist
-      git("submodule add --depth 1 $1 dist" % [ distribution().quoteShell ])
+template refreshDistribution() =
   withinDistribution:
-    git("fetch --all --prune")
-    git("pull")
+    var branch = currentNimVersion()
+    if run("git", ["checkout", branch], capture).ok:
+      info "using the $# distribution branch" % [ branch ]
+    else:
+      warn "the $# distribution branch is not available" % [ branch ]
 
 proc switch(branch: string): bool =
   ## switch compiler and distribution branches
-  withinDirectory getAppDir().parentDir:
-    let switch = run("git", ["checkout", branch], {poStdErrToStdOut})
+  withinNimDirectory:
+    let switch = run("git", ["checkout", branch], capture)
     result = switch.ok
     if result:
-      info "using the $1 compiler branch" % [ branch ]
-      withinDistribution:
-        if run("git", ["checkout", branch], {poStdErrToStdOut}).ok:
-          info "using the $1 distribution branch" % [ branch ]
-          return
-      warn "the $1 distribution branch is not available" % [ branch ]
+      info "using the $# compiler branch" % [ branch ]
+      refreshDistribution()
     else:
       warn switch.output
+
+proc refresh() =
+  withinNimDirectory:
+    git "fetch --all", capture
+    let dist = "dist"
+    if not dirExists dist:
+      createDir dist
+      git ["submodule", "add", distribution().quoteShell, dist ], capture
+    elif not dirExists ".git" / "modules" / dist:
+      git ["submodule", "update", "--init", dist], capture
+    elif not fileExists dist / ".gitmodules":
+      git ["submodule", "update", "--init", dist], capture
+  withinDistribution:
+    info "querying for new distributions..."
+    git "fetch --all --prune", capture
+    refreshDistribution()
+    info "fetching the current distribution..."
+    git "pull", capture
+    for kind, package in walkDir".":
+      if kind == pcDir:
+        let module = lastPathPart package
+        info "updating $#..." % [ module ]
+        git ["submodule", "update", "--init", "--depth=1", module], capture
 
 when isMainModule:
   let logger = newCuteConsoleLogger()
@@ -180,10 +226,11 @@ when isMainModule:
 
   if paramCount() == 0:
     refresh()
-    info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
-    info git("branch --all --sort=version:refname --verbose", {poStdErrToStdOut})
-    info "or you can specify one of these tags; eg. `git nim latest`:"
-    info git("tag --list -n2 --sort=version:refname", {poStdErrToStdOut})
+    withinNimDirectory:
+      info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
+      info git("branch --all --sort=version:refname --verbose", capture)
+      info "or you can specify one of these tags; eg. `git nim latest`:"
+      info git("tag --list -n2 --sort=version:refname", capture)
   else:
     if switch paramStr(1):
       info nim ["--version"]
