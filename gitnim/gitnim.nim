@@ -15,9 +15,9 @@ const
 
 # these will change towards our nightlies soon
 const
-  envURL: string = "NIM_BINS"
-  embURL: string = staticExec"git remote get-url origin"
-  URL {.strdefine.}: string = getEnv(envURL, embURL)
+  binsURL: string = "NIM_BINS"
+  embBINS: string = staticExec"git remote get-url origin"
+  bins {.strdefine.}: string = getEnv(binsURL, embBINS)
 
 # use the above to guess the distribution URL
 proc toDist(u: string): string {.compileTime.} =
@@ -33,14 +33,15 @@ proc toDist(u: string): string {.compileTime.} =
 
 const
   distURL: string = "NIM_DIST"
-  embDist: string = embURL.toDist
+  embDIST: string = embBINS.toDist
   dist {.strdefine.}: string = getEnv(distURL, embDIST)
+  dir = "dist"
 
 static:
   hint "gitnim uses following nightlies repository:"
-  hint URL
-  hint "via setting the $" & envURL & ", or"
-  hint "via passing --define:URL=\"...\""
+  hint embBINS
+  hint "via setting the $" & binsURL & ", or"
+  hint "via passing --define:bins=\"...\""
   hint "gitnim uses the following distribution url:"
   hint dist
   hint "via setting the $" & distURL & ", or"
@@ -58,7 +59,7 @@ type
 
 macro repo(): untyped =
   let getEnv = bindSym"getEnv"
-  result = getEnv.newCall(envURL.newLit, URL.newLit)
+  result = getEnv.newCall(binsURL.newLit, embBINS.newLit)
 
 template crash(why: string) {.used.} =
   error why
@@ -88,10 +89,9 @@ template withinNimDirectory(body: untyped) =
 template withinDistribution(body: untyped) =
   ## do something within the distribution directory
   withinNimDirectory:
-    const dist = "dist"
-    if dirExists dist:
-      if fileExists dist / ".git":
-        withinDirectory dist:
+    if dirExists dir:
+      if fileExists dir / ".git":
+        withinDirectory dir:
           body
 
 proc run(exe: string; args: openArray[string];
