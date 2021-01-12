@@ -133,7 +133,7 @@ proc git(args: openArray[string]; options = defaultProcess): string
   {.discardable.} =
   ## run git with some arguments
   var also = @args
-  if stdout.isAtty and args.anyIt "--sort" in it:
+  if stdout.isAtty and args.anyIt it.startsWith("--sort"):
     also.insert("--color", 1)
   let ran = run("git", also, options = options)
   if ran.ok:
