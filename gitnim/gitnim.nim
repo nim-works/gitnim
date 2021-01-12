@@ -117,8 +117,7 @@ proc run(exe: string; args: openArray[string];
       opts.incl poInteractive
       opts.incl poParentStreams
       # the user wants interactivity
-      let process = startProcess(command, nimDirectory,
-                                 args = arguments, options = opts)
+      let process = startProcess(command, args = arguments, options = opts)
       result = RunOutput(ok: process.waitForExit == 0)
       when gitnimDebug:
         debug $process.waitForExit
