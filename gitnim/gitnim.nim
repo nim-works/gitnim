@@ -164,7 +164,7 @@ proc refresh() =
       createDir dist
       git(["submodule", "add", distribution().quoteShell, dist ])
     elif not dirExists ".git" / "modules" / dist:
-      git(["submodule", "add", distribution().quoteShell, dist ])
+      git(["submodule", "update", "--init", dist])
     elif not fileExists dist / ".gitmodules":
       git(["submodule", "update", "--init", dist])
   withinDistribution:
