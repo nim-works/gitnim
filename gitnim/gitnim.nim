@@ -173,6 +173,25 @@ proc nim(args: openArray[string]; options = defaultProcess): string =
   ## run nim with some arguments
   run(findExe"nim", args, options = options).output
 
+template refreshDistribution() =
+  withinDistribution:
+    var branch = currentNimVersion()
+    if run("git", ["checkout", branch], {poStdErrToStdOut}).ok:
+      info "using the $1 distribution branch" % [ branch ]
+      return
+  warn "the $1 distribution branch is not available" % [ branch ]
+
+proc switch(branch: string): bool =
+  ## switch compiler and distribution branches
+  withinNimDirectory:
+    let switch = run("git", ["checkout", branch], {poStdErrToStdOut})
+    result = switch.ok
+    if result:
+      info "using the $1 compiler branch" % [ branch ]
+      refreshDistribution()
+    else:
+      warn switch.output
+
 proc refresh() =
   withinNimDirectory:
     discard git("fetch --all")
@@ -186,28 +205,13 @@ proc refresh() =
       git ["submodule", "update", "--init", dist]
   withinDistribution:
     git"fetch --all --prune"
+    refreshDistribution()
     git"pull"
     for kind, package in walkDir".":
       if kind == pcDir:
         let module = lastPathPart package
         info "updating $#..." % [ module ]
         git ["submodule", "update", "--init", "--depth=1", module]
-
-proc switch(branch: string): bool =
-  ## switch compiler and distribution branches
-  withinNimDirectory:
-    let switch = run("git", ["checkout", branch], {poStdErrToStdOut})
-    result = switch.ok
-    if result:
-      info "using the $1 compiler branch" % [ branch ]
-      withinDistribution:
-        var branch = currentNimVersion()
-        if run("git", ["checkout", branch], {poStdErrToStdOut}).ok:
-          info "using the $1 distribution branch" % [ branch ]
-          return
-      warn "the $1 distribution branch is not available" % [ branch ]
-    else:
-      warn switch.output
 
 when isMainModule:
   let logger = newCuteConsoleLogger()
