@@ -170,6 +170,11 @@ proc refresh() =
   withinDistribution:
     git("fetch --all --prune")
     git("pull")
+    for kind, package in walkDir".":
+      if kind == pcDir:
+        let module = lastPathPart package
+        info "updating $#..." % [ module ]
+        git(["submodule", "update", "--init", "--depth=1", module])
 
 proc switch(branch: string): bool =
   ## switch compiler and distribution branches
