@@ -12,6 +12,7 @@ import cutelog
 const
   gitnimDebug {.booldefine.} = false
   defaultProcess = {poStdErrToStdOut, poParentStreams}
+  capture = {poStdErrToStdOut}
 
 # these will change towards our nightlies soon
 const
@@ -154,14 +155,15 @@ proc git(args: string; options = defaultProcess): string
 
 proc currentNimBranch(): string =
   withinNimDirectory:
-    result = git ["branch", "--show-current", "--format=%(objectname)"]
+    result = git(["branch", "--show-current",
+                  "--format=%(objectname)"], capture)
   if result == "":
     crash "unable to determine branch"
 
 proc currentNimVersion(): string =
   ## kinda brittle, but what can you do?
   withinNimDirectory:
-    let ran = run("bin" / "nim", ["--version"])
+    let ran = run("bin" / "nim", ["--version"], capture)
     if not ran.ok:
       crash "unable to determine nim version"
     else:
@@ -176,25 +178,25 @@ proc nim(args: openArray[string]; options = defaultProcess): string =
 template refreshDistribution() =
   withinDistribution:
     var branch = currentNimVersion()
-    if run("git", ["checkout", branch], {poStdErrToStdOut}).ok:
-      info "using the $1 distribution branch" % [ branch ]
+    if run("git", ["checkout", branch], capture).ok:
+      info "using the $# distribution branch" % [ branch ]
     else:
-      warn "the $1 distribution branch is not available" % [ branch ]
+      warn "the $# distribution branch is not available" % [ branch ]
 
 proc switch(branch: string): bool =
   ## switch compiler and distribution branches
   withinNimDirectory:
-    let switch = run("git", ["checkout", branch], {poStdErrToStdOut})
+    let switch = run("git", ["checkout", branch], capture)
     result = switch.ok
     if result:
-      info "using the $1 compiler branch" % [ branch ]
+      info "using the $# compiler branch" % [ branch ]
       refreshDistribution()
     else:
       warn switch.output
 
 proc refresh() =
   withinNimDirectory:
-    discard git("fetch --all")
+    git"fetch --all"
     let dist = "dist"
     if not dirExists dist:
       createDir dist
@@ -204,9 +206,11 @@ proc refresh() =
     elif not fileExists dist / ".gitmodules":
       git ["submodule", "update", "--init", dist]
   withinDistribution:
-    git"fetch --all --prune"
+    info "querying for new distributions..."
+    git "fetch --all --prune", capture
     refreshDistribution()
-    git"pull"
+    info "fetching the current distribution..."
+    git "pull", capture
     for kind, package in walkDir".":
       if kind == pcDir:
         let module = lastPathPart package
@@ -224,9 +228,9 @@ when isMainModule:
     refresh()
     withinNimDirectory:
       info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
-      info git("branch --all --sort=version:refname --verbose", {poStdErrToStdOut})
+      info git("branch --all --sort=version:refname --verbose", capture)
       info "or you can specify one of these tags; eg. `git nim latest`:"
-      info git("tag --list -n2 --sort=version:refname", {poStdErrToStdOut})
+      info git("tag --list -n2 --sort=version:refname", capture)
   else:
     if switch paramStr(1):
       info nim ["--version"]
