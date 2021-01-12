@@ -157,8 +157,6 @@ proc currentNimBranch(): string =
     result = git ["branch", "--show-current", "--format=%(objectname)"]
   if result == "":
     crash "unable to determine branch"
-<<<<<<< Updated upstream
-=======
 
 proc currentNimVersion(): string =
   ## kinda brittle, but what can you do?
@@ -170,7 +168,6 @@ proc currentNimVersion(): string =
       #Nim Compiler Version 1.5.1 [Linux: amd64]
       let header = splitLines(ran.output)[0]
       result = splitWhitespace(header)[3]
->>>>>>> Stashed changes
 
 proc nim(args: openArray[string]; options = defaultProcess): string =
   ## run nim with some arguments
