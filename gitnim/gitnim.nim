@@ -152,6 +152,12 @@ proc git(args: string; options = defaultProcess): string
   ## run git with some arguments
   git(args.split, options = options)
 
+proc currentNimBranch(): string =
+  withinNimDirectory:
+    result = git ["branch", "--show-current", "--format=%(objectname)"]
+  if result == "":
+    crash "unable to determine branch"
+
 proc nim(args: openArray[string]; options = defaultProcess): string =
   ## run nim with some arguments
   run(findExe"nim", args, options = options).output
