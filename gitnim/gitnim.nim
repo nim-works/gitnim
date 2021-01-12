@@ -80,13 +80,18 @@ template withinDirectory(path: typed; body: untyped) =
   else:
     raise newException(ValueError, $path & " is not a directory")
 
+template withinNimDirectory(body: untyped) =
+  withinDirectory getAppDir().parentDir:
+    body
+
 template withinDistribution(body: untyped) =
   ## do something within the distribution directory
-  let dist = getAppDir().parentDir / "dist"
-  if dirExists dist:
-    if fileExists dist / ".git":
-      withinDirectory dist:
-        body
+  withinNimDirectory:
+    const dist = "dist"
+    if dirExists dist:
+      if fileExists dist / ".git":
+        withinDirectory dist:
+          body
 
 proc run(exe: string; args: openArray[string];
          options = defaultProcess): RunOutput =
@@ -151,21 +156,21 @@ proc nim(args: openArray[string]; options = defaultProcess): string =
   run(findExe"nim", args, options = options).output
 
 proc refresh() =
-  withinDirectory getAppDir().parentDir:
+  withinNimDirectory:
     discard git("fetch --all")
     let dist = "dist"
     if not dirExists dist:
       createDir dist
       git("submodule add --depth 1 $1 dist" % [ distribution().quoteShell ])
     elif not fileExists dist / ".git":
-      git("submodule update --init --recursive --depth 1 dist")
+      git("submodule update --init --depth 1 dist")
   withinDistribution:
     git("fetch --all --prune")
     git("pull")
 
 proc switch(branch: string): bool =
   ## switch compiler and distribution branches
-  withinDirectory getAppDir().parentDir:
+  withinNimDirectory:
     let switch = run("git", ["checkout", branch], {poStdErrToStdOut})
     result = switch.ok
     if result:
@@ -187,10 +192,11 @@ when isMainModule:
 
   if paramCount() == 0:
     refresh()
-    info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
-    info git("branch --all --sort=version:refname --verbose", {poStdErrToStdOut})
-    info "or you can specify one of these tags; eg. `git nim latest`:"
-    info git("tag --list -n2 --sort=version:refname", {poStdErrToStdOut})
+    withinNimDirectory:
+      info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
+      info git("branch --all --sort=version:refname --verbose", {poStdErrToStdOut})
+      info "or you can specify one of these tags; eg. `git nim latest`:"
+      info git("tag --list -n2 --sort=version:refname", {poStdErrToStdOut})
   else:
     if switch paramStr(1):
       info nim ["--version"]
