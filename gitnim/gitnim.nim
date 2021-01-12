@@ -42,13 +42,13 @@ proc toDist(u: string): string {.compileTime.} =
 
 const
   distURL: string = "NIM_DIST"
-  embDIST: string = embBINS.toDist
+  embDIST: string = bins.toDist
   dist {.used, strdefine.}: string = getEnv(distURL, embDIST)
   dir = "dist"
 
 static:
   hint "gitnim uses following nightlies repository:"
-  hint embBINS
+  hint bins
   hint "via setting the $" & binsURL & ", or"
   hint "via passing --define:bins=\"...\""
   hint "gitnim uses the following distribution url:"
