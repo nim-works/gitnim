@@ -157,6 +157,20 @@ proc currentNimBranch(): string =
     result = git ["branch", "--show-current", "--format=%(objectname)"]
   if result == "":
     crash "unable to determine branch"
+<<<<<<< Updated upstream
+=======
+
+proc currentNimVersion(): string =
+  ## kinda brittle, but what can you do?
+  withinNimDirectory:
+    let ran = run("bin" / "nim", ["--version"])
+    if not ran.ok:
+      crash "unable to determine nim version"
+    else:
+      #Nim Compiler Version 1.5.1 [Linux: amd64]
+      let header = splitLines(ran.output)[0]
+      result = splitWhitespace(header)[3]
+>>>>>>> Stashed changes
 
 proc nim(args: openArray[string]; options = defaultProcess): string =
   ## run nim with some arguments
@@ -190,6 +204,7 @@ proc switch(branch: string): bool =
     if result:
       info "using the $1 compiler branch" % [ branch ]
       withinDistribution:
+        var branch = currentNimVersion()
         if run("git", ["checkout", branch], {poStdErrToStdOut}).ok:
           info "using the $1 distribution branch" % [ branch ]
           return
