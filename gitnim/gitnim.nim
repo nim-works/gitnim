@@ -23,7 +23,9 @@ const
 proc toDist(u: string): string {.compileTime.} =
   var url = parseUri u
   # support for paths is inconsistent, so we do this simply
-  url.path = parentDir url.path
+  if url.hostname != "":
+    # it's a URL; use a peer of the gitnim repo
+    url.path = parentDir url.path
   if not url.path.endsWith "/":
     url.path.add "/"
   url.path.add "dist"
