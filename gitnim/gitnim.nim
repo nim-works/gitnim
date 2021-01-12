@@ -88,10 +88,11 @@ template withinNimDirectory(body: untyped) =
 
 template withinDistribution(body: untyped) =
   ## do something within the distribution directory
+  let dist = nimDirectory / dir
   withinNimDirectory:
-    if dirExists dir:
-      if fileExists dir / ".git":
-        withinDirectory dir:
+    if dirExists dist:
+      if fileExists dist / ".git":
+        withinDirectory dist:
           body
 
 proc run(exe: string; args: openArray[string];
@@ -162,19 +163,19 @@ proc refresh() =
     let dist = "dist"
     if not dirExists dist:
       createDir dist
-      git(["submodule", "add", distribution().quoteShell, dist ])
+      git ["submodule", "add", distribution().quoteShell, dist ]
     elif not dirExists ".git" / "modules" / dist:
-      git(["submodule", "update", "--init", dist])
+      git ["submodule", "update", "--init", dist]
     elif not fileExists dist / ".gitmodules":
-      git(["submodule", "update", "--init", dist])
+      git ["submodule", "update", "--init", dist]
   withinDistribution:
-    git("fetch --all --prune")
-    git("pull")
+    git"fetch --all --prune"
+    git"pull"
     for kind, package in walkDir".":
       if kind == pcDir:
         let module = lastPathPart package
         info "updating $#..." % [ module ]
-        git(["submodule", "update", "--init", "--depth=1", module])
+        git ["submodule", "update", "--init", "--depth=1", module]
 
 proc switch(branch: string): bool =
   ## switch compiler and distribution branches
