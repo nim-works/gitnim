@@ -37,7 +37,7 @@ const
   dist {.strdefine.}: string = getEnv(distURL, embDIST)
 
 static:
-  hint "gitnim uses following url by default:"
+  hint "gitnim uses following nightlies repository:"
   hint URL
   hint "via setting the $" & envURL & ", or"
   hint "via passing --define:URL=\"...\""
