@@ -732,8 +732,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/bitsets.nim
   cp compiler/btrees.nim $nimbleDir/compiler/btrees.nim
   chmod 644 $nimbleDir/compiler/btrees.nim
-  cp compiler/canonicalizer_unused.nim $nimbleDir/compiler/canonicalizer_unused.nim
-  chmod 644 $nimbleDir/compiler/canonicalizer_unused.nim
   cp compiler/ccgcalls.nim $nimbleDir/compiler/ccgcalls.nim
   chmod 644 $nimbleDir/compiler/ccgcalls.nim
   cp compiler/ccgexprs.nim $nimbleDir/compiler/ccgexprs.nim
@@ -804,6 +802,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/ic/rodfiles.nim
   cp compiler/ic/bitabs.nim $nimbleDir/compiler/ic/bitabs.nim
   chmod 644 $nimbleDir/compiler/ic/bitabs.nim
+  cp compiler/ic/replayer.nim $nimbleDir/compiler/ic/replayer.nim
+  chmod 644 $nimbleDir/compiler/ic/replayer.nim
   cp compiler/ic/design.rst $nimbleDir/compiler/ic/design.rst
   chmod 644 $nimbleDir/compiler/ic/design.rst
   cp compiler/idents.nim $nimbleDir/compiler/idents.nim

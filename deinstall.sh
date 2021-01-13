@@ -63,7 +63,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/astalgo.nim
     rm -f $nimbleDir/compiler/bitsets.nim
     rm -f $nimbleDir/compiler/btrees.nim
-    rm -f $nimbleDir/compiler/canonicalizer_unused.nim
     rm -f $nimbleDir/compiler/ccgcalls.nim
     rm -f $nimbleDir/compiler/ccgexprs.nim
     rm -f $nimbleDir/compiler/ccgliterals.nim
@@ -99,6 +98,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/ic/packed_ast.nim
     rm -f $nimbleDir/compiler/ic/rodfiles.nim
     rm -f $nimbleDir/compiler/ic/bitabs.nim
+    rm -f $nimbleDir/compiler/ic/replayer.nim
     rm -f $nimbleDir/compiler/ic/design.rst
     rm -f $nimbleDir/compiler/idents.nim
     rm -f $nimbleDir/compiler/importer.nim
