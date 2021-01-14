@@ -185,7 +185,7 @@ proc nim(args: string; options = capture): string =
   ## run nim with some arguments
   withinNimDirectory:
     let nim = "bin" / "nim"
-    if not fileExists(nim):
+    if not nim.fileExists:
       crash "unable to find nim and unwilling to search your path"
     else:
       let ran = run(nim, split args, options = options)
@@ -208,7 +208,7 @@ proc currentNimVersion(): string =
 proc setupDistribution(): bool =
   ## true if we had to setup the distribution from scratch
   withinNimDirectory:
-    if not dirExists dist:
+    if not dist.dirExists:
       createDir dist
       git ["submodule", "add", distribution().quoteShell, dist ]
     else:
@@ -219,6 +219,7 @@ proc setupDistribution(): bool =
     result = true
 
 proc repointDistribution(fetch = "--checkout") =
+  ## make sure the submodules point to the current versions
   withinDistribution:
     for kind, package in walkDir".":
       let module = lastPathPart package
@@ -235,6 +236,7 @@ proc repointDistribution(fetch = "--checkout") =
     stderr.write "\n"
 
 proc switchDistribution(): bool =
+  ## target the distribution at the current compiler version
   withinDistribution:
     let branch = currentNimVersion()
     var ran = run("git", ["checkout", "origin/" & branch])
@@ -250,7 +252,7 @@ proc switchDistribution(): bool =
       notice ran.output
 
 proc switch(branch: string): bool =
-  ## switch compiler and distribution branches; returns true if successful
+  ## switch compiler and distribution branches; returns true on success
   withinNimDirectory:
     let switch = run("git", ["checkout", branch])
     result = switch.ok
@@ -290,14 +292,16 @@ when isMainModule:
   info "$1 against $2" % [ app, repo() ]
 
   withinNimDirectory:
-    if not dirExists ".git":
-      if fileExists ".git":
+    if not ".git".dirExists:
+      # we want to handle degraded environments gracefully...
+      if ".git".fileExists:
         warn app & " cowardly refusing to manage a Nim submodule"
       else:
         warn app & " works best against Nim from a git repository"
       if not stderr.isAtty:
         notice app & " will assume a headless/CI context..."
     else:
+      # this is the expected path, wherein we likely have a git repo
       if paramCount() == 0:
         # no arguments means the user wants to see what's available;
         # perform a network refresh and then display their options
@@ -313,6 +317,6 @@ when isMainModule:
               info git"tag --list -n2 --sort=version:refname"
       else:
         # the user knows what they want; give it to them with as little
-        # latency as possible and then display the nim version as confirmation
+        # latency as possible and then display the nim version
         if switch paramStr(1):
           info nim"--version"
