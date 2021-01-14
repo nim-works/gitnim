@@ -135,7 +135,7 @@ proc run(exe: string; args: openArray[string];
       (result.output, code) = execCmdEx(execute, options = opts)
 
     # strip the output so newlines aren't too excessive
-    result.output = strip result.output
+    result.output = strip(result.output, leading = false, trailing = true)
 
     result.ok = code == 0
     when gitnimDebug:
