@@ -1,3 +1,4 @@
+import std/options
 import std/sequtils
 import std/macros except `error`
 import std/os
@@ -6,6 +7,7 @@ import std/osproc
 import std/logging
 import std/uri
 import std/terminal
+import std/parsecfg
 
 import cutelog
 
@@ -106,6 +108,15 @@ template withinDistribution(body: typed) =
       if fileExists dist / ".git":
         withinDirectory dist:
           body
+
+proc parseModules(): Option[Config] =
+  ## parse a .gitmodules file using the stdlib's .ini parser;
+  ## returns an empty Option in any failure event
+  withinDistribution:
+    if ".gitmodules".fileExists:
+      let cfg = loadConfig ".gitmodules"
+      if not cfg.isNil:
+        result = some cfg
 
 proc run(exe: string; args: openArray[string];
          options = capture): RunOutput =
