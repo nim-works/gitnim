@@ -47,7 +47,7 @@ const
   distURL {.used, strdefine.}: string = getEnv(distENV, embDIST)
 
 static:
-  hint "gitnim uses following nightlies repository:"
+  hint "gitnim uses the following binary releases:"
   hint binsURL
   hint "via setting the $" & binsURL & ", or"
   hint "via passing --define:binsURL=\"...\""
