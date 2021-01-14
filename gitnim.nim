@@ -49,7 +49,7 @@ const
 static:
   hint "gitnim uses the following binary releases:"
   hint binsURL
-  hint "via setting the $" & binsURL & ", or"
+  hint "via setting the $" & binsENV & ", or"
   hint "via passing --define:binsURL=\"...\""
   hint "gitnim uses the following distribution url:"
   hint distURL
@@ -68,7 +68,7 @@ type
 
 macro repo(): untyped =
   let getEnv = bindSym"getEnv"
-  result = getEnv.newCall(binsURL.newLit, embBINS.newLit)
+  result = getEnv.newCall(binsENV.newLit, embBINS.newLit)
 
 proc crash(why: string) {.used.} =
   error why
