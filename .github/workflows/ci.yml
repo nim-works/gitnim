@@ -1,0 +1,74 @@
+name: CI
+on:
+  schedule:
+    - cron: '30 5 * * *'
+
+  push:
+    paths:
+      - '**.cfg'
+      - '**.nims'
+      - '**.nim'
+      - '**.nimble'
+      - 'tests/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - '**.cfg'
+      - '**.nims'
+      - '**.nim'
+      - '**.nimble'
+      - 'tests/**'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['windows-latest', 'macos-latest', 'ubuntu-latest']
+        nim: ['devel', 'version-1-4', 'version-1-2', 'version-1-0']
+    name: '${{ matrix.os }} (${{ matrix.nim }})'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: gitnim
+
+      - name: Setup Nim
+        uses: alaviss/setup-nim@0.1.1
+        with:
+          path: nim
+          version: ${{ matrix.nim }}
+
+      - name: Run tests
+        shell: bash
+        run: |
+          cd gitnim
+          nimble --accept build
+          nimble test
+
+      - name: Build docs
+        if: ${{ matrix.docs }} == 'true'
+        shell: bash
+        run: |
+          cd gitnim
+          branch=${{ github.ref }}
+          branch=${branch##*/}
+          nimble doc --project --path="." --outdir:docs \
+            '--git.url:https://github.com/${{ github.repository }}' \
+            '--git.commit:${{ github.sha }}' \
+            "--git.devel:$branch" \
+            gitnim.nim
+          # Ignore failures for older Nim
+          cp docs/{the,}index.html || true
+
+      - name: Publish docs
+        if: >
+          github.event_name == 'push' && github.ref == 'refs/heads/master' &&
+          matrix.os == 'ubuntu-latest' && matrix.nim == 'devel'
+        uses: crazy-max/ghaction-github-pages@v1
+        with:
+          build_dir: gitnim/docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
