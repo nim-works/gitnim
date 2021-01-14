@@ -278,21 +278,30 @@ when isMainModule:
   let app = extractFilename getAppFilename()
   info "$1 against $2" % [ app, repo() ]
 
-  if paramCount() == 0:
-    # no arguments means the user wants to see what's available;
-    # perform a network refresh and then display their options
-    refresh()
-    withinNimDirectory:
-      info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
-      info git"branch --all --sort=version:refname --verbose"
-      info "or you can specify one of these tags; eg. `git nim latest`:"
-      info git"tag --list -n2 --sort=version:refname"
-      when gitnimDebug:
-        withinDistribution:
+  withinNimDirectory:
+    if not dirExists ".git":
+      if fileExists ".git":
+        warn app & " cowardly refusing to manage a Nim submodule"
+      else:
+        warn app & " works best against Nim from a git repository"
+      if not stderr.isAtty:
+        notice app & " will assume a headless/CI context..."
+    else:
+      if paramCount() == 0:
+        # no arguments means the user wants to see what's available;
+        # perform a network refresh and then display their options
+        refresh()
+        withinNimDirectory:
+          info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
           info git"branch --all --sort=version:refname --verbose"
+          info "or you can specify one of these tags; eg. `git nim latest`:"
           info git"tag --list -n2 --sort=version:refname"
-  else:
-    # the user knows what they want; give it to them with as little
-    # latency as possible and then display the nim version as confirmation
-    if switch paramStr(1):
-      info nim"--version"
+          when gitnimDebug:
+            withinDistribution:
+              info git"branch --all --sort=version:refname --verbose"
+              info git"tag --list -n2 --sort=version:refname"
+      else:
+        # the user knows what they want; give it to them with as little
+        # latency as possible and then display the nim version as confirmation
+        if switch paramStr(1):
+          info nim"--version"
