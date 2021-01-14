@@ -8,6 +8,6 @@ when not defined(release):
 
 task test, "run unit testes":
   when defined(windows):
-    exec "testes.cmd"
+    exec "testes.cmd --define:gitnimDebug"
   else:
-    exec findExe"testes"
+    exec "testes --define:gitnimDebug"
