@@ -5,7 +5,7 @@
 ![status](https://img.shields.io/badge/nim-1.2.9%2B-informational?style=flat&logo=nim)
 ![latest](https://img.shields.io/badge/nim-1.4.3%2B-informational?style=flat&logo=nim)
 ![devel](https://img.shields.io/badge/nim-1.5.1%2B-informational?style=flat&logo=nim)
-[![License](https://img.shields.io/github/license/disruptek/gitnim?style=flat)](#license)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen)](#license)
 
 choosenim for choosey nimions
 
