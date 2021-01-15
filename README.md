@@ -11,9 +11,9 @@ choosenim for choosey nimions
 
 ## What is It?
 
-This program adds a git subcommand for Nim (`git nim`) and installs itself
+This program adds a git subcommand for Nim `git nim` and installs itself
 next to your Nim compiler so that if your compiler is in your `PATH`, so is
-`git-nim`.
+**gitnim**.
 
 The `git nim` subcommand allows you to choose from precompiled Nim releases and
 download/install them directly by managing your Nim installation as any other
@@ -23,9 +23,9 @@ This Nim repository also links to the distribution from
 https://github.com/disruptek/dist, which is a hand-curated monorepo holding the
 most useful Nim modules from the ecosystem.
 
-When run, the `git-nim` tool displays or switches branches in the Nim
-repository and updates the `dist` submodules to ensure you always have
-easy access to the latest features and fixes as matched to your compiler.
+When run, **gitnim** displays or switches branches in the Nim repository and
+updates the **dist** submodules to ensure you always have easy access to the
+latest features and fixes as matched to your compiler.
 
 ## Installation
 
@@ -40,18 +40,18 @@ $ git clone https://github.com/disruptek/gitnim
 ### Add `bin` to `$PATH`
 
 A critical step; humor me on this one. The location of the compiler is used to
-infer the installation directory for `git-nim` itself.
+infer the installation directory for **gitnim** itself.
 
 ```bash
 $ export PATH=`pwd`/gitnim/bin:$PATH
 ```
 
-### Build `git-nim`
+### Build **gitnim**
 
 You now have a statically-linked Nim binary for your Linux-x64 system, so
-you can immediately compile `git-nim`.
+you can immediately compile **gitnim**.
 
-This will automatically install the `git-nim` binary next to the compiler
+This will automatically install the **gitnim** binary next to the compiler
 binary according to your `PATH`, enabling the `git nim` subcommand.
 
 ```bash
