@@ -11,3 +11,9 @@ task test, "run unit testes":
     exec "testes.cmd --define:gitnimDebug"
   else:
     exec "testes --define:gitnimDebug"
+
+task demo, "generate examples":
+  exec """demo docs/gitnim.svg "git nim""""
+  exec """demo docs/gitnim143.svg "git nim 1.4.3""""
+  exec """demo docs/gitnimdevel.svg "git nim devel""""
+  exec """demo docs/gitnimstable.svg "git nim stable""""
