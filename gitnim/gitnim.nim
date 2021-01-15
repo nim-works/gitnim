@@ -1,3 +1,6 @@
+import std/algorithm
+import std/deques
+import std/options
 import std/sequtils
 import std/macros except `error`
 import std/os
@@ -10,7 +13,6 @@ import std/terminal
 import cutelog
 
 const
-  gitnimDebug {.used,booldefine.} = false
   interact {.used.} = {poStdErrToStdOut, poParentStreams}
   capture {.used.} = {poStdErrToStdOut}
 
@@ -28,6 +30,7 @@ const
   embBINS: string = originURL()
   binsURL {.used, strdefine.}: string = getEnv(binsENV, embBINS)
   dist = "dist"
+  attic = ".attic"
 
 # use the above to guess the distribution URL
 proc toDist(u: string): string {.compileTime.} =
@@ -47,9 +50,9 @@ const
   distURL {.used, strdefine.}: string = getEnv(distENV, embDIST)
 
 static:
-  hint "gitnim uses following nightlies repository:"
+  hint "gitnim uses the following binary releases:"
   hint binsURL
-  hint "via setting the $" & binsURL & ", or"
+  hint "via setting the $" & binsENV & ", or"
   hint "via passing --define:binsURL=\"...\""
   hint "gitnim uses the following distribution url:"
   hint distURL
@@ -68,7 +71,7 @@ type
 
 macro repo(): untyped =
   let getEnv = bindSym"getEnv"
-  result = getEnv.newCall(binsURL.newLit, embBINS.newLit)
+  result = getEnv.newCall(binsENV.newLit, embBINS.newLit)
 
 proc crash(why: string) {.used.} =
   error why
@@ -76,9 +79,8 @@ proc crash(why: string) {.used.} =
 
 template changeDir(path: string) =
   let cwd = getCurrentDir()
-  when gitnimDebug:
-    if cwd != path:
-      debug "cd " & path
+  if cwd != path:
+    debug "cd " & path
   setCurrentDir path
 
 template withinDirectory(path: string; body: typed) =
@@ -101,11 +103,10 @@ template withinNimDirectory(body: typed) =
 template withinDistribution(body: typed) =
   ## do something within the distribution directory
   let dist = nimDirectory / dist
-  withinNimDirectory:
-    if dirExists dist:
-      if fileExists dist / ".git":
-        withinDirectory dist:
-          body
+  if dirExists dist:
+    if fileExists dist / ".git":
+      withinDirectory dist:
+        body
 
 proc run(exe: string; args: openArray[string];
          options = capture): RunOutput =
@@ -119,8 +120,7 @@ proc run(exe: string; args: openArray[string];
     result.output = "unable to find $# in path" % [ exe ]
     warn result.output
   else:
-    when gitnimDebug:
-      debug command, arguments.join(" ")
+    debug command, arguments.join(" ")
 
     var code: int
     if poParentStreams in opts or poInteractive in opts:
@@ -135,12 +135,14 @@ proc run(exe: string; args: openArray[string];
       (result.output, code) = execCmdEx(execute, options = opts)
 
     # strip the output so newlines aren't too excessive
-    result.output = strip result.output
+    result.output = strip(result.output, leading = false, trailing = true)
+    # restore a single newline if necessary
+    if result.output.len > 0:
+      result.output.add "\n"
 
     result.ok = code == 0
-    when gitnimDebug:
-      if not result.ok:
-        debug $code
+    if not result.ok:
+      debug $code
 
     # for utility, also return the arguments we used
     result.arguments = arguments
@@ -164,17 +166,146 @@ proc git(args: string; options = capture): string {.discardable.} =
   ## run git with some arguments
   git(split args, options = options)
 
+type
+  # a line of output from `git submodule`
+  Module = object
+    status: Status
+    name: string
+    sha: string
+
+  # first character from the above
+  Status = enum
+    Missing   = "-"
+    OutOfDate = "+"
+    UpToDate  = " "
+
+# for sorting
+proc `<`(a, b: Module): bool = a.name < b.name
+proc `==`(a, b: Module): bool = a.name == b.name
+
+proc parseModules(): seq[Module] =
+  ## get the list of modules, commits, etc. from `git submodule`;
+  ## the result will be sorted by module name
+  withinDistribution:
+    for line in splitLines git"submodule":
+      # status, 40-char sha, space, 2-letter (at least) package name
+      if line.len >= 1+40+1+2:
+        try:
+          let status = parseEnum[Status]($line[0])
+          let splat = split line[1..^1]
+          result.add Module(status: status, name: splat[1], sha: splat[0])
+          continue
+        except:
+          discard
+        warn "weird `git submodule` output: " & line
+    # don't trust git here; it's important that the result is sorted
+    sort result
+
+proc fetchFromAttic(module: string): bool =
+  ## true if we were able to retrieve a module from the attic
+  withinDistribution:
+    if not dirExists module:
+      if dirExists attic / module:
+        debug "recovering " & module & " from " & attic
+        moveDir attic / module, module
+        result = true
+      if not result:
+        debug "unable to fetch " & module & " from " & attic
+
+proc stashInAttic(module: string) =
+  withinDistribution:
+    createDir attic
+    if dirExists attic / module:
+      debug "removing " & module & " from " & attic
+      removeDir attic / module
+    debug "stashing " & module & " in " & attic
+    moveDir module, attic / module
+
+proc exposedModules(): Deque[string] =
+  ## these are modules that the user can import by name;
+  ## they are sorted by name
+  withinDistribution:
+    var available: seq[string]
+    for kind, package in walkDir".":
+      if kind == pcDir:
+        let module = lastPathPart package
+        # obviously, it can't start with a period
+        if not module.startsWith ".":
+          available.add module
+    sort available
+    result = available.toDeque
+
+proc updateModule(module: string; fetch = "--checkout") =
+  withinDistribution:
+    debug "update " & module
+    if fileExists module / ".git":
+      stderr.write "."
+      git ["submodule", "update", fetch, module]
+    else:
+      stderr.write "+"
+      git ["submodule", "update", "--init", "--depth=1", module]
+
+proc toggleModules(fetch = "--checkout") =
+  ## expose or hide modules according to .gitmodules
+  withinDistribution:
+    debug "toggling modules with " & fetch
+    # the attic is a place to store modules we aren't using
+    createDir attic
+
+    # see if we need to fetch anything we might want from the attic
+    var dirty = false
+    var modules = parseModules()
+    for m in modules.items:
+      dirty = dirty or fetchFromAttic m.name
+
+    # if we moved something into place, ask git to update the list
+    # so we have current data on module status and commit
+    if dirty:
+      modules = parseModules()
+
+    # get the modules that are currently exposed to the user
+    var exposed = exposedModules()
+
+    # update anything that needs updating, in an appropriate way
+    for m in modules.items:
+      case m.status
+      of UpToDate:
+        discard
+      of OutOfDate:
+        updateModule m.name, fetch                 # resist network?
+      of Missing:
+        updateModule m.name, "--checkout"          # use the network
+
+      # stash anything we don't need in the attic
+      while exposed.len > 0:
+        case cmp(exposed[0], m.name)
+        of -1:  # hide it
+          stashInAttic popFirst(exposed)
+        of 0:   # ignore it
+          popFirst(exposed)
+          break
+        of 1:   # we're done here
+          break
+        else:
+          raise newException(Defect, "timotheecour was here")
+    stderr.write "\n"
+
+    # anything remaining goes to the attic, of course
+    while exposed.len > 0:
+      stashInAttic popFirst(exposed)
+
 proc currentBranch(): string =
   ## find the current branch; note that you must choose the directory
   result = strip git"branch --show-current --format='%(objectname)'"
   if result == "":
     crash "unable to determine branch"
+  debug "the current branch of " & getCurrentDir() & " is " & result
 
 proc nim(args: string; options = capture): string =
   ## run nim with some arguments
   withinNimDirectory:
     let nim = "bin" / "nim"
-    if not fileExists(nim):
+    if not nim.fileExists:
       crash "unable to find nim and unwilling to search your path"
     else:
       let ran = run(nim, split args, options = options)
@@ -193,28 +324,29 @@ proc currentNimVersion(): string =
     else:
       version = splitLines(version)[0]
       result = splitWhitespace(version)[3]
+      debug "this is nim version " & result
 
 proc setupDistribution(): bool =
   ## true if we had to setup the distribution from scratch
   withinNimDirectory:
-    if not dirExists dist:
+    if not dist.dirExists:
       createDir dist
       git ["submodule", "add", distribution().quoteShell, dist ]
     else:
       if dirExists ".git" / "modules" / dist:
         if fileExists dist / ".gitmodules":
+          debug "the distribution is already setup"
           return false
       git ["submodule", "update", "--init", dist]
     result = true
+    debug "initialized the distribution"
 
-proc repointDistribution(fetch = "--checkout") =
+proc repointDistribution(fetch = "--checkout") {.deprecated.} =
+  ## make sure the submodules point to the current versions
   withinDistribution:
     for kind, package in walkDir".":
       let module = lastPathPart package
       if kind == pcDir and not module.startsWith("."):
-        when gitnimDebug:
-          if module != "gram":
-            continue
         if fileExists package / ".git":
           stderr.write "."
           git ["submodule", "update", fetch, module]
@@ -224,6 +356,7 @@ proc repointDistribution(fetch = "--checkout") =
     stderr.write "\n"
 
 proc switchDistribution(): bool =
+  ## target the distribution at the current compiler version
   withinDistribution:
     let branch = currentNimVersion()
     var ran = run("git", ["checkout", "origin/" & branch])
@@ -233,31 +366,23 @@ proc switchDistribution(): bool =
         ran = run("git", ["checkout", "origin/" & branch])
     result = ran.ok
     if result:
-      info "using the $# distribution branch" % [ branch ]
+      debug "using the $# distribution branch" % [ branch ]
     else:
       warn "the $# distribution branch is not available" % [ branch ]
       notice ran.output
 
 proc switch(branch: string): bool =
-  ## switch compiler and distribution branches; returns true if successful
+  ## switch compiler and distribution branches; returns true on success
   withinNimDirectory:
     let switch = run("git", ["checkout", branch])
     result = switch.ok
     if result:
-      info "using the $# compiler branch" % [ branch ]
+      debug "using the $# compiler branch" % [ branch ]
       if switchDistribution():
-        # make sure all the modules point to the right version
-        repointDistribution "--checkout"
+        # gently repoint all the modules to the right version
+        toggleModules "--no-fetch"
     else:
       warn switch.output
-
-proc refreshDistribution(): bool =
-  withinNimDirectory:
-    let branch = currentBranch()
-    info "refreshing the $# distribution..." % [ branch ]
-    withinDistribution:
-      discard run("git", ["fetch", "origin", branch])
-      result = switchDistribution()
 
 proc refresh() =
   ## check the network for fresh releases of Nim or the distribution
@@ -266,33 +391,48 @@ proc refresh() =
     git"fetch --all"
     # see if we need to setup the distribution and if so,
     discard setupDistribution()
+    let branch = currentBranch()
+    info "refreshing the $# distribution..." % [ branch ]
     withinDistribution:
-      if refreshDistribution():
+      discard run("git", ["fetch", "origin", branch])
+      if switchDistribution():
         # make sure all the modules point to the right version
-        repointDistribution "--checkout"
+        toggleModules "--checkout"
 
 when isMainModule:
   let logger = newCuteConsoleLogger()
   addHandler logger
+  setLogFilter:
+    when defined(debug):
+      lvlDebug
+    else:
+      lvlInfo
 
   let app = extractFilename getAppFilename()
   info "$1 against $2" % [ app, repo() ]
 
-  if paramCount() == 0:
-    # no arguments means the user wants to see what's available;
-    # perform a network refresh and then display their options
-    refresh()
-    withinNimDirectory:
-      info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
-      info git"branch --all --sort=version:refname --verbose"
-      info "or you can specify one of these tags; eg. `git nim latest`:"
-      info git"tag --list -n2 --sort=version:refname"
-      when gitnimDebug:
-        withinDistribution:
+  withinNimDirectory:
+    if not ".git".dirExists:
+      # we want to handle degraded environments gracefully...
+      if ".git".fileExists:
+        warn app & " cowardly refusing to manage a Nim submodule"
+      else:
+        warn app & " works best against Nim from a git repository"
+      if not stderr.isAtty:
+        notice app & " will assume a headless/CI context..."
+    else:
+      # this is the expected path, wherein we likely have a git repo
+      if paramCount() == 0:
+        # no arguments means the user wants to see what's available;
+        # perform a network refresh and then display their options
+        refresh()
+        withinNimDirectory:
+          info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
           info git"branch --all --sort=version:refname --verbose"
+          info "or you can specify one of these tags; eg. `git nim latest`:"
           info git"tag --list -n2 --sort=version:refname"
-  else:
-    # the user knows what they want; give it to them with as little
-    # latency as possible and then display the nim version as confirmation
-    if switch paramStr(1):
-      info nim"--version"
+      else:
+        # the user knows what they want; give it to them with as little
+        # latency as possible and then display the nim version
+        if switch paramStr(1):
+          info nim"--version"
