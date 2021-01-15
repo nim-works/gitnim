@@ -30,16 +30,28 @@ List available releases:
 ```bash
 $ git nim
 ```
+![git nim](docs/gitnim.svg "git nim")
 
 Choose a release by branch or tag:
 
 ```bash
-$ git nim 1.3.5
+$ git nim 1.4.3
 ```
+![git nim 1.4.3](docs/gitnim143.svg "git nim 1.4.3")
+
 or
+
 ```bash
 $ git nim devel
 ```
+![git nim devel](docs/gitnimdevel.svg "git nim devel")
+
+```bash
+$ git nim stable
+```
+![git nim stable](docs/gitnimstable.svg "git nim stable")
+
+...you get the idea...
 
 ## Advanced Usage
 
