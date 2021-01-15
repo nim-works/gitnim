@@ -233,7 +233,12 @@ proc exposedModules(): Deque[string] =
         if not module.startsWith ".":
           available.add module
     sort available
-    result = available.toDeque
+    when (NimMajor, NimMinor) >= (1, 3):
+      result = available.toDeque
+    else:
+      result = initDeque[string]()
+      for module in available.items:
+        result.addLast module
 
 proc updateModule(module: string; fetch = "--checkout") =
   withinDistribution:
@@ -278,16 +283,13 @@ proc toggleModules(fetch = "--checkout") =
 
       # stash anything we don't need in the attic
       while exposed.len > 0:
-        case cmp(exposed[0], m.name)
-        of -1:  # hide it
-          stashInAttic popFirst(exposed)
-        of 0:   # ignore it
-          popFirst(exposed)
-          break
-        of 1:   # we're done here
+        if exposed[0] < m.name:
+          stashInAttic popFirst(exposed)     # hide it
+        elif exposed[0] == m.name:
+          popFirst(exposed)                  # ignore it
           break
         else:
-          raise newException(Defect, "timotheecour was here")
+          break                              # we're done
     stderr.write "\n"
 
     # anything remaining goes to the attic, of course
@@ -336,7 +338,9 @@ proc setupDistribution(): bool =
       if dirExists ".git" / "modules" / dist:
         if fileExists dist / ".gitmodules":
           debug "the distribution is already setup"
-          return false
+          result = false
+          return
+          #return false      # amazingly, this doesn't work on 1.2
       git ["submodule", "update", "--init", dist]
     result = true
     debug "initialized the distribution"
