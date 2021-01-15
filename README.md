@@ -1,10 +1,10 @@
 # [gitnim linux_x64](https://gitnim.com/)
 
 [![tests](https://github.com/disruptek/gitnim/workflows/CI/badge.svg?branch=master)](https://github.com/disruptek/gitnim/actions?query=workflow%3ACI)
-![stable](https://img.shields.io/badge/nim-1.0.10%2B-informational?style=flat&logo=nim)
-![status](https://img.shields.io/badge/nim-1.2.9%2B-informational?style=flat&logo=nim)
-![latest](https://img.shields.io/badge/nim-1.4.3%2B-informational?style=flat&logo=nim)
-![devel](https://img.shields.io/badge/nim-1.5.1%2B-informational?style=flat&logo=nim)
+![stable](https://img.shields.io/badge/nim-1.0.10-informational?style=flat&logo=nim)
+![status](https://img.shields.io/badge/nim-1.2.9-informational?style=flat&logo=nim)
+![latest](https://img.shields.io/badge/nim-1.4.3-informational?style=flat&logo=nim)
+![devel](https://img.shields.io/badge/nim-1.5.1-informational?style=flat&logo=nim)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](#license)
 
 choosenim for choosey nimions
