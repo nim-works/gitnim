@@ -4,13 +4,13 @@ description = "choosenim for choosey nimions"
 license = "MIT"
 
 when not defined(release):
-  requires "https://github.com/disruptek/testes >= 1.0.0 & < 2.0.0"
+  requires "https://github.com/disruptek/balls >= 2.0.0 & < 3.0.0"
 
 task test, "run unit testes":
   when defined(windows):
-    exec "testes.cmd --define:gitnimDebug"
+    exec "balls.cmd --define:debug"
   else:
-    exec "testes --define:gitnimDebug"
+    exec "balls --define:debug"
 
 task demo, "generate examples":
   exec """demo docs/gitnim.svg "git nim""""
