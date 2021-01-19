@@ -417,7 +417,10 @@ proc switch(branch: string): bool =
     result = switch.ok
     if result:
       debug "using the $# compiler branch" % [ branch ]
-      if switchDistribution(branch, fetch = off):
+      # we're switching the compiler, so there's no way to guess which
+      # custom distribution the user might want -- just switch to the
+      # distribution that matches the new compiler version
+      if switchDistribution(currentNimVersion(), fetch = off):
         # gently repoint all the modules to the right version
         toggleModules(fetch = off)
     else:
