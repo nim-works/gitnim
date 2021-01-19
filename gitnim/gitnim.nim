@@ -13,6 +13,7 @@ import std/terminal
 import cutelog
 
 const
+  mainBranches = ["main", "master"]
   interact {.used.} = {poStdErrToStdOut, poParentStreams}
   capture {.used.} = {poStdErrToStdOut}
 
@@ -151,10 +152,15 @@ proc run(exe: string; args: openArray[string];
     if not result.ok:
       notice exe & " " & arguments.join(" ")
 
+proc useColor(args: openArray[string]): bool =
+  if stdout.isAtty:
+    result = result or args.anyIt it == "log"
+    result = result or args.anyIt it.startsWith("--sort")
+
 proc git(args: openArray[string]; options = capture): string {.discardable.} =
   ## run git with some arguments
   var also = @args
-  if stdout.isAtty and args.anyIt it.startsWith("--sort"):
+  if args.useColor:
     also.insert("--color", 1)
   let ran = run("git", also, options = options)
   if ran.ok:
@@ -182,6 +188,9 @@ type
 # for sorting
 proc `<`(a, b: Module): bool = a.name < b.name
 proc `==`(a, b: Module): bool = a.name == b.name
+
+proc fetchFlag(b: bool): string =
+  if b: "--checkout" else: "--no-fetch"
 
 proc parseModules(): seq[Module] =
   ## get the list of modules, commits, etc. from `git submodule`;
@@ -240,32 +249,31 @@ proc exposedModules(): Deque[string] =
       for module in available.items:
         result.addLast module
 
-proc updateModule(module: string; fetch = "--checkout") =
+proc updateModule(module: string; fetch = on) =
   withinDistribution:
     debug "update " & module
     if fileExists module / ".git":
       stderr.write "."
-      git ["submodule", "update", fetch, module]
+      git ["submodule", "update", fetchFlag fetch, module]
     else:
       stderr.write "+"
       git ["submodule", "update", "--init", "--depth=1", module]
 
-proc toggleModules(fetch = "--checkout") =
+proc toggleModules(fetch = on) =
   ## expose or hide modules according to .gitmodules
   withinDistribution:
-    debug "toggling modules with " & fetch
+    debug "toggling modules with " & fetchFlag fetch
     # the attic is a place to store modules we aren't using
     createDir attic
 
     # see if we need to fetch anything we might want from the attic
-    var dirty = false
     var modules = parseModules()
+    var dirty = false
     for m in modules.items:
-      dirty = dirty or fetchFromAttic m.name
-
-    # if we moved something into place, ask git to update the list
-    # so we have current data on module status and commit
+      dirty = fetchFromAttic(m.name) or dirty
     if dirty:
+      # if we moved something into place, ask git to update the list
+      # so we have current data on module status and commit
       modules = parseModules()
 
     # get the modules that are currently exposed to the user
@@ -277,9 +285,9 @@ proc toggleModules(fetch = "--checkout") =
       of UpToDate:
         discard
       of OutOfDate:
-        updateModule m.name, fetch                 # resist network?
+        updateModule m.name, fetch = fetch         # resist network?
       of Missing:
-        updateModule m.name, "--checkout"          # use the network
+        updateModule m.name, fetch = on            # use the network
 
       # stash anything we don't need in the attic
       while exposed.len > 0:
@@ -345,7 +353,7 @@ proc setupDistribution(): bool =
     result = true
     debug "initialized the distribution"
 
-proc repointDistribution(fetch = "--checkout") {.deprecated.} =
+proc repointDistribution(fetch = on) {.deprecated.} =
   ## make sure the submodules point to the current versions
   withinDistribution:
     for kind, package in walkDir".":
@@ -353,21 +361,48 @@ proc repointDistribution(fetch = "--checkout") {.deprecated.} =
       if kind == pcDir and not module.startsWith("."):
         if fileExists package / ".git":
           stderr.write "."
-          git ["submodule", "update", fetch, module]
+          git ["submodule", "update", fetchFlag fetch, module]
         else:
           stderr.write "+"
           git ["submodule", "update", "--init", "--depth=1", module]
     stderr.write "\n"
 
-proc switchDistribution(): bool =
+proc dumpLog(a, b: string) =
+  ## output the git log for the commits between refs `a` and `b`
+  if a != b:
+    let log = git ["log", "--pretty='format:%Cblue%>(14)%ar %Cgreen%s'",
+                   "--reverse", a & "..." & b]
+    if strip(log).len == 0:
+      info "(no updates)"
+    else:
+      info log
+
+proc checkoutDistribution(branch: string; fetch = on): RunOutput =
+  withinDistribution:
+    let current = currentBranch()
+    result = run("git", ["checkout", branch])
+    # if we want to fetch or the branch doesn't exist,
+    if fetch or not result.ok:
+      # point to the origin and try to fetch again
+      result = run("git", ["fetch", "--prune", "origin", branch])
+      if result.ok:
+        # if that worked, we dump the log to show changes,
+        dumpLog current, "origin/" & branch
+        # pull those changes from the network,
+        result = run("git", ["pull", "--rebase=merges", "--autostash"])
+        if result.ok:
+          # and attempt to checkout the branch again
+          result = run("git", ["checkout", branch])
+
+proc switchDistribution(branch = "", fetch = on): bool =
   ## target the distribution at the current compiler version
   withinDistribution:
-    let branch = currentNimVersion()
-    var ran = run("git", ["checkout", "origin/" & branch])
-    if not ran.ok:
-      ran = run("git", ["fetch", "--prune", "origin", branch])
-      if ran.ok:
-        ran = run("git", ["checkout", "origin/" & branch])
+    let branch =
+      if branch == "":
+        currentNimVersion()
+      else:
+        branch
+    var ran = checkoutDistribution(branch, fetch)
     result = ran.ok
     if result:
       debug "using the $# distribution branch" % [ branch ]
@@ -382,9 +417,9 @@ proc switch(branch: string): bool =
     result = switch.ok
     if result:
       debug "using the $# compiler branch" % [ branch ]
-      if switchDistribution():
+      if switchDistribution(branch, fetch = off):
         # gently repoint all the modules to the right version
-        toggleModules "--no-fetch"
+        toggleModules(fetch = off)
     else:
       warn switch.output
 
@@ -395,13 +430,20 @@ proc refresh() =
     git"fetch --all"
     # see if we need to setup the distribution and if so,
     discard setupDistribution()
-    let branch = currentBranch()
-    info "refreshing the $# distribution..." % [ branch ]
+    let nim = currentNimVersion()
     withinDistribution:
+      # if we're in the main branch, then presume that we actually
+      # want to point at the branch that matches the compiler version
+      var branch = currentBranch()
+      if branch in mainBranches:
+        branch = nim
+      info "refreshing the $# distribution..." % [ branch ]
       discard run("git", ["fetch", "origin", branch])
-      if switchDistribution():
+      # we're not using a custom distribution branch, so we'll go
+      # ahead and toggle the modules to ensure they are fresh
+      if switchDistribution(branch, fetch = on):
         # make sure all the modules point to the right version
-        toggleModules "--checkout"
+        toggleModules(fetch = on)
 
 when isMainModule:
   let logger = newCuteConsoleLogger()
