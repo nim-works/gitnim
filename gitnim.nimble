@@ -3,6 +3,8 @@ author = "disruptek"
 description = "choosenim for choosey nimions"
 license = "MIT"
 
+namedBin = {"gitnim": "git-nim"}.toTable
+
 when not defined(release):
   requires "https://github.com/disruptek/balls >= 2.0.0 & < 3.0.0"
 
