@@ -63,6 +63,11 @@ $ nim c gitnim/gitnim.nim
 
 ### List Available Releases
 
+With no additional arguments, `git nim` will check the network for updates and
+present the available Nim releases for selection.
+
+The current distribution will be updated from the network, if necessary.
+
 ```bash
 $ git nim
 ```
@@ -70,12 +75,23 @@ $ git nim
 
 ### Choose a Release by Version
 
+When a version is provided, `git nim` will switch to that version immediately
+without querying the network, provided the version exists locally.
+
+The distribution will be updated without querying the network, if possible.
+
 ```bash
 $ git nim 1.4.3
 ```
 ![git nim 1.4.3](https://github.com/disruptek/gitnim/raw/master/docs/gitnim143.svg "git nim 1.4.3")
 
 ### Choose a Release by Tag
+
+When a tag is provided, `git nim` will switch to the tagged version immediately
+without querying the network, provided the tagged reference exists locally.
+
+The distribution will be updated without querying the network, if possible.
+
 ```bash
 $ git nim devel
 ```
