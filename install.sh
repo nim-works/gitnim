@@ -692,6 +692,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/isolation.nim
   cp lib/std/compilesettings.nim $libdir/std/compilesettings.nim
   chmod 644 $libdir/std/compilesettings.nim
+  cp lib/std/private/jsutils.nim $libdir/std/private/jsutils.nim
+  chmod 644 $libdir/std/private/jsutils.nim
   cp lib/std/private/miscdollars.nim $libdir/std/private/miscdollars.nim
   chmod 644 $libdir/std/private/miscdollars.nim
   cp lib/std/private/since.nim $libdir/std/private/since.nim

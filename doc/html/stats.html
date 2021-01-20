@@ -110,14 +110,14 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#RunningStat"
     title="RunningStat = object
-  n*: int                    ## number of pushed data
+  n*: int                    ## amount of pushed data
   min*, max*, sum*: float    ## self-explaining
   mom1, mom2, mom3, mom4: float ## statistical moments, mom1 is mean">RunningStat</a></li>
   <li><a class="reference" href="#RunningRegress"
     title="RunningRegress = object
-  n*: int                    ## number of pushed data
-  x_stats*: RunningStat      ## stats for first set of data
-  y_stats*: RunningStat      ## stats for second set of data
+  n*: int                    ## amount of pushed data
+  x_stats*: RunningStat      ## stats for the first set of data
+  y_stats*: RunningStat      ## stats for the second set of data
   s_xy: float                ## accumulated data for combined xy">RunningRegress</a></li>
 
   </ul>
@@ -259,48 +259,44 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="nine columns" id="content">
   <div id="tocRoot"></div>
   
-  <p class="module-desc"><p>Statistical analysis framework for performing basic statistical analysis of data. The data is analysed in a single pass, when a data value is pushed to the <tt class="docutils literal"><span class="pre">RunningStat</span></tt> or <tt class="docutils literal"><span class="pre">RunningRegress</span></tt> objects</p>
+  <p class="module-desc"><p>Statistical analysis framework for performing basic statistical analysis of data. The data is analysed in a single pass, when it is pushed to a <tt class="docutils literal"><span class="pre">RunningStat</span></tt> or <tt class="docutils literal"><span class="pre">RunningRegress</span></tt> object.</p>
 <p><tt class="docutils literal"><span class="pre">RunningStat</span></tt> calculates for a single data set</p>
 <ul class="simple"><li>n (data count)</li>
-<li>min  (smallest value)</li>
-<li>max  (largest value)</li>
+<li>min (smallest value)</li>
+<li>max (largest value)</li>
 <li>sum</li>
 <li>mean</li>
 <li>variance</li>
-<li>varianceS (sample var)</li>
+<li>varianceS (sample variance)</li>
 <li>standardDeviation</li>
-<li>standardDeviationS  (sample stddev)</li>
+<li>standardDeviationS (sample standard deviation)</li>
 <li>skewness (the third statistical moment)</li>
 <li>kurtosis (the fourth statistical moment)</li>
 </ul>
 <p><tt class="docutils literal"><span class="pre">RunningRegress</span></tt> calculates for two sets of data</p>
-<ul class="simple"><li>n</li>
+<ul class="simple"><li>n (data count)</li>
 <li>slope</li>
 <li>intercept</li>
 <li>correlation</li>
 </ul>
-<p>Procs have been provided to calculate statistics on arrays and sequences.</p>
-<p>However, if more than a single statistical calculation is required, it is more efficient to push the data once to the RunningStat object, and call the numerous statistical procs for the RunningStat object.</p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">rs</span><span class="Punctuation">:</span> <span class="Identifier">RunningStat</span>
-<span class="Identifier">rs</span><span class="Operator">.</span><span class="Identifier">push</span><span class="Punctuation">(</span><span class="Identifier">MySeqOfData</span><span class="Punctuation">)</span>
-<span class="Identifier">rs</span><span class="Operator">.</span><span class="Identifier">mean</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-<span class="Identifier">rs</span><span class="Operator">.</span><span class="Identifier">variance</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-<span class="Identifier">rs</span><span class="Operator">.</span><span class="Identifier">skewness</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-<span class="Identifier">rs</span><span class="Operator">.</span><span class="Identifier">kurtosis</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
+<p>Procs are provided to calculate statistics on <tt class="docutils literal"><span class="pre">openArray</span></tt>s.</p>
+<p>However, if more than a single statistical calculation is required, it is more efficient to push the data once to a <tt class="docutils literal"><span class="pre">RunningStat</span></tt> object and then call the numerous statistical procs for the <tt class="docutils literal"><span class="pre">RunningStat</span></tt> object:</p>
+
 <p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Keyword">static</span><span class="Punctuation">:</span><span class="Whitespace">
-  </span><span class="Keyword">block</span><span class="Punctuation">:</span><span class="Whitespace">
-    </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">RunningStat</span><span class="Whitespace">  </span><span class="Comment">## Must be &quot;var&quot;</span><span class="Whitespace">
-    </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">push</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">2.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">4.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">4.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">2.0</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Whitespace">
-    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">n</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">8</span><span class="Whitespace">
-    </span><span class="Keyword">template</span><span class="Whitespace"> </span><span class="Punctuation">`</span><span class="Operator">===</span><span class="Punctuation">`</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">float</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">bool</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Punctuation">(</span><span class="Identifier">abs</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">-</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">&lt;</span><span class="Whitespace"> </span><span class="FloatNumber">1e-9</span><span class="Punctuation">)</span><span class="Whitespace">
-    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">mean</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">===</span><span class="Whitespace"> </span><span class="FloatNumber">2.0</span><span class="Whitespace">
-    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">variance</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">===</span><span class="Whitespace"> </span><span class="FloatNumber">1.5</span><span class="Whitespace">
-    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">varianceS</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">===</span><span class="Whitespace"> </span><span class="FloatNumber">1.714285714285715</span><span class="Whitespace">
-    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">skewness</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">===</span><span class="Whitespace"> </span><span class="FloatNumber">0.8164965809277261</span><span class="Whitespace">
-    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">skewnessS</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">===</span><span class="Whitespace"> </span><span class="FloatNumber">1.018350154434631</span><span class="Whitespace">
-    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">kurtosis</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">===</span><span class="Whitespace"> </span><span class="Operator">-</span><span class="FloatNumber">1.0</span><span class="Whitespace">
-    </span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">kurtosisS</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">===</span><span class="Whitespace"> </span><span class="Operator">-</span><span class="FloatNumber">0.7000000000000008</span></pre></p>
+<pre class="listing"><span class="Keyword">from</span><span class="Whitespace"> </span><span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">math</span><span class="Whitespace"> </span><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">almostEqual</span><span class="Whitespace">
+
+</span><span class="Keyword">template</span><span class="Whitespace"> </span><span class="Punctuation">`</span><span class="Operator">~=</span><span class="Punctuation">`</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">float</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">bool</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">almostEqual</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">b</span><span class="Punctuation">)</span><span class="Whitespace">
+
+</span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">RunningStat</span><span class="Whitespace">  </span><span class="Comment">## Must be var</span><span class="Whitespace">
+</span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">push</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">2.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">4.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">4.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">1.0</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="FloatNumber">2.0</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">n</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">8</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">mean</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">~=</span><span class="Whitespace"> </span><span class="FloatNumber">2.0</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">variance</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">~=</span><span class="Whitespace"> </span><span class="FloatNumber">1.5</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">varianceS</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">~=</span><span class="Whitespace"> </span><span class="FloatNumber">1.714285714285715</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">skewness</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">~=</span><span class="Whitespace"> </span><span class="FloatNumber">0.8164965809277261</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">skewnessS</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">~=</span><span class="Whitespace"> </span><span class="FloatNumber">1.018350154434631</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">kurtosis</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">~=</span><span class="Whitespace"> </span><span class="Operator">-</span><span class="FloatNumber">1.0</span><span class="Whitespace">
+</span><span class="Identifier">doAssert</span><span class="Whitespace"> </span><span class="Identifier">statistics</span><span class="Operator">.</span><span class="Identifier">kurtosisS</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">~=</span><span class="Whitespace"> </span><span class="Operator">-</span><span class="FloatNumber">0.7000000000000008</span></pre></p>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
@@ -311,33 +307,33 @@ class="link-seesrc" target="_blank">Source</a>
 <dl class="item">
 <a id="RunningStat"></a>
 <dt><pre><a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">n</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                    <span class="Comment">## number of pushed data</span>
+  <span class="Identifier">n</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                    <span class="Comment">## amount of pushed data</span>
   <span class="Identifier">min</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">max</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">sum</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a>    <span class="Comment">## self-explaining</span>
   <span class="Identifier">mom1</span><span class="Other">,</span> <span class="Identifier">mom2</span><span class="Other">,</span> <span class="Identifier">mom3</span><span class="Other">,</span> <span class="Identifier">mom4</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span class="Comment">## statistical moments, mom1 is mean</span>
   </pre></dt>
 <dd>
 
-an accumulator for statistical data
+An accumulator for statistical data.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L56"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L63"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L56" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L63" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="RunningRegress"></a>
 <dt><pre><a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">n</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                    <span class="Comment">## number of pushed data</span>
-  <span class="Identifier">x_stats</span><span class="Operator">*</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a>      <span class="Comment">## stats for first set of data</span>
-  <span class="Identifier">y_stats</span><span class="Operator">*</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a>      <span class="Comment">## stats for second set of data</span>
+  <span class="Identifier">n</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                    <span class="Comment">## amount of pushed data</span>
+  <span class="Identifier">x_stats</span><span class="Operator">*</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a>      <span class="Comment">## stats for the first set of data</span>
+  <span class="Identifier">y_stats</span><span class="Operator">*</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a>      <span class="Comment">## stats for the second set of data</span>
   <span class="Identifier">s_xy</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a>                <span class="Comment">## accumulated data for combined xy</span>
   </pre></dt>
 <dd>
 
-an accumulator for regression calculations
+An accumulator for regression calculations.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L62"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L68"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L62" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L68" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -349,43 +345,30 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><span class="Keyword">proc</span> <a href="#clear%2CRunningStat"><span class="Identifier">clear</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-reset <tt class="docutils literal"><span class="pre">s</span></tt>
+Resets <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L69"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L76"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L69" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L76" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="push,RunningStat,float"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#push%2CRunningStat%2Cfloat"><span class="Identifier">push</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-pushes a value <tt class="docutils literal"><span class="pre">x</span></tt> for processing
+Pushes a value <tt class="docutils literal"><span class="pre">x</span></tt> for processing.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L80"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L87"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L80" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L87" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="push,RunningStat,int"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#push%2CRunningStat%2Cint"><span class="Identifier">push</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-<p>pushes a value <tt class="docutils literal"><span class="pre">x</span></tt> for processing.</p>
+<p>Pushes a value <tt class="docutils literal"><span class="pre">x</span></tt> for processing.</p>
 <p><tt class="docutils literal"><span class="pre">x</span></tt> is simply converted to <tt class="docutils literal"><span class="pre">float</span></tt> and the other push operation is called.</p>
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L99"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L99" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="push,RunningStat,openArray[]"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#push%2CRunningStat%2CopenArray%5B%5D"><span class="Identifier">push</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><a href="system.html#float"><span class="Identifier">float</span></a> <span class="Operator">|</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span></pre></dt>
-<dd>
-
-<p>pushes all values of <tt class="docutils literal"><span class="pre">x</span></tt> for processing.</p>
-<p>Int values of <tt class="docutils literal"><span class="pre">x</span></tt> are simply converted to <tt class="docutils literal"><span class="pre">float</span></tt> and the other push operation is called.</p>
 
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L106"
@@ -393,344 +376,357 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L106" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="push,RunningStat,openArray[]"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#push%2CRunningStat%2CopenArray%5B%5D"><span class="Identifier">push</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><a href="system.html#float"><span class="Identifier">float</span></a> <span class="Operator">|</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span></pre></dt>
+<dd>
+
+<p>Pushes all values of <tt class="docutils literal"><span class="pre">x</span></tt> for processing.</p>
+<p>Int values of <tt class="docutils literal"><span class="pre">x</span></tt> are simply converted to <tt class="docutils literal"><span class="pre">float</span></tt> and the other push operation is called.</p>
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L113"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L113" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="mean,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#mean%2CRunningStat"><span class="Identifier">mean</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current mean of <tt class="docutils literal"><span class="pre">s</span></tt>
+Computes the current mean of <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L114"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L121"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L114" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L121" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="variance,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#variance%2CRunningStat"><span class="Identifier">variance</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current population variance of <tt class="docutils literal"><span class="pre">s</span></tt>
+Computes the current population variance of <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L118"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L125"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L118" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L125" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="varianceS,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#varianceS%2CRunningStat"><span class="Identifier">varianceS</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current sample variance of <tt class="docutils literal"><span class="pre">s</span></tt>
+Computes the current sample variance of <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L122"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L129"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L122" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L129" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="standardDeviation,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#standardDeviation%2CRunningStat"><span class="Identifier">standardDeviation</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current population standard deviation of <tt class="docutils literal"><span class="pre">s</span></tt>
+Computes the current population standard deviation of <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L126"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L133"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L126" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L133" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="standardDeviationS,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#standardDeviationS%2CRunningStat"><span class="Identifier">standardDeviationS</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current sample standard deviation of <tt class="docutils literal"><span class="pre">s</span></tt>
+Computes the current sample standard deviation of <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L130"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L137"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L130" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L137" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skewness,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#skewness%2CRunningStat"><span class="Identifier">skewness</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current population skewness of <tt class="docutils literal"><span class="pre">s</span></tt>
+Computes the current population skewness of <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L134"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L141"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L134" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L141" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skewnessS,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#skewnessS%2CRunningStat"><span class="Identifier">skewnessS</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current sample skewness of <tt class="docutils literal"><span class="pre">s</span></tt>
+Computes the current sample skewness of <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L138"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L145"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L138" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L145" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="kurtosis,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#kurtosis%2CRunningStat"><span class="Identifier">kurtosis</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current population kurtosis of <tt class="docutils literal"><span class="pre">s</span></tt>
+Computes the current population kurtosis of <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L143"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L150"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L143" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L150" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="kurtosisS,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#kurtosisS%2CRunningStat"><span class="Identifier">kurtosisS</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current sample kurtosis of <tt class="docutils literal"><span class="pre">s</span></tt>
+Computes the current sample kurtosis of <tt class="docutils literal"><span class="pre">s</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L147"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L154"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L147" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L154" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="+,RunningStat,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%2B%2CRunningStat%2CRunningStat"><span class="Identifier">`+`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-<p>combine two RunningStats.</p>
-<p>Useful if performing parallel analysis of data series and need to re-combine parallel result sets</p>
+<p>Combines two <tt class="docutils literal"><span class="pre">RunningStat</span></tt>s.</p>
+<p>Useful when performing parallel analysis of data series and needing to re-combine parallel result sets.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L152"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L159"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L152" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L159" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="+=,RunningStat,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%2B%3D%2CRunningStat%2CRunningStat"><span class="Identifier">`+=`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">;</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-add a second RunningStats <tt class="docutils literal"><span class="pre">b</span></tt> to <tt class="docutils literal"><span class="pre">a</span></tt>
+Adds the <tt class="docutils literal"><span class="pre">RunningStat</span></tt> <tt class="docutils literal"><span class="pre">b</span></tt> to <tt class="docutils literal"><span class="pre">a</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L180"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L187"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L180" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L187" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$,RunningStat"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%24%2CRunningStat"><span class="Identifier">`$`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <a href="stats.html#RunningStat"><span class="Identifier">RunningStat</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-produces a string representation of the <tt class="docutils literal"><span class="pre">RunningStat</span></tt>. The exact format is currently unspecified and subject to change. Currently it contains:<ul class="simple"><li>the number of probes</li>
+Produces a string representation of the <tt class="docutils literal"><span class="pre">RunningStat</span></tt>. The exact format is currently unspecified and subject to change. Currently it contains:<ul class="simple"><li>the number of probes</li>
 <li>min, max values</li>
 <li>sum, mean and standard deviation.</li>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L184"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L191"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L184" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mean,openArray[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#mean%2CopenArray%5BT%5D"><span class="Identifier">mean</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a></pre></dt>
 <dd>
 
-computes the mean of <tt class="docutils literal"><span class="pre">x</span></tt>
+Computes the mean of <tt class="docutils literal"><span class="pre">x</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L202"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L210"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L202" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L210" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="variance,openArray[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#variance%2CopenArray%5BT%5D"><span class="Identifier">variance</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a></pre></dt>
 <dd>
 
-computes the population variance of <tt class="docutils literal"><span class="pre">x</span></tt>
+Computes the population variance of <tt class="docutils literal"><span class="pre">x</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L208"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L216"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L208" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L216" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="varianceS,openArray[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#varianceS%2CopenArray%5BT%5D"><span class="Identifier">varianceS</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a></pre></dt>
 <dd>
 
-computes the sample variance of <tt class="docutils literal"><span class="pre">x</span></tt>
+Computes the sample variance of <tt class="docutils literal"><span class="pre">x</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L214"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L222"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L214" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L222" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="standardDeviation,openArray[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#standardDeviation%2CopenArray%5BT%5D"><span class="Identifier">standardDeviation</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a></pre></dt>
 <dd>
 
-computes the population standardDeviation of <tt class="docutils literal"><span class="pre">x</span></tt>
+Computes the population standard deviation of <tt class="docutils literal"><span class="pre">x</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L220"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L228"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L220" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L228" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="standardDeviationS,openArray[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#standardDeviationS%2CopenArray%5BT%5D"><span class="Identifier">standardDeviationS</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a></pre></dt>
 <dd>
 
-computes the sample standardDeviation of <tt class="docutils literal"><span class="pre">x</span></tt>
+Computes the sample standard deviation of <tt class="docutils literal"><span class="pre">x</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L226"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L234"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L226" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L234" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skewness,openArray[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#skewness%2CopenArray%5BT%5D"><span class="Identifier">skewness</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a></pre></dt>
 <dd>
 
-computes the population skewness of <tt class="docutils literal"><span class="pre">x</span></tt>
+Computes the population skewness of <tt class="docutils literal"><span class="pre">x</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L232"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L240"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L232" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L240" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skewnessS,openArray[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#skewnessS%2CopenArray%5BT%5D"><span class="Identifier">skewnessS</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a></pre></dt>
 <dd>
 
-computes the sample skewness of <tt class="docutils literal"><span class="pre">x</span></tt>
+Computes the sample skewness of <tt class="docutils literal"><span class="pre">x</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L238"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L246"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L246" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="kurtosis,openArray[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#kurtosis%2CopenArray%5BT%5D"><span class="Identifier">kurtosis</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a></pre></dt>
 <dd>
 
-computes the population kurtosis of <tt class="docutils literal"><span class="pre">x</span></tt>
+Computes the population kurtosis of <tt class="docutils literal"><span class="pre">x</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L244"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L252"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L244" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L252" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="kurtosisS,openArray[T]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#kurtosisS%2CopenArray%5BT%5D"><span class="Identifier">kurtosisS</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a></pre></dt>
 <dd>
 
-computes the sample kurtosis of <tt class="docutils literal"><span class="pre">x</span></tt>
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L250"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="clear,RunningRegress"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#clear%2CRunningRegress"><span class="Identifier">clear</span></a><span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-reset <tt class="docutils literal"><span class="pre">r</span></tt>
+Computes the sample kurtosis of <tt class="docutils literal"><span class="pre">x</span></tt>.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L258"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L258" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="clear,RunningRegress"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#clear%2CRunningRegress"><span class="Identifier">clear</span></a><span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+Resets <tt class="docutils literal"><span class="pre">r</span></tt>.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L266"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L266" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="push,RunningRegress,float,float"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#push%2CRunningRegress%2Cfloat%2Cfloat"><span class="Identifier">push</span></a><span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">,</span> <span class="Identifier">y</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-pushes two values <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> for processing
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L265"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L265" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="push,RunningRegress,int,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#push%2CRunningRegress%2Cint%2Cint"><span class="Identifier">push</span></a><span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">,</span> <span class="Identifier">y</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-<p>pushes two values <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> for processing.</p>
-<p><tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> are converted to <tt class="docutils literal"><span class="pre">float</span></tt> and the other push operation is called.</p>
-
+Pushes two values <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> for processing.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L273"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L273" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="push,RunningRegress,int,int"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#push%2CRunningRegress%2Cint%2Cint"><span class="Identifier">push</span></a><span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">,</span> <span class="Identifier">y</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Pushes two values <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> for processing.</p>
+<p><tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> are converted to <tt class="docutils literal"><span class="pre">float</span></tt> and the other push operation is called.</p>
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L281"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L281" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="push,RunningRegress,openArray[],openArray[]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#push%2CRunningRegress%2CopenArray%5B%5D%2CopenArray%5B%5D"><span class="Identifier">push</span></a><span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">,</span> <span class="Identifier">y</span><span class="Other">:</span> <a href="system.html#openArray"><span class="Identifier">openArray</span></a><span class="Other">[</span><a href="system.html#float"><span class="Identifier">float</span></a> <span class="Operator">|</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span></pre></dt>
 <dd>
 
-pushes two sets of values <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> for processing.
+Pushes two sets of values <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> for processing.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L280"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L288"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L280" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="slope,RunningRegress"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#slope%2CRunningRegress"><span class="Identifier">slope</span></a><span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current slope of <tt class="docutils literal"><span class="pre">r</span></tt>
+Computes the current slope of <tt class="docutils literal"><span class="pre">r</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L286"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L294"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L286" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L294" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="intercept,RunningRegress"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#intercept%2CRunningRegress"><span class="Identifier">intercept</span></a><span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current intercept of <tt class="docutils literal"><span class="pre">r</span></tt>
+Computes the current intercept of <tt class="docutils literal"><span class="pre">r</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L291"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L299"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L291" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L299" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="correlation,RunningRegress"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#correlation%2CRunningRegress"><span class="Identifier">correlation</span></a><span class="Other">(</span><span class="Identifier">r</span><span class="Other">:</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#float"><span class="Identifier">float</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-computes the current correlation of the two data sets pushed into <tt class="docutils literal"><span class="pre">r</span></tt>
+Computes the current correlation of the two data sets pushed into <tt class="docutils literal"><span class="pre">r</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L295"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L303"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L295" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L303" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="+,RunningRegress,RunningRegress"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%2B%2CRunningRegress%2CRunningRegress"><span class="Identifier">`+`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">)</span><span class="Other">:</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-<p>combine two <tt class="docutils literal"><span class="pre">RunningRegress</span></tt> objects.</p>
-<p>Useful if performing parallel analysis of data series and need to re-combine parallel result sets</p>
+<p>Combines two <tt class="docutils literal"><span class="pre">RunningRegress</span></tt> objects.</p>
+<p>Useful when performing parallel analysis of data series and needing to re-combine parallel result sets</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L301"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L309"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L301" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L309" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="+=,RunningRegress,RunningRegress"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%2B%3D%2CRunningRegress%2CRunningRegress"><span class="Identifier">`+=`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">;</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="stats.html#RunningRegress"><span class="Identifier">RunningRegress</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
-add RunningRegress <tt class="docutils literal"><span class="pre">b</span></tt> to <tt class="docutils literal"><span class="pre">a</span></tt>
+Adds the <tt class="docutils literal"><span class="pre">RunningRegress</span></tt> <tt class="docutils literal"><span class="pre">b</span></tt> to <tt class="docutils literal"><span class="pre">a</span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L316"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/stats.nim#L324"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/stats.nim#L324" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -743,7 +739,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-19 06:06:39 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-20 01:13:16 UTC</small>
       </div>
     </div>
   </div>
