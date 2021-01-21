@@ -447,6 +447,34 @@ proc refresh() =
         # make sure all the modules point to the right version
         toggleModules(fetch = on)
 
+proc install() =
+  ## perform an automatic installation because nimble is dumb
+  ## and stomps all over our --outdir configuration setting
+  let nim = findExe"nim"
+  if nim == "":
+    return         # there's a good chance we're out of our depth, here
+
+  let nimbin = nim.parentDir
+  withinDirectory nimbin:
+    let app = getAppFilename()
+    let bin = nimbin / extractFilename app
+    # sameFile can be kinda expensive, so try not to call it
+    if app != bin:
+      if not bin.fileExists or not sameFile(app, bin):
+        debug app & " is not the same as " & bin & "; install ourselves"
+        try:
+          moveFile app, bin
+        except OSError as e:
+          warn "failed to move " & app & " to " & nimbin
+          warn "unable to install: " & e.msg
+          quit 1
+
+        debug "move successful; invoke app from new location"
+        # let an OSError raise normally; not much we can add to a message
+        quit:
+          waitForExit:
+            startProcess(bin, args = commandLineParams(), options = interact)
+
 when isMainModule:
   let logger = newCuteConsoleLogger()
   addHandler logger
@@ -455,6 +483,8 @@ when isMainModule:
       lvlDebug
     else:
       lvlInfo
+
+  install()  # install ourselves if necessary; noreturn in that event
 
   let app = extractFilename getAppFilename()
   info "$1 against $2" % [ app, repo() ]
