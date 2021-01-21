@@ -249,15 +249,14 @@ proc exposedModules(): Deque[string] =
       for module in available.items:
         result.addLast module
 
-proc updateModule(module: string; fetch = on) =
+proc update(m: Module; fetch = on) =
   withinDistribution:
-    debug "update " & module
-    if fileExists module / ".git":
-      stderr.write "."
-      git ["submodule", "update", fetchFlag fetch, module]
+    debug "update " & m.name
+    stderr.write $m.status
+    if fileExists m.name / ".git":
+      git ["submodule", "update", fetchFlag fetch, m.name]
     else:
-      stderr.write "+"
-      git ["submodule", "update", "--init", "--depth=1", module]
+      git ["submodule", "update", "--init", "--depth=1", m.name]
 
 proc toggleModules(fetch = on) =
   ## expose or hide modules according to .gitmodules
@@ -285,9 +284,9 @@ proc toggleModules(fetch = on) =
       of UpToDate:
         discard
       of OutOfDate:
-        updateModule m.name, fetch = fetch         # resist network?
+        m.update(fetch = fetch)         # resist network?
       of Missing:
-        updateModule m.name, fetch = on            # use the network
+        m.update(fetch = on)            # use the network
 
       # stash anything we don't need in the attic
       while exposed.len > 0:
