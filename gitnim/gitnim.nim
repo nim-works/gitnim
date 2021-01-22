@@ -249,15 +249,14 @@ proc exposedModules(): Deque[string] =
       for module in available.items:
         result.addLast module
 
-proc updateModule(module: string; fetch = on) =
+proc update(m: Module; fetch = on) =
   withinDistribution:
-    debug "update " & module
-    if fileExists module / ".git":
-      stderr.write "."
-      git ["submodule", "update", fetchFlag fetch, module]
+    debug "update " & m.name
+    stderr.write $m.status
+    if fileExists m.name / ".git":
+      git ["submodule", "update", fetchFlag fetch, m.name]
     else:
-      stderr.write "+"
-      git ["submodule", "update", "--init", "--depth=1", module]
+      git ["submodule", "update", "--init", "--depth=1", m.name]
 
 proc toggleModules(fetch = on) =
   ## expose or hide modules according to .gitmodules
@@ -285,9 +284,9 @@ proc toggleModules(fetch = on) =
       of UpToDate:
         discard
       of OutOfDate:
-        updateModule m.name, fetch = fetch         # resist network?
+        m.update(fetch = fetch)         # resist network?
       of Missing:
-        updateModule m.name, fetch = on            # use the network
+        m.update(fetch = on)            # use the network
 
       # stash anything we don't need in the attic
       while exposed.len > 0:
@@ -448,6 +447,34 @@ proc refresh() =
         # make sure all the modules point to the right version
         toggleModules(fetch = on)
 
+proc install() =
+  ## perform an automatic installation because nimble is dumb
+  ## and stomps all over our --outdir configuration setting
+  let nim = findExe"nim"
+  if nim == "":
+    return         # there's a good chance we're out of our depth, here
+
+  let nimbin = nim.parentDir
+  withinDirectory nimbin:
+    let app = getAppFilename()
+    let bin = nimbin / extractFilename app
+    # sameFile can be kinda expensive, so try not to call it
+    if app != bin:
+      if not bin.fileExists or not sameFile(app, bin):
+        debug app & " is not the same as " & bin & "; install ourselves"
+        try:
+          moveFile app, bin
+        except OSError as e:
+          warn "failed to move " & app & " to " & nimbin
+          warn "unable to install: " & e.msg
+          quit 1
+
+        debug "move successful; invoke app from new location"
+        # let an OSError raise normally; not much we can add to a message
+        quit:
+          waitForExit:
+            startProcess(bin, args = commandLineParams(), options = interact)
+
 when isMainModule:
   let logger = newCuteConsoleLogger()
   addHandler logger
@@ -456,6 +483,8 @@ when isMainModule:
       lvlDebug
     else:
       lvlInfo
+
+  install()  # install ourselves if necessary; noreturn in that event
 
   let app = extractFilename getAppFilename()
   info "$1 against $2" % [ app, repo() ]
