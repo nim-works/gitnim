@@ -146,30 +146,25 @@ class="link-seesrc" target="_blank">Source</a>
   <div id="tocRoot"></div>
   
   <p class="module-desc"><p>This module contains procs for <span id="serialization_1">serialization</span> and <span id="deserialization_1">deserialization</span> of arbitrary Nim data structures. The serialization format uses <span id="json_1">JSON</span>.</p>
-<p><strong>Restriction</strong>: For objects their type is <strong>not</strong> serialized. This means essentially that it does not work if the object has some other runtime type than its compiletime type.</p>
+<p><strong>Restriction:</strong> For objects, their type is <strong>not</strong> serialized. This means essentially that it does not work if the object has some other runtime type than its compiletime type.</p>
 
-<h1><a class="toc-backref" id="basic-usage" href="#basic-usage">Basic usage</a></h1><pre class="listing"><span class="Keyword">type</span>
-  <span class="Identifier">A</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">RootObj</span>
-  <span class="Identifier">B</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">A</span>
-    <span class="Identifier">f</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
+<h1><a class="toc-backref" id="basic-usage" href="#basic-usage">Basic usage</a></h1>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">type</span><span class="Whitespace">
+  </span><span class="Identifier">A</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Keyword">object</span><span class="Whitespace"> </span><span class="Keyword">of</span><span class="Whitespace"> </span><span class="Identifier">RootObj</span><span class="Whitespace">
+  </span><span class="Identifier">B</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Keyword">object</span><span class="Whitespace"> </span><span class="Keyword">of</span><span class="Whitespace"> </span><span class="Identifier">A</span><span class="Whitespace">
+    </span><span class="Identifier">f</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Whitespace">
 
-<span class="Keyword">var</span>
-  <span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Keyword">ref</span> <span class="Identifier">A</span>
-  <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Keyword">ref</span> <span class="Identifier">B</span>
+</span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Keyword">ref</span><span class="Whitespace"> </span><span class="Identifier">A</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">new</span><span class="Punctuation">(</span><span class="Identifier">B</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$$</span><span class="Identifier">a</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;{}&quot;</span><span class="Whitespace"> </span><span class="Comment"># not &quot;{f: 0}&quot;</span><span class="Whitespace">
 
-<span class="Identifier">new</span><span class="Punctuation">(</span><span class="Identifier">b</span><span class="Punctuation">)</span>
-<span class="Identifier">a</span> <span class="Operator">=</span> <span class="Identifier">b</span>
-<span class="Identifier">echo</span><span class="Punctuation">(</span><span class="Operator">$$</span><span class="Identifier">a</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Comment"># produces &quot;{}&quot;, not &quot;{f: 0}&quot;</span>
+</span><span class="Comment"># unmarshal</span><span class="Whitespace">
+</span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">to</span><span class="Punctuation">[</span><span class="Identifier">B</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="LongStringLit">&quot;&quot;&quot;{&quot;f&quot;: 2}&quot;&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">typeof</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Keyword">is</span><span class="Whitespace"> </span><span class="Identifier">B</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">f</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">2</span><span class="Whitespace">
 
-<span class="Comment"># unmarshal</span>
-<span class="Keyword">let</span> <span class="Identifier">c</span> <span class="Operator">=</span> <span class="Identifier">to</span><span class="Punctuation">[</span><span class="Identifier">B</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="LongStringLit">&quot;&quot;&quot;{&quot;f&quot;: 2}&quot;&quot;&quot;</span><span class="Punctuation">)</span>
-<span class="Identifier">assert</span> <span class="Identifier">typeof</span><span class="Punctuation">(</span><span class="Identifier">c</span><span class="Punctuation">)</span> <span class="Keyword">is</span> <span class="Identifier">B</span>
-<span class="Identifier">assert</span> <span class="Identifier">c</span><span class="Operator">.</span><span class="Identifier">f</span> <span class="Operator">==</span> <span class="DecNumber">2</span>
-
-<span class="Comment"># marshal</span>
-<span class="Keyword">let</span> <span class="Identifier">s</span> <span class="Operator">=</span> <span class="Operator">$$</span><span class="Identifier">c</span>
-<span class="Identifier">assert</span> <span class="Identifier">s</span> <span class="Operator">==</span> <span class="LongStringLit">&quot;&quot;&quot;{&quot;f&quot;: 2}&quot;&quot;&quot;</span></pre><p><strong>Note</strong>: The <tt class="docutils literal"><span class="pre">to</span></tt> and <tt class="docutils literal"><span class="pre">$$</span></tt> operations are available at compile-time!</p>
-
+</span><span class="Comment"># marshal</span><span class="Whitespace">
+</span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Operator">$$</span><span class="Identifier">c</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot;{&quot;f&quot;: 2}&quot;&quot;&quot;</span></pre><strong>Note:</strong> The <tt class="docutils literal"><span class="pre">to</span></tt> and <tt class="docutils literal"><span class="pre">$$</span></tt> operations are available at compile-time!
 <h1><a class="toc-backref" id="see-also" href="#see-also">See also</a></h1><ul class="simple"><li><a class="reference external" href="streams.html">streams module</a></li>
 <li><a class="reference external" href="json.html">json module</a></li>
 </ul>
@@ -188,15 +183,16 @@ class="link-seesrc" target="_blank">Source</a>
 
 Loads <tt class="docutils literal"><span class="pre">data</span></tt> from the stream <tt class="docutils literal"><span class="pre">s</span></tt>. Raises <tt class="docutils literal"><span class="pre">IOError</span></tt> in case of an error.
 <p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">marshal</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">streams</span><span class="Whitespace">
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">streams</span><span class="Whitespace">
+
 </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">s</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">newStringStream</span><span class="Punctuation">(</span><span class="StringLit">&quot;[1, 3, 5]&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
 </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Punctuation">:</span><span class="Whitespace"> </span><span class="Identifier">array</span><span class="Punctuation">[</span><span class="DecNumber">3</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Whitespace">
 </span><span class="Identifier">load</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Punctuation">)</span><span class="Whitespace">
 </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">3</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">5</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/marshal.nim#L279"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/marshal.nim#L272"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/marshal.nim#L279" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/marshal.nim#L272" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="store,Stream,T"></a>
@@ -205,16 +201,17 @@ class="link-seesrc" target="_blank">Source</a>
 
 Stores <tt class="docutils literal"><span class="pre">data</span></tt> into the stream <tt class="docutils literal"><span class="pre">s</span></tt>. Raises <tt class="docutils literal"><span class="pre">IOError</span></tt> in case of an error.
 <p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">marshal</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">streams</span><span class="Whitespace">
+<pre class="listing"><span class="Keyword">import</span><span class="Whitespace"> </span><span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">streams</span><span class="Whitespace">
+
 </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">s</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">newStringStream</span><span class="Punctuation">(</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
 </span><span class="Keyword">var</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">3</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="DecNumber">5</span><span class="Punctuation">]</span><span class="Whitespace">
 </span><span class="Identifier">store</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">,</span><span class="Whitespace"> </span><span class="Identifier">a</span><span class="Punctuation">)</span><span class="Whitespace">
 </span><span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">setPosition</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">)</span><span class="Whitespace">
 </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">readAll</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;[1, 3, 5]&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/marshal.nim#L291"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/marshal.nim#L285"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/marshal.nim#L291" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/marshal.nim#L285" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="$$,T"></a>
@@ -222,7 +219,7 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 <p>Returns a string representation of <tt class="docutils literal"><span class="pre">x</span></tt> (serialization, marshalling).</p>
-<p><strong>Note:</strong> to serialize <tt class="docutils literal"><span class="pre">x</span></tt> to JSON use <tt class="docutils literal"><span class="pre">$(%x)</span></tt> from the <tt class="docutils literal"><span class="pre">json</span></tt> module.</p>
+<p><strong>Note:</strong> to serialize <tt class="docutils literal"><span class="pre">x</span></tt> to JSON use <tt class="docutils literal"><span class="pre">%x</span></tt> from the <tt class="docutils literal"><span class="pre">json</span></tt> module or <tt class="docutils literal"><span class="pre">jsonutils.toJson(x)</span></tt>.</p>
 
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Keyword">type</span><span class="Whitespace">
@@ -234,9 +231,9 @@ class="link-seesrc" target="_blank">Source</a>
 </span><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">y</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Operator">$$</span><span class="Identifier">x</span><span class="Whitespace">
 </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">y</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="LongStringLit">&quot;&quot;&quot;{&quot;id&quot;: 1, &quot;bar&quot;: &quot;baz&quot;}&quot;&quot;&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/marshal.nim#L306"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/marshal.nim#L301"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/marshal.nim#L306" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/marshal.nim#L301" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="to,string"></a>
@@ -257,9 +254,9 @@ Reads data and transforms it to a type <tt class="docutils literal"><span class=
 </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">z</span><span class="Operator">.</span><span class="Identifier">id</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="DecNumber">1</span><span class="Whitespace">
 </span><span class="Identifier">assert</span><span class="Whitespace"> </span><span class="Identifier">z</span><span class="Operator">.</span><span class="Identifier">bar</span><span class="Whitespace"> </span><span class="Operator">==</span><span class="Whitespace"> </span><span class="StringLit">&quot;baz&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/marshal.nim#L327"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/marshal.nim#L323"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/marshal.nim#L327" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/marshal.nim#L323" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -272,7 +269,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-22 01:09:41 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-23 01:11:36 UTC</small>
       </div>
     </div>
   </div>
