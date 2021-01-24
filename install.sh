@@ -798,6 +798,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/guards.nim
   cp compiler/hlo.nim $nimbleDir/compiler/hlo.nim
   chmod 644 $nimbleDir/compiler/hlo.nim
+  cp compiler/ic/cbackend.nim $nimbleDir/compiler/ic/cbackend.nim
+  chmod 644 $nimbleDir/compiler/ic/cbackend.nim
   cp compiler/ic/to_packed_ast.nim $nimbleDir/compiler/ic/to_packed_ast.nim
   chmod 644 $nimbleDir/compiler/ic/to_packed_ast.nim
   cp compiler/ic/packed_ast.nim $nimbleDir/compiler/ic/packed_ast.nim
@@ -806,6 +808,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $nimbleDir/compiler/ic/rodfiles.nim
   cp compiler/ic/bitabs.nim $nimbleDir/compiler/ic/bitabs.nim
   chmod 644 $nimbleDir/compiler/ic/bitabs.nim
+  cp compiler/ic/dce.nim $nimbleDir/compiler/ic/dce.nim
+  chmod 644 $nimbleDir/compiler/ic/dce.nim
   cp compiler/ic/replayer.nim $nimbleDir/compiler/ic/replayer.nim
   chmod 644 $nimbleDir/compiler/ic/replayer.nim
   cp compiler/ic/design.rst $nimbleDir/compiler/ic/design.rst

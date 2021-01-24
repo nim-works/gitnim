@@ -94,10 +94,12 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/gorgeimpl.nim
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
+    rm -f $nimbleDir/compiler/ic/cbackend.nim
     rm -f $nimbleDir/compiler/ic/to_packed_ast.nim
     rm -f $nimbleDir/compiler/ic/packed_ast.nim
     rm -f $nimbleDir/compiler/ic/rodfiles.nim
     rm -f $nimbleDir/compiler/ic/bitabs.nim
+    rm -f $nimbleDir/compiler/ic/dce.nim
     rm -f $nimbleDir/compiler/ic/replayer.nim
     rm -f $nimbleDir/compiler/ic/design.rst
     rm -f $nimbleDir/compiler/idents.nim

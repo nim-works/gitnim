@@ -121,7 +121,7 @@ window.addEventListener('DOMContentLoaded', main);
   unanalysableMutation: bool
   inAsgnSource, inConstructor, inNoSideEffectSection: int
   owner: PSym
-  config: ConfigRef">Partitions</a></li>
+  g: ModuleGraph">Partitions</a></li>
 
   </ul>
 </li>
@@ -134,8 +134,8 @@ window.addEventListener('DOMContentLoaded', main);
 
   </ul>
   <ul class="simple nested-toc-section">computeCursors
-      <li><a class="reference" href="#computeCursors%2CPSym%2CPNode%2CConfigRef"
-    title="computeCursors(s: PSym; n: PNode; config: ConfigRef)">computeCursors,<wbr>PSym,<wbr>PNode,<wbr>ConfigRef</a></li>
+      <li><a class="reference" href="#computeCursors%2CPSym%2CPNode%2CModuleGraph"
+    title="computeCursors(s: PSym; n: PNode; g: ModuleGraph)">computeCursors,<wbr>PSym,<wbr>PNode,<wbr>ModuleGraph</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">hasSideEffect
@@ -149,8 +149,8 @@ window.addEventListener('DOMContentLoaded', main);
 
   </ul>
   <ul class="simple nested-toc-section">computeGraphPartitions
-      <li><a class="reference" href="#computeGraphPartitions%2CPSym%2CPNode%2CConfigRef%2Cset%5BGoal%5D"
-    title="computeGraphPartitions(s: PSym; n: PNode; config: ConfigRef; goals: set[Goal]): Partitions">computeGraphPartitions,<wbr>PSym,<wbr>PNode,<wbr>ConfigRef,<wbr>set[Goal]</a></li>
+      <li><a class="reference" href="#computeGraphPartitions%2CPSym%2CPNode%2CModuleGraph%2Cset%5BGoal%5D"
+    title="computeGraphPartitions(s: PSym; n: PNode; g: ModuleGraph; goals: set[Goal]): Partitions">computeGraphPartitions,<wbr>PSym,<wbr>PNode,<wbr>ModuleGraph,<wbr>set[Goal]</a></li>
 
   </ul>
 
@@ -179,7 +179,7 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="types.html">types</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="msgs.html">msgs</a>, <a class="reference external" href="renderer.html">renderer</a>, <a class="reference external" href="typeallowed.html">typeallowed</a>, <a class="reference external" href="trees.html">trees</a>, <a class="reference external" href="isolation_check.html">isolation_check</a>
+<a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="types.html">types</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="msgs.html">msgs</a>, <a class="reference external" href="renderer.html">renderer</a>, <a class="reference external" href="typeallowed.html">typeallowed</a>, <a class="reference external" href="modulegraphs.html">modulegraphs</a>, <a class="reference external" href="trees.html">trees</a>, <a class="reference external" href="isolation_check.html">isolation_check</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -222,7 +222,7 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">unanalysableMutation</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">inAsgnSource</span><span class="Other">,</span> <span class="Identifier">inConstructor</span><span class="Other">,</span> <span class="Identifier">inNoSideEffectSection</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">owner</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
-  <span class="Identifier">config</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a>
+  <span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a>
 </pre></dt>
 <dd>
 
@@ -261,9 +261,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L123" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="computeGraphPartitions,PSym,PNode,ConfigRef,set[Goal]"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#computeGraphPartitions%2CPSym%2CPNode%2CConfigRef%2Cset%5BGoal%5D"><span class="Identifier">computeGraphPartitions</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span>
-                            <span class="Identifier">goals</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="varpartitions.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="varpartitions.html#Partitions"><span class="Identifier">Partitions</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+<a id="computeGraphPartitions,PSym,PNode,ModuleGraph,set[Goal]"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#computeGraphPartitions%2CPSym%2CPNode%2CModuleGraph%2Cset%5BGoal%5D"><span class="Identifier">computeGraphPartitions</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">goals</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="varpartitions.html#Goal"><span class="Identifier">Goal</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="varpartitions.html#Partitions"><span class="Identifier">Partitions</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
@@ -288,8 +287,8 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/varpartitions.nim#L866" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="computeCursors,PSym,PNode,ConfigRef"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#computeCursors%2CPSym%2CPNode%2CConfigRef"><span class="Identifier">computeCursors</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+<a id="computeCursors,PSym,PNode,ModuleGraph"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#computeCursors%2CPSym%2CPNode%2CModuleGraph"><span class="Identifier">computeCursors</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
@@ -311,7 +310,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-23 01:11:55 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-24 01:05:38 UTC</small>
       </div>
     </div>
   </div>
