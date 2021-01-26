@@ -120,8 +120,13 @@ window.addEventListener('DOMContentLoaded', main);
   exports*: seq[(LitId, int32)]
   reexports*: seq[(LitId, PackedItemId)]
   compilerProcs*, trmacros*, converters*, pureEnums*: seq[(LitId, int32)]
-  methods*: seq[(LitId, PackedItemId, int32)]
+  methods*: seq[int32]
   macroUsages*: seq[(PackedItemId, PackedLineInfo)]
+  typeInstCache*: seq[(PackedItemId, PackedItemId)]
+  procInstCache*: seq[PackedInstantiation]
+  attachedOps*: seq[(TTypeAttachedOp, PackedItemId, PackedItemId)]
+  methodsPerType*: seq[(PackedItemId, int, PackedItemId)]
+  enumToStringProcs*: seq[(PackedItemId, PackedItemId)]
   sh*: Shared
   cfg: PackedConfig">PackedModule</a></li>
   <li><a class="reference" href="#PackedEncoder"
@@ -178,9 +183,15 @@ window.addEventListener('DOMContentLoaded', main);
     title="addImportFileDep(c: var PackedEncoder; m: var PackedModule; f: FileIndex)">addImportFileDep,<wbr>PackedEncoder,<wbr>PackedModule,<wbr>FileIndex</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">storePrim
-      <li><a class="reference" href="#storePrim%2CRodFile%2CPackedType"
-    title="storePrim(f: var RodFile; x: PackedType)">storePrim,<wbr>RodFile,<wbr>PackedType</a></li>
+  <ul class="simple nested-toc-section">storeInstantiation
+      <li><a class="reference" href="#storeInstantiation%2CPackedEncoder%2CPackedModule%2CPSym%2CPInstantiation"
+    title="storeInstantiation(c: var PackedEncoder; m: var PackedModule; s: PSym;
+                   i: PInstantiation)">storeInstantiation,<wbr>PackedEncoder,<wbr>PackedModule,<wbr>PSym,<wbr>PInstantiation</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">storeTypeInst
+      <li><a class="reference" href="#storeTypeInst%2CPackedEncoder%2CPackedModule%2CPSym%2CPType"
+    title="storeTypeInst(c: var PackedEncoder; m: var PackedModule; s: PSym; inst: PType)">storeTypeInst,<wbr>PackedEncoder,<wbr>PackedModule,<wbr>PSym,<wbr>PType</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">toPackedNodeTopLevel
@@ -238,11 +249,6 @@ window.addEventListener('DOMContentLoaded', main);
     title="addConverter(c: var PackedEncoder; m: var PackedModule; s: PSym)">addConverter,<wbr>PackedEncoder,<wbr>PackedModule,<wbr>PSym</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">loadPrim
-      <li><a class="reference" href="#loadPrim%2CRodFile%2CPackedType"
-    title="loadPrim(f: var RodFile; x: var PackedType)">loadPrim,<wbr>RodFile,<wbr>PackedType</a></li>
-
-  </ul>
   <ul class="simple nested-toc-section">loadRodFile
       <li><a class="reference" href="#loadRodFile%2CAbsoluteFile%2CPackedModule%2CConfigRef"
     title="loadRodFile(filename: AbsoluteFile; m: var PackedModule; config: ConfigRef): RodFileError">loadRodFile,<wbr>AbsoluteFile,<wbr>PackedModule,<wbr>ConfigRef</a></li>
@@ -285,6 +291,12 @@ window.addEventListener('DOMContentLoaded', main);
     title="toFileIndex(x: LitId; m: PackedModule; config: ConfigRef): FileIndex">toFileIndex,<wbr>LitId,<wbr>PackedModule,<wbr>ConfigRef</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">translateId
+      <li><a class="reference" href="#translateId%2CPackedItemId%2CPackedModuleGraph%2Cint%2CConfigRef"
+    title="translateId(id: PackedItemId; g: PackedModuleGraph; thisModule: int;
+            config: ConfigRef): ItemId">translateId,<wbr>PackedItemId,<wbr>PackedModuleGraph,<wbr>int,<wbr>ConfigRef</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">toPackedNode
       <li><a class="reference" href="#toPackedNode%2CPNode%2CPackedTree%2CPackedEncoder%2CPackedModule"
     title="toPackedNode(n: PNode; ir: var PackedTree; c: var PackedEncoder;
@@ -316,6 +328,12 @@ window.addEventListener('DOMContentLoaded', main);
     title="idgenFromLoadedModule(m: LoadedModule): IdGenerator">idgenFromLoadedModule,<wbr>LoadedModule</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">loadSymFromId
+      <li><a class="reference" href="#loadSymFromId%2CConfigRef%2CIdentCache%2CPackedModuleGraph%2Cint%2CPackedItemId"
+    title="loadSymFromId(config: ConfigRef; cache: IdentCache; g: var PackedModuleGraph;
+              module: int; id: PackedItemId): PSym">loadSymFromId,<wbr>ConfigRef,<wbr>IdentCache,<wbr>PackedModuleGraph,<wbr>int,<wbr>PackedItemId</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">initRodIterAllSyms
       <li><a class="reference" href="#initRodIterAllSyms%2CRodIter%2CConfigRef%2CIdentCache%2CPackedModuleGraph%2CFileIndex"
     title="initRodIterAllSyms(it: var RodIter; config: ConfigRef; cache: IdentCache;
@@ -331,6 +349,12 @@ window.addEventListener('DOMContentLoaded', main);
       <li><a class="reference" href="#moduleFromRodFile%2CPackedModuleGraph%2CConfigRef%2CIdentCache%2CFileIndex"
     title="moduleFromRodFile(g: var PackedModuleGraph; conf: ConfigRef; cache: IdentCache;
                   fileIdx: FileIndex): PSym">moduleFromRodFile,<wbr>PackedModuleGraph,<wbr>ConfigRef,<wbr>IdentCache,<wbr>FileIndex</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">loadTypeFromId
+      <li><a class="reference" href="#loadTypeFromId%2CConfigRef%2CIdentCache%2CPackedModuleGraph%2Cint%2CPackedItemId"
+    title="loadTypeFromId(config: ConfigRef; cache: IdentCache; g: var PackedModuleGraph;
+               module: int; id: PackedItemId): PType">loadTypeFromId,<wbr>ConfigRef,<wbr>IdentCache,<wbr>PackedModuleGraph,<wbr>int,<wbr>PackedItemId</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">rememberStartupConfig
@@ -405,8 +429,13 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">exports</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a><span class="Other">,</span> <span class="Identifier">int32</span><span class="Other">)</span><span class="Other">]</span>
   <span class="Identifier">reexports</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a><span class="Other">,</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">)</span><span class="Other">]</span>
   <span class="Identifier">compilerProcs</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">trmacros</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">converters</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">pureEnums</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a><span class="Other">,</span> <span class="Identifier">int32</span><span class="Other">)</span><span class="Other">]</span>
-  <span class="Identifier">methods</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a><span class="Other">,</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">,</span> <span class="Identifier">int32</span><span class="Other">)</span><span class="Other">]</span>
+  <span class="Identifier">methods</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int32</span><span class="Other">]</span>
   <span class="Identifier">macroUsages</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">,</span> <a href="packed_ast.html#PackedLineInfo"><span class="Identifier">PackedLineInfo</span></a><span class="Other">)</span><span class="Other">]</span>
+  <span class="Identifier">typeInstCache</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">,</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">)</span><span class="Other">]</span>
+  <span class="Identifier">procInstCache</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#PackedInstantiation"><span class="Identifier">PackedInstantiation</span></a><span class="Other">]</span>
+  <span class="Identifier">attachedOps</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="../ast.html#TTypeAttachedOp"><span class="Identifier">TTypeAttachedOp</span></a><span class="Other">,</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">,</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">)</span><span class="Other">]</span>
+  <span class="Identifier">methodsPerType</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">,</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">)</span><span class="Other">]</span>
+  <span class="Identifier">enumToStringProcs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">,</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">)</span><span class="Other">]</span>
   <span class="Identifier">sh</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#Shared"><span class="Identifier">Shared</span></a>
   <span class="Identifier">cfg</span><span class="Other">:</span> <a href="to_packed_ast.html#PackedConfig"><span class="Identifier">PackedConfig</span></a>
 </pre></dt>
@@ -435,9 +464,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L41"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L48"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L41" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L48" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="PackedDecoder"></a>
@@ -452,9 +481,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L573"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L588"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L573" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L588" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ModuleStatus"></a>
@@ -464,9 +493,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L581"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L596"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L581" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L596" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="LoadedModule"></a>
@@ -483,9 +512,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L588"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L603"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L588" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L603" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="PackedModuleGraph"></a>
@@ -494,9 +523,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L597"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L612"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L597" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L612" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="RodIter"></a>
@@ -509,9 +538,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L932"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L977"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L932" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L977" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -526,9 +555,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L84"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L91"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L84" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L91" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toFileIndex,LitId,PackedModule,ConfigRef"></a>
@@ -538,9 +567,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L110"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L117"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L110" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L117" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="initEncoder,PackedEncoder,PackedModule,PSym,ConfigRef,PackedConfig"></a>
@@ -551,9 +580,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 setup a context for serializing to packed ast
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L119"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L126"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L119" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L126" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addIncludeFileDep,PackedEncoder,PackedModule,FileIndex"></a>
@@ -563,37 +592,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L139"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L146"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L139" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L146" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addImportFileDep,PackedEncoder,PackedModule,FileIndex"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#addImportFileDep%2CPackedEncoder%2CPackedModule%2CFileIndex"><span class="Identifier">addImportFileDep</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">f</span><span class="Other">:</span> <a href="../lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L142"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L142" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="addExported,PackedEncoder,PackedModule,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addExported%2CPackedEncoder%2CPackedModule%2CPSym"><span class="Identifier">addExported</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L145"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L145" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="addConverter,PackedEncoder,PackedModule,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addConverter%2CPackedEncoder%2CPackedModule%2CPSym"><span class="Identifier">addConverter</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -604,6 +609,30 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L149" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="addExported,PackedEncoder,PackedModule,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addExported%2CPackedEncoder%2CPackedModule%2CPSym"><span class="Identifier">addExported</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L152"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L152" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="addConverter,PackedEncoder,PackedModule,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addConverter%2CPackedEncoder%2CPackedModule%2CPSym"><span class="Identifier">addConverter</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L156"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L156" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="addTrmacro,PackedEncoder,PackedModule,PSym"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#addTrmacro%2CPackedEncoder%2CPackedModule%2CPSym"><span class="Identifier">addTrmacro</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
@@ -611,9 +640,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L153"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L160"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L153" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L160" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addPureEnum,PackedEncoder,PackedModule,PSym"></a>
@@ -623,9 +652,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L157"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L164"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L157" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L164" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addMethod,PackedEncoder,PackedModule,PSym"></a>
@@ -635,25 +664,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L162"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L169"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L162" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L169" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addReexport,PackedEncoder,PackedModule,PSym"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#addReexport%2CPackedEncoder%2CPackedModule%2CPSym"><span class="Identifier">addReexport</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L167"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L167" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="addCompilerProc,PackedEncoder,PackedModule,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addCompilerProc%2CPackedEncoder%2CPackedModule%2CPSym"><span class="Identifier">addCompilerProc</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
@@ -664,6 +681,18 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L172" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="addCompilerProc,PackedEncoder,PackedModule,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addCompilerProc%2CPackedEncoder%2CPackedModule%2CPSym"><span class="Identifier">addCompilerProc</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L177"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L177" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="storeSym,PSym,PackedEncoder,PackedModule"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#storeSym%2CPSym%2CPackedEncoder%2CPackedModule"><span class="Identifier">storeSym</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">)</span><span class="Other">:</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
@@ -671,9 +700,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 serialize a psym
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L317"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L322"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L317" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L322" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toPackedNode,PNode,PackedTree,PackedEncoder,PackedModule"></a>
@@ -683,9 +712,33 @@ class="link-seesrc" target="_blank">Source</a>
 
 serialize a node into the tree
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L371"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L376"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L371" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L376" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="storeInstantiation,PackedEncoder,PackedModule,PSym,PInstantiation"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#storeInstantiation%2CPackedEncoder%2CPackedModule%2CPSym%2CPInstantiation"><span class="Identifier">storeInstantiation</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span>
+                        <span class="Identifier">i</span><span class="Other">:</span> <a href="../ast.html#PInstantiation"><span class="Identifier">PInstantiation</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L423"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L423" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="storeTypeInst,PackedEncoder,PackedModule,PSym,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#storeTypeInst%2CPackedEncoder%2CPackedModule%2CPSym%2CPType"><span class="Identifier">storeTypeInst</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedEncoder"><span class="Identifier">PackedEncoder</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModule"><span class="Identifier">PackedModule</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span>
+                   <span class="Identifier">inst</span><span class="Other">:</span> <a href="../ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L431"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L431" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addPragmaComputation,PackedEncoder,PackedModule,PNode"></a>
@@ -695,9 +748,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L418"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L434"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L418" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L434" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toPackedNodeTopLevel,PNode,PackedEncoder,PackedModule"></a>
@@ -708,33 +761,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L435"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L451"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L435" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="storePrim,RodFile,PackedType"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#storePrim%2CRodFile%2CPackedType"><span class="Identifier">storePrim</span></a><span class="Other">(</span><span class="Identifier">f</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rodfiles.html#RodFile"><span class="Identifier">RodFile</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">:</span> <a href="packed_ast.html#PackedType"><span class="Identifier">PackedType</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L439"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L439" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="loadPrim,RodFile,PackedType"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#loadPrim%2CRodFile%2CPackedType"><span class="Identifier">loadPrim</span></a><span class="Other">(</span><span class="Identifier">f</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rodfiles.html#RodFile"><span class="Identifier">RodFile</span></a><span class="Other">;</span> <span class="Identifier">x</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="packed_ast.html#PackedType"><span class="Identifier">PackedType</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L446"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L446" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L451" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="loadRodFile,AbsoluteFile,PackedModule,ConfigRef"></a>
@@ -745,9 +774,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L456"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L458"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L456" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L458" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="saveRodFile,AbsoluteFile,PackedEncoder,PackedModule"></a>
@@ -758,9 +787,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L515"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L523"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L515" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L523" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toFileIndexCached,PackedDecoder,PackedModuleGraph,int,LitId"></a>
@@ -771,9 +800,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L602"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L617"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L602" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L617" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="loadNodes,PackedDecoder,PackedModuleGraph,int,PackedTree,NodePos"></a>
@@ -784,9 +813,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L617"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L632"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L617" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L632" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="initPackedDecoder,ConfigRef,IdentCache"></a>
@@ -796,9 +825,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L653"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L668"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L653" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L668" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="moduleIndex,PackedDecoder,PackedModuleGraph,int,PackedItemId"></a>
@@ -809,9 +838,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L686"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L701"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L686" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L701" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="moduleFromRodFile,PackedModuleGraph,ConfigRef,IdentCache,FileIndex"></a>
@@ -823,9 +852,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns 'nil' if the module needs to be recompiled.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L874"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L889"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L874" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L889" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="loadProcBody,ConfigRef,IdentCache,PackedModuleGraph,PSym"></a>
@@ -836,9 +865,48 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L892"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L907"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L892" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L907" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="loadTypeFromId,ConfigRef,IdentCache,PackedModuleGraph,int,PackedItemId"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#loadTypeFromId%2CConfigRef%2CIdentCache%2CPackedModuleGraph%2Cint%2CPackedItemId"><span class="Identifier">loadTypeFromId</span></a><span class="Other">(</span><span class="Identifier">config</span><span class="Other">:</span> <a href="../options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span> <span class="Identifier">cache</span><span class="Other">:</span> <a href="../idents.html#IdentCache"><span class="Identifier">IdentCache</span></a><span class="Other">;</span>
+                    <span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModuleGraph"><span class="Identifier">PackedModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">module</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">id</span><span class="Other">:</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../ast.html#PType"><span class="Identifier">PType</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L920"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L920" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="loadSymFromId,ConfigRef,IdentCache,PackedModuleGraph,int,PackedItemId"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#loadSymFromId%2CConfigRef%2CIdentCache%2CPackedModuleGraph%2Cint%2CPackedItemId"><span class="Identifier">loadSymFromId</span></a><span class="Other">(</span><span class="Identifier">config</span><span class="Other">:</span> <a href="../options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span> <span class="Identifier">cache</span><span class="Other">:</span> <a href="../idents.html#IdentCache"><span class="Identifier">IdentCache</span></a><span class="Other">;</span>
+                   <span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="to_packed_ast.html#PackedModuleGraph"><span class="Identifier">PackedModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">module</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">id</span><span class="Other">:</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L932"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L932" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="translateId,PackedItemId,PackedModuleGraph,int,ConfigRef"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#translateId%2CPackedItemId%2CPackedModuleGraph%2Cint%2CConfigRef"><span class="Identifier">translateId</span></a><span class="Other">(</span><span class="Identifier">id</span><span class="Other">:</span> <a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">;</span> <span class="Identifier">g</span><span class="Other">:</span> <a href="to_packed_ast.html#PackedModuleGraph"><span class="Identifier">PackedModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">thisModule</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
+                 <span class="Identifier">config</span><span class="Other">:</span> <a href="../options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../ast.html#ItemId"><span class="Identifier">ItemId</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L944"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L944" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="simulateLoadedModule,PackedModuleGraph,ConfigRef,IdentCache,PSym,PackedModule"></a>
@@ -849,9 +917,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L918"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L963"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L918" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L963" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="initRodIter,RodIter,ConfigRef,IdentCache,PackedModuleGraph,FileIndex,PIdent"></a>
@@ -862,9 +930,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L937"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L982"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L937" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L982" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="initRodIterAllSyms,RodIter,ConfigRef,IdentCache,PackedModuleGraph,FileIndex"></a>
@@ -875,9 +943,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L953"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L998"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L953" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L998" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="nextRodIter,RodIter,PackedModuleGraph"></a>
@@ -887,9 +955,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L970"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L1015"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L970" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L1015" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="interfaceSymbol,ConfigRef,IdentCache,PackedModuleGraph,FileIndex,PIdent"></a>
@@ -900,9 +968,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L985"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L1030"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L985" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L1030" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="idgenFromLoadedModule,LoadedModule"></a>
@@ -911,9 +979,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L992"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L1037"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L992" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L1037" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rodViewer,AbsoluteFile,ConfigRef,IdentCache"></a>
@@ -924,9 +992,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L998"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L1043"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L998" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L1043" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -943,9 +1011,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L975"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/ic/to_packed_ast.nim#L1020"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L975" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ic/to_packed_ast.nim#L1020" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -958,7 +1026,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-25 01:09:38 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-26 00:44:24 UTC</small>
       </div>
     </div>
   </div>
