@@ -323,6 +323,7 @@ window.addEventListener('DOMContentLoaded', main);
 </ul><li><a class="reference" id="implementation-specific-pragmas-importjs-pragma_toc" href="#implementation-specific-pragmas-importjs-pragma">ImportJs pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-importobjc-pragma_toc" href="#implementation-specific-pragmas-importobjc-pragma">ImportObjC pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-codegendecl-pragma_toc" href="#implementation-specific-pragmas-codegendecl-pragma">CodegenDecl pragma</a></li>
+<li><a class="reference" id="implementation-specific-pragmas-cppnonpod-pragma_toc" href="#implementation-specific-pragmas-cppnonpod-pragma"><tt class="docutils literal"><span class="pre">cppNonPod</span></tt> pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-injectstmt-pragma_toc" href="#implementation-specific-pragmas-injectstmt-pragma">InjectStmt pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-compileminustime-define-pragmas_toc" href="#implementation-specific-pragmas-compileminustime-define-pragmas">compile-time define pragmas</a></li>
 </ul><li><a class="reference" id="userminusdefined-pragmas_toc" href="#userminusdefined-pragmas">User-defined pragmas</a></li>
@@ -3920,6 +3921,11 @@ using namespace gui;
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">myinterrupt</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">codegenDecl</span><span class="Punctuation">:</span> <span class="StringLit">&quot;__interrupt $# $#$#&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
   <span class="Identifier">echo</span> <span class="StringLit">&quot;realistic interrupt handler&quot;</span></pre><p>will generate this code:</p>
 <pre class="listing"><span class="Identifier">__interrupt</span> <span class="Keyword">void</span> <span class="Identifier">myinterrupt</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
+<h2><a class="toc-backref" id="implementation-specific-pragmas-cppnonpod-pragma" href="#implementation-specific-pragmas-cppnonpod-pragma"><tt class="docutils literal"><span class="pre">cppNonPod</span></tt> pragma</a></h2><p>The <tt class="docutils literal"><span class="pre">.cppNonPod</span></tt> pragma should be used for non-POD <tt class="docutils literal"><span class="pre">importcpp</span></tt> types so that they work properly (in particular regarding constructor and destructor) for <tt class="docutils literal"><span class="pre">.threadvar</span></tt> variables. This requires <tt class="docutils literal"><span class="pre">--tlsEmulation:off</span></tt>.</p>
+<pre class="listing"><span class="Keyword">type</span> <span class="Identifier">Foo</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">cppNonPod</span><span class="Punctuation">,</span> <span class="Identifier">importcpp</span><span class="Punctuation">,</span> <span class="Identifier">header</span><span class="Punctuation">:</span> <span class="StringLit">&quot;funs.h&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">cint</span>
+<span class="Keyword">proc</span> <span class="Identifier">main</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Operator">=</span>
+  <span class="Keyword">var</span> <span class="Identifier">a</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">threadvar</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span> <span class="Identifier">Foo</span></pre>
 <h2><a class="toc-backref" id="implementation-specific-pragmas-injectstmt-pragma" href="#implementation-specific-pragmas-injectstmt-pragma">InjectStmt pragma</a></h2><p>The <tt class="docutils literal"><span class="pre">injectStmt</span></tt> pragma can be used to inject a statement before every other statement in the current module. It is only supposed to be used for debugging:</p>
 <pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">injectStmt</span><span class="Punctuation">:</span> <span class="Identifier">gcInvariants</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span>
 
@@ -4101,7 +4107,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-27 00:41:44 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-28 00:40:24 UTC</small>
       </div>
     </div>
   </div>
