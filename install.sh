@@ -682,6 +682,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/wrapnils.nim
   cp lib/std/isolation.nim $libdir/std/isolation.nim
   chmod 644 $libdir/std/isolation.nim
+  cp lib/std/private/gitutils.nim $libdir/std/private/gitutils.nim
+  chmod 644 $libdir/std/private/gitutils.nim
   cp lib/std/private/since.nim $libdir/std/private/since.nim
   chmod 644 $libdir/std/private/since.nim
   cp lib/std/private/strimpl.nim $libdir/std/private/strimpl.nim
