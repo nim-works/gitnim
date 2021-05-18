@@ -17,7 +17,7 @@
 <link href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,500,600' rel='stylesheet' type='text/css'/>
 
 <!-- CSS -->
-<title>lookups</title>
+<title>compiler/lookups</title>
 <link rel="stylesheet" type="text/css" href="nimdoc.out.css">
 
 <script type="text/javascript" src="dochack.js"></script>
@@ -64,7 +64,7 @@ window.addEventListener('DOMContentLoaded', main);
 <body>
 <div class="document" id="documentId">
   <div class="container">
-    <h1 class="title">lookups</h1>
+    <h1 class="title">compiler/lookups</h1>
     <div class="row">
   <div class="three columns">
   <div class="theme-switch-wrapper">
@@ -127,7 +127,7 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">debugScopes
       <li><a class="reference" href="#debugScopes%2CPContext%2Cint"
-    title="debugScopes(c: PContext; limit = 0)">debugScopes(c: PContext; limit = 0)</a></li>
+    title="debugScopes(c: PContext; limit = 0; max = int.high)">debugScopes(c: PContext; limit = 0; max = int.high)</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">getSymRepr
@@ -152,9 +152,14 @@ window.addEventListener('DOMContentLoaded', main);
                   conflictsWith: TLineInfo)</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">addInterfaceDeclAux
+      <li><a class="reference" href="#addInterfaceDeclAux%2CPContext%2CPSym"
+    title="addInterfaceDeclAux(c: PContext; sym: PSym; forceExport = false)">addInterfaceDeclAux(c: PContext; sym: PSym; forceExport = false)</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">errorUndeclaredIdentifier
-      <li><a class="reference" href="#errorUndeclaredIdentifier%2CPContext%2CTLineInfo%2Cstring"
-    title="errorUndeclaredIdentifier(c: PContext; info: TLineInfo; name: string)">errorUndeclaredIdentifier(c: PContext; info: TLineInfo; name: string)</a></li>
+      <li><a class="reference" href="#errorUndeclaredIdentifier%2CPContext%2CTLineInfo%2Cstring%2Cstring"
+    title="errorUndeclaredIdentifier(c: PContext; info: TLineInfo; name: string; extra = &quot;&quot;)">errorUndeclaredIdentifier(c: PContext; info: TLineInfo; name: string; extra = &quot;&quot;)</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">someSymFromImportTable
@@ -175,6 +180,11 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple nested-toc-section">openShadowScope
       <li><a class="reference" href="#openShadowScope%2CPContext"
     title="openShadowScope(c: PContext)">openShadowScope(c: PContext)</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">errorUndeclaredIdentifierHint
+      <li><a class="reference" href="#errorUndeclaredIdentifierHint%2CPContext%2CPNode%2CPIdent"
+    title="errorUndeclaredIdentifierHint(c: PContext; n: PNode; ident: PIdent): PSym">errorUndeclaredIdentifierHint(c: PContext; n: PNode; ident: PIdent): PSym</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">rawCloseScope
@@ -300,20 +310,37 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#15" id="65">Iterators</a>
   <ul class="simple simple-toc-section">
+      <ul class="simple nested-toc-section">allSyms
+      <li><a class="reference" href="#allSyms.i%2CPContext"
+    title="allSyms(c: PContext): (PSym, int, bool)">allSyms(c: PContext): (PSym, int, bool)</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">importedItems
+      <li><a class="reference" href="#importedItems.i%2CPContext%2CPIdent"
+    title="importedItems(c: PContext; name: PIdent): PSym">importedItems(c: PContext; name: PIdent): PSym</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">localScopesFrom
       <li><a class="reference" href="#localScopesFrom.i%2CPContext%2CPScope"
-    title="localScopesFrom(c: PContext; scope: PScope): PScope">localScopesFrom</a></li>
-  <li><a class="reference" href="#importedItems.i%2CPContext%2CPIdent"
-    title="importedItems(c: PContext; name: PIdent): PSym">importedItems</a></li>
-  <li><a class="reference" href="#allSyms.i%2CPContext"
-    title="allSyms(c: PContext): (PSym, int, bool)">allSyms</a></li>
+    title="localScopesFrom(c: PContext; scope: PScope): PScope">localScopesFrom(c: PContext; scope: PScope): PScope</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">allScopes
+      <li><a class="reference" href="#allScopes.i%2CPScope"
+    title="allScopes(scope: PScope): PScope">allScopes(scope: PScope): PScope</a></li>
+
+  </ul>
 
   </ul>
 </li>
 <li>
   <a class="reference reference-toplevel" href="#18" id="68">Templates</a>
   <ul class="simple simple-toc-section">
+      <ul class="simple nested-toc-section">addSym
       <li><a class="reference" href="#addSym.t%2CPScope%2CPSym"
-    title="addSym(scope: PScope; s: PSym)">addSym</a></li>
+    title="addSym(scope: PScope; s: PSym)">addSym(scope: PScope; s: PSym)</a></li>
+
+  </ul>
 
   </ul>
 </li>
@@ -333,7 +360,7 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="astalgo.html">astalgo</a>, <a class="reference external" href="idents.html">idents</a>, <a class="reference external" href="semdata.html">semdata</a>, <a class="reference external" href="types.html">types</a>, <a class="reference external" href="msgs.html">msgs</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="renderer.html">renderer</a>, <a class="reference external" href="nimfix/prettybase.html">nimfix/prettybase</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="modulegraphs.html">modulegraphs</a>
+<a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="astalgo.html">astalgo</a>, <a class="reference external" href="idents.html">idents</a>, <a class="reference external" href="semdata.html">semdata</a>, <a class="reference external" href="types.html">types</a>, <a class="reference external" href="msgs.html">msgs</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="renderer.html">renderer</a>, <a class="reference external" href="nimfix/prettybase.html">nimfix/prettybase</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="modulegraphs.html">modulegraphs</a>, <a class="reference external" href="astmsgs.html">astmsgs</a>, <a class="reference external" href="ic/ic.html">ic/ic</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -346,9 +373,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L241"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L244"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L241" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L244" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TOverloadIter"></a>
@@ -366,9 +393,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L244"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L247"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L244" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L247" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TLookupFlag"></a>
@@ -378,9 +405,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L434"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L503"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L434" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L503" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -389,9 +416,9 @@ class="link-seesrc" target="_blank">Source</a>
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
 <a id="considerQuotedIdent,PContext,PNode,PNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#considerQuotedIdent%2CPContext%2CPNode%2CPNode"><span class="Identifier">considerQuotedIdent</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">origin</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#considerQuotedIdent%2CPContext%2CPNode%2CPNode"><span class="Identifier">considerQuotedIdent</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">origin</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 Retrieve a PIdent from a PNode, taking into account accent nodes. <tt class="docutils literal"><span class="pre">origin</span></tt> can be nil. If it is not nil, it is used for a better error message.
@@ -402,7 +429,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="addUniqueSym,PScope,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addUniqueSym%2CPScope%2CPSym"><span class="Identifier">addUniqueSym</span></a><span class="Other">(</span><span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#addUniqueSym%2CPScope%2CPSym"><span class="Identifier">addUniqueSym</span></a><span class="Other">(</span><span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -413,7 +440,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="openScope,PContext"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#openScope%2CPContext"><span class="Identifier">openScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">discardable</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#openScope%2CPContext"><span class="Identifier">openScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a> {.<span class="Identifier">discardable</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -424,7 +451,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="rawCloseScope,PContext"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#rawCloseScope%2CPContext"><span class="Identifier">rawCloseScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#rawCloseScope%2CPContext"><span class="Identifier">rawCloseScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -435,7 +462,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="closeScope,PContext"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#closeScope%2CPContext"><span class="Identifier">closeScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#closeScope%2CPContext"><span class="Identifier">closeScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -446,9 +473,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="skipAlias,PSym,PNode,ConfigRef"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#skipAlias%2CPSym%2CPNode%2CConfigRef"><span class="Identifier">skipAlias</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#skipAlias%2CPSym%2CPNode%2CConfigRef"><span class="Identifier">skipAlias</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -459,7 +486,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="isShadowScope,PScope"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#isShadowScope%2CPScope"><span class="Identifier">isShadowScope</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#isShadowScope%2CPScope"><span class="Identifier">isShadowScope</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -470,7 +497,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="localSearchInScope,PContext,PIdent"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#localSearchInScope%2CPContext%2CPIdent"><span class="Identifier">localSearchInScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#localSearchInScope%2CPContext%2CPIdent"><span class="Identifier">localSearchInScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -481,8 +508,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="someSymFromImportTable,PContext,PIdent,bool"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#someSymFromImportTable%2CPContext%2CPIdent%2Cbool"><span class="Identifier">someSymFromImportTable</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">ambiguous</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#someSymFromImportTable%2CPContext%2CPIdent%2Cbool"><span class="Identifier">someSymFromImportTable</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">ambiguous</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -493,8 +520,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="searchInScopes,PContext,PIdent,bool"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#searchInScopes%2CPContext%2CPIdent%2Cbool"><span class="Identifier">searchInScopes</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">ambiguous</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#searchInScopes%2CPContext%2CPIdent%2Cbool"><span class="Identifier">searchInScopes</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">ambiguous</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">bool</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -505,7 +532,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="debugScopes,PContext,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#debugScopes%2CPContext%2Cint"><span class="Identifier">debugScopes</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">limit</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">deprecated</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#debugScopes%2CPContext%2Cint"><span class="Identifier">debugScopes</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">limit</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">;</span> <span class="Identifier">max</span> <span class="Other">=</span> <span class="Identifier">int</span><span class="Other">.</span><span class="Identifier">high</span><span class="Other">)</span> {.<span class="Identifier">deprecated</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
   <div class="deprecation-message">
     <b>Deprecated</b> 
@@ -519,110 +547,111 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="searchInScopesFilterBy,PContext,PIdent,TSymKinds"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#searchInScopesFilterBy%2CPContext%2CPIdent%2CTSymKinds"><span class="Identifier">searchInScopesFilterBy</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">filter</span><span class="Other">:</span> <a href="ast.html#TSymKinds"><span class="Identifier">TSymKinds</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#searchInScopesFilterBy%2CPContext%2CPIdent%2CTSymKinds"><span class="Identifier">searchInScopesFilterBy</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">filter</span><span class="Other">:</span> <a href="ast.html#TSymKinds"><span class="Identifier">TSymKinds</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L206"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L209"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L206" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L209" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errorSym,PContext,PNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#errorSym%2CPContext%2CPNode"><span class="Identifier">errorSym</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#errorSym%2CPContext%2CPNode"><span class="Identifier">errorSym</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 creates an error symbol to avoid cascading errors (for IDE support)
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L224"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L227"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L224" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L227" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getSymRepr,ConfigRef,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getSymRepr%2CConfigRef%2CPSym"><span class="Identifier">getSymRepr</span></a><span class="Other">(</span><span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">getDeclarationPath</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getSymRepr%2CConfigRef%2CPSym"><span class="Identifier">getSymRepr</span></a><span class="Other">(</span><span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">getDeclarationPath</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L254"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L257"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L254" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L257" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="wrongRedefinition,PContext,TLineInfo,string,TLineInfo"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#wrongRedefinition%2CPContext%2CTLineInfo%2Cstring%2CTLineInfo"><span class="Identifier">wrongRedefinition</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
-                       <span class="Identifier">conflictsWith</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+                       <span class="Identifier">conflictsWith</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-
+Emit a redefinition error if in non-interactive mode
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L285"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L288"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L285" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addDecl,PContext,PSym,TLineInfo"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addDecl%2CPContext%2CPSym%2CTLineInfo"><span class="Identifier">addDecl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#addDecl%2CPContext%2CPSym%2CTLineInfo"><span class="Identifier">addDecl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L292"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L296"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L292" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L296" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addDecl,PContext,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addDecl%2CPContext%2CPSym"><span class="Identifier">addDecl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span>
-                               <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#addDecl%2CPContext%2CPSym"><span class="Identifier">addDecl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span>
+                                        <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span>
+                                        <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L297"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L301"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L297" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L301" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addPrelimDecl,PContext,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addPrelimDecl%2CPContext%2CPSym"><span class="Identifier">addPrelimDecl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#addPrelimDecl%2CPContext%2CPSym"><span class="Identifier">addPrelimDecl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L302"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L306"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L302" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L306" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addDeclAt,PContext,PScope,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addDeclAt%2CPContext%2CPScope%2CPSym"><span class="Identifier">addDeclAt</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#addDeclAt%2CPContext%2CPScope%2CPSym"><span class="Identifier">addDeclAt</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L305"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L309"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L305" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L309" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="addInterfaceDeclAt,PContext,PScope,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addInterfaceDeclAt%2CPContext%2CPScope%2CPSym"><span class="Identifier">addInterfaceDeclAt</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="addInterfaceDeclAux,PContext,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addInterfaceDeclAux%2CPContext%2CPSym"><span class="Identifier">addInterfaceDeclAux</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">forceExport</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -632,23 +661,23 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="addOverloadableSymAt,PContext,PScope,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addOverloadableSymAt%2CPContext%2CPScope%2CPSym"><span class="Identifier">addOverloadableSymAt</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">fn</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="addInterfaceDeclAt,PContext,PScope,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addInterfaceDeclAt%2CPContext%2CPScope%2CPSym"><span class="Identifier">addInterfaceDeclAt</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L320"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L326"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L320" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L326" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="addInterfaceDecl,PContext,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addInterfaceDecl%2CPContext%2CPSym"><span class="Identifier">addInterfaceDecl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="addOverloadableSymAt,PContext,PScope,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addOverloadableSymAt%2CPContext%2CPScope%2CPSym"><span class="Identifier">addOverloadableSymAt</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">fn</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -658,21 +687,10 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L330" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="addInterfaceOverloadableSymAt,PContext,PScope,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#addInterfaceOverloadableSymAt%2CPContext%2CPScope%2CPSym"><span class="Identifier">addInterfaceOverloadableSymAt</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L335"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L335" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="openShadowScope,PContext"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#openShadowScope%2CPContext"><span class="Identifier">openShadowScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="addInterfaceDecl,PContext,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addInterfaceDecl%2CPContext%2CPSym"><span class="Identifier">addInterfaceDecl</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -682,8 +700,10 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L340" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="closeShadowScope,PContext"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#closeShadowScope%2CPContext"><span class="Identifier">closeShadowScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="addInterfaceOverloadableSymAt,PContext,PScope,PSym"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addInterfaceOverloadableSymAt%2CPContext%2CPScope%2CPSym"><span class="Identifier">addInterfaceOverloadableSymAt</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">;</span> <span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -693,119 +713,156 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L345" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="mergeShadowScope,PContext"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#mergeShadowScope%2CPContext"><span class="Identifier">mergeShadowScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span>
-    <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span>
-                               <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="openShadowScope,PContext"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#openShadowScope%2CPContext"><span class="Identifier">openShadowScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L348"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L350"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L348" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L350" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="closeShadowScope,PContext"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#closeShadowScope%2CPContext"><span class="Identifier">closeShadowScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L355"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L355" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="mergeShadowScope,PContext"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#mergeShadowScope%2CPContext"><span class="Identifier">mergeShadowScope</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span>
+                                        <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span>
+                                        <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L358"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L358" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errorUseQualifier,PContext,TLineInfo,PSym"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#errorUseQualifier%2CPContext%2CTLineInfo%2CPSym"><span class="Identifier">errorUseQualifier</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#errorUseQualifier%2CPContext%2CTLineInfo%2CPSym"><span class="Identifier">errorUseQualifier</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L374"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L450"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L374" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L450" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="errorUndeclaredIdentifier,PContext,TLineInfo,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#errorUndeclaredIdentifier%2CPContext%2CTLineInfo%2Cstring"><span class="Identifier">errorUndeclaredIdentifier</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<a id="errorUndeclaredIdentifier,PContext,TLineInfo,string,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#errorUndeclaredIdentifier%2CPContext%2CTLineInfo%2Cstring%2Cstring"><span class="Identifier">errorUndeclaredIdentifier</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
+                               <span class="Identifier">extra</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L396"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L465"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L396" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L465" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="errorUndeclaredIdentifierHint,PContext,PNode,PIdent"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#errorUndeclaredIdentifierHint%2CPContext%2CPNode%2CPIdent"><span class="Identifier">errorUndeclaredIdentifierHint</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">ident</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L474"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L474" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lookUp,PContext,PNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#lookUp%2CPContext%2CPNode"><span class="Identifier">lookUp</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#lookUp%2CPContext%2CPNode"><span class="Identifier">lookUp</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L405"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L480"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L405" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L480" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="qualifiedLookUp,PContext,PNode,set[TLookupFlag]"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#qualifiedLookUp%2CPContext%2CPNode%2Cset%5BTLookupFlag%5D"><span class="Identifier">qualifiedLookUp</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">flags</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="lookups.html#TLookupFlag"><span class="Identifier">TLookupFlag</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#qualifiedLookUp%2CPContext%2CPNode%2Cset%5BTLookupFlag%5D"><span class="Identifier">qualifiedLookUp</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">flags</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="lookups.html#TLookupFlag"><span class="Identifier">TLookupFlag</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L437"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L506"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L437" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L506" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="initOverloadIter,TOverloadIter,PContext,PNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#initOverloadIter%2CTOverloadIter%2CPContext%2CPNode"><span class="Identifier">initOverloadIter</span></a><span class="Other">(</span><span class="Identifier">o</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="lookups.html#TOverloadIter"><span class="Identifier">TOverloadIter</span></a><span class="Other">;</span> <span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#initOverloadIter%2CTOverloadIter%2CPContext%2CPNode"><span class="Identifier">initOverloadIter</span></a><span class="Other">(</span><span class="Identifier">o</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="lookups.html#TOverloadIter"><span class="Identifier">TOverloadIter</span></a><span class="Other">;</span> <span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L499"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L564"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L499" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L564" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lastOverloadScope,TOverloadIter"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#lastOverloadScope%2CTOverloadIter"><span class="Identifier">lastOverloadScope</span></a><span class="Other">(</span><span class="Identifier">o</span><span class="Other">:</span> <a href="lookups.html#TOverloadIter"><span class="Identifier">TOverloadIter</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#lastOverloadScope%2CTOverloadIter"><span class="Identifier">lastOverloadScope</span></a><span class="Other">(</span><span class="Identifier">o</span><span class="Other">:</span> <a href="lookups.html#TOverloadIter"><span class="Identifier">TOverloadIter</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L560"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L625"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L560" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L625" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="nextOverloadIter,TOverloadIter,PContext,PNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#nextOverloadIter%2CTOverloadIter%2CPContext%2CPNode"><span class="Identifier">nextOverloadIter</span></a><span class="Other">(</span><span class="Identifier">o</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="lookups.html#TOverloadIter"><span class="Identifier">TOverloadIter</span></a><span class="Other">;</span> <span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#nextOverloadIter%2CTOverloadIter%2CPContext%2CPNode"><span class="Identifier">nextOverloadIter</span></a><span class="Other">(</span><span class="Identifier">o</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="lookups.html#TOverloadIter"><span class="Identifier">TOverloadIter</span></a><span class="Other">;</span> <span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L593"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L658"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L593" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L658" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pickSym,PContext,PNode,set[TSymKind],TSymFlags"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#pickSym%2CPContext%2CPNode%2Cset%5BTSymKind%5D%2CTSymFlags"><span class="Identifier">pickSym</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">kinds</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="ast.html#TSymKind"><span class="Identifier">TSymKind</span></a><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">flags</span><span class="Other">:</span> <a href="ast.html#TSymFlags"><span class="Identifier">TSymFlags</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#pickSym%2CPContext%2CPNode%2Cset%5BTSymKind%5D%2CTSymFlags"><span class="Identifier">pickSym</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">;</span> <span class="Identifier">kinds</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="ast.html#TSymKind"><span class="Identifier">TSymKind</span></a><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">flags</span><span class="Other">:</span> <a href="ast.html#TSymFlags"><span class="Identifier">TSymFlags</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L672"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L737"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L672" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L737" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -813,9 +870,20 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="15">
 <h1><a class="toc-backref" href="#15">Iterators</a></h1>
 <dl class="item">
+<a id="allScopes.i,PScope"></a>
+<dt><pre><span class="Keyword">iterator</span> <a href="#allScopes.i%2CPScope"><span class="Identifier">allScopes</span></a><span class="Other">(</span><span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lookups.nim#L78"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lookups.nim#L78" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="localScopesFrom.i,PContext,PScope"></a>
-<dt><pre><span class="Keyword">iterator</span> <a href="#localScopesFrom.i%2CPContext%2CPScope"><span class="Identifier">localScopesFrom</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">iterator</span> <a href="#localScopesFrom.i%2CPContext%2CPScope"><span class="Identifier">localScopesFrom</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">scope</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PScope"><span class="Identifier">PScope</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -826,8 +894,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="importedItems.i,PContext,PIdent"></a>
-<dt><pre><span class="Keyword">iterator</span> <a href="#importedItems.i%2CPContext%2CPIdent"><span class="Identifier">importedItems</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">iterator</span> <a href="#importedItems.i%2CPContext%2CPIdent"><span class="Identifier">importedItems</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -838,8 +906,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="allSyms.i,PContext"></a>
-<dt><pre><span class="Keyword">iterator</span> <a href="#allSyms.i%2CPContext"><span class="Identifier">allSyms</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">bool</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">iterator</span> <a href="#allSyms.i%2CPContext"><span class="Identifier">allSyms</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="semdata.html#PContext"><span class="Identifier">PContext</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">bool</span><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -875,7 +943,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-31 00:42:44 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-17 00:53:47 UTC</small>
       </div>
     </div>
   </div>

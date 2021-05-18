@@ -61,12 +61,13 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/aliases.nim
     rm -f $nimbleDir/compiler/ast.nim
     rm -f $nimbleDir/compiler/astalgo.nim
+    rm -f $nimbleDir/compiler/astmsgs.nim
     rm -f $nimbleDir/compiler/bitsets.nim
     rm -f $nimbleDir/compiler/btrees.nim
     rm -f $nimbleDir/compiler/ccgcalls.nim
     rm -f $nimbleDir/compiler/ccgexprs.nim
     rm -f $nimbleDir/compiler/ccgliterals.nim
-    rm -f $nimbleDir/compiler/ccgmerge.nim
+    rm -f $nimbleDir/compiler/ccgmerge_unused.nim
     rm -f $nimbleDir/compiler/ccgreset.nim
     rm -f $nimbleDir/compiler/ccgstmts.nim
     rm -f $nimbleDir/compiler/ccgthreadvars.nim
@@ -79,13 +80,16 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/closureiters.nim
     rm -f $nimbleDir/compiler/cmdlinehelper.nim
     rm -f $nimbleDir/compiler/commands.nim
+    rm -f $nimbleDir/compiler/concepts.nim
     rm -f $nimbleDir/compiler/condsyms.nim
     rm -f $nimbleDir/compiler/debuginfo.nim
+    rm -f $nimbleDir/compiler/debugutils.nim
     rm -f $nimbleDir/compiler/depends.nim
     rm -f $nimbleDir/compiler/dfa.nim
     rm -f $nimbleDir/compiler/docgen.nim
     rm -f $nimbleDir/compiler/docgen2.nim
     rm -f $nimbleDir/compiler/enumtostr.nim
+    rm -f $nimbleDir/compiler/errorhandling.nim
     rm -f $nimbleDir/compiler/evalffi.nim
     rm -f $nimbleDir/compiler/evaltempl.nim
     rm -f $nimbleDir/compiler/extccomp.nim
@@ -94,14 +98,16 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/gorgeimpl.nim
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
-    rm -f $nimbleDir/compiler/ic/cbackend.nim
-    rm -f $nimbleDir/compiler/ic/replayer.nim
-    rm -f $nimbleDir/compiler/ic/rodfiles.nim
-    rm -f $nimbleDir/compiler/ic/dce.nim
-    rm -f $nimbleDir/compiler/ic/design.rst
-    rm -f $nimbleDir/compiler/ic/to_packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/integrity.nim
     rm -f $nimbleDir/compiler/ic/bitabs.nim
     rm -f $nimbleDir/compiler/ic/packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/cbackend.nim
+    rm -f $nimbleDir/compiler/ic/dce.nim
+    rm -f $nimbleDir/compiler/ic/design.rst
+    rm -f $nimbleDir/compiler/ic/rodfiles.nim
+    rm -f $nimbleDir/compiler/ic/replayer.nim
+    rm -f $nimbleDir/compiler/ic/ic.nim
+    rm -f $nimbleDir/compiler/ic/navigator.nim
     rm -f $nimbleDir/compiler/idents.nim
     rm -f $nimbleDir/compiler/importer.nim
     rm -f $nimbleDir/compiler/index.nim
@@ -154,9 +160,9 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/pathutils.nim
     rm -f $nimbleDir/compiler/patterns.nim
     rm -f $nimbleDir/compiler/platform.nim
-    rm -f $nimbleDir/compiler/plugins/itersgen.nim
-    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/active.nim
+    rm -f $nimbleDir/compiler/plugins/locals.nim
+    rm -f $nimbleDir/compiler/plugins/itersgen.nim
     rm -f $nimbleDir/compiler/pluginsupport.nim
     rm -f $nimbleDir/compiler/pragmas.nim
     rm -f $nimbleDir/compiler/prefixmatches.nim

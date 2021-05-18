@@ -17,7 +17,7 @@
 <link href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,500,600' rel='stylesheet' type='text/css'/>
 
 <!-- CSS -->
-<title>since</title>
+<title>std/private/since</title>
 <link rel="stylesheet" type="text/css" href="nimdoc.out.css">
 
 <script type="text/javascript" src="dochack.js"></script>
@@ -64,7 +64,7 @@ window.addEventListener('DOMContentLoaded', main);
 <body>
 <div class="document" id="documentId">
   <div class="container">
-    <h1 class="title">since</h1>
+    <h1 class="title">std/private/since</h1>
     <div class="row">
   <div class="three columns">
   <div class="theme-switch-wrapper">
@@ -102,10 +102,13 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#18" id="68">Templates</a>
   <ul class="simple simple-toc-section">
+      <ul class="simple nested-toc-section">since
       <li><a class="reference" href="#since.t%2C%2Cuntyped"
-    title="since(version: (int, int); body: untyped)">since</a></li>
+    title="since(version: (int, int); body: untyped)">since(version: (int, int); body: untyped)</a></li>
   <li><a class="reference" href="#since.t%2C%2Cuntyped_2"
-    title="since(version: (int, int, int); body: untyped)">since</a></li>
+    title="since(version: (int, int, int); body: untyped)">since(version: (int, int, int); body: untyped)</a></li>
+
+  </ul>
 
   </ul>
 </li>
@@ -121,32 +124,39 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="nine columns" id="content">
   <div id="tocRoot"></div>
   
-  <p class="module-desc"></p>
+  <p class="module-desc"><p><tt class="docutils literal"><span class="pre"><span class="Identifier">since</span></span></tt> is used to emulate older versions of nim stdlib with <tt class="docutils literal"><span class="pre"><span class="Operator">--</span><span class="Identifier">useVersion</span></span></tt>, see <tt class="docutils literal"><span class="pre"><span class="Identifier">tuse_version</span><span class="Operator">.</span><span class="Identifier">nim</span></span></tt>.</p>
+<p>If a symbol <tt class="docutils literal"><span class="pre"><span class="Identifier">foo</span></span></tt> is added in version <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span><span class="DecNumber">3</span><span class="Punctuation">,</span><span class="DecNumber">5</span><span class="Punctuation">)</span></span></tt>, use <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">since</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="FloatNumber">1.3</span><span class="Operator">.</span><span class="DecNumber">5</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt>, not <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">since</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="FloatNumber">1.4</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt>, so that it works in devel in between releases.</p>
+<p>The emulation cannot be 100% faithful and to avoid adding too much complexity, <tt class="docutils literal"><span class="pre"><span class="Identifier">since</span></span></tt> is not needed in those cases:</p>
+<ul class="simple"><li>if a new module is added</li>
+<li>if an overload is added</li>
+<li>if an extra parameter to an existing routine is added</li>
+</ul>
+</p>
   <div class="section" id="18">
 <h1><a class="toc-backref" href="#18">Templates</a></h1>
 <dl class="item">
 <a id="since.t,,untyped"></a>
-<dt><pre><span class="Keyword">template</span> <a href="#since.t%2C%2Cuntyped"><span class="Identifier">since</span></a><span class="Other">(</span><span class="Identifier">version</span><span class="Other">:</span> <span class="Other">(</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">body</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">dirty</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">template</span> <a href="#since.t%2C%2Cuntyped"><span class="Identifier">since</span></a><span class="Other">(</span><span class="Identifier">version</span><span class="Other">:</span> <span class="Other">(</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">body</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a><span class="Other">)</span> {.<span class="Identifier">dirty</span>.}</pre></dt>
 <dd>
 
-Evaluates <tt class="docutils literal"><span class="pre">body</span></tt> if the <tt class="docutils literal"><span class="pre">(NimMajor, NimMinor)</span></tt> is greater than or equal to <tt class="docutils literal"><span class="pre">version</span></tt>. Usage:<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">fun</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">since</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span>
+Evaluates <tt class="docutils literal"><span class="pre"><span class="Identifier">body</span></span></tt> if the <tt class="docutils literal"><span class="pre">(NimMajor, NimMinor)</span></tt> is greater than or equal to <tt class="docutils literal"><span class="pre"><span class="Identifier">version</span></span></tt>. Usage:<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">fun</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">since</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span>
 <span class="Identifier">since</span> <span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">fun</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/private/since.nim#L1"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/private/since.nim#L15"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/private/since.nim#L1" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/private/since.nim#L15" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="since.t,,untyped_2"></a>
-<dt><pre><span class="Keyword">template</span> <a href="#since.t%2C%2Cuntyped_2"><span class="Identifier">since</span></a><span class="Other">(</span><span class="Identifier">version</span><span class="Other">:</span> <span class="Other">(</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">body</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">dirty</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">template</span> <a href="#since.t%2C%2Cuntyped_2"><span class="Identifier">since</span></a><span class="Other">(</span><span class="Identifier">version</span><span class="Other">:</span> <span class="Other">(</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">body</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a><span class="Other">)</span> {.<span class="Identifier">dirty</span>.}</pre></dt>
 <dd>
 
-Evaluates <tt class="docutils literal"><span class="pre">body</span></tt> if <tt class="docutils literal"><span class="pre">(NimMajor, NimMinor, NimPatch)</span></tt> is greater than or equal to <tt class="docutils literal"><span class="pre">version</span></tt>. Usage:<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">fun</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">since</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span>
+Evaluates <tt class="docutils literal"><span class="pre"><span class="Identifier">body</span></span></tt> if <tt class="docutils literal"><span class="pre">(NimMajor, NimMinor, NimPatch)</span></tt> is greater than or equal to <tt class="docutils literal"><span class="pre"><span class="Identifier">version</span></span></tt>. Usage:<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">fun</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">since</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span>
 <span class="Identifier">since</span> <span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">fun</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/private/since.nim#L11"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/private/since.nim#L25"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/private/since.nim#L11" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/private/since.nim#L25" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -159,7 +169,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-31 00:42:02 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-17 00:53:35 UTC</small>
       </div>
     </div>
   </div>

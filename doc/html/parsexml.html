@@ -17,7 +17,7 @@
 <link href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,500,600' rel='stylesheet' type='text/css'/>
 
 <!-- CSS -->
-<title>parsexml</title>
+<title>std/parsexml</title>
 <link rel="stylesheet" type="text/css" href="nimdoc.out.css">
 
 <script type="text/javascript" src="dochack.js"></script>
@@ -64,7 +64,7 @@ window.addEventListener('DOMContentLoaded', main);
 <body>
 <div class="document" id="documentId">
   <div class="container">
-    <h1 class="title">parsexml</h1>
+    <h1 class="title">std/parsexml</h1>
     <div class="row">
   <div class="three columns">
   <div class="theme-switch-wrapper">
@@ -135,7 +135,7 @@ window.addEventListener('DOMContentLoaded', main);
   errQmGtExpected,          ## ``?&gt;`` expected
   errGtExpected,            ## ``&gt;`` expected
   errEqExpected,            ## ``=`` expected
-  errQuoteExpected,         ## ``&quot;`` or ``&apos;`` expected
+  errQuoteExpected,         ## ``&quot;`` or ``'`` expected
   errEndOfCommentExpected,  ## ``--&gt;`` expected
   errAttributeValueExpected  ## non-empty attribute value expected">XmlErrorKind</a></li>
   <li><a class="reference" href="#XmlParseOption"
@@ -224,20 +224,41 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#18" id="68">Templates</a>
   <ul class="simple simple-toc-section">
+      <ul class="simple nested-toc-section">piName
+      <li><a class="reference" href="#piName.t%2CXmlParser"
+    title="piName(my: XmlParser): string">piName(my: XmlParser): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">attrValue
+      <li><a class="reference" href="#attrValue.t%2CXmlParser"
+    title="attrValue(my: XmlParser): string">attrValue(my: XmlParser): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">charData
       <li><a class="reference" href="#charData.t%2CXmlParser"
-    title="charData(my: XmlParser): string">charData</a></li>
-  <li><a class="reference" href="#elementName.t%2CXmlParser"
-    title="elementName(my: XmlParser): string">elementName</a></li>
-  <li><a class="reference" href="#entityName.t%2CXmlParser"
-    title="entityName(my: XmlParser): string">entityName</a></li>
-  <li><a class="reference" href="#attrKey.t%2CXmlParser"
-    title="attrKey(my: XmlParser): string">attrKey</a></li>
-  <li><a class="reference" href="#attrValue.t%2CXmlParser"
-    title="attrValue(my: XmlParser): string">attrValue</a></li>
-  <li><a class="reference" href="#piName.t%2CXmlParser"
-    title="piName(my: XmlParser): string">piName</a></li>
-  <li><a class="reference" href="#piRest.t%2CXmlParser"
-    title="piRest(my: XmlParser): string">piRest</a></li>
+    title="charData(my: XmlParser): string">charData(my: XmlParser): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">entityName
+      <li><a class="reference" href="#entityName.t%2CXmlParser"
+    title="entityName(my: XmlParser): string">entityName(my: XmlParser): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">piRest
+      <li><a class="reference" href="#piRest.t%2CXmlParser"
+    title="piRest(my: XmlParser): string">piRest(my: XmlParser): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">elementName
+      <li><a class="reference" href="#elementName.t%2CXmlParser"
+    title="elementName(my: XmlParser): string">elementName(my: XmlParser): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">attrKey
+      <li><a class="reference" href="#attrKey.t%2CXmlParser"
+    title="attrKey(my: XmlParser): string">attrKey(my: XmlParser): string</a></li>
+
+  </ul>
 
   </ul>
 </li>
@@ -255,7 +276,7 @@ class="link-seesrc" target="_blank">Source</a>
   
   <p class="module-desc">This module implements a simple high performance <span id="xml_1">XML</span> / <span id="html_1">HTML</span> parser. The only encoding that is supported is UTF-8. The parser has been designed to be somewhat error correcting, so that even most &quot;wild HTML&quot; found on the web can be parsed with it. <strong>Note:</strong> This parser does not check that each <tt class="docutils literal"><span class="pre">&lt;tag&gt;</span></tt> has a corresponding <tt class="docutils literal"><span class="pre">&lt;/tag&gt;</span></tt>! These checks have do be implemented by the client code for various reasons:<ul class="simple"><li>Old HTML contains tags that have no end tag: <tt class="docutils literal"><span class="pre">&lt;br&gt;</span></tt> for example.</li>
 <li>HTML tags are case insensitive, XML tags are case sensitive. Since this library can parse both, only the client knows which comparison is to be used.</li>
-<li>Thus the checks would have been very difficult to implement properly with little benefit, especially since they are simple to implement in the client. The client should use the <tt class="docutils literal"><span class="pre">errorMsgExpected</span></tt> proc to generate a nice error message that fits the other error messages this library creates.</li>
+<li>Thus the checks would have been very difficult to implement properly with little benefit, especially since they are simple to implement in the client. The client should use the <tt class="docutils literal"><span class="pre"><span class="Identifier">errorMsgExpected</span></span></tt> proc to generate a nice error message that fits the other error messages this library creates.</li>
 </ul>
 
 <h1><a class="toc-backref" id="example-1colon-retrieve-html-title" href="#example-1colon-retrieve-html-title">Example 1: Retrieve HTML title</a></h1><p>The file <tt class="docutils literal"><span class="pre">examples/htmltitle.nim</span></tt> demonstrates how to use the XML parser to accomplish a simple task: To determine the title of an HTML document.</p>
@@ -446,11 +467,11 @@ class="link-seesrc" target="_blank">Source</a>
 <dl class="item">
 <a id="open,XmlParser,Stream,string,set[XmlParseOption]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#open%2CXmlParser%2CStream%2Cstring%2Cset%5BXmlParseOption%5D"><span class="Identifier">open</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">;</span> <span class="Identifier">input</span><span class="Other">:</span> <a href="streams.html#Stream"><span class="Identifier">Stream</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span>
-          <span class="Identifier">options</span><span class="Other">:</span> <a href="system.html#set"><span class="Identifier">set</span></a><span class="Other">[</span><a href="parsexml.html#XmlParseOption"><span class="Identifier">XmlParseOption</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+          <span class="Identifier">options</span><span class="Other">:</span> <a href="system.html#set"><span class="Identifier">set</span></a><span class="Other">[</span><a href="parsexml.html#XmlParseOption"><span class="Identifier">XmlParseOption</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-initializes the parser with an input stream. <tt class="docutils literal"><span class="pre">Filename</span></tt> is only used for nice error messages. The parser's behaviour can be controlled by the <tt class="docutils literal"><span class="pre">options</span></tt> parameter: If <tt class="docutils literal"><span class="pre">options</span></tt> contains <tt class="docutils literal"><span class="pre">reportWhitespace</span></tt> a whitespace token is reported as an <tt class="docutils literal"><span class="pre">xmlWhitespace</span></tt> event. If <tt class="docutils literal"><span class="pre">options</span></tt> contains <tt class="docutils literal"><span class="pre">reportComments</span></tt> a comment token is reported as an <tt class="docutils literal"><span class="pre">xmlComment</span></tt> event.
+initializes the parser with an input stream. <tt class="docutils literal"><span class="pre"><span class="Identifier">Filename</span></span></tt> is only used for nice error messages. The parser's behaviour can be controlled by the <tt class="docutils literal"><span class="pre"><span class="Identifier">options</span></span></tt> parameter: If <tt class="docutils literal"><span class="pre"><span class="Identifier">options</span></span></tt> contains <tt class="docutils literal"><span class="pre">reportWhitespace</span></tt> a whitespace token is reported as an <tt class="docutils literal"><span class="pre">xmlWhitespace</span></tt> event. If <tt class="docutils literal"><span class="pre"><span class="Identifier">options</span></span></tt> contains <tt class="docutils literal"><span class="pre">reportComments</span></tt> a comment token is reported as an <tt class="docutils literal"><span class="pre">xmlComment</span></tt> event.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parsexml.nim#L217"
 class="link-seesrc" target="_blank">Source</a>
@@ -458,11 +479,11 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="close,XmlParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#close%2CXmlParser"><span class="Identifier">close</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
-                                <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#close%2CXmlParser"><span class="Identifier">close</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
+                                <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-closes the parser <tt class="docutils literal"><span class="pre">my</span></tt> and its associated input stream.
+closes the parser <tt class="docutils literal"><span class="pre"><span class="Identifier">my</span></span></tt> and its associated input stream.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parsexml.nim#L235"
 class="link-seesrc" target="_blank">Source</a>
@@ -470,7 +491,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="kind,XmlParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#kind%2CXmlParser"><span class="Identifier">kind</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="parsexml.html#XmlEventKind"><span class="Identifier">XmlEventKind</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#kind%2CXmlParser"><span class="Identifier">kind</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="parsexml.html#XmlEventKind"><span class="Identifier">XmlEventKind</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 returns the current event type for the XML parser
@@ -481,7 +502,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="rawData,XmlParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#rawData%2CXmlParser"><span class="Identifier">rawData</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#lent"><span class="Identifier">lent</span></a> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#rawData%2CXmlParser"><span class="Identifier">rawData</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#lent"><span class="Identifier">lent</span></a> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 returns the underlying 'data' string by reference. This is only used for speed hacks.
@@ -492,7 +513,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="rawData2,XmlParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#rawData2%2CXmlParser"><span class="Identifier">rawData2</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#lent"><span class="Identifier">lent</span></a> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#rawData2%2CXmlParser"><span class="Identifier">rawData2</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#lent"><span class="Identifier">lent</span></a> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 returns the underlying second 'data' string by reference. This is only used for speed hacks.
@@ -503,7 +524,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getColumn,XmlParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getColumn%2CXmlParser"><span class="Identifier">getColumn</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getColumn%2CXmlParser"><span class="Identifier">getColumn</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 get the current column the parser has arrived at.
@@ -514,7 +535,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getLine,XmlParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getLine%2CXmlParser"><span class="Identifier">getLine</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getLine%2CXmlParser"><span class="Identifier">getLine</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 get the current line the parser has arrived at.
@@ -525,7 +546,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="getFilename,XmlParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getFilename%2CXmlParser"><span class="Identifier">getFilename</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getFilename%2CXmlParser"><span class="Identifier">getFilename</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 get the filename of the file that the parser processes.
@@ -536,7 +557,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="errorMsg,XmlParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#errorMsg%2CXmlParser"><span class="Identifier">errorMsg</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#errorMsg%2CXmlParser"><span class="Identifier">errorMsg</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 returns a helpful error message for the event <tt class="docutils literal"><span class="pre">xmlError</span></tt>
@@ -547,8 +568,8 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="errorMsgExpected,XmlParser,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#errorMsgExpected%2CXmlParser%2Cstring"><span class="Identifier">errorMsgExpected</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">;</span> <span class="Identifier">tag</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#errorMsgExpected%2CXmlParser%2Cstring"><span class="Identifier">errorMsgExpected</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">;</span> <span class="Identifier">tag</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 returns an error message &quot;&lt;tag&gt; expected&quot; in the same format as the other error messages
@@ -559,11 +580,11 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="errorMsg,XmlParser,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#errorMsg%2CXmlParser%2Cstring"><span class="Identifier">errorMsg</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">;</span> <span class="Identifier">msg</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#errorMsg%2CXmlParser%2Cstring"><span class="Identifier">errorMsg</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">;</span> <span class="Identifier">msg</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-returns an error message with text <tt class="docutils literal"><span class="pre">msg</span></tt> in the same format as the other error messages
+returns an error message with text <tt class="docutils literal"><span class="pre"><span class="Identifier">msg</span></span></tt> in the same format as the other error messages
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parsexml.nim#L336"
 class="link-seesrc" target="_blank">Source</a>
@@ -571,7 +592,7 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="next,XmlParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#next%2CXmlParser"><span class="Identifier">next</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#next%2CXmlParser"><span class="Identifier">next</span></a><span class="Other">(</span><span class="Identifier">my</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parsexml.html#XmlParser"><span class="Identifier">XmlParser</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 retrieves the first/next event. This controls the parser.
@@ -673,7 +694,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-31 00:42:25 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-17 00:53:18 UTC</small>
       </div>
     </div>
   </div>

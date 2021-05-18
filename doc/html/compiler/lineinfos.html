@@ -17,7 +17,7 @@
 <link href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,500,600' rel='stylesheet' type='text/css'/>
 
 <!-- CSS -->
-<title>lineinfos</title>
+<title>compiler/lineinfos</title>
 <link rel="stylesheet" type="text/css" href="nimdoc.out.css">
 
 <script type="text/javascript" src="dochack.js"></script>
@@ -64,7 +64,7 @@ window.addEventListener('DOMContentLoaded', main);
 <body>
 <div class="document" id="documentId">
   <div class="container">
-    <h1 class="title">lineinfos</h1>
+    <h1 class="title">compiler/lineinfos</h1>
     <div class="row">
   <div class="three columns">
   <div class="theme-switch-wrapper">
@@ -106,8 +106,8 @@ window.addEventListener('DOMContentLoaded', main);
     title="TMsgKind = enum
   errUnknown, errInternal, errIllFormedAstX, errCannotOpenFile, errXExpected,
   errGridTableNotImplemented, errMarkdownIllformedTable, errGeneralParseError,
-  errNewSectionExpected, errInvalidDirectiveX, errProveInit, errGenerated,
-  errUser, warnCannotOpenFile = &quot;CannotOpenFile&quot;,
+  errNewSectionExpected, errInvalidDirectiveX, errFootnoteMismatch,
+  errProveInit, errGenerated, errUser, warnCannotOpenFile = &quot;CannotOpenFile&quot;,
   warnOctalEscape = &quot;OctalEscape&quot;, warnXIsNeverRead = &quot;XIsNeverRead&quot;,
   warnXmightNotBeenInit = &quot;XmightNotBeenInit&quot;, warnDeprecated = &quot;Deprecated&quot;,
   warnConfigDeprecated = &quot;ConfigDeprecated&quot;,
@@ -116,7 +116,7 @@ window.addEventListener('DOMContentLoaded', main);
   warnRedefinitionOfLabel = &quot;RedefinitionOfLabel&quot;,
   warnUnknownSubstitutionX = &quot;UnknownSubstitutionX&quot;,
   warnLanguageXNotSupported = &quot;LanguageXNotSupported&quot;,
-  warnFieldXNotSupported = &quot;FieldXNotSupported&quot;,
+  warnFieldXNotSupported = &quot;FieldXNotSupported&quot;, warnRstStyle = &quot;warnRstStyle&quot;,
   warnCommentXIgnored = &quot;CommentXIgnored&quot;, warnTypelessParam = &quot;TypelessParam&quot;,
   warnUseBase = &quot;UseBase&quot;, warnWriteToForeignHeap = &quot;WriteToForeignHeap&quot;,
   warnUnsafeCode = &quot;UnsafeCode&quot;, warnUnusedImportX = &quot;UnusedImport&quot;,
@@ -131,8 +131,10 @@ window.addEventListener('DOMContentLoaded', main);
   warnLockLevel = &quot;LockLevel&quot;, warnResultShadowed = &quot;ResultShadowed&quot;,
   warnInconsistentSpacing = &quot;Spacing&quot;, warnCaseTransition = &quot;CaseTransition&quot;,
   warnCycleCreated = &quot;CycleCreated&quot;, warnObservableStores = &quot;ObservableStores&quot;,
-  warnUser = &quot;User&quot;, warnStrictNotNil = &quot;StrictNotNil&quot;, hintSuccess = &quot;Success&quot;,
-  hintSuccessX = &quot;SuccessX&quot;, hintCC = &quot;CC&quot;, hintLineTooLong = &quot;LineTooLong&quot;,
+  warnStrictNotNil = &quot;StrictNotNil&quot;, warnResultUsed = &quot;ResultUsed&quot;,
+  warnCannotOpen = &quot;CannotOpen&quot;, warnFileChanged = &quot;FileChanged&quot;,
+  warnUser = &quot;User&quot;, hintSuccess = &quot;Success&quot;, hintSuccessX = &quot;SuccessX&quot;,
+  hintBuildMode = &quot;BuildMode&quot;, hintCC = &quot;CC&quot;, hintLineTooLong = &quot;LineTooLong&quot;,
   hintXDeclaredButNotUsed = &quot;XDeclaredButNotUsed&quot;,
   hintXCannotRaiseY = &quot;XCannotRaiseY&quot;,
   hintConvToBaseNotNeeded = &quot;ConvToBaseNotNeeded&quot;,
@@ -208,44 +210,46 @@ window.addEventListener('DOMContentLoaded', main);
     title="explanationsBaseUrl = &quot;https://nim-lang.github.io/Nim&quot;">explanationsBaseUrl</a></li>
   <li><a class="reference" href="#MsgKindToStr"
     title="MsgKindToStr: array[TMsgKind, string] = [&quot;unknown error&quot;, &quot;internal error: $1&quot;,
-    &quot;illformed AST: $1&quot;, &quot;cannot open \&apos;$1\&apos;&quot;, &quot;\&apos;$1\&apos; expected&quot;,
+    &quot;illformed AST: $1&quot;, &quot;cannot open \'$1\'&quot;, &quot;\'$1\' expected&quot;,
     &quot;grid table is not implemented&quot;,
     &quot;illformed delimiter row of a markdown table&quot;, &quot;general parse error&quot;,
-    &quot;new section expected&quot;, &quot;invalid directive: \&apos;$1\&apos;&quot;,
-    &quot;Cannot prove that \&apos;$1\&apos; is initialized.&quot;, &quot;$1&quot;, &quot;$1&quot;,
-    &quot;cannot open \&apos;$1\&apos;&quot;,
+    &quot;new section expected $1&quot;, &quot;invalid directive: \'$1\'&quot;,
+    &quot;number of footnotes and their references don\'t match: $1&quot;,
+    &quot;Cannot prove that \'$1\' is initialized.&quot;, &quot;$1&quot;, &quot;$1&quot;,
+    &quot;cannot open \'$1\'&quot;,
     &quot;octal escape sequences do not exist; leading zero is ignored&quot;,
-    &quot;\&apos;$1\&apos; is never read&quot;, &quot;\&apos;$1\&apos; might not have been initialized&quot;, &quot;$1&quot;,
-    &quot;config file \&apos;$1\&apos; is deprecated&quot;,
-    &quot;\&apos;l\&apos; should not be used as an identifier; may look like \&apos;1\&apos; (one)&quot;,
-    &quot;unknown magic \&apos;$1\&apos; might crash the compiler&quot;,
-    &quot;redefinition of label \&apos;$1\&apos;&quot;, &quot;unknown substitution \&apos;$1\&apos;&quot;,
-    &quot;language \&apos;$1\&apos; not supported&quot;, &quot;field \&apos;$1\&apos; not supported&quot;,
-    &quot;comment \&apos;$1\&apos; ignored&quot;, &quot;\&apos;$1\&apos; has no type. Typeless parameters are deprecated; only allowed for \&apos;template\&apos;&quot;,
+    &quot;\'$1\' is never read&quot;, &quot;\'$1\' might not have been initialized&quot;, &quot;$1&quot;,
+    &quot;config file \'$1\' is deprecated&quot;,
+    &quot;\'l\' should not be used as an identifier; may look like \'1\' (one)&quot;,
+    &quot;unknown magic \'$1\' might crash the compiler&quot;,
+    &quot;redefinition of label \'$1\'&quot;, &quot;unknown substitution \'$1\'&quot;,
+    &quot;language \'$1\' not supported&quot;, &quot;field \'$1\' not supported&quot;,
+    &quot;RST style: $1&quot;, &quot;comment \'$1\' ignored&quot;, &quot;\'$1\' has no type. Typeless parameters are deprecated; only allowed for \'template\'&quot;,
     &quot;use {.base.} for base methods; baseless methods are deprecated&quot;,
-    &quot;write to foreign heap&quot;, &quot;unsafe code: \&apos;$1\&apos;&quot;,
-    &quot;imported and not used: \&apos;$1\&apos;&quot;, &quot;inherit from a more precise exception type like ValueError, IOError or OSError. If these don\&apos;t suit, inherit from CatchableError or Defect.&quot;,
-    &quot;each identifier is a tuple&quot;, &quot;setLen can potentially expand the sequence, but the element type \&apos;$1\&apos; doesn\&apos;t have a valid default value&quot;,
-    &quot;The \&apos;$1\&apos; type doesn\&apos;t have a valid default value&quot;, &quot;Cannot prove that \&apos;$1\&apos; is initialized. This will become a compile time error in the future.&quot;,
-    &quot;cannot prove that field \&apos;$1\&apos; is accessible&quot;,
-    &quot;cannot prove index \&apos;$1\&apos; is valid&quot;,
+    &quot;write to foreign heap&quot;, &quot;unsafe code: \'$1\'&quot;,
+    &quot;imported and not used: \'$1\'&quot;, &quot;inherit from a more precise exception type like ValueError, IOError or OSError. If these don\'t suit, inherit from CatchableError or Defect.&quot;,
+    &quot;each identifier is a tuple&quot;, &quot;setLen can potentially expand the sequence, but the element type \'$1\' doesn\'t have a valid default value&quot;,
+    &quot;The \'$1\' type doesn\'t have a valid default value&quot;, &quot;Cannot prove that \'$1\' is initialized. This will become a compile time error in the future.&quot;,
+    &quot;cannot prove that field \'$1\' is accessible&quot;,
+    &quot;cannot prove index \'$1\' is valid&quot;,
     &quot;unreachable else, all cases are already covered&quot;,
-    &quot;unreachable code after \&apos;return\&apos; statement or \&apos;{.noReturn.}\&apos; proc&quot;,
-    &quot;$1&quot;, &quot;not GC-safe: \&apos;$1\&apos;&quot;, &quot;$1&quot;,
-    &quot;use explicit initialization of \&apos;$1\&apos; for clarity&quot;,
-    &quot;\&apos;$1\&apos; uses GC\&apos;ed memory&quot;, &quot;usage of a type with a destructor in a non destructible context. This will become a compile time error in the future.&quot;,
-    &quot;$1&quot;, &quot;Special variable \&apos;result\&apos; is shadowed.&quot;,
-    &quot;Number of spaces around \&apos;$#\&apos; is not consistent&quot;,
+    &quot;unreachable code after \'return\' statement or \'{.noReturn.}\' proc&quot;,
+    &quot;$1&quot;, &quot;not GC-safe: \'$1\'&quot;, &quot;$1&quot;,
+    &quot;use explicit initialization of \'$1\' for clarity&quot;,
+    &quot;\'$1\' uses GC\'ed memory&quot;, &quot;usage of a type with a destructor in a non destructible context. This will become a compile time error in the future.&quot;,
+    &quot;$1&quot;, &quot;Special variable \'result\' is shadowed.&quot;,
+    &quot;Number of spaces around \'$#\' is not consistent&quot;,
     &quot;Potential object case transition, instantiate new object instead&quot;, &quot;$1&quot;,
-    &quot;observable stores to \&apos;$1\&apos;&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;operation successful: $#&quot;,
-    &quot;${loc} lines; ${sec}s; $mem; $build build; proj: $project; out: $output&quot;,
-    &quot;CC: $1&quot;, &quot;line too long&quot;, &quot;\&apos;$1\&apos; is declared but not used&quot;, &quot;$1&quot;,
+    &quot;observable stores to \'$1\'&quot;, &quot;$1&quot;, &quot;used \'result\' variable&quot;,
+    &quot;cannot open: $1&quot;, &quot;file changed: $1&quot;, &quot;$1&quot;, &quot;operation successful: $#&quot;,
+    &quot;$loc lines; ${sec}s; $mem; proj: $project; out: $output&quot;, &quot;$1&quot;, &quot;CC: $1&quot;,
+    &quot;line too long&quot;, &quot;\'$1\' is declared but not used&quot;, &quot;$1&quot;,
     &quot;conversion to base object is not needed&quot;,
     &quot;conversion from $1 to itself is pointless&quot;,
-    &quot;expression evaluates always to \&apos;$1\&apos;&quot;, &quot;quit() called&quot;, &quot;$1&quot;,
-    &quot;generated code listing:&quot;, &quot;end of listing&quot;, &quot;used config file \&apos;$1\&apos;&quot;,
-    &quot;added path: \&apos;$1\&apos;&quot;, &quot;condition is always true: \&apos;$1\&apos;&quot;,
-    &quot;condition is always false: \&apos;$1\&apos;&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;,
+    &quot;expression evaluates always to \'$1\'&quot;, &quot;quit() called&quot;, &quot;$1&quot;,
+    &quot;generated code listing:&quot;, &quot;end of listing&quot;, &quot;used config file \'$1\'&quot;,
+    &quot;added path: \'$1\'&quot;, &quot;condition is always true: \'$1\'&quot;,
+    &quot;condition is always false: \'$1\'&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;,
     &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;global variable declared here&quot;, &quot;expanded macro: $1&quot;,
     &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;, &quot;$1&quot;]">MsgKindToStr</a></li>
   <li><a class="reference" href="#fatalMin"
@@ -259,7 +263,7 @@ window.addEventListener('DOMContentLoaded', main);
   <li><a class="reference" href="#warnMin"
     title="warnMin = warnCannotOpenFile">warnMin</a></li>
   <li><a class="reference" href="#warnMax"
-    title="warnMax = warnStrictNotNil">warnMax</a></li>
+    title="warnMax = warnUser">warnMax</a></li>
   <li><a class="reference" href="#hintMin"
     title="hintMin = hintSuccess">hintMin</a></li>
   <li><a class="reference" href="#hintMax"
@@ -267,31 +271,30 @@ window.addEventListener('DOMContentLoaded', main);
   <li><a class="reference" href="#NotesVerbosity"
     title="NotesVerbosity = [{warnCannotOpenFile..warnProveInit,
                    warnUnreachableElse..warnStaticIndexCheck, warnGcUnsafe2,
-                   warnGcMem..warnCycleCreated, warnUser..warnStrictNotNil,
-                   hintLineTooLong..hintQuitCalled,
-                   hintConditionAlwaysTrue..hintName, hintPerformance,
+                   warnGcMem..warnCycleCreated, warnStrictNotNil,
+                   warnCannotOpen..warnUser, hintLineTooLong..hintQuitCalled,
+                   hintConditionAlwaysTrue..hintName,
                    hintExpandMacro..hintUserRaw}, {
     warnCannotOpenFile..warnProveInit,
     warnUnreachableElse..warnStaticIndexCheck, warnGcUnsafe2,
-    warnGcMem..warnCycleCreated, warnUser..hintProcessing, hintConf,
-    hintConditionAlwaysTrue..hintLinking, hintPerformance,
-    hintExpandMacro..hintUserRaw}, {warnCannotOpenFile..warnGcUnsafe2,
-                                    warnGcMem..warnCycleCreated,
-                                    warnUser..hintPerformance,
-                                    hintGCStats..hintUserRaw, hintMsgOrigin},
-                  {13..50, 52..86}]">NotesVerbosity</a></li>
+    warnGcMem..warnCycleCreated, warnStrictNotNil,
+    warnCannotOpen..hintProcessing, hintConf,
+    hintConditionAlwaysTrue..hintLinking, hintExpandMacro..hintUserRaw}, {
+    warnCannotOpenFile..warnGcUnsafe2, warnGcMem..warnCycleCreated,
+    warnStrictNotNil, warnCannotOpen..hintPerformance, hintGCStats..hintUserRaw,
+    hintMsgOrigin}, {14..52, warnStrictNotNil, 56..92}]">NotesVerbosity</a></li>
   <li><a class="reference" href="#errXMustBeCompileTime"
-    title="errXMustBeCompileTime = &quot;\&apos;$1\&apos; can only be used in compile-time context&quot;">errXMustBeCompileTime</a></li>
+    title="errXMustBeCompileTime = &quot;\'$1\' can only be used in compile-time context&quot;">errXMustBeCompileTime</a></li>
   <li><a class="reference" href="#errArgsNeedRunOption"
-    title="errArgsNeedRunOption = &quot;arguments can only be given if the \&apos;--run\&apos; option is selected&quot;">errArgsNeedRunOption</a></li>
+    title="errArgsNeedRunOption = &quot;arguments can only be given if the \'--run\' option is selected&quot;">errArgsNeedRunOption</a></li>
   <li><a class="reference" href="#InvalidFileIdx"
-    title="InvalidFileIdx = -1&apos;i32">InvalidFileIdx</a></li>
+    title="InvalidFileIdx = -1'i32">InvalidFileIdx</a></li>
   <li><a class="reference" href="#unknownLineInfo"
-    title="unknownLineInfo = (line: 0&apos;u, col: -1, fileIndex: -1)">unknownLineInfo</a></li>
+    title="unknownLineInfo = (line: 0'u, col: -1, fileIndex: -1)">unknownLineInfo</a></li>
   <li><a class="reference" href="#trackPosInvalidFileIdx"
-    title="trackPosInvalidFileIdx = -2&apos;i32">trackPosInvalidFileIdx</a></li>
+    title="trackPosInvalidFileIdx = -2'i32">trackPosInvalidFileIdx</a></li>
   <li><a class="reference" href="#commandLineIdx"
-    title="commandLineIdx = -3&apos;i32">commandLineIdx</a></li>
+    title="commandLineIdx = -3'i32">commandLineIdx</a></li>
 
   </ul>
 </li>
@@ -351,8 +354,8 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><a href="lineinfos.html#TMsgKind"><span class="Identifier">TMsgKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">errUnknown</span><span class="Other">,</span> <span class="Identifier">errInternal</span><span class="Other">,</span> <span class="Identifier">errIllFormedAstX</span><span class="Other">,</span> <span class="Identifier">errCannotOpenFile</span><span class="Other">,</span> <span class="Identifier">errXExpected</span><span class="Other">,</span>
   <span class="Identifier">errGridTableNotImplemented</span><span class="Other">,</span> <span class="Identifier">errMarkdownIllformedTable</span><span class="Other">,</span> <span class="Identifier">errGeneralParseError</span><span class="Other">,</span>
-  <span class="Identifier">errNewSectionExpected</span><span class="Other">,</span> <span class="Identifier">errInvalidDirectiveX</span><span class="Other">,</span> <span class="Identifier">errProveInit</span><span class="Other">,</span> <span class="Identifier">errGenerated</span><span class="Other">,</span>
-  <span class="Identifier">errUser</span><span class="Other">,</span> <span class="Identifier">warnCannotOpenFile</span> <span class="Other">=</span> <span class="StringLit">&quot;CannotOpenFile&quot;</span><span class="Other">,</span>
+  <span class="Identifier">errNewSectionExpected</span><span class="Other">,</span> <span class="Identifier">errInvalidDirectiveX</span><span class="Other">,</span> <span class="Identifier">errFootnoteMismatch</span><span class="Other">,</span>
+  <span class="Identifier">errProveInit</span><span class="Other">,</span> <span class="Identifier">errGenerated</span><span class="Other">,</span> <span class="Identifier">errUser</span><span class="Other">,</span> <span class="Identifier">warnCannotOpenFile</span> <span class="Other">=</span> <span class="StringLit">&quot;CannotOpenFile&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnOctalEscape</span> <span class="Other">=</span> <span class="StringLit">&quot;OctalEscape&quot;</span><span class="Other">,</span> <span class="Identifier">warnXIsNeverRead</span> <span class="Other">=</span> <span class="StringLit">&quot;XIsNeverRead&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnXmightNotBeenInit</span> <span class="Other">=</span> <span class="StringLit">&quot;XmightNotBeenInit&quot;</span><span class="Other">,</span> <span class="Identifier">warnDeprecated</span> <span class="Other">=</span> <span class="StringLit">&quot;Deprecated&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnConfigDeprecated</span> <span class="Other">=</span> <span class="StringLit">&quot;ConfigDeprecated&quot;</span><span class="Other">,</span>
@@ -361,7 +364,7 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">warnRedefinitionOfLabel</span> <span class="Other">=</span> <span class="StringLit">&quot;RedefinitionOfLabel&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnUnknownSubstitutionX</span> <span class="Other">=</span> <span class="StringLit">&quot;UnknownSubstitutionX&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnLanguageXNotSupported</span> <span class="Other">=</span> <span class="StringLit">&quot;LanguageXNotSupported&quot;</span><span class="Other">,</span>
-  <span class="Identifier">warnFieldXNotSupported</span> <span class="Other">=</span> <span class="StringLit">&quot;FieldXNotSupported&quot;</span><span class="Other">,</span>
+  <span class="Identifier">warnFieldXNotSupported</span> <span class="Other">=</span> <span class="StringLit">&quot;FieldXNotSupported&quot;</span><span class="Other">,</span> <span class="Identifier">warnRstStyle</span> <span class="Other">=</span> <span class="StringLit">&quot;warnRstStyle&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnCommentXIgnored</span> <span class="Other">=</span> <span class="StringLit">&quot;CommentXIgnored&quot;</span><span class="Other">,</span> <span class="Identifier">warnTypelessParam</span> <span class="Other">=</span> <span class="StringLit">&quot;TypelessParam&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnUseBase</span> <span class="Other">=</span> <span class="StringLit">&quot;UseBase&quot;</span><span class="Other">,</span> <span class="Identifier">warnWriteToForeignHeap</span> <span class="Other">=</span> <span class="StringLit">&quot;WriteToForeignHeap&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnUnsafeCode</span> <span class="Other">=</span> <span class="StringLit">&quot;UnsafeCode&quot;</span><span class="Other">,</span> <span class="Identifier">warnUnusedImportX</span> <span class="Other">=</span> <span class="StringLit">&quot;UnusedImport&quot;</span><span class="Other">,</span>
@@ -376,8 +379,10 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">warnLockLevel</span> <span class="Other">=</span> <span class="StringLit">&quot;LockLevel&quot;</span><span class="Other">,</span> <span class="Identifier">warnResultShadowed</span> <span class="Other">=</span> <span class="StringLit">&quot;ResultShadowed&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnInconsistentSpacing</span> <span class="Other">=</span> <span class="StringLit">&quot;Spacing&quot;</span><span class="Other">,</span> <span class="Identifier">warnCaseTransition</span> <span class="Other">=</span> <span class="StringLit">&quot;CaseTransition&quot;</span><span class="Other">,</span>
   <span class="Identifier">warnCycleCreated</span> <span class="Other">=</span> <span class="StringLit">&quot;CycleCreated&quot;</span><span class="Other">,</span> <span class="Identifier">warnObservableStores</span> <span class="Other">=</span> <span class="StringLit">&quot;ObservableStores&quot;</span><span class="Other">,</span>
-  <span class="Identifier">warnUser</span> <span class="Other">=</span> <span class="StringLit">&quot;User&quot;</span><span class="Other">,</span> <span class="Identifier">warnStrictNotNil</span> <span class="Other">=</span> <span class="StringLit">&quot;StrictNotNil&quot;</span><span class="Other">,</span> <span class="Identifier">hintSuccess</span> <span class="Other">=</span> <span class="StringLit">&quot;Success&quot;</span><span class="Other">,</span>
-  <span class="Identifier">hintSuccessX</span> <span class="Other">=</span> <span class="StringLit">&quot;SuccessX&quot;</span><span class="Other">,</span> <span class="Identifier">hintCC</span> <span class="Other">=</span> <span class="StringLit">&quot;CC&quot;</span><span class="Other">,</span> <span class="Identifier">hintLineTooLong</span> <span class="Other">=</span> <span class="StringLit">&quot;LineTooLong&quot;</span><span class="Other">,</span>
+  <span class="Identifier">warnStrictNotNil</span> <span class="Other">=</span> <span class="StringLit">&quot;StrictNotNil&quot;</span><span class="Other">,</span> <span class="Identifier">warnResultUsed</span> <span class="Other">=</span> <span class="StringLit">&quot;ResultUsed&quot;</span><span class="Other">,</span>
+  <span class="Identifier">warnCannotOpen</span> <span class="Other">=</span> <span class="StringLit">&quot;CannotOpen&quot;</span><span class="Other">,</span> <span class="Identifier">warnFileChanged</span> <span class="Other">=</span> <span class="StringLit">&quot;FileChanged&quot;</span><span class="Other">,</span>
+  <span class="Identifier">warnUser</span> <span class="Other">=</span> <span class="StringLit">&quot;User&quot;</span><span class="Other">,</span> <span class="Identifier">hintSuccess</span> <span class="Other">=</span> <span class="StringLit">&quot;Success&quot;</span><span class="Other">,</span> <span class="Identifier">hintSuccessX</span> <span class="Other">=</span> <span class="StringLit">&quot;SuccessX&quot;</span><span class="Other">,</span>
+  <span class="Identifier">hintBuildMode</span> <span class="Other">=</span> <span class="StringLit">&quot;BuildMode&quot;</span><span class="Other">,</span> <span class="Identifier">hintCC</span> <span class="Other">=</span> <span class="StringLit">&quot;CC&quot;</span><span class="Other">,</span> <span class="Identifier">hintLineTooLong</span> <span class="Other">=</span> <span class="StringLit">&quot;LineTooLong&quot;</span><span class="Other">,</span>
   <span class="Identifier">hintXDeclaredButNotUsed</span> <span class="Other">=</span> <span class="StringLit">&quot;XDeclaredButNotUsed&quot;</span><span class="Other">,</span>
   <span class="Identifier">hintXCannotRaiseY</span> <span class="Other">=</span> <span class="StringLit">&quot;XCannotRaiseY&quot;</span><span class="Other">,</span>
   <span class="Identifier">hintConvToBaseNotNeeded</span> <span class="Other">=</span> <span class="StringLit">&quot;ConvToBaseNotNeeded&quot;</span><span class="Other">,</span>
@@ -408,9 +413,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L180"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L194"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L180" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L194" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TNoteKinds"></a>
@@ -419,9 +424,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L181"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L195"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L181" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L195" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TFileInfo"></a>
@@ -443,9 +448,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L198"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L212"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L198" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L212" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="FileIndex"></a>
@@ -454,9 +459,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L218"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L232"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L218" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L232" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TLineInfo"></a>
@@ -473,9 +478,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L219"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L233"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L219" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L233" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TErrorOutput"></a>
@@ -485,9 +490,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L232"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L246"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L232" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L246" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TErrorOutputs"></a>
@@ -496,9 +501,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L236"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L250"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L236" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ERecoverableError"></a>
@@ -507,9 +512,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L238"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L252"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L252" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ESuggestDone"></a>
@@ -518,21 +523,21 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L239"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L253"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L239" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L253" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Severity"></a>
-<dt><pre><a href="lineinfos.html#Severity"><span class="Identifier">Severity</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">pure</span></span><span class="Other">.}</span></span> <span class="Other">=</span> <span class="Keyword">enum</span>
+<dt><pre><a href="lineinfos.html#Severity"><span class="Identifier">Severity</span></a> {.<span class="Identifier">pure</span>.} <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">Hint</span><span class="Other">,</span> <span class="Identifier">Warning</span><span class="Other">,</span> <span class="Identifier">Error</span></pre></dt>
 <dd>
 
 VS Code only supports these three
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L254"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L268"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L254" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L268" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="MsgConfig"></a>
@@ -551,9 +556,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 does not need to be stored in the incremental cache
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L263"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L277"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L263" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L277" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -577,7 +582,8 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="StringLit">&quot;illformed AST: $1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;cannot open \'$1\'&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;\'$1\' expected&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;grid table is not implemented&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;illformed delimiter row of a markdown table&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;general parse error&quot;</span><span class="Other">,</span>
-    <span class="StringLit">&quot;new section expected&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;invalid directive: \'$1\'&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;new section expected $1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;invalid directive: \'$1\'&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;number of footnotes and their references don\'t match: $1&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;Cannot prove that \'$1\' is initialized.&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;cannot open \'$1\'&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;octal escape sequences do not exist; leading zero is ignored&quot;</span><span class="Other">,</span>
@@ -587,7 +593,7 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="StringLit">&quot;unknown magic \'$1\' might crash the compiler&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;redefinition of label \'$1\'&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;unknown substitution \'$1\'&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;language \'$1\' not supported&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;field \'$1\' not supported&quot;</span><span class="Other">,</span>
-    <span class="StringLit">&quot;comment \'$1\' ignored&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;\'$1\' has no type. Typeless parameters are deprecated; only allowed for \'template\'&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;RST style: $1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;comment \'$1\' ignored&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;\'$1\' has no type. Typeless parameters are deprecated; only allowed for \'template\'&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;use {.base.} for base methods; baseless methods are deprecated&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;write to foreign heap&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;unsafe code: \'$1\'&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;imported and not used: \'$1\'&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;inherit from a more precise exception type like ValueError, IOError or OSError. If these don\'t suit, inherit from CatchableError or Defect.&quot;</span><span class="Other">,</span>
@@ -603,9 +609,10 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Special variable \'result\' is shadowed.&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;Number of spaces around \'$#\' is not consistent&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;Potential object case transition, instantiate new object instead&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span>
-    <span class="StringLit">&quot;observable stores to \'$1\'&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;operation successful: $#&quot;</span><span class="Other">,</span>
-    <span class="StringLit">&quot;${loc} lines; ${sec}s; $mem; $build build; proj: $project; out: $output&quot;</span><span class="Other">,</span>
-    <span class="StringLit">&quot;CC: $1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;line too long&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;\'$1\' is declared but not used&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;observable stores to \'$1\'&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;used \'result\' variable&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;cannot open: $1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;file changed: $1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;operation successful: $#&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;$loc lines; ${sec}s; $mem; proj: $project; out: $output&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;CC: $1&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;line too long&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;\'$1\' is declared but not used&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;conversion to base object is not needed&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;conversion from $1 to itself is pointless&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;expression evaluates always to \'$1\'&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;quit() called&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;$1&quot;</span><span class="Other">,</span>
@@ -618,9 +625,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L76"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L84"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L76" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L84" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fatalMin"></a>
@@ -629,9 +636,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L170"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L184"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L170" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L184" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fatalMax"></a>
@@ -640,9 +647,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L171"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L185"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L171" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L185" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errMin"></a>
@@ -651,9 +658,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L172"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L186"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L172" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L186" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errMax"></a>
@@ -662,9 +669,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L173"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L187"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L173" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L187" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="warnMin"></a>
@@ -673,20 +680,20 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L174"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L188"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L174" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L188" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="warnMax"></a>
-<dt><pre><a href="lineinfos.html#warnMax"><span class="Identifier">warnMax</span></a> <span class="Other">=</span> <span class="DecNumber">warnStrictNotNil</span></pre></dt>
+<dt><pre><a href="lineinfos.html#warnMax"><span class="Identifier">warnMax</span></a> <span class="Other">=</span> <span class="DecNumber">warnUser</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L175"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L189"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L175" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L189" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hintMin"></a>
@@ -695,9 +702,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L176"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L190"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L176" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L190" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hintMax"></a>
@@ -706,34 +713,33 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L177"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L191"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L177" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="NotesVerbosity"></a>
 <dt><pre><a href="lineinfos.html#NotesVerbosity"><span class="Identifier">NotesVerbosity</span></a> <span class="Other">=</span> <span class="Other">[</span><span class="Other">{</span><span class="DecNumber">warnCannotOpenFile</span><span class="Other">..</span><span class="DecNumber">warnProveInit</span><span class="Other">,</span>
                    <span class="DecNumber">warnUnreachableElse</span><span class="Other">..</span><span class="DecNumber">warnStaticIndexCheck</span><span class="Other">,</span> <span class="DecNumber">warnGcUnsafe2</span><span class="Other">,</span>
-                   <span class="DecNumber">warnGcMem</span><span class="Other">..</span><span class="DecNumber">warnCycleCreated</span><span class="Other">,</span> <span class="DecNumber">warnUser</span><span class="Other">..</span><span class="DecNumber">warnStrictNotNil</span><span class="Other">,</span>
-                   <span class="DecNumber">hintLineTooLong</span><span class="Other">..</span><span class="DecNumber">hintQuitCalled</span><span class="Other">,</span>
-                   <span class="DecNumber">hintConditionAlwaysTrue</span><span class="Other">..</span><span class="DecNumber">hintName</span><span class="Other">,</span> <span class="DecNumber">hintPerformance</span><span class="Other">,</span>
+                   <span class="DecNumber">warnGcMem</span><span class="Other">..</span><span class="DecNumber">warnCycleCreated</span><span class="Other">,</span> <span class="DecNumber">warnStrictNotNil</span><span class="Other">,</span>
+                   <span class="DecNumber">warnCannotOpen</span><span class="Other">..</span><span class="DecNumber">warnUser</span><span class="Other">,</span> <span class="DecNumber">hintLineTooLong</span><span class="Other">..</span><span class="DecNumber">hintQuitCalled</span><span class="Other">,</span>
+                   <span class="DecNumber">hintConditionAlwaysTrue</span><span class="Other">..</span><span class="DecNumber">hintName</span><span class="Other">,</span>
                    <span class="DecNumber">hintExpandMacro</span><span class="Other">..</span><span class="DecNumber">hintUserRaw</span><span class="Other">}</span><span class="Other">,</span> <span class="Other">{</span>
     <span class="DecNumber">warnCannotOpenFile</span><span class="Other">..</span><span class="DecNumber">warnProveInit</span><span class="Other">,</span>
     <span class="DecNumber">warnUnreachableElse</span><span class="Other">..</span><span class="DecNumber">warnStaticIndexCheck</span><span class="Other">,</span> <span class="DecNumber">warnGcUnsafe2</span><span class="Other">,</span>
-    <span class="DecNumber">warnGcMem</span><span class="Other">..</span><span class="DecNumber">warnCycleCreated</span><span class="Other">,</span> <span class="DecNumber">warnUser</span><span class="Other">..</span><span class="DecNumber">hintProcessing</span><span class="Other">,</span> <span class="DecNumber">hintConf</span><span class="Other">,</span>
-    <span class="DecNumber">hintConditionAlwaysTrue</span><span class="Other">..</span><span class="DecNumber">hintLinking</span><span class="Other">,</span> <span class="DecNumber">hintPerformance</span><span class="Other">,</span>
-    <span class="DecNumber">hintExpandMacro</span><span class="Other">..</span><span class="DecNumber">hintUserRaw</span><span class="Other">}</span><span class="Other">,</span> <span class="Other">{</span><span class="DecNumber">warnCannotOpenFile</span><span class="Other">..</span><span class="DecNumber">warnGcUnsafe2</span><span class="Other">,</span>
-                                    <span class="DecNumber">warnGcMem</span><span class="Other">..</span><span class="DecNumber">warnCycleCreated</span><span class="Other">,</span>
-                                    <span class="DecNumber">warnUser</span><span class="Other">..</span><span class="DecNumber">hintPerformance</span><span class="Other">,</span>
-                                    <span class="DecNumber">hintGCStats</span><span class="Other">..</span><span class="DecNumber">hintUserRaw</span><span class="Other">,</span> <span class="DecNumber">hintMsgOrigin</span><span class="Other">}</span><span class="Other">,</span>
-                  <span class="Other">{</span><span class="DecNumber">13</span><span class="Other">..</span><span class="DecNumber">50</span><span class="Other">,</span> <span class="DecNumber">52</span><span class="Other">..</span><span class="DecNumber">86</span><span class="Other">}</span><span class="Other">]</span></pre></dt>
+    <span class="DecNumber">warnGcMem</span><span class="Other">..</span><span class="DecNumber">warnCycleCreated</span><span class="Other">,</span> <span class="DecNumber">warnStrictNotNil</span><span class="Other">,</span>
+    <span class="DecNumber">warnCannotOpen</span><span class="Other">..</span><span class="DecNumber">hintProcessing</span><span class="Other">,</span> <span class="DecNumber">hintConf</span><span class="Other">,</span>
+    <span class="DecNumber">hintConditionAlwaysTrue</span><span class="Other">..</span><span class="DecNumber">hintLinking</span><span class="Other">,</span> <span class="DecNumber">hintExpandMacro</span><span class="Other">..</span><span class="DecNumber">hintUserRaw</span><span class="Other">}</span><span class="Other">,</span> <span class="Other">{</span>
+    <span class="DecNumber">warnCannotOpenFile</span><span class="Other">..</span><span class="DecNumber">warnGcUnsafe2</span><span class="Other">,</span> <span class="DecNumber">warnGcMem</span><span class="Other">..</span><span class="DecNumber">warnCycleCreated</span><span class="Other">,</span>
+    <span class="DecNumber">warnStrictNotNil</span><span class="Other">,</span> <span class="DecNumber">warnCannotOpen</span><span class="Other">..</span><span class="DecNumber">hintPerformance</span><span class="Other">,</span> <span class="DecNumber">hintGCStats</span><span class="Other">..</span><span class="DecNumber">hintUserRaw</span><span class="Other">,</span>
+    <span class="DecNumber">hintMsgOrigin</span><span class="Other">}</span><span class="Other">,</span> <span class="Other">{</span><span class="DecNumber">14</span><span class="Other">..</span><span class="DecNumber">52</span><span class="Other">,</span> <span class="DecNumber">warnStrictNotNil</span><span class="Other">,</span> <span class="DecNumber">56</span><span class="Other">..</span><span class="DecNumber">92</span><span class="Other">}</span><span class="Other">]</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L193"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L207"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L193" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L207" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errXMustBeCompileTime"></a>
@@ -742,9 +748,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L194"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L208"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L194" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L208" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="errArgsNeedRunOption"></a>
@@ -753,9 +759,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L195"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L209"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L195" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L209" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="InvalidFileIdx"></a>
@@ -764,9 +770,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L250"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L264"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L264" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="unknownLineInfo"></a>
@@ -775,9 +781,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L251"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L265"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L251" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L265" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="trackPosInvalidFileIdx"></a>
@@ -786,9 +792,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L258"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L272"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L258" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L272" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="commandLineIdx"></a>
@@ -797,9 +803,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L260"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L274"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L260" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L274" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -808,7 +814,7 @@ class="link-seesrc" target="_blank">Source</a>
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
 <a id="createDocLink,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#createDocLink%2Cstring"><span class="Identifier">createDocLink</span></a><span class="Other">(</span><span class="Identifier">urlSuffix</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#createDocLink%2Cstring"><span class="Identifier">createDocLink</span></a><span class="Other">(</span><span class="Identifier">urlSuffix</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
@@ -819,48 +825,48 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="==,FileIndex,FileIndex"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#%3D%3D%2CFileIndex%2CFileIndex"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">borrow</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#%3D%3D%2CFileIndex%2CFileIndex"><span class="Identifier">`==`</span></a><span class="Other">(</span><span class="Identifier">a</span><span class="Other">,</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">borrow</span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L241"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L255"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L241" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L255" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hash,TLineInfo"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#hash%2CTLineInfo"><span class="Identifier">hash</span></a><span class="Other">(</span><span class="Identifier">i</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Hash</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#hash%2CTLineInfo"><span class="Identifier">hash</span></a><span class="Other">(</span><span class="Identifier">i</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Hash</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L243"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L257"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L243" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L257" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="raiseRecoverableError,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#raiseRecoverableError%2Cstring"><span class="Identifier">raiseRecoverableError</span></a><span class="Other">(</span><span class="Identifier">msg</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">noinline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#raiseRecoverableError%2Cstring"><span class="Identifier">raiseRecoverableError</span></a><span class="Other">(</span><span class="Identifier">msg</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> {.<span class="Identifier">noinline</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ERecoverableError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L246"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L260"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L246" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L260" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="initMsgConfig"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#initMsgConfig"><span class="Identifier">initMsgConfig</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="lineinfos.html#MsgConfig"><span class="Identifier">MsgConfig</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#initMsgConfig"><span class="Identifier">initMsgConfig</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="lineinfos.html#MsgConfig"><span class="Identifier">MsgConfig</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L276"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/lineinfos.nim#L290"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L276" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/lineinfos.nim#L290" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -873,7 +879,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-31 00:42:43 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-17 00:53:45 UTC</small>
       </div>
     </div>
   </div>

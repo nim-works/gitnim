@@ -17,7 +17,7 @@
 <link href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,500,600' rel='stylesheet' type='text/css'/>
 
 <!-- CSS -->
-<title>highlite</title>
+<title>packages/docutils/highlite</title>
 <link rel="stylesheet" type="text/css" href="nimdoc.out.css">
 
 <script type="text/javascript" src="dochack.js"></script>
@@ -64,7 +64,7 @@ window.addEventListener('DOMContentLoaded', main);
 <body>
 <div class="document" id="documentId">
   <div class="container">
-    <h1 class="title">highlite</h1>
+    <h1 class="title">packages/docutils/highlite</h1>
     <div class="row">
   <div class="three columns">
   <div class="theme-switch-wrapper">
@@ -100,11 +100,18 @@ window.addEventListener('DOMContentLoaded', main);
   
   <ul class="simple simple-toc" id="toc-list">
 <li>
+  <a class="reference reference-toplevel" href="#6" id="56">Imports</a>
+  <ul class="simple simple-toc-section">
+    
+  </ul>
+</li>
+<li>
   <a class="reference reference-toplevel" href="#7" id="57">Types</a>
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#SourceLanguage"
     title="SourceLanguage = enum
-  langNone, langNim, langCpp, langCsharp, langC, langJava, langYaml, langPython">SourceLanguage</a></li>
+  langNone, langNim, langCpp, langCsharp, langC, langJava, langYaml, langPython,
+  langCmd, langConsole">SourceLanguage</a></li>
   <li><a class="reference" href="#TokenClass"
     title="TokenClass = enum
   gtEof, gtNone, gtWhitespace, gtDecNumber, gtBinNumber, gtHexNumber,
@@ -112,7 +119,8 @@ window.addEventListener('DOMContentLoaded', main);
   gtLongStringLit, gtCharLit, gtEscapeSequence, gtOperator, gtPunctuation,
   gtComment, gtLongComment, gtRegularExpression, gtTagStart, gtTagEnd, gtKey,
   gtValue, gtRawData, gtAssembler, gtPreprocessor, gtDirective, gtCommand,
-  gtRule, gtHyperlink, gtLabel, gtReference, gtOther">TokenClass</a></li>
+  gtRule, gtHyperlink, gtLabel, gtReference, gtPrompt, gtProgramOutput,
+  gtProgram, gtOption, gtOther">TokenClass</a></li>
   <li><a class="reference" href="#GeneralTokenizer"
     title="GeneralTokenizer = object of RootObj
   kind*: TokenClass
@@ -129,7 +137,10 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#sourceLanguageToStr"
     title="sourceLanguageToStr: array[SourceLanguage, string] = [&quot;none&quot;, &quot;Nim&quot;, &quot;C++&quot;,
-    &quot;C#&quot;, &quot;C&quot;, &quot;Java&quot;, &quot;Yaml&quot;, &quot;Python&quot;]">sourceLanguageToStr</a></li>
+    &quot;C#&quot;, &quot;C&quot;, &quot;Java&quot;, &quot;Yaml&quot;, &quot;Python&quot;, &quot;Cmd&quot;, &quot;Console&quot;]">sourceLanguageToStr</a></li>
+  <li><a class="reference" href="#sourceLanguageToAlpha"
+    title="sourceLanguageToAlpha: array[SourceLanguage, string] = [&quot;none&quot;, &quot;Nim&quot;, &quot;cpp&quot;,
+    &quot;csharp&quot;, &quot;C&quot;, &quot;Java&quot;, &quot;Yaml&quot;, &quot;Python&quot;, &quot;Cmd&quot;, &quot;Console&quot;]">sourceLanguageToAlpha</a></li>
   <li><a class="reference" href="#tokenClassToStr"
     title="tokenClassToStr: array[TokenClass, string] = [&quot;Eof&quot;, &quot;None&quot;, &quot;Whitespace&quot;,
     &quot;DecNumber&quot;, &quot;BinNumber&quot;, &quot;HexNumber&quot;, &quot;OctNumber&quot;, &quot;FloatNumber&quot;,
@@ -137,14 +148,20 @@ window.addEventListener('DOMContentLoaded', main);
     &quot;EscapeSequence&quot;, &quot;Operator&quot;, &quot;Punctuation&quot;, &quot;Comment&quot;, &quot;LongComment&quot;,
     &quot;RegularExpression&quot;, &quot;TagStart&quot;, &quot;TagEnd&quot;, &quot;Key&quot;, &quot;Value&quot;, &quot;RawData&quot;,
     &quot;Assembler&quot;, &quot;Preprocessor&quot;, &quot;Directive&quot;, &quot;Command&quot;, &quot;Rule&quot;, &quot;Hyperlink&quot;,
-    &quot;Label&quot;, &quot;Reference&quot;, &quot;Other&quot;]">tokenClassToStr</a></li>
+    &quot;Label&quot;, &quot;Reference&quot;, &quot;Prompt&quot;, &quot;ProgramOutput&quot;, &quot;program&quot;, &quot;option&quot;,
+    &quot;Other&quot;]">tokenClassToStr</a></li>
 
   </ul>
 </li>
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">initGeneralTokenizer
+      <ul class="simple nested-toc-section">tokenize
+      <li><a class="reference" href="#tokenize%2Cstring%2CSourceLanguage"
+    title="tokenize(text: string; lang: SourceLanguage): seq[(string, TokenClass)]">tokenize(text: string; lang: SourceLanguage): seq[(string, TokenClass)]</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">initGeneralTokenizer
       <li><a class="reference" href="#initGeneralTokenizer%2CGeneralTokenizer%2Ccstring"
     title="initGeneralTokenizer(g: var GeneralTokenizer; buf: cstring)">initGeneralTokenizer(g: var GeneralTokenizer; buf: cstring)</a></li>
   <li><a class="reference" href="#initGeneralTokenizer%2CGeneralTokenizer%2Cstring"
@@ -182,7 +199,6 @@ class="link-seesrc" target="_blank">Source</a>
   <div id="tocRoot"></div>
   
   <p class="module-desc"><p>Source highlighter for programming or markup languages. Currently only few languages are supported, other languages may be added. The interface supports one language nested in another.</p>
-<p><strong>Note:</strong> Import <tt class="docutils literal"><span class="pre">packages/docutils/highlite</span></tt> to use this module</p>
 <p>You can use this to build your own syntax highlighting, check this example:</p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">code</span> <span class="Operator">=</span> <span class="LongStringLit">&quot;&quot;&quot;for x in $int.high: echo x.ord mod 2 == 0&quot;&quot;&quot;</span>
 <span class="Keyword">var</span> <span class="Identifier">toknizr</span><span class="Punctuation">:</span> <span class="Identifier">GeneralTokenizer</span>
@@ -200,21 +216,30 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Comment"># of gtSomeSymbol: syntaxHighlight(&quot;Comic Sans&quot;, &quot;bold&quot;, &quot;99px&quot;, &quot;pink&quot;)</span>
   <span class="Keyword">else</span><span class="Punctuation">:</span>
     <span class="Identifier">echo</span> <span class="Identifier">toknizr</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Comment"># All the kinds of tokens can be processed here.</span>
-    <span class="Identifier">echo</span> <span class="Identifier">substr</span><span class="Punctuation">(</span><span class="Identifier">code</span><span class="Punctuation">,</span> <span class="Identifier">toknizr</span><span class="Operator">.</span><span class="Identifier">start</span><span class="Punctuation">,</span> <span class="Identifier">toknizr</span><span class="Operator">.</span><span class="Identifier">length</span> <span class="Operator">+</span> <span class="Identifier">toknizr</span><span class="Operator">.</span><span class="Identifier">start</span> <span class="Operator">-</span> <span class="DecNumber">1</span><span class="Punctuation">)</span></pre><p>The proc <tt class="docutils literal"><span class="pre">getSourceLanguage</span></tt> can get the language <tt class="docutils literal"><span class="pre">enum</span></tt> from a string:</p>
-<pre class="listing"><span class="Keyword">for</span> <span class="Identifier">l</span> <span class="Keyword">in</span> <span class="Punctuation">[</span><span class="StringLit">&quot;C&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;c++&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;jAvA&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Nim&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;c#&quot;</span><span class="Punctuation">]</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="Identifier">getSourceLanguage</span><span class="Punctuation">(</span><span class="Identifier">l</span><span class="Punctuation">)</span></pre></p>
-  <div class="section" id="7">
+    <span class="Identifier">echo</span> <span class="Identifier">substr</span><span class="Punctuation">(</span><span class="Identifier">code</span><span class="Punctuation">,</span> <span class="Identifier">toknizr</span><span class="Operator">.</span><span class="Identifier">start</span><span class="Punctuation">,</span> <span class="Identifier">toknizr</span><span class="Operator">.</span><span class="Identifier">length</span> <span class="Operator">+</span> <span class="Identifier">toknizr</span><span class="Operator">.</span><span class="Identifier">start</span> <span class="Operator">-</span> <span class="DecNumber">1</span><span class="Punctuation">)</span></pre><p>The proc <tt class="docutils literal"><span class="pre"><span class="Identifier">getSourceLanguage</span></span></tt> can get the language <tt class="docutils literal"><span class="pre"><span class="Keyword">enum</span></span></tt> from a string:</p>
+<pre class="listing"><span class="Keyword">for</span> <span class="Identifier">l</span> <span class="Keyword">in</span> <span class="Punctuation">[</span><span class="StringLit">&quot;C&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;c++&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;jAvA&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Nim&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;c#&quot;</span><span class="Punctuation">]</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="Identifier">getSourceLanguage</span><span class="Punctuation">(</span><span class="Identifier">l</span><span class="Punctuation">)</span></pre><p>There is also a <tt class="docutils literal"><span class="pre"><span class="Identifier">Cmd</span></span></tt> pseudo-language supported, which is a simple generic shell/cmdline tokenizer (UNIX shell/Powershell/Windows Command): no escaping, no programming language constructs besides variable definition at the beginning of line. It supports these operators:</p>
+<pre class="listing"><span class="Operator">&amp;</span>  <span class="Operator">&amp;&amp;</span>  <span class="Operator">|</span>  <span class="Operator">||</span>  <span class="Operator">(</span>  <span class="Operator">)</span>  <span class="option">''</span>  <span class="option">&quot;&quot;</span>  <span class="Operator">;</span>  <span class="Comment"># for comments</span></pre><p>Instead of escaping always use quotes like here <tt class="docutils literal"><span class="pre"><span class="program">nimgrep</span> <span class="option">--ext:</span><span class="option">'nim|nims'</span> <span class="Identifier">file.name</span></span></tt> shows how to input <tt class="docutils literal"><span class="pre">|</span></tt>. Any argument that contains <tt class="docutils literal"><span class="pre">.</span></tt> or <tt class="docutils literal"><span class="pre">/</span></tt> or <tt class="docutils literal"><span class="pre">\</span></tt> will be treated as a file or directory.</p>
+<p>In addition to <tt class="docutils literal"><span class="pre"><span class="Identifier">Cmd</span></span></tt> there is also <tt class="docutils literal"><span class="pre"><span class="Identifier">Console</span></span></tt> language for displaying interactive sessions. Lines with a command should start with <tt class="docutils literal"><span class="pre">$</span></tt>, other lines are considered as program output.</p>
+</p>
+  <div class="section" id="6">
+<h1><a class="toc-backref" href="#6">Imports</a></h1>
+<dl class="item">
+<a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="algorithm.html">algorithm</a>
+</dl></div>
+<div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
 <dl class="item">
 <a id="SourceLanguage"></a>
 <dt><pre><a href="highlite.html#SourceLanguage"><span class="Identifier">SourceLanguage</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">langNone</span><span class="Other">,</span> <span class="Identifier">langNim</span><span class="Other">,</span> <span class="Identifier">langCpp</span><span class="Other">,</span> <span class="Identifier">langCsharp</span><span class="Other">,</span> <span class="Identifier">langC</span><span class="Other">,</span> <span class="Identifier">langJava</span><span class="Other">,</span> <span class="Identifier">langYaml</span><span class="Other">,</span> <span class="Identifier">langPython</span></pre></dt>
+  <span class="Identifier">langNone</span><span class="Other">,</span> <span class="Identifier">langNim</span><span class="Other">,</span> <span class="Identifier">langCpp</span><span class="Other">,</span> <span class="Identifier">langCsharp</span><span class="Other">,</span> <span class="Identifier">langC</span><span class="Other">,</span> <span class="Identifier">langJava</span><span class="Other">,</span> <span class="Identifier">langYaml</span><span class="Other">,</span> <span class="Identifier">langPython</span><span class="Other">,</span>
+  <span class="Identifier">langCmd</span><span class="Other">,</span> <span class="Identifier">langConsole</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L48"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L63"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L48" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L63" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TokenClass"></a>
@@ -224,22 +249,23 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">gtLongStringLit</span><span class="Other">,</span> <span class="Identifier">gtCharLit</span><span class="Other">,</span> <span class="Identifier">gtEscapeSequence</span><span class="Other">,</span> <span class="Identifier">gtOperator</span><span class="Other">,</span> <span class="Identifier">gtPunctuation</span><span class="Other">,</span>
   <span class="Identifier">gtComment</span><span class="Other">,</span> <span class="Identifier">gtLongComment</span><span class="Other">,</span> <span class="Identifier">gtRegularExpression</span><span class="Other">,</span> <span class="Identifier">gtTagStart</span><span class="Other">,</span> <span class="Identifier">gtTagEnd</span><span class="Other">,</span> <span class="Identifier">gtKey</span><span class="Other">,</span>
   <span class="Identifier">gtValue</span><span class="Other">,</span> <span class="Identifier">gtRawData</span><span class="Other">,</span> <span class="Identifier">gtAssembler</span><span class="Other">,</span> <span class="Identifier">gtPreprocessor</span><span class="Other">,</span> <span class="Identifier">gtDirective</span><span class="Other">,</span> <span class="Identifier">gtCommand</span><span class="Other">,</span>
-  <span class="Identifier">gtRule</span><span class="Other">,</span> <span class="Identifier">gtHyperlink</span><span class="Other">,</span> <span class="Identifier">gtLabel</span><span class="Other">,</span> <span class="Identifier">gtReference</span><span class="Other">,</span> <span class="Identifier">gtOther</span></pre></dt>
+  <span class="Identifier">gtRule</span><span class="Other">,</span> <span class="Identifier">gtHyperlink</span><span class="Other">,</span> <span class="Identifier">gtLabel</span><span class="Other">,</span> <span class="Identifier">gtReference</span><span class="Other">,</span> <span class="Identifier">gtPrompt</span><span class="Other">,</span> <span class="Identifier">gtProgramOutput</span><span class="Other">,</span>
+  <span class="Identifier">gtProgram</span><span class="Other">,</span> <span class="Identifier">gtOption</span><span class="Other">,</span> <span class="Identifier">gtOther</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L51"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L66"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L51" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L66" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="GeneralTokenizer"></a>
-<dt><pre><a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">RootObj</span>
+<dt><pre><a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="system.html#RootObj"><span class="Identifier">RootObj</span></a>
   <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="highlite.html#TokenClass"><span class="Identifier">TokenClass</span></a>
-  <span class="Identifier">start</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">length</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">buf</span><span class="Other">:</span> <span class="Identifier">cstring</span>
-  <span class="Identifier">pos</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">start</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">length</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>
+  <span class="Identifier">buf</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a>
+  <span class="Identifier">pos</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>
   <span class="Identifier">state</span><span class="Other">:</span> <a href="highlite.html#TokenClass"><span class="Identifier">TokenClass</span></a>
   <span class="Identifier">lang</span><span class="Other">:</span> <a href="highlite.html#SourceLanguage"><span class="Identifier">SourceLanguage</span></a>
 </pre></dt>
@@ -247,9 +273,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L59"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L74"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L59" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L74" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -258,32 +284,45 @@ class="link-seesrc" target="_blank">Source</a>
 <h1><a class="toc-backref" href="#10">Consts</a></h1>
 <dl class="item">
 <a id="sourceLanguageToStr"></a>
-<dt><pre><a href="highlite.html#sourceLanguageToStr"><span class="Identifier">sourceLanguageToStr</span></a><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">SourceLanguage</span><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="StringLit">&quot;none&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Nim&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;C++&quot;</span><span class="Other">,</span>
-    <span class="StringLit">&quot;C#&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;C&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Java&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Yaml&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Python&quot;</span><span class="Other">]</span></pre></dt>
+<dt><pre><a href="highlite.html#sourceLanguageToStr"><span class="Identifier">sourceLanguageToStr</span></a><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="Identifier">SourceLanguage</span><span class="Other">,</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="StringLit">&quot;none&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Nim&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;C++&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;C#&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;C&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Java&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Yaml&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Python&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Cmd&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Console&quot;</span><span class="Other">]</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L68"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L83"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L68" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L83" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="sourceLanguageToAlpha"></a>
+<dt><pre><a href="highlite.html#sourceLanguageToAlpha"><span class="Identifier">sourceLanguageToAlpha</span></a><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="Identifier">SourceLanguage</span><span class="Other">,</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="StringLit">&quot;none&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Nim&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;cpp&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;csharp&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;C&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Java&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Yaml&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Python&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Cmd&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Console&quot;</span><span class="Other">]</span></pre></dt>
+<dd>
+
+list of languages spelled with alpabetic characters
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L85"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L85" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="tokenClassToStr"></a>
-<dt><pre><a href="highlite.html#tokenClassToStr"><span class="Identifier">tokenClassToStr</span></a><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">TokenClass</span><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="StringLit">&quot;Eof&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;None&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Whitespace&quot;</span><span class="Other">,</span>
+<dt><pre><a href="highlite.html#tokenClassToStr"><span class="Identifier">tokenClassToStr</span></a><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="Identifier">TokenClass</span><span class="Other">,</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="StringLit">&quot;Eof&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;None&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Whitespace&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;DecNumber&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;BinNumber&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;HexNumber&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;OctNumber&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;FloatNumber&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;Identifier&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Keyword&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;StringLit&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;LongStringLit&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;CharLit&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;EscapeSequence&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Operator&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Punctuation&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Comment&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;LongComment&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;RegularExpression&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;TagStart&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;TagEnd&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Key&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Value&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;RawData&quot;</span><span class="Other">,</span>
     <span class="StringLit">&quot;Assembler&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Preprocessor&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Directive&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Command&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Rule&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Hyperlink&quot;</span><span class="Other">,</span>
-    <span class="StringLit">&quot;Label&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Reference&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Other&quot;</span><span class="Other">]</span></pre></dt>
+    <span class="StringLit">&quot;Label&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Reference&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;Prompt&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;ProgramOutput&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;program&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;option&quot;</span><span class="Other">,</span>
+    <span class="StringLit">&quot;Other&quot;</span><span class="Other">]</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L70"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L88"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L70" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L88" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -292,61 +331,73 @@ class="link-seesrc" target="_blank">Source</a>
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
 <a id="getSourceLanguage,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getSourceLanguage%2Cstring"><span class="Identifier">getSourceLanguage</span></a><span class="Other">(</span><span class="Identifier">name</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="highlite.html#SourceLanguage"><span class="Identifier">SourceLanguage</span></a> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getSourceLanguage%2Cstring"><span class="Identifier">getSourceLanguage</span></a><span class="Other">(</span><span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="highlite.html#SourceLanguage"><span class="Identifier">SourceLanguage</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L92"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L113"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L92" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L113" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="initGeneralTokenizer,GeneralTokenizer,cstring"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#initGeneralTokenizer%2CGeneralTokenizer%2Ccstring"><span class="Identifier">initGeneralTokenizer</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a><span class="Other">;</span> <span class="Identifier">buf</span><span class="Other">:</span> <span class="Identifier">cstring</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#initGeneralTokenizer%2CGeneralTokenizer%2Ccstring"><span class="Identifier">initGeneralTokenizer</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a><span class="Other">;</span> <span class="Identifier">buf</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L98"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L121"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L98" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L121" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="initGeneralTokenizer,GeneralTokenizer,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#initGeneralTokenizer%2CGeneralTokenizer%2Cstring"><span class="Identifier">initGeneralTokenizer</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a><span class="Other">;</span> <span class="Identifier">buf</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#initGeneralTokenizer%2CGeneralTokenizer%2Cstring"><span class="Identifier">initGeneralTokenizer</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a><span class="Other">;</span> <span class="Identifier">buf</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L109"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L132"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L109" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L132" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="deinitGeneralTokenizer,GeneralTokenizer"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#deinitGeneralTokenizer%2CGeneralTokenizer"><span class="Identifier">deinitGeneralTokenizer</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#deinitGeneralTokenizer%2CGeneralTokenizer"><span class="Identifier">deinitGeneralTokenizer</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L112"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L135"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L112" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L135" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getNextToken,GeneralTokenizer,SourceLanguage"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getNextToken%2CGeneralTokenizer%2CSourceLanguage"><span class="Identifier">getNextToken</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a><span class="Other">;</span> <span class="Identifier">lang</span><span class="Other">:</span> <a href="highlite.html#SourceLanguage"><span class="Identifier">SourceLanguage</span></a><span class="Other">)</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#getNextToken%2CGeneralTokenizer%2CSourceLanguage"><span class="Identifier">getNextToken</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="highlite.html#GeneralTokenizer"><span class="Identifier">GeneralTokenizer</span></a><span class="Other">;</span> <span class="Identifier">lang</span><span class="Other">:</span> <a href="highlite.html#SourceLanguage"><span class="Identifier">SourceLanguage</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L903"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L996"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L903" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L996" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="tokenize,string,SourceLanguage"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#tokenize%2Cstring%2CSourceLanguage"><span class="Identifier">tokenize</span></a><span class="Other">(</span><span class="Identifier">text</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">lang</span><span class="Other">:</span> <a href="highlite.html#SourceLanguage"><span class="Identifier">SourceLanguage</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><span class="Other">(</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="highlite.html#TokenClass"><span class="Identifier">TokenClass</span></a><span class="Other">)</span><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/highlite.nim#L1010"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/highlite.nim#L1010" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -359,7 +410,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-31 00:42:05 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-17 00:53:37 UTC</small>
       </div>
     </div>
   </div>

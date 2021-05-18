@@ -1467,6 +1467,7 @@ else:
   proc insertBefore*(n, newNode, before: Node) {.importcpp.}
   proc getElementById*(d: Document, id: cstring): Element {.importcpp.}
   proc createElement*(d: Document, identifier: cstring): Element {.importcpp.}
+  proc createElementNS*(d: Document, namespaceURI, qualifiedIdentifier: cstring): Element {.importcpp.}
   proc createTextNode*(d: Document, identifier: cstring): Node {.importcpp.}
   proc createComment*(d: Document, data: cstring): Node {.importcpp.}
 
@@ -1495,7 +1496,9 @@ proc find*(w: Window, text: cstring, caseSensitive = false,
            backwards = false)
 proc focus*(w: Window)
 proc forward*(w: Window)
-proc getComputedStyle*(w: Window, e: Node, pe:Node = nil): Style
+proc getComputedStyle*(w: Window, e: Node, pe: Node = nil): Style
+  ## .. warning:: The returned Style may or may not be read-only at run-time in the browser. getComputedStyle is performance costly.
+
 proc handleEvent*(w: Window, e: Event)
 proc home*(w: Window)
 proc moveBy*(w: Window, x, y: int)
