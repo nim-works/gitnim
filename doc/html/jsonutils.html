@@ -114,6 +114,12 @@ window.addEventListener('DOMContentLoaded', main);
                         ## have a field for every JSON key.
   allowMissingKeys*: bool ## If `true` Nim's object to which JSON is parsed is allowed to have
                           ## fields without corresponding JSON keys.">Joptions</a></li>
+  <li><a class="reference" href="#EnumMode"
+    title="EnumMode = enum
+  joptEnumOrd, joptEnumSymbol, joptEnumString">EnumMode</a></li>
+  <li><a class="reference" href="#ToJsonOptions"
+    title="ToJsonOptions = object
+  enumMode*: EnumMode">ToJsonOptions</a></li>
 
   </ul>
 </li>
@@ -136,6 +142,11 @@ window.addEventListener('DOMContentLoaded', main);
     title="toJsonHook(a: StringTableRef): JsonNode">toJsonHook(a: StringTableRef): JsonNode</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">initToJsonOptions
+      <li><a class="reference" href="#initToJsonOptions"
+    title="initToJsonOptions(): ToJsonOptions">initToJsonOptions(): ToJsonOptions</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">jsonTo
       <li><a class="reference" href="#jsonTo%2CJsonNode%2Ctypedesc"
     title="jsonTo(b: JsonNode; T: typedesc; opt = Joptions()): T:type">jsonTo(b: JsonNode; T: typedesc; opt = Joptions()): T:type</a></li>
@@ -156,7 +167,7 @@ window.addEventListener('DOMContentLoaded', main);
   </ul>
   <ul class="simple nested-toc-section">toJson
       <li><a class="reference" href="#toJson%2CT"
-    title="toJson[T](a: T): JsonNode">toJson[T](a: T): JsonNode</a></li>
+    title="toJson[T](a: T; opt = initToJsonOptions()): JsonNode">toJson[T](a: T; opt = initToJsonOptions()): JsonNode</a></li>
 
   </ul>
 
@@ -190,7 +201,7 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="json.html">json</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="sets.html">sets</a>, <a class="reference external" href="strtabs.html">strtabs</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="macros.html">macros</a>
+<a class="reference external" href="json.html">json</a>, <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="sets.html">sets</a>, <a class="reference external" href="strtabs.html">strtabs</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="macros.html">macros</a>, <a class="reference external" href="enumutils.html">enumutils</a>, <a class="reference external" href="typetraits.html">typetraits</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -206,9 +217,34 @@ class="link-seesrc" target="_blank">Source</a>
 
 Options controlling the behavior of <tt class="docutils literal"><span class="pre"><span class="Identifier">fromJson</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L36"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L38"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L36" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L38" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="EnumMode"></a>
+<dt><pre><a href="jsonutils.html#EnumMode"><span class="Identifier">EnumMode</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">joptEnumOrd</span><span class="Other">,</span> <span class="Identifier">joptEnumSymbol</span><span class="Other">,</span> <span class="Identifier">joptEnumString</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L47"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L47" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="ToJsonOptions"></a>
+<dt><pre><a href="jsonutils.html#ToJsonOptions"><span class="Identifier">ToJsonOptions</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">enumMode</span><span class="Operator">*</span><span class="Other">:</span> <a href="jsonutils.html#EnumMode"><span class="Identifier">EnumMode</span></a>
+</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L51"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L51" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -216,15 +252,26 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="12">
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
+<a id="initToJsonOptions"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#initToJsonOptions"><span class="Identifier">initToJsonOptions</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="jsonutils.html#ToJsonOptions"><span class="Identifier">ToJsonOptions</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+initializes <tt class="docutils literal"><span class="pre"><span class="Identifier">ToJsonOptions</span></span></tt> with sane options.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L55"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L55" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="fromJson,T,JsonNode"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#fromJson%2CT%2CJsonNode"><span class="Identifier">fromJson</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Other">;</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a><span class="Other">;</span> <span class="Identifier">opt</span> <span class="Other">=</span> <a href="jsonutils.html#Joptions"><span class="Identifier">Joptions</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span></pre></dt>
 <dd>
 
 inplace version of <tt class="docutils literal"><span class="pre"><span class="Identifier">jsonTo</span></span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L180"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L193"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L180" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L193" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="jsonTo,JsonNode,typedesc"></a>
@@ -233,20 +280,20 @@ class="link-seesrc" target="_blank">Source</a>
 
 reverse of <tt class="docutils literal"><span class="pre"><span class="Identifier">toJson</span></span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L260"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L273"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L260" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L273" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toJson,T"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#toJson%2CT"><span class="Identifier">toJson</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#toJson%2CT"><span class="Identifier">toJson</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">a</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">;</span> <span class="Identifier">opt</span> <span class="Other">=</span> <span class="Identifier">initToJsonOptions</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="json.html#JsonNode"><span class="Identifier">JsonNode</span></a></pre></dt>
 <dd>
 
 serializes <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span></span></tt> to json; uses <tt class="docutils literal"><span class="pre"><span class="Identifier">toJsonHook</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">T</span><span class="Punctuation">)</span></span></tt> if it's in scope to customize serialization, see strtabs.toJsonHook for an example.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L264"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L277"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L264" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L277" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fromJsonHook,,JsonNode"></a>
@@ -267,9 +314,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">t</span> <span class="Operator">==</span> <span class="Punctuation">[</span><span class="Punctuation">(</span><span class="StringLit">&quot;one&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="StringLit">&quot;two&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toTable</span>
 <span class="Identifier">assert</span> <span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">ot</span> <span class="Operator">==</span> <span class="Punctuation">[</span><span class="Punctuation">(</span><span class="StringLit">&quot;one&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="StringLit">&quot;three&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toOrderedTable</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L294"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L315"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L294" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L315" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toJsonHook"></a>
@@ -292,9 +339,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Keyword">let</span> <span class="Identifier">a2</span> <span class="Operator">=</span> <span class="Identifier">collect</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="Keyword">for</span> <span class="Identifier">k</span><span class="Punctuation">,</span><span class="Identifier">v</span> <span class="Keyword">in</span> <span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="Identifier">k</span><span class="Punctuation">,</span><span class="Identifier">v</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Operator">$</span><span class="Identifier">toJson</span><span class="Punctuation">(</span><span class="Identifier">a2</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="LongStringLit">&quot;&quot;&quot;[[10,&quot;foo&quot;],[11,&quot;bar&quot;]]&quot;&quot;&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L315"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L336"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L315" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L336" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fromJsonHook,SomeSet[A],JsonNode"></a>
@@ -314,9 +361,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">hs</span> <span class="Operator">==</span> <span class="Punctuation">[</span><span class="StringLit">&quot;hash&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;set&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toHashSet</span>
 <span class="Identifier">assert</span> <span class="Identifier">foo</span><span class="Operator">.</span><span class="Identifier">os</span> <span class="Operator">==</span> <span class="Punctuation">[</span><span class="StringLit">&quot;ordered&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;set&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toOrderedSet</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L337"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L358"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L337" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L358" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toJsonHook,SomeSet[A]"></a>
@@ -333,9 +380,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Keyword">let</span> <span class="Identifier">foo</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="Identifier">hs</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="StringLit">&quot;hash&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toHashSet</span><span class="Punctuation">,</span> <span class="Identifier">os</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="StringLit">&quot;ordered&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;set&quot;</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">toOrderedSet</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Operator">$</span><span class="Identifier">toJson</span><span class="Punctuation">(</span><span class="Identifier">foo</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="LongStringLit">&quot;&quot;&quot;{&quot;hs&quot;:[&quot;hash&quot;],&quot;os&quot;:[&quot;ordered&quot;,&quot;set&quot;]}&quot;&quot;&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L357"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L378"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L357" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L378" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fromJsonHook,Option[T],JsonNode"></a>
@@ -355,9 +402,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">fromJson</span><span class="Punctuation">(</span><span class="Identifier">opt</span><span class="Punctuation">,</span> <span class="Identifier">parseJson</span><span class="Punctuation">(</span><span class="StringLit">&quot;null&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Identifier">isNone</span><span class="Punctuation">(</span><span class="Identifier">opt</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L371"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L392"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L371" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L392" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toJsonHook,Option[T]"></a>
@@ -376,9 +423,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Keyword">let</span> <span class="Identifier">optNone</span> <span class="Operator">=</span> <span class="Identifier">none</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Operator">$</span><span class="Identifier">toJson</span><span class="Punctuation">(</span><span class="Identifier">optNone</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;null&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L389"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L410"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L389" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L410" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="fromJsonHook,StringTableRef,JsonNode"></a>
@@ -399,9 +446,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">t</span><span class="Punctuation">[</span><span class="Punctuation">]</span> <span class="Operator">==</span> <span class="Identifier">newStringTable</span><span class="Punctuation">(</span><span class="StringLit">&quot;name&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;John&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;surname&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Doe&quot;</span><span class="Punctuation">,</span>
                              <span class="Identifier">modeCaseSensitive</span><span class="Punctuation">)</span><span class="Punctuation">[</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L406"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L427"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L406" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L427" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toJsonHook,StringTableRef"></a>
@@ -420,9 +467,9 @@ class="link-seesrc" target="_blank">Source</a>
                       &quot;table&quot;: {&quot;name&quot;: &quot;John&quot;, &quot;surname&quot;: &quot;Doe&quot;}}&quot;&quot;&quot;</span>
 <span class="Identifier">assert</span> <span class="Identifier">toJson</span><span class="Punctuation">(</span><span class="Identifier">t</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">parseJson</span><span class="Punctuation">(</span><span class="Identifier">jsonStr</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L424"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/jsonutils.nim#L445"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L424" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/jsonutils.nim#L445" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -435,7 +482,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-17 00:53:33 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-29 01:14:51 UTC</small>
       </div>
     </div>
   </div>

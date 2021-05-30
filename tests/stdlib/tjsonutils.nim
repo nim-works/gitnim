@@ -4,7 +4,8 @@ discard """
 
 import std/jsonutils
 import std/json
-from std/math import isNaN
+from std/math import isNaN, signbit
+from stdtest/testutils import whenRuntimeJs
 
 proc testRoundtrip[T](t: T, expected: string) =
   # checks that `T => json => T2 => json2` is such that json2 = json
@@ -34,6 +35,13 @@ type Foo = ref object
 
 proc `==`(a, b: Foo): bool =
   a.id == b.id
+
+type MyEnum = enum me0, me1 = "me1Alt", me2, me3, me4
+
+proc `$`(a: MyEnum): string =
+  # putting this here pending https://github.com/nim-lang/Nim/issues/13747
+  if a == me2: "me2Modif"
+  else: system.`$`(a)
 
 template fn() = 
   block: # toJson, jsonTo
@@ -83,6 +91,12 @@ template fn() =
     doAssert b2.ord == 1 # explains the `1`
     testRoundtrip(a): """[1,2,3]"""
 
+  block: # ToJsonOptions
+    let a = (me1, me2)
+    doAssert $a.toJson() == "[1,2]"
+    doAssert $a.toJson(ToJsonOptions(enumMode: joptEnumSymbol)) == """["me1","me2"]"""
+    doAssert $a.toJson(ToJsonOptions(enumMode: joptEnumString)) == """["me1Alt","me2Modif"]"""
+
   block: # set
     type Foo = enum f1, f2, f3, f4, f5
     type Goo = enum g1 = 10, g2 = 15, g3 = 17, g4
@@ -109,6 +123,20 @@ template fn() =
     testRoundtrip((float32(NaN), Inf, -Inf, 0.0, -0.0, 1.0)): """["nan","inf","-inf",0.0,-0.0,1.0]"""
     testRoundtripVal((Inf, -Inf, 0.0, -0.0, 1.0)): """["inf","-inf",0.0,-0.0,1.0]"""
     doAssert ($NaN.toJson).parseJson.jsonTo(float).isNaN
+
+  block: # bug #18009; unfixable unless we change parseJson (which would have overhead),
+         # but at least we can guarantee that the distinction between 0.0 and -0.0 is preserved.
+    let a = (0, 0.0, -0.0, 0.5, 1, 1.0)
+    testRoundtripVal(a): "[0,0.0,-0.0,0.5,1,1.0]"
+    let a2 = $($a.toJson).parseJson
+    whenRuntimeJs:
+      doAssert a2 == "[0,0,-0.0,0.5,1,1]"
+    do:
+      doAssert a2 == "[0,0.0,-0.0,0.5,1,1.0]"
+    let b = a2.parseJson.jsonTo(type(a))
+    doAssert not b[1].signbit
+    doAssert b[2].signbit
+    doAssert not b[3].signbit
 
   block: # case object
     type Foo = object

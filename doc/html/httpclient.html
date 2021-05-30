@@ -697,9 +697,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L600"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L596"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L600" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L596" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -943,15 +943,11 @@ class="link-seesrc" target="_blank">Source</a>
 <p><tt class="docutils literal"><span class="pre"><span class="Identifier">headers</span></span></tt> specifies the HTTP Headers.</p>
 
 <p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Punctuation">[</span><span class="Identifier">asyncdispatch</span><span class="Punctuation">,</span> <span class="Identifier">httpclient</span><span class="Punctuation">,</span> <span class="Identifier">strutils</span><span class="Punctuation">]</span>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">strutils</span>
 
-<span class="Keyword">proc</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">Future</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">async</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
-  <span class="Keyword">var</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newAsyncHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-  <span class="Keyword">return</span> <span class="Identifier">await</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">getContent</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://example.com&quot;</span><span class="Punctuation">)</span>
-
-<span class="Keyword">let</span> <span class="Identifier">exampleHtml</span> <span class="Operator">=</span> <span class="Identifier">waitFor</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+<span class="Keyword">let</span> <span class="Identifier">exampleHtml</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">getContent</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://example.com&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;Example Domain&quot;</span> <span class="Keyword">in</span> <span class="Identifier">exampleHtml</span>
-<span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="Punctuation">(</span><span class="StringLit">&quot;Pizza&quot;</span> <span class="Keyword">in</span> <span class="Identifier">exampleHtml</span><span class="Punctuation">)</span></pre>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;Pizza&quot;</span> <span class="Keyword">notin</span> <span class="Identifier">exampleHtml</span></pre>
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L555"
 class="link-seesrc" target="_blank">Source</a>
@@ -972,10 +968,20 @@ class="link-seesrc" target="_blank">Source</a>
 <p><tt class="docutils literal"><span class="pre"><span class="Identifier">proxy</span></span></tt> specifies an HTTP proxy to use for this HTTP client's connections.</p>
 <p><tt class="docutils literal"><span class="pre"><span class="Identifier">headers</span></span></tt> specifies the HTTP Headers.</p>
 
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Punctuation">[</span><span class="Identifier">asyncdispatch</span><span class="Punctuation">,</span> <span class="Identifier">strutils</span><span class="Punctuation">]</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">Future</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">async</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
+  <span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newAsyncHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">await</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">getContent</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://example.com&quot;</span><span class="Punctuation">)</span>
+
+<span class="Keyword">let</span> <span class="Identifier">exampleHtml</span> <span class="Operator">=</span> <span class="Identifier">waitFor</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;Example Domain&quot;</span> <span class="Keyword">in</span> <span class="Identifier">exampleHtml</span>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;Pizza&quot;</span> <span class="Keyword">notin</span> <span class="Identifier">exampleHtml</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L602"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L598"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L602" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L598" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="close"></a>
@@ -984,9 +990,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Closes any connections held by the HTTP client.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L631"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L638"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L631" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L638" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getSocket,HttpClient"></a>
@@ -999,9 +1005,9 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">echo</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">getSocket</span><span class="Operator">.</span><span class="Identifier">getLocalAddr</span>
   <span class="Identifier">echo</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">getSocket</span><span class="Operator">.</span><span class="Identifier">getPeerAddr</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L637"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L644"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L637" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L644" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getSocket,AsyncHttpClient"></a>
@@ -1011,9 +1017,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L649"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L656"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L649" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L656" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="request,AsyncHttpClient,,string,HttpHeaders,MultipartData"></a>
@@ -1031,9 +1037,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Deprecated since v1.5</strong>: use HttpMethod enum instead; string parameter httpMethod is deprecated</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1035"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1042"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1035" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1042" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="request,HttpClient,,string,HttpHeaders,MultipartData"></a>
@@ -1044,9 +1050,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1039"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1046"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1039" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1046" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="head,AsyncHttpClient,"></a>
@@ -1057,9 +1063,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1147"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1154"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1147" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1154" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="head,HttpClient,"></a>
@@ -1068,9 +1074,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1148"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1155"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1148" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1155" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="get,AsyncHttpClient,"></a>
@@ -1081,35 +1087,13 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1154"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1154" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="get,HttpClient,"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#get%2CHttpClient%2C"><span class="Identifier">get</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1155"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1155" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="getContent,AsyncHttpClient,"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getContent%2CAsyncHttpClient%2C"><span class="Identifier">getContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span></pre></dt>
-<dd>
-
-Connects to the hostname specified by the URL and returns the content of a GET request.
-&nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1161"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1161" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="getContent,HttpClient,"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getContent%2CHttpClient%2C"><span class="Identifier">getContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
+<a id="get,HttpClient,"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#get%2CHttpClient%2C"><span class="Identifier">get</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a></pre></dt>
 <dd>
 
 
@@ -1119,15 +1103,37 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1162" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="getContent,AsyncHttpClient,"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#getContent%2CAsyncHttpClient%2C"><span class="Identifier">getContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span></pre></dt>
+<dd>
+
+Connects to the hostname specified by the URL and returns the content of a GET request.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1168"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1168" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="getContent,HttpClient,"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#getContent%2CHttpClient%2C"><span class="Identifier">getContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1169"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1169" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="delete,AsyncHttpClient,"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#delete%2CAsyncHttpClient%2C"><span class="Identifier">delete</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span></pre></dt>
 <dd>
 
 Connects to the hostname specified by the URL and performs a DELETE request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1167"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1174"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1167" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1174" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="delete,HttpClient,"></a>
@@ -1136,9 +1142,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1168"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1175"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1168" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1175" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="deleteContent,AsyncHttpClient,"></a>
@@ -1147,37 +1153,13 @@ class="link-seesrc" target="_blank">Source</a>
 
 Connects to the hostname specified by the URL and returns the content of a DELETE request.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1173"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1180"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1173" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1180" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="deleteContent,HttpClient,"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#deleteContent%2CHttpClient%2C"><span class="Identifier">deleteContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1174"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1174" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="post,AsyncHttpClient,,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#post%2CAsyncHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">post</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-          <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span></pre></dt>
-<dd>
-
-Connects to the hostname specified by the URL and performs a POST request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1179"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1179" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="post,HttpClient,,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#post%2CHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">post</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-          <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a></pre></dt>
 <dd>
 
 
@@ -1187,21 +1169,21 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1181" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="postContent,AsyncHttpClient,,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#postContent%2CAsyncHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">postContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-                 <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span></pre></dt>
+<a id="post,AsyncHttpClient,,string,MultipartData"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#post%2CAsyncHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">post</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+          <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span></pre></dt>
 <dd>
 
-Connects to the hostname specified by the URL and returns the content of a POST request.
+Connects to the hostname specified by the URL and performs a POST request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1186"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1186" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="postContent,HttpClient,,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#postContent%2CHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">postContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-                 <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
+<a id="post,HttpClient,,string,MultipartData"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#post%2CHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">post</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+          <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a></pre></dt>
 <dd>
 
 
@@ -1211,21 +1193,21 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1188" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="put,AsyncHttpClient,,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#put%2CAsyncHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">put</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-         <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span></pre></dt>
+<a id="postContent,AsyncHttpClient,,string,MultipartData"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#postContent%2CAsyncHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">postContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+                 <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span></pre></dt>
 <dd>
 
-Connects to the hostname specified by the URL and performs a PUT request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
+Connects to the hostname specified by the URL and returns the content of a POST request.
 &nbsp;&nbsp;<a
 href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1193"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1193" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="put,HttpClient,,string,MultipartData"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#put%2CHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">put</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
-         <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a></pre></dt>
+<a id="postContent,HttpClient,,string,MultipartData"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#postContent%2CHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">postContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+                 <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
 <dd>
 
 
@@ -1235,6 +1217,30 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1195" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="put,AsyncHttpClient,,string,MultipartData"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#put%2CAsyncHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">put</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+         <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="httpclient.html#AsyncResponse"><span class="Identifier">AsyncResponse</span></a><span class="Other">]</span></pre></dt>
+<dd>
+
+Connects to the hostname specified by the URL and performs a PUT request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1200"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1200" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="put,HttpClient,,string,MultipartData"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#put%2CHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">put</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#HttpClient"><span class="Identifier">HttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+         <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="httpclient.html#Response"><span class="Identifier">Response</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1202"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1202" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="putContent,AsyncHttpClient,,string,MultipartData"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#putContent%2CAsyncHttpClient%2C%2Cstring%2CMultipartData"><span class="Identifier">putContent</span></a><span class="Other">(</span><span class="Identifier">client</span><span class="Other">:</span> <a href="httpclient.html#AsyncHttpClient"><span class="Identifier">AsyncHttpClient</span></a><span class="Other">;</span> <span class="Identifier">url</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a> <span class="Operator">|</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">body</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
                 <span class="Identifier">multipart</span><span class="Other">:</span> <a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span></pre></dt>
@@ -1242,9 +1248,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Connects to the hostname specified by the URL andreturns the content of a PUT request.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1200"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1207"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1200" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1207" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="putContent,HttpClient,,string,MultipartData"></a>
@@ -1254,9 +1260,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1201"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1208"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1201" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1208" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="patch,AsyncHttpClient,,string,MultipartData"></a>
@@ -1266,9 +1272,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Connects to the hostname specified by the URL and performs a PATCH request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1206"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1213"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1206" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1213" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="patch,HttpClient,,string,MultipartData"></a>
@@ -1278,9 +1284,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1208"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1215"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1208" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1215" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="patchContent,AsyncHttpClient,,string,MultipartData"></a>
@@ -1290,9 +1296,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Connects to the hostname specified by the URL and returns the content of a PATCH request.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1213"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1220"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1213" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1220" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="patchContent,HttpClient,,string,MultipartData"></a>
@@ -1302,9 +1308,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1215"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1222"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1215" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1222" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="downloadFile,HttpClient,,string"></a>
@@ -1313,9 +1319,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Downloads <tt class="docutils literal"><span class="pre"><span class="Identifier">url</span></span></tt> and saves it to <tt class="docutils literal"><span class="pre"><span class="Identifier">filename</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1220"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1227"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1220" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1227" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="downloadFile,AsyncHttpClient,,string"></a>
@@ -1325,9 +1331,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1258"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1265"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1258" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1265" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1345,7 +1351,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-17 00:53:08 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-29 01:15:29 UTC</small>
       </div>
     </div>
   </div>
