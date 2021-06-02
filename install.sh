@@ -540,6 +540,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/system/cyclebreaker.nim
   cp lib/system/gc.nim $libdir/system/gc.nim
   chmod 644 $libdir/system/gc.nim
+  cp lib/system/dragonbox.nim $libdir/system/dragonbox.nim
+  chmod 644 $libdir/system/dragonbox.nim
   cp lib/system/seqs_v2_reimpl.nim $libdir/system/seqs_v2_reimpl.nim
   chmod 644 $libdir/system/seqs_v2_reimpl.nim
   cp lib/system/sysspawn.nim $libdir/system/sysspawn.nim
