@@ -186,6 +186,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/nimrtl.nim
   cp lib/nintendoswitch/switch_memory.nim $libdir/nintendoswitch/switch_memory.nim
   chmod 644 $libdir/nintendoswitch/switch_memory.nim
+  cp lib/deps.txt $libdir/deps.txt
+  chmod 644 $libdir/deps.txt
   cp lib/nimrtl.nim.cfg $libdir/nimrtl.nim.cfg
   chmod 644 $libdir/nimrtl.nim.cfg
   cp lib/nimbase.h $libdir/nimbase.h
@@ -498,6 +500,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/arch/x86/amd64.S
   cp lib/system/excpt.nim $libdir/system/excpt.nim
   chmod 644 $libdir/system/excpt.nim
+  cp lib/system/schubfach.nim $libdir/system/schubfach.nim
+  chmod 644 $libdir/system/schubfach.nim
   cp lib/system/syslocks.nim $libdir/system/syslocks.nim
   chmod 644 $libdir/system/syslocks.nim
   cp lib/system/alloc.nim $libdir/system/alloc.nim

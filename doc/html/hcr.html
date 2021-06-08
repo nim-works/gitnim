@@ -68,7 +68,7 @@ window.addEventListener('DOMContentLoaded', main);
     <p>The <span id="hotcodereloading_1">hotCodeReloading</span> option enables special compilation mode where changes in the code can be applied automatically to a running program. The code reloading happens at the granularity of an individual module. When a module is reloaded, any newly added global variables will be initialized, but all other top-level code appearing in the module won't be re-executed and the state of all existing global variables will be preserved.</p>
 
 <h1 id="basic-workflow">Basic workflow</h1><p>Currently, hot code reloading does not work for the main module itself, so we have to use a helper module where the major logic we want to change during development resides.</p>
-<p>In this example, we use SDL2 to create a window and we reload the logic code when <tt class="docutils literal"><span class="pre">F9</span></tt> is pressed. The important lines are marked with <tt class="docutils literal"><span class="pre">#***</span></tt>. To install SDL2 you can use <tt class="docutils literal"><span class="pre">nimble install sdl2</span></tt>.</p>
+<p>In this example, we use SDL2 to create a window and we reload the logic code when <tt class="docutils literal"><span class="pre"><span class="Identifier">F9</span></span></tt> is pressed. The important lines are marked with <tt class="docutils literal"><span class="pre"><span class="Comment">#***</span></span></tt>. To install SDL2 you can use <tt class="docutils literal"><span class="pre"><span class="program">nimble</span> <span class="option">install</span> <span class="option">sdl2</span></span></tt>.</p>
 <pre class="listing"><span class="Comment"># logic.nim</span>
 <span class="Keyword">import</span> <span class="Identifier">sdl2</span>
 
@@ -132,29 +132,27 @@ window.addEventListener('DOMContentLoaded', main);
     <span class="Identifier">update</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
   <span class="Identifier">destroy</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 
-<span class="Identifier">main</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>Compile this example via:<pre>
-nim c --hotcodereloading:on mymain.nim</pre>
-</p>
+<span class="Identifier">main</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>Compile this example via:</p>
+<p><pre class="listing"><span class="program">nim</span> <span class="option">c</span> <span class="option">--hotcodereloading:on</span> <span class="Identifier">mymain.nim</span>
+</pre></p>
 <p>Now start the program and KEEP it running!</p>
-<pre>
-# Unix:
-mymain &amp;
-# or Windows (click on the .exe)
-mymain.exe
-# edit</pre>
-<p>For example, change the line:<pre>
-discard renderer.setDrawColor(255, 128, 128, 0)</pre>
-</p>
-<p>into:<pre>
-discard renderer.setDrawColor(255, 255, 128, 0)</pre>
-</p>
+<pre class="listing"><span class="Comment"># Unix:</span>
+<span class="program">mymain</span> <span class="Operator">&amp;</span>
+<span class="Comment"># or Windows (click on the .exe)</span>
+<span class="program">mymain.exe</span>
+<span class="Comment"># edit</span></pre><p>For example, change the line:</p>
+<p><pre class="listing"><span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">setDrawColor</span><span class="Punctuation">(</span><span class="DecNumber">255</span><span class="Punctuation">,</span> <span class="DecNumber">128</span><span class="Punctuation">,</span> <span class="DecNumber">128</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">)</span>
+</pre></p>
+<p>into:</p>
+<p><pre class="listing"><span class="Keyword">discard</span> <span class="Identifier">renderer</span><span class="Operator">.</span><span class="Identifier">setDrawColor</span><span class="Punctuation">(</span><span class="DecNumber">255</span><span class="Punctuation">,</span> <span class="DecNumber">255</span><span class="Punctuation">,</span> <span class="DecNumber">128</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">)</span>
+</pre></p>
 <p>(This will change the color of the rectangle.)</p>
 <p>Then recompile the project, but do not restart or quit the mymain.exe program!</p>
-<pre>
-nim c --hotcodereloading:on mymain.nim</pre>
-<p>Now give the <tt class="docutils literal"><span class="pre">mymain</span></tt> SDL window the focus, press F9, and watch the updated version of the program.</p>
+<p><pre class="listing"><span class="program">nim</span> <span class="option">c</span> <span class="option">--hotcodereloading:on</span> <span class="Identifier">mymain.nim</span>
+</pre></p>
+<p>Now give the <tt class="docutils literal"><span class="pre"><span class="Identifier">mymain</span></span></tt> SDL window the focus, press F9, and watch the updated version of the program.</p>
 
-<h1 id="reloading-api">Reloading API</h1><p>One can use the special event handlers <tt class="docutils literal"><span class="pre">beforeCodeReload</span></tt> and <tt class="docutils literal"><span class="pre">afterCodeReload</span></tt> to reset the state of a particular variable or to force the execution of certain statements:</p>
+<h1 id="reloading-api">Reloading API</h1><p>One can use the special event handlers <tt class="docutils literal"><span class="pre"><span class="Identifier">beforeCodeReload</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">afterCodeReload</span></span></tt> to reset the state of a particular variable or to force the execution of certain statements:</p>
 <pre class="listing"><span class="Keyword">var</span>
  <span class="Identifier">settings</span> <span class="Operator">=</span> <span class="Identifier">initTable</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
  <span class="Identifier">lastReload</span><span class="Punctuation">:</span> <span class="Identifier">Time</span>
@@ -175,22 +173,20 @@ nim c --hotcodereloading:on mymain.nim</pre>
   <span class="Keyword">if</span> <span class="Identifier">hasModuleChanged</span><span class="Punctuation">(</span><span class="Identifier">mydb</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
     <span class="Identifier">resetCache</span><span class="Punctuation">(</span><span class="Identifier">myCache</span><span class="Punctuation">)</span></pre><p>The hot code reloading is based on dynamic library hot swapping in the native targets and direct manipulation of the global namespace in the JavaScript target. The Nim compiler does not specify the mechanism for detecting the conditions when the code must be reloaded. Instead, the program code is expected to call <span id="performcodereload_1">performCodeReload()</span> every time it wishes to reload its code.</p>
 <p>It's expected that most projects will implement the reloading with a suitable build-system triggered IPC notification mechanism, but a polling solution is also possible through the provided <span id="hasanymodulechanged_1">hasAnyModuleChanged()</span> API.</p>
-<p>In order to access <tt class="docutils literal"><span class="pre">beforeCodeReload</span></tt>, <tt class="docutils literal"><span class="pre">afterCodeReload</span></tt>, <tt class="docutils literal"><span class="pre">hasModuleChanged</span></tt> or <tt class="docutils literal"><span class="pre">hasAnyModuleChanged</span></tt> one must import the <span id="hotcodereloading_2">hotcodereloading</span> module.</p>
+<p>In order to access <tt class="docutils literal"><span class="pre"><span class="Identifier">beforeCodeReload</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">afterCodeReload</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">hasModuleChanged</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">hasAnyModuleChanged</span></span></tt> one must import the <span id="hotcodereloading_2">hotcodereloading</span> module.</p>
 
-<h1 id="native-code-targets">Native code targets</h1><p>Native projects using the hot code reloading option will be implicitly compiled with the <tt class="docutils literal"><span class="pre">-d:useNimRtl</span></tt> option and they will depend on both the <tt class="docutils literal"><span class="pre">nimrtl</span></tt> library and the <tt class="docutils literal"><span class="pre">nimhcr</span></tt> library which implements the hot code reloading run-time. Both libraries can be found in the <tt class="docutils literal"><span class="pre">lib</span></tt> folder of Nim and can be compiled into dynamic libraries to satisfy runtime demands of the example code above. An example of compiling <tt class="docutils literal"><span class="pre">nimhcr.nim</span></tt> and <tt class="docutils literal"><span class="pre">nimrtl.nim</span></tt> when the source dir of Nim is installed with choosenim follows.</p>
-<pre>
-# Unix/MacOS
-# Make sure you are in the directory containing your .nim files
-$ cd your-source-directory
+<h1 id="native-code-targets">Native code targets</h1><p>Native projects using the hot code reloading option will be implicitly compiled with the <tt class="docutils literal"><span class="pre option">-d:useNimRtl</span></tt> option and they will depend on both the <tt class="docutils literal"><span class="pre"><span class="Identifier">nimrtl</span></span></tt> library and the <tt class="docutils literal"><span class="pre"><span class="Identifier">nimhcr</span></span></tt> library which implements the hot code reloading run-time. Both libraries can be found in the <tt class="docutils literal"><span class="pre"><span class="Identifier">lib</span></span></tt> folder of Nim and can be compiled into dynamic libraries to satisfy runtime demands of the example code above. An example of compiling <tt class="docutils literal"><span class="pre">nimhcr.nim</span></tt> and <tt class="docutils literal"><span class="pre">nimrtl.nim</span></tt> when the source dir of Nim is installed with choosenim follows.</p>
+<pre class="listing"><span class="Comment"># Unix/MacOS</span>
+<span class="Comment"># Make sure you are in the directory containing your .nim files</span>
+<span class="Prompt">$ </span><span class="program">cd</span> <span class="option">your-source-directory</span>
 
-# Compile two required files and set their output directory to current dir
-$ nim c --outdir:$PWD ~/.choosenim/toolchains/nim-#devel/lib/nimhcr.nim
-$ nim c --outdir:$PWD ~/.choosenim/toolchains/nim-#devel/lib/nimrtl.nim
+<span class="Comment"># Compile two required files and set their output directory to current dir</span>
+<span class="Prompt">$ </span><span class="program">nim</span> <span class="option">c</span> <span class="option">--outdir:$PWD</span> <span class="Identifier">~/.choosenim/toolchains/nim-#devel/lib/nimhcr.nim</span>
+<span class="Prompt">$ </span><span class="program">nim</span> <span class="option">c</span> <span class="option">--outdir:$PWD</span> <span class="Identifier">~/.choosenim/toolchains/nim-#devel/lib/nimrtl.nim</span>
 
-# verify that you have two files named libnimhcr and libnimrtl in your
-# source directory (.dll for Windows, .so for Unix, .dylib for MacOS)</pre>
-<p>All modules of the project will be compiled to separate dynamic link libraries placed in the <tt class="docutils literal"><span class="pre">nimcache</span></tt> directory. Please note that during the execution of the program, the hot code reloading run-time will load only copies of these libraries in order to not interfere with any newly issued build commands.</p>
-<p>The main module of the program is considered non-reloadable. Please note that procs from reloadable modules should not appear in the call stack of program while <tt class="docutils literal"><span class="pre">performCodeReload</span></tt> is being called. Thus, the main module is a suitable place for implementing a program loop capable of calling <tt class="docutils literal"><span class="pre">performCodeReload</span></tt>.</p>
+<span class="Comment"># verify that you have two files named libnimhcr and libnimrtl in your</span>
+<span class="Comment"># source directory (.dll for Windows, .so for Unix, .dylib for MacOS)</span></pre><p>All modules of the project will be compiled to separate dynamic link libraries placed in the <tt class="docutils literal"><span class="pre"><span class="Identifier">nimcache</span></span></tt> directory. Please note that during the execution of the program, the hot code reloading run-time will load only copies of these libraries in order to not interfere with any newly issued build commands.</p>
+<p>The main module of the program is considered non-reloadable. Please note that procs from reloadable modules should not appear in the call stack of program while <tt class="docutils literal"><span class="pre"><span class="Identifier">performCodeReload</span></span></tt> is being called. Thus, the main module is a suitable place for implementing a program loop capable of calling <tt class="docutils literal"><span class="pre"><span class="Identifier">performCodeReload</span></span></tt>.</p>
 <p>Please note that reloading won't be possible when any of the type definitions in the program has been changed. When closure iterators are used (directly or through async code), the reloaded definitions will affect only newly created instances. Existing iterator instances will execute their original code to completion.</p>
 
 <h1 id="javascript-target">JavaScript target</h1><p>Once your code is compiled for hot reloading, a convenient solution for implementing the actual reloading in the browser using a framework such as <a class="reference external" href="http://livereload.com/">LiveReload</a> or <a class="reference external" href="https://browsersync.io/">BrowserSync</a>. </p>
@@ -201,7 +197,7 @@ $ nim c --outdir:$PWD ~/.choosenim/toolchains/nim-#devel/lib/nimrtl.nim
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-02 01:52:59 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-07 01:13:26 UTC</small>
       </div>
     </div>
   </div>
