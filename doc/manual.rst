@@ -2483,9 +2483,10 @@ matches) is preferred:
 Overloading based on 'var T'
 ----------------------------
 
-If the formal parameter ``f`` is of type ``var T`` in addition to the ordinary
-type checking, the argument is checked to be an `l-value`:idx:. ``var T``
-matches better than just ``T`` then.
+If the formal parameter ``f`` is of type ``var T``
+in addition to the ordinary type checking,
+the argument is checked to be an `l-value`:idx:.
+``var T`` matches better than just ``T`` then.
 
 .. code-block:: nim
   proc sayHi(x: int): string =
@@ -5714,12 +5715,12 @@ avoid ambiguity when there are multiple modules with the same path.
 There are two pseudo directories:
 
 1. ``std``: The ``std`` pseudo directory is the abstract location of Nim's standard
-library. For example, the syntax ``import std / strutils`` is used to unambiguously
-refer to the standard library's ``strutils`` module.
+   library. For example, the syntax ``import std / strutils`` is used to unambiguously
+   refer to the standard library's ``strutils`` module.
 2. ``pkg``: The ``pkg`` pseudo directory is used to unambiguously refer to a Nimble
-package. However, for technical details that lie outside of the scope of this document
-its semantics are: *Use the search path to look for module name but ignore the standard
-library locations*. In other words, it is the opposite of ``std``.
+   package. However, for technical details that lie outside of the scope of this document
+   its semantics are: *Use the search path to look for module name but ignore the standard
+   library locations*. In other words, it is the opposite of ``std``.
 
 
 From import statement
@@ -5981,10 +5982,10 @@ noSideEffect pragma
 The ``noSideEffect`` pragma is used to mark a proc/iterator to have no side
 effects. This means that the proc/iterator only changes locations that are
 reachable from its parameters and the return value only depends on the
-arguments. If none of its parameters have the type ``var T``
-or ``ref T`` or ``ptr T`` this means no locations are modified. It is a static
-error to mark a proc/iterator to have no side effect if the compiler cannot
-verify this.
+arguments. If none of its parameters have the type ``var T`` or ``ref T``
+or ``ptr T`` this means no locations are modified. It is a static error to
+mark a proc/iterator to have no side effect if the compiler cannot verify
+this.
 
 As a special semantic rule, the built-in `debugEcho
 <system.html#debugEcho,varargs[typed,]>`_ pretends to be free of side effects,

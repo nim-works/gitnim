@@ -22,6 +22,17 @@
 ## In order to use the SSL procedures defined in this module, you will need to
 ## compile your application with the ``-d:ssl`` flag.
 ##
+##
+## SSL on Windows
+## ==============
+##
+## On Windows the SSL library checks for valid certificates.
+## It uses the `cacert.pem` file for this purpose which was extracted
+## from `https://curl.se/ca/cacert.pem`. Besides
+## the OpenSSL DLLs (e.g. libssl-1_1-x64.dll, libcrypto-1_1-x64.dll) you
+## also need to ship `cacert.pem` with your `.exe` file.
+##
+##
 ## Examples
 ## ========
 ##
@@ -572,7 +583,7 @@ when defineSsl:
     if newCTX.SSL_CTX_set_cipher_list(cipherList) != 1:
       raiseSSLError()
 
-    when defined(nimDisableCertificateValidation) or defined(windows):
+    when defined(nimDisableCertificateValidation):
       newCTX.SSL_CTX_set_verify(SSL_VERIFY_NONE, nil)
     else:
       case verifyMode
@@ -587,11 +598,13 @@ when defineSsl:
     discard newCTX.SSLCTXSetMode(SSL_MODE_AUTO_RETRY)
     newCTX.loadCertificates(certFile, keyFile)
 
-    when not defined(nimDisableCertificateValidation) and not defined(windows):
+    const VerifySuccess = 1 # SSL_CTX_load_verify_locations returns 1 on success.
+
+    when not defined(nimDisableCertificateValidation):
       if verifyMode != CVerifyNone:
         # Use the caDir and caFile parameters if set
         if caDir != "" or caFile != "":
-          if newCTX.SSL_CTX_load_verify_locations(caFile, caDir) != 0:
+          if newCTX.SSL_CTX_load_verify_locations(caFile, caDir) != VerifySuccess:
             raise newException(IOError, "Failed to load SSL/TLS CA certificate(s).")
 
         else:
@@ -599,7 +612,7 @@ when defineSsl:
           # the SSL_CERT_FILE and SSL_CERT_DIR env vars
           var found = false
           for fn in scanSSLCertificates():
-            if newCTX.SSL_CTX_load_verify_locations(fn, "") == 0:
+            if newCTX.SSL_CTX_load_verify_locations(fn, nil) == VerifySuccess:
               found = true
               break
           if not found:
@@ -637,12 +650,11 @@ when defineSsl:
     let ctx = SslContext(context: ssl.SSL_get_SSL_CTX)
     let hintString = if hint == nil: "" else: $hint
     let (identityString, pskString) = (ctx.clientGetPskFunc)(hintString)
-    if psk.len.cuint > max_psk_len:
+    if pskString.len.cuint > max_psk_len:
       return 0
     if identityString.len.cuint >= max_identity_len:
       return 0
-
-    copyMem(identity, identityString.cstring, pskString.len + 1) # with the last zero byte
+    copyMem(identity, identityString.cstring, identityString.len + 1) # with the last zero byte
     copyMem(psk, pskString.cstring, pskString.len)
 
     return pskString.len.cuint
@@ -663,7 +675,7 @@ when defineSsl:
       max_psk_len: cint): cuint {.cdecl.} =
     let ctx = SslContext(context: ssl.SSL_get_SSL_CTX)
     let pskString = (ctx.serverGetPskFunc)($identity)
-    if psk.len.cint > max_psk_len:
+    if pskString.len.cint > max_psk_len:
       return 0
     copyMem(psk, pskString.cstring, pskString.len)
 
@@ -716,10 +728,11 @@ when defineSsl:
         raiseSSLError("No SSL certificate found.")
 
       const X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT = 0x1.cuint
-      const size = 1024
-      var peername: string = newString(size)
+      # https://www.openssl.org/docs/man1.1.1/man3/X509_check_host.html
       let match = certificate.X509_check_host(hostname.cstring, hostname.len.cint,
-        X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT, peername)
+        X509_CHECK_FLAG_ALWAYS_CHECK_SUBJECT, nil)
+      # https://www.openssl.org/docs/man1.1.1/man3/SSL_get_peer_certificate.html
+      X509_free(certificate)
       if match != 1:
         raiseSSLError("SSL Certificate check failed.")
 

@@ -317,7 +317,7 @@ proc getDefaultSSL(): SslContext =
   result = defaultSslContext
   when defined(ssl):
     if result == nil:
-      defaultSslContext = newContext(verifyMode = CVerifyNone)
+      defaultSslContext = newContext(verifyMode = CVerifyPeer)
       result = defaultSslContext
       doAssert result != nil, "failure to initialize the SSL context"
 
@@ -1140,14 +1140,14 @@ proc downloadFile*(client: HttpClient, url: string, filename: string) =
     client.getBody = true
   let resp = client.get(url)
 
+  if resp.code.is4xx or resp.code.is5xx:
+    raise newException(HttpRequestError, resp.status)
+
   client.bodyStream = newFileStream(filename, fmWrite)
   if client.bodyStream.isNil:
     fileError("Unable to open file")
   parseBody(client, resp.headers, resp.version)
   client.bodyStream.close()
-
-  if resp.code.is4xx or resp.code.is5xx:
-    raise newException(HttpRequestError, resp.status)
 
 proc downloadFile*(client: AsyncHttpClient, url: string,
                    filename: string): Future[void] =
