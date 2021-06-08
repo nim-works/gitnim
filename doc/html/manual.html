@@ -241,6 +241,7 @@ function main() {
 <ul class="simple"><li><a class="reference" id="symbol-lookup-in-generics-open-and-closed-symbols_toc" href="#symbol-lookup-in-generics-open-and-closed-symbols">Open and Closed symbols</a></li>
 </ul><li><a class="reference" id="generics-mixin-statement_toc" href="#generics-mixin-statement">Mixin statement</a></li>
 <li><a class="reference" id="generics-bind-statement_toc" href="#generics-bind-statement">Bind statement</a></li>
+<li><a class="reference" id="generics-delegating-bind-statements_toc" href="#generics-delegating-bind-statements">Delegating bind statements</a></li>
 </ul><li><a class="reference" id="templates_toc" href="#templates">Templates</a></li>
 <ul class="simple"><li><a class="reference" id="templates-typed-vs-untyped-parameters_toc" href="#templates-typed-vs-untyped-parameters">Typed vs untyped parameters</a></li>
 <li><a class="reference" id="templates-passing-a-code-block-to-a-template_toc" href="#templates-passing-a-code-block-to-a-template">Passing a code block to a template</a></li>
@@ -350,7 +351,7 @@ function main() {
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Authors:</th><td> Andreas Rumpf, Zahary Karadjov</td></tr>
-<tr><th class="docinfo-name">Version:</th><td> 1.4.3</td></tr>
+<tr><th class="docinfo-name">Version:</th><td> 1.4.8</td></tr>
 </tbody></table><blockquote><p>&quot;Complexity&quot; seems to be a lot like &quot;energy&quot;: you can transfer it from the end-user to one/some of the other players, but the total amount seems to remain pretty much constant for a given task. -- Ran</p></blockquote>
 
 <h1><a class="toc-backref" id="about-this-document" href="#about-this-document">About this document</a></h1><p><strong>Note</strong>: This document is a draft! Several of Nim's features may need more precise wording. This manual is constantly evolving into a proper specification.</p>
@@ -2952,6 +2953,24 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 <span class="Identifier">echo</span> <span class="Identifier">genId</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>But a <tt class="docutils literal"><span class="pre">bind</span></tt> is rarely useful because symbol binding from the definition scope is the default.</p>
 <p><tt class="docutils literal"><span class="pre">bind</span></tt> statements only make sense in templates and generics.</p>
 
+<h2><a class="toc-backref" id="generics-delegating-bind-statements" href="#generics-delegating-bind-statements">Delegating bind statements</a></h2><p>The following example outlines a problem that can arise when generic instantiations cross multiple different modules:</p>
+<pre class="listing"><span class="Comment"># module A</span>
+<span class="Keyword">proc</span> <span class="Identifier">genericA</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">T</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">mixin</span> <span class="Identifier">init</span>
+  <span class="Identifier">init</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span></pre><pre class="listing"><span class="Keyword">import</span> <span class="Identifier">C</span>
+
+<span class="Comment"># module B</span>
+<span class="Keyword">proc</span> <span class="Identifier">genericB</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">T</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Comment"># Without the `bind init` statement C's init proc is</span>
+  <span class="Comment"># not available when `genericB` is instantiated:</span>
+  <span class="Keyword">bind</span> <span class="Identifier">init</span>
+  <span class="Identifier">genericA</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span></pre><pre class="listing"><span class="Comment"># module C</span>
+<span class="Keyword">type</span> <span class="Identifier">O</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+<span class="Keyword">proc</span> <span class="Identifier">init</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">O</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Keyword">discard</span></pre><pre class="listing"><span class="Comment"># module main</span>
+<span class="Keyword">import</span> <span class="Identifier">B</span><span class="Punctuation">,</span> <span class="Identifier">C</span>
+
+<span class="Identifier">genericB</span> <span class="Identifier">O</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>In module B has an <tt class="docutils literal"><span class="pre">init</span></tt> proc from module C in its scope that is not taken into account when <tt class="docutils literal"><span class="pre">genericB</span></tt> is instantiated which leads to the instantiation of <tt class="docutils literal"><span class="pre">genericA</span></tt>. The solution is to <tt class="docutils literal"><span class="pre">forward</span></tt>:idx these symbols by a <tt class="docutils literal"><span class="pre">bind</span></tt> statement inside <tt class="docutils literal"><span class="pre">genericB</span></tt>.</p>
+
 <h1><a class="toc-backref" id="templates" href="#templates">Templates</a></h1><p>A template is a simple form of a macro: It is a simple substitution mechanism that operates on Nim's abstract syntax trees. It is processed in the semantic pass of the compiler.</p>
 <p>The syntax to <em>invoke</em> a template is the same as calling a procedure.</p>
 <p>Example:</p>
@@ -3381,8 +3400,9 @@ Memory safety for returning by <tt class="docutils literal"><span class="pre">va
 <pre class="listing"><span class="Keyword">import</span> <span class="StringLit">&quot;gfx/3d/somemodule&quot;</span> <span class="Comment"># in quotes because '3d' is not a valid Nim identifier</span></pre>
 <h3><a class="toc-backref" id="modules-pseudo-importslashinclude-paths" href="#modules-pseudo-importslashinclude-paths">Pseudo import/include paths</a></h3><p>A directory can also be a so-called &quot;pseudo directory&quot;. They can be used to avoid ambiguity when there are multiple modules with the same path.</p>
 <p>There are two pseudo directories:</p>
-<p>1. <tt class="docutils literal"><span class="pre">std</span></tt>: The <tt class="docutils literal"><span class="pre">std</span></tt> pseudo directory is the abstract location of Nim's standard library. For example, the syntax <tt class="docutils literal"><span class="pre">import std / strutils</span></tt> is used to unambiguously refer to the standard library's <tt class="docutils literal"><span class="pre">strutils</span></tt> module.</p>
-<p>2. <tt class="docutils literal"><span class="pre">pkg</span></tt>: The <tt class="docutils literal"><span class="pre">pkg</span></tt> pseudo directory is used to unambiguously refer to a Nimble package. However, for technical details that lie outside of the scope of this document its semantics are: <em>Use the search path to look for module name but ignore the standard library locations</em>. In other words, it is the opposite of <tt class="docutils literal"><span class="pre">std</span></tt>.</p>
+<ol class="simple"><li><tt class="docutils literal"><span class="pre">std</span></tt>: The <tt class="docutils literal"><span class="pre">std</span></tt> pseudo directory is the abstract location of Nim's standard library. For example, the syntax <tt class="docutils literal"><span class="pre">import std / strutils</span></tt> is used to unambiguously refer to the standard library's <tt class="docutils literal"><span class="pre">strutils</span></tt> module.</li>
+<li><tt class="docutils literal"><span class="pre">pkg</span></tt>: The <tt class="docutils literal"><span class="pre">pkg</span></tt> pseudo directory is used to unambiguously refer to a Nimble package. However, for technical details that lie outside of the scope of this document its semantics are: <em>Use the search path to look for module name but ignore the standard library locations</em>. In other words, it is the opposite of <tt class="docutils literal"><span class="pre">std</span></tt>.</li>
+</ol>
 
 <h3><a class="toc-backref" id="modules-from-import-statement" href="#modules-from-import-statement">From import statement</a></h3><p>After the <tt class="docutils literal"><span class="pre">from</span></tt> statement, a module name follows followed by an <tt class="docutils literal"><span class="pre">import</span></tt> to list the symbols one likes to use without explicit full qualification:</p>
 <pre class="listing"><span class="Keyword">from</span> <span class="Identifier">strutils</span> <span class="Keyword">import</span> <span class="Punctuation">`</span><span class="Operator">%</span><span class="Punctuation">`</span>
@@ -4059,7 +4079,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-01-03 00:48:39 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-05-25 00:49:51 UTC</small>
       </div>
     </div>
   </div>

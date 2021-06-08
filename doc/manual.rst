@@ -5029,6 +5029,50 @@ scope is the default.
 ``bind`` statements only make sense in templates and generics.
 
 
+Delegating bind statements
+--------------------------
+
+The following example outlines a problem that can arise when generic
+instantiations cross multiple different modules:
+
+.. code-block:: nim
+
+  # module A
+  proc genericA*[T](x: T) =
+    mixin init
+    init(x)
+
+
+.. code-block:: nim
+
+  import C
+
+  # module B
+  proc genericB*[T](x: T) =
+    # Without the `bind init` statement C's init proc is
+    # not available when `genericB` is instantiated:
+    bind init
+    genericA(x)
+
+.. code-block:: nim
+
+  # module C
+  type O = object
+  proc init*(x: var O) = discard
+
+.. code-block:: nim
+
+  # module main
+  import B, C
+
+  genericB O()
+
+In module B has an `init` proc from module C in its scope that is not
+taken into account when `genericB` is instantiated which leads to the
+instantiation of `genericA`. The solution is to `forward`:idx these
+symbols by a `bind` statement inside `genericB`.
+
+
 Templates
 =========
 
@@ -5940,12 +5984,12 @@ avoid ambiguity when there are multiple modules with the same path.
 There are two pseudo directories:
 
 1. ``std``: The ``std`` pseudo directory is the abstract location of Nim's standard
-library. For example, the syntax ``import std / strutils`` is used to unambiguously
-refer to the standard library's ``strutils`` module.
+   library. For example, the syntax ``import std / strutils`` is used to unambiguously
+   refer to the standard library's ``strutils`` module.
 2. ``pkg``: The ``pkg`` pseudo directory is used to unambiguously refer to a Nimble
-package. However, for technical details that lie outside of the scope of this document
-its semantics are: *Use the search path to look for module name but ignore the standard
-library locations*. In other words, it is the opposite of ``std``.
+   package. However, for technical details that lie outside of the scope of this document
+   its semantics are: *Use the search path to look for module name but ignore the standard
+   library locations*. In other words, it is the opposite of ``std``.
 
 
 From import statement

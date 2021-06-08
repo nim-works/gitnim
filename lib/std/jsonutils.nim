@@ -13,7 +13,7 @@ runnableExamples:
   let j = a.toJson
   doAssert j.jsonTo(type(a)).toJson == j
 
-import std/[json,strutils,tables,sets,strtabs,options]
+import json, strutils, tables, sets, strtabs, options
 
 #[
 Future directions:
@@ -27,7 +27,7 @@ add a way to customize serialization, for e.g.:
   objects.
 ]#
 
-import std/macros
+import macros
 
 type
   Joptions* = object
@@ -106,7 +106,7 @@ proc hasField[T](obj: T, field: string): bool =
       return true
   return false
 
-macro accessField(obj: typed, name: static string): untyped = 
+macro accessField(obj: typed, name: static string): untyped =
   newDotExpr(obj, ident(name))
 
 template fromJsonFields(newObj, oldObj, json, discKeys, opt) =
@@ -146,7 +146,7 @@ template fromJsonFields(newObj, oldObj, json, discKeys, opt) =
       json.len == numMatched
     else:
       json.len == num and num == numMatched
-  
+
   checkJson ok, $(json.len, num, numMatched, $T, json)
 
 proc fromJson*[T](a: var T, b: JsonNode, opt = Joptions())
@@ -187,7 +187,8 @@ proc fromJson*[T](a: var T, b: JsonNode, opt = Joptions()) =
     of JInt: a = T(b.getBiggestInt())
     of JString: a = parseEnum[T](b.getStr())
     else: checkJson false, $($T, " ", b)
-  elif T is Ordinal: a = T(to(b, int))
+  elif T is uint|uint64: a = T(to(b, uint64))
+  elif T is Ordinal: a = cast[T](to(b, int))
   elif T is pointer: a = cast[pointer](to(b, int))
   elif T is distinct:
     when nimvm:
@@ -270,13 +271,14 @@ proc toJson*[T](a: T): JsonNode =
     # in simpler code for `toJson` and `fromJson`.
   elif T is distinct: result = toJson(a.distinctBase)
   elif T is bool: result = %(a)
+  elif T is SomeInteger: result = %a
   elif T is Ordinal: result = %(a.ord)
   else: result = %a
 
 proc fromJsonHook*[K, V](t: var (Table[K, V] | OrderedTable[K, V]),
                          jsonNode: JsonNode) =
   ## Enables `fromJson` for `Table` and `OrderedTable` types.
-  ## 
+  ##
   ## See also:
   ## * `toJsonHook proc<#toJsonHook,(Table[K,V]|OrderedTable[K,V])>`_
   runnableExamples:
@@ -312,7 +314,7 @@ proc toJsonHook*[K, V](t: (Table[K, V] | OrderedTable[K, V])): JsonNode =
 
 proc fromJsonHook*[A](s: var SomeSet[A], jsonNode: JsonNode) =
   ## Enables `fromJson` for `HashSet` and `OrderedSet` types.
-  ## 
+  ##
   ## See also:
   ## * `toJsonHook proc<#toJsonHook,SomeSet[A]>`_
   runnableExamples:
@@ -346,7 +348,7 @@ proc toJsonHook*[A](s: SomeSet[A]): JsonNode =
 
 proc fromJsonHook*[T](self: var Option[T], jsonNode: JsonNode) =
   ## Enables `fromJson` for `Option` types.
-  ## 
+  ##
   ## See also:
   ## * `toJsonHook proc<#toJsonHook,Option[T]>`_
   runnableExamples:
@@ -381,7 +383,7 @@ proc toJsonHook*[T](self: Option[T]): JsonNode =
 
 proc fromJsonHook*(a: var StringTableRef, b: JsonNode) =
   ## Enables `fromJson` for `StringTableRef` type.
-  ## 
+  ##
   ## See also:
   ## * `toJsonHook` proc<#toJsonHook,StringTableRef>`_
   runnableExamples:
@@ -399,7 +401,7 @@ proc fromJsonHook*(a: var StringTableRef, b: JsonNode) =
 
 proc toJsonHook*(a: StringTableRef): JsonNode =
   ## Enables `toJson` for `StringTableRef` type.
-  ## 
+  ##
   ## See also:
   ## * `fromJsonHook` proc<#fromJsonHook,StringTableRef,JsonNode>`_
   runnableExamples:

@@ -11,7 +11,7 @@
 ## macro system.
 
 import std/private/since
-import macros, typetraits
+import macros
 
 proc checkPragma(ex, prag: var NimNode) =
   since (1, 3):
@@ -219,7 +219,7 @@ macro capture*(locals: varargs[typed], body: untyped): untyped {.since: (1, 1).}
       error("The variable name cannot be `result`!", arg)
     params.add(newIdentDefs(ident(arg.strVal), freshIdentNodes getTypeInst arg))
   result = newNimNode(nnkCall)
-  result.add(newProc(newEmptyNode(), params, body, nnkProcDef))
+  result.add(newProc(newEmptyNode(), params, body, nnkLambda))
   for arg in locals: result.add(arg)
 
 since (1, 1):

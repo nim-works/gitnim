@@ -321,7 +321,7 @@ proc getDefaultSSL(): SslContext =
   result = defaultSslContext
   when defined(ssl):
     if result == nil:
-      defaultSslContext = newContext(verifyMode = CVerifyNone)
+      defaultSslContext = newContext(verifyMode = CVerifyPeer)
       result = defaultSslContext
       doAssert result != nil, "failure to initialize the SSL context"
 
@@ -843,8 +843,11 @@ proc parseResponse(client: HttpClient | AsyncHttpClient,
       client.bodyStream = newFutureStream[string]("parseResponse")
       result.bodyStream = client.bodyStream
       assert(client.parseBodyFut.isNil or client.parseBodyFut.finished)
+      # do not wait here for the body request to complete
       client.parseBodyFut = parseBody(client, result.headers, result.version)
-        # do not wait here for the body request to complete
+      client.parseBodyFut.addCallback do():
+        if client.parseBodyFut.failed:
+          client.bodyStream.fail(client.parseBodyFut.error)
 
 proc newConnection(client: HttpClient | AsyncHttpClient,
                    url: Uri) {.multisync.} =
@@ -958,12 +961,15 @@ proc format(client: HttpClient | AsyncHttpClient,
 
 proc override(fallback, override: HttpHeaders): HttpHeaders =
   # Right-biased map union for `HttpHeaders`
-  if override.isNil:
-    return fallback
 
   result = newHttpHeaders()
   # Copy by value
   result.table[] = fallback.table[]
+
+  if override.isNil:
+    # Return the copy of fallback so it does not get modified
+    return result
+
   for k, vs in override.table:
     result[k] = vs
 
@@ -1155,14 +1161,14 @@ proc downloadFile*(client: HttpClient, url: string, filename: string) =
     client.getBody = true
   let resp = client.get(url)
 
+  if resp.code.is4xx or resp.code.is5xx:
+    raise newException(HttpRequestError, resp.status)
+
   client.bodyStream = newFileStream(filename, fmWrite)
   if client.bodyStream.isNil:
     fileError("Unable to open file")
   parseBody(client, resp.headers, resp.version)
   client.bodyStream.close()
-
-  if resp.code.is4xx or resp.code.is5xx:
-    raise newException(HttpRequestError, resp.status)
 
 proc downloadFile*(client: AsyncHttpClient, url: string,
                    filename: string): Future[void] =
@@ -1174,13 +1180,16 @@ proc downloadFile*(client: AsyncHttpClient, url: string,
 
     client.bodyStream = newFutureStream[string]("downloadFile")
     var file = openAsync(filename, fmWrite)
+    defer: file.close()
     # Let `parseBody` write response data into client.bodyStream in the
     # background.
-    asyncCheck parseBody(client, resp.headers, resp.version)
+    let parseBodyFut = parseBody(client, resp.headers, resp.version)
+    parseBodyFut.addCallback do():
+      if parseBodyFut.failed:
+        client.bodyStream.fail(parseBodyFut.error)
     # The `writeFromStream` proc will complete once all the data in the
     # `bodyStream` has been written to the file.
     await file.writeFromStream(client.bodyStream)
-    file.close()
 
     if resp.code.is4xx or resp.code.is5xx:
       raise newException(HttpRequestError, resp.status)
