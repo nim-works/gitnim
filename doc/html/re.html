@@ -34,7 +34,6 @@ function main() {
     }
   }
 
-  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
   function switchTheme(e) {
       if (e.target.checked) {
           document.documentElement.setAttribute('data-theme', 'dark');
@@ -45,13 +44,19 @@ function main() {
       }
   }
 
-  toggleSwitch.addEventListener('change', switchTheme, false);
+  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+  if (toggleSwitch !== null) {
+    toggleSwitch.addEventListener('change', switchTheme, false);
+  }
 
-  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  var currentTheme = localStorage.getItem('theme');
+  if (!currentTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    currentTheme = 'dark';
+  }
   if (currentTheme) {
     document.documentElement.setAttribute('data-theme', currentTheme);
 
-    if (currentTheme === 'dark') {
+    if (currentTheme === 'dark' && toggleSwitch !== null) {
       toggleSwitch.checked = true;
     }
   }
@@ -76,21 +81,12 @@ window.addEventListener('DOMContentLoaded', main);
   </div>
   <div id="global-links">
     <ul class="simple-boot">
-      <li>
-        <a href="manual.html">Manual</a>
-      </li>
-      <li>
-        <a href="lib.html">Standard library</a>
-      </li>
-      <li>
-        <a href="theindex.html">Index</a>
-      </li>
-      <li>
-        <a href="compiler/theindex.html">Compiler docs</a>
-      </li>
-      <li>
-        <a href="https://nim-lang.github.io/fusion/theindex.html">Fusion docs</a>
-      </li>
+      <li><a href="manual.html">Manual</a></li>
+      <li><a href="lib.html">Standard library</a></li>
+      <li> <a href="theindex.html">Index</a></li>
+      <li><a href="compiler/theindex.html">Compiler docs</a></li>
+      <li><a href="https://nim-lang.github.io/fusion/theindex.html">Fusion docs</a></li>
+      <li><a href="https://nim-lang.github.io/Nim/">devel</a>, <a href="https://nim-lang.org/documentation.html">stable</a></li>
     </ul>
   </div>
   <div id="searchInputDiv">
@@ -577,9 +573,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns the <tt class="docutils literal"><span class="pre"><span class="Identifier">first</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">last</span></span></tt> position of <tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span></span></tt> in <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span></span></tt>, where <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span></span></tt> has length <tt class="docutils literal"><span class="pre"><span class="Identifier">bufSize</span></span></tt> (not necessarily <tt class="docutils literal"><span class="pre"><span class="CharLit">'\0'</span></span></tt> terminated). If it does not match, <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span><span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">,</span><span class="DecNumber">0</span><span class="Punctuation">)</span></span></tt> is returned.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L202"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L214"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L202" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L214" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="findBounds,string,Regex,int"></a>
@@ -593,9 +589,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">findBounds</span><span class="Punctuation">(</span><span class="StringLit">&quot;01234abc89&quot;</span><span class="Punctuation">,</span> <span class="RawData">re&quot;abc&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Punctuation">(</span><span class="DecNumber">5</span><span class="Punctuation">,</span><span class="DecNumber">7</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L215"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L227"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L215" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L227" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="matchLen,string,Regex,openArray[string],int"></a>
@@ -605,9 +601,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 the same as <tt class="docutils literal"><span class="pre"><span class="Identifier">match</span></span></tt>, but it returns the length of the match, if there is no match, <tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="DecNumber">1</span></span></tt> is returned. Note that a match length of zero can happen.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L234"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L246"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L234" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L246" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="matchLen,cstring,Regex,openArray[string],int,int"></a>
@@ -617,9 +613,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 the same as <tt class="docutils literal"><span class="pre"><span class="Identifier">match</span></span></tt>, but it returns the length of the match, if there is no match, <tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="DecNumber">1</span></span></tt> is returned. Note that a match length of zero can happen.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L241"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L253"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L241" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L253" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="matchLen,string,Regex,int"></a>
@@ -633,9 +629,9 @@ the same as <tt class="docutils literal"><span class="pre"><span class="Identifi
 <span class="Identifier">doAssert</span> <span class="Identifier">matchLen</span><span class="Punctuation">(</span><span class="StringLit">&quot;abcdefg&quot;</span><span class="Punctuation">,</span> <span class="RawData">re&quot;abcde&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">5</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">matchLen</span><span class="Punctuation">(</span><span class="StringLit">&quot;abcdefg&quot;</span><span class="Punctuation">,</span> <span class="RawData">re&quot;cde&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">-</span><span class="DecNumber">1</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L248"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L260"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L248" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L260" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="matchLen,cstring,Regex,int,int"></a>
@@ -645,9 +641,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 the same as <tt class="docutils literal"><span class="pre"><span class="Identifier">match</span></span></tt>, but it returns the length of the match, if there is no match, <tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="DecNumber">1</span></span></tt> is returned. Note that a match length of zero can happen.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L259"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L271"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L259" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L271" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="match,string,Regex,int"></a>
@@ -657,9 +653,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span><span class="Punctuation">[</span><span class="Identifier">start</span><span class="Operator">..</span><span class="Punctuation">]</span></span></tt> matches the <tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L265"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L277"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L265" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L277" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="match,string,Regex,openArray[string],int"></a>
@@ -674,9 +670,9 @@ returns <tt class="docutils literal"><span class="pre"><span class="Identifier">
 <span class="Keyword">if</span> <span class="Identifier">match</span><span class="Punctuation">(</span><span class="StringLit">&quot;abcdefg&quot;</span><span class="Punctuation">,</span> <span class="RawData">re&quot;c(d)ef(g)&quot;</span><span class="Punctuation">,</span> <span class="Identifier">matches</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
   <span class="Identifier">doAssert</span> <span class="Identifier">toSeq</span><span class="Punctuation">(</span><span class="Identifier">matches</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;d&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;g&quot;</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L269"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L281"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L269" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L281" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="match,cstring,Regex,openArray[string],int,int"></a>
@@ -686,9 +682,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span><span class="Punctuation">[</span><span class="Identifier">start</span><span class="Operator">..&lt;</span><span class="Identifier">bufSize</span><span class="Punctuation">]</span></span></tt> matches the <tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span></span></tt> and the captured substrings in the array <tt class="docutils literal"><span class="pre"><span class="Identifier">matches</span></span></tt>. If it does not match, nothing is written into <tt class="docutils literal"><span class="pre"><span class="Identifier">matches</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">false</span></span></tt> is returned. <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span></span></tt> has length <tt class="docutils literal"><span class="pre"><span class="Identifier">bufSize</span></span></tt> (not necessarily <tt class="docutils literal"><span class="pre"><span class="CharLit">'\0'</span></span></tt> terminated).
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L283"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L295"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L283" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L295" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="find,cstring,Regex,openArray[string],int,int"></a>
@@ -698,9 +694,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns the starting position of <tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span></span></tt> in <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span></span></tt> and the captured substrings in the array <tt class="docutils literal"><span class="pre"><span class="Identifier">matches</span></span></tt>. If it does not match, nothing is written into <tt class="docutils literal"><span class="pre"><span class="Identifier">matches</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="DecNumber">1</span></span></tt> is returned. <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span></span></tt> has length <tt class="docutils literal"><span class="pre"><span class="Identifier">bufSize</span></span></tt> (not necessarily <tt class="docutils literal"><span class="pre"><span class="CharLit">'\0'</span></span></tt> terminated).
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L292"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L304"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L292" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L304" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="find,string,Regex,openArray[string],int"></a>
@@ -710,9 +706,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns the starting position of <tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span></span></tt> in <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> and the captured substrings in the array <tt class="docutils literal"><span class="pre"><span class="Identifier">matches</span></span></tt>. If it does not match, nothing is written into <tt class="docutils literal"><span class="pre"><span class="Identifier">matches</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="DecNumber">1</span></span></tt> is returned.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L311"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L323"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L311" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L323" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="find,cstring,Regex,int,int"></a>
@@ -722,9 +718,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns the starting position of <tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span></span></tt> in <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span></span></tt>, where <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span></span></tt> has length <tt class="docutils literal"><span class="pre"><span class="Identifier">bufSize</span></span></tt> (not necessarily <tt class="docutils literal"><span class="pre"><span class="CharLit">'\0'</span></span></tt> terminated). If it does not match, <tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="DecNumber">1</span></span></tt> is returned.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L318"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L330"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L318" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L330" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="find,string,Regex,int"></a>
@@ -742,9 +738,9 @@ returns the starting position of <tt class="docutils literal"><span class="pre">
 <span class="Identifier">doAssert</span> <span class="Identifier">find</span><span class="Punctuation">(</span><span class="StringLit">&quot;xabc&quot;</span><span class="Punctuation">,</span> <span class="RawData">re&quot;(?&lt;=x|y)abc&quot;</span><span class="Punctuation">,</span> <span class="Identifier">start</span> <span class="Operator">=</span> <span class="DecNumber">1</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">1</span>
   <span class="Comment"># lookbehind assertion `(?&lt;=x|y)` can look behind `start`</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L330"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L342"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L330" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L342" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="findAll,string,Regex,int"></a>
@@ -754,9 +750,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns all matching <tt class="docutils literal"><span class="pre"><span class="Identifier">substrings</span></span></tt> of <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> that match <tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span></span></tt>. If it does not match, @[] is returned.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L383"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L395"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L383" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L395" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="contains,string,Regex,int"></a>
@@ -766,9 +762,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 same as <tt class="docutils literal"><span class="pre"><span class="Identifier">find</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">,</span> <span class="Identifier">pattern</span><span class="Punctuation">,</span> <span class="Identifier">start</span><span class="Punctuation">)</span> <span class="Operator">&gt;=</span> <span class="DecNumber">0</span></span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L410"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L422"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L410" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L422" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="contains,string,Regex,openArray[string],int"></a>
@@ -778,9 +774,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 same as <tt class="docutils literal"><span class="pre"><span class="Identifier">find</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">,</span> <span class="Identifier">pattern</span><span class="Punctuation">,</span> <span class="Identifier">matches</span><span class="Punctuation">,</span> <span class="Identifier">start</span><span class="Punctuation">)</span> <span class="Operator">&gt;=</span> <span class="DecNumber">0</span></span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L414"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L426"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L414" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L426" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="startsWith,string,Regex"></a>
@@ -789,9 +785,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns true if <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> starts with the pattern <tt class="docutils literal"><span class="pre"><span class="Identifier">prefix</span></span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L419"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L431"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L419" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L431" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="endsWith,string,Regex"></a>
@@ -800,9 +796,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns true if <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> ends with the pattern <tt class="docutils literal"><span class="pre"><span class="Identifier">suffix</span></span></tt>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L423"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L435"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L423" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L435" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="replace,string,Regex,string"></a>
@@ -814,9 +810,9 @@ Replaces <tt class="docutils literal"><span class="pre"><span class="Identifier"
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="StringLit">&quot;var1=key; var2=key2&quot;</span><span class="Operator">.</span><span class="Identifier">replace</span><span class="Punctuation">(</span><span class="RawData">re&quot;(\w+)=(\w+)&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;; &quot;</span>
 <span class="Identifier">doAssert</span> <span class="StringLit">&quot;var1=key; var2=key2&quot;</span><span class="Operator">.</span><span class="Identifier">replace</span><span class="Punctuation">(</span><span class="RawData">re&quot;(\w+)=(\w+)&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;?&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;?; ?&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L428"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L440"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L428" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L440" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="replacef,string,Regex,string"></a>
@@ -829,9 +825,9 @@ Replaces <tt class="docutils literal"><span class="pre"><span class="Identifier"
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="StringLit">&quot;var1=key; var2=key2&quot;</span><span class="Operator">.</span><span class="Identifier">replacef</span><span class="Punctuation">(</span><span class="RawData">re&quot;(\w+)=(\w+)&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;$1&lt;-$2$2&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span>
   <span class="StringLit">&quot;var1&lt;-keykey; var2&lt;-key2key2&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L445"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L461"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L445" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L461" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="multiReplace,string,openArray[tuple[Regex,string]]"></a>
@@ -842,9 +838,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns a modified copy of <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> with the substitutions in <tt class="docutils literal"><span class="pre"><span class="Identifier">subs</span></span></tt> applied in parallel.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L463"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L479"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L463" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L479" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="transformFile,string,string,openArray[tuple[Regex,string]]"></a>
@@ -855,9 +851,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 reads in the file <tt class="docutils literal"><span class="pre"><span class="Identifier">infile</span></span></tt>, performs a parallel replacement (calls <tt class="docutils literal"><span class="pre"><span class="Identifier">parallelReplace</span></span></tt>) and writes back to <tt class="docutils literal"><span class="pre"><span class="Identifier">outfile</span></span></tt>. Raises <tt class="docutils literal"><span class="pre"><span class="Identifier">IOError</span></span></tt> if an error occurs. This is supposed to be used for quick scripting.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L483"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L499"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L483" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L499" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="split,string,Regex,int"></a>
@@ -869,9 +865,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>The portion matched by <tt class="docutils literal"><span class="pre"><span class="Identifier">sep</span></span></tt> is not returned.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L521"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L537"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L521" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L537" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="escapeRe,string"></a>
@@ -880,9 +876,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 escapes <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> so that it is matched verbatim when used as a regular expression.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L528"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L544"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L528" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L544" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -899,9 +895,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Note that since this is an iterator you should not modify the string you are iterating over: bad things could happen.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L343"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L355"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L343" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L355" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="findAll.i,cstring,Regex,int,int"></a>
@@ -913,9 +909,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Note that since this is an iterator you should not modify the string you are iterating over: bad things could happen.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L362"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L374"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L362" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L374" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="split.i,string,Regex,int"></a>
@@ -931,9 +927,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">doAssert</span> <span class="Identifier">toSeq</span><span class="Punctuation">(</span><span class="Identifier">split</span><span class="Punctuation">(</span><span class="StringLit">&quot;00232this02939is39an22example111&quot;</span><span class="Punctuation">,</span> <span class="RawData">re&quot;\d+&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span> <span class="Operator">==</span>
   <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;this&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;is&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;an&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;example&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L491"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L507"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L491" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L507" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -958,9 +954,9 @@ This calls <tt class="docutils literal"><span class="pre"><span class="Identifie
 <span class="Identifier">doAssert</span> <span class="Identifier">parse</span><span class="Punctuation">(</span><span class="StringLit">&quot;NAME = LENA&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="LongStringLit">&quot;&quot;&quot;(&quot;NAME&quot;, &quot;LENA&quot;)&quot;&quot;&quot;</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">parse</span><span class="Punctuation">(</span><span class="StringLit">&quot;   # comment ... &quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="LongStringLit">&quot;&quot;&quot;(&quot;# comment ... &quot;,)&quot;&quot;&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L389"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/re.nim#L401"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L389" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/re.nim#L401" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -973,7 +969,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-07 01:13:51 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-16 00:51:48 UTC</small>
       </div>
     </div>
   </div>

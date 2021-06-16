@@ -34,7 +34,6 @@ function main() {
     }
   }
 
-  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
   function switchTheme(e) {
       if (e.target.checked) {
           document.documentElement.setAttribute('data-theme', 'dark');
@@ -45,13 +44,19 @@ function main() {
       }
   }
 
-  toggleSwitch.addEventListener('change', switchTheme, false);
+  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+  if (toggleSwitch !== null) {
+    toggleSwitch.addEventListener('change', switchTheme, false);
+  }
 
-  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  var currentTheme = localStorage.getItem('theme');
+  if (!currentTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    currentTheme = 'dark';
+  }
   if (currentTheme) {
     document.documentElement.setAttribute('data-theme', currentTheme);
 
-    if (currentTheme === 'dark') {
+    if (currentTheme === 'dark' && toggleSwitch !== null) {
       toggleSwitch.checked = true;
     }
   }
@@ -76,21 +81,12 @@ window.addEventListener('DOMContentLoaded', main);
   </div>
   <div id="global-links">
     <ul class="simple-boot">
-      <li>
-        <a href="manual.html">Manual</a>
-      </li>
-      <li>
-        <a href="lib.html">Standard library</a>
-      </li>
-      <li>
-        <a href="theindex.html">Index</a>
-      </li>
-      <li>
-        <a href="compiler/theindex.html">Compiler docs</a>
-      </li>
-      <li>
-        <a href="https://nim-lang.github.io/fusion/theindex.html">Fusion docs</a>
-      </li>
+      <li><a href="manual.html">Manual</a></li>
+      <li><a href="lib.html">Standard library</a></li>
+      <li> <a href="theindex.html">Index</a></li>
+      <li><a href="compiler/theindex.html">Compiler docs</a></li>
+      <li><a href="https://nim-lang.github.io/fusion/theindex.html">Fusion docs</a></li>
+      <li><a href="https://nim-lang.github.io/Nim/">devel</a>, <a href="https://nim-lang.org/documentation.html">stable</a></li>
     </ul>
   </div>
   <div id="searchInputDiv">
@@ -1160,20 +1156,18 @@ Arglist
 
 <h1><a class="toc-backref" id="view-types" href="#view-types">View types</a></h1><p><strong>Note</strong>:  <tt class="docutils literal"><span class="pre option">--experimental:views</span></tt> is more effective with <tt class="docutils literal"><span class="pre option">--experimental:strictFuncs</span></tt>.</p>
 <p>A view type is a type that is or contains one of the following types:</p>
-<ul class="simple"><li><tt class="docutils literal"><span class="pre"><span class="Keyword">var</span> <span class="Identifier">T</span></span></tt> (mutable view into <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span></span></tt>)</li>
-<li><tt class="docutils literal"><span class="pre"><span class="Identifier">lent</span> <span class="Identifier">T</span></span></tt> (immutable view into <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span></span></tt>)</li>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre"><span class="Identifier">lent</span> <span class="Identifier">T</span></span></tt> (view into <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span></span></tt>)</li>
 <li><tt class="docutils literal"><span class="pre"><span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span></span></tt> (pair of (pointer to array of <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span></span></tt>, size))</li>
 </ul>
 <p>For example:</p>
 <pre class="listing"><span class="Keyword">type</span>
-  <span class="Identifier">View1</span> <span class="Operator">=</span> <span class="Keyword">var</span> <span class="Identifier">int</span>
-  <span class="Identifier">View2</span> <span class="Operator">=</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">byte</span><span class="Punctuation">]</span>
-  <span class="Identifier">View3</span> <span class="Operator">=</span> <span class="Identifier">lent</span> <span class="Identifier">string</span>
-  <span class="Identifier">View4</span> <span class="Operator">=</span> <span class="Identifier">Table</span><span class="Punctuation">[</span><span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">char</span><span class="Punctuation">]</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">]</span></pre><p>Exceptions to this rule are types constructed via <tt class="docutils literal"><span class="pre"><span class="Keyword">ptr</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span></span></tt>. For example, the following types are <strong>not</strong> view types:</p>
+  <span class="Identifier">View1</span> <span class="Operator">=</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">byte</span><span class="Punctuation">]</span>
+  <span class="Identifier">View2</span> <span class="Operator">=</span> <span class="Identifier">lent</span> <span class="Identifier">string</span>
+  <span class="Identifier">View3</span> <span class="Operator">=</span> <span class="Identifier">Table</span><span class="Punctuation">[</span><span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">char</span><span class="Punctuation">]</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">]</span></pre><p>Exceptions to this rule are types constructed via <tt class="docutils literal"><span class="pre"><span class="Keyword">ptr</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span></span></tt>. For example, the following types are <strong>not</strong> view types:</p>
 <pre class="listing"><span class="Keyword">type</span>
   <span class="Identifier">NotView1</span> <span class="Operator">=</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">int</span><span class="Punctuation">]</span><span class="Punctuation">)</span>
   <span class="Identifier">NotView2</span> <span class="Operator">=</span> <span class="Keyword">ptr</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">char</span><span class="Punctuation">]</span>
-  <span class="Identifier">NotView3</span> <span class="Operator">=</span> <span class="Keyword">ptr</span> <span class="Identifier">array</span><span class="Punctuation">[</span><span class="DecNumber">4</span><span class="Punctuation">,</span> <span class="Keyword">var</span> <span class="Identifier">int</span><span class="Punctuation">]</span></pre><p>A <em>mutable</em> view type is a type that is or contains a <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span> <span class="Identifier">T</span></span></tt> type. An <em>immutable</em> view type is a view type that is not a mutable view type.</p>
+  <span class="Identifier">NotView3</span> <span class="Operator">=</span> <span class="Keyword">ptr</span> <span class="Identifier">array</span><span class="Punctuation">[</span><span class="DecNumber">4</span><span class="Punctuation">,</span> <span class="Identifier">lent</span> <span class="Identifier">int</span><span class="Punctuation">]</span></pre><p>The mutability aspect of a view type is not part of the type but part of the locations it's derived from. More on this later.</p>
 <p>A <em>view</em> is a symbol (a let, var, const, etc.) that has a view type.</p>
 <p>Since version 1.4 Nim allows view types to be used as local variables. This feature needs to be enabled via <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">experimental</span><span class="Punctuation">:</span> <span class="StringLit">&quot;views&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt>.</p>
 <p>A local variable of a view type <em>borrows</em> from the locations and it is statically enforced that the view does not outlive the location it was borrowed from.</p>
@@ -1223,8 +1217,9 @@ Arglist
 </ul>
 <p>If a view type is used as a return type, the location must borrow from a location that is derived from the first parameter that is passed to the proc. See <a class="reference external" href="https://nim-lang.org/docs/manual.html#procedures-var-return-type">https://nim-lang.org/docs/manual.html#procedures-var-return-type</a> for details about how this is done for <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span> <span class="Identifier">T</span></span></tt>.</p>
 <p>A mutable view can borrow from a mutable location, an immutable view can borrow from both a mutable or an immutable location.</p>
+<p>If a view borrows from a mutable location, the view can be used to update the location. Otherwise it cannot be used for mutations.</p>
 <p>The <em>duration</em> of a borrow is the span of commands beginning from the assignment to the view and ending with the last usage of the view.</p>
-<p>For the duration of the borrow operation, no mutations to the borrowed locations may be performed except via the potentially mutable view that borrowed from the location. The borrowed location is said to be <em>sealed</em> during the borrow.</p>
+<p>For the duration of the borrow operation, no mutations to the borrowed locations may be performed except via the view that borrowed from the location. The borrowed location is said to be <em>sealed</em> during the borrow.</p>
 <pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">experimental</span><span class="Punctuation">:</span> <span class="StringLit">&quot;views&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
 
 <span class="Keyword">type</span>
@@ -1266,7 +1261,7 @@ f(x, y) = g(a, b)</pre>
 <p>For strict functions it is then enforced that there is no graph that is both mutated and has an element that is an immutable parameter (that is a parameter that is not of type <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span> <span class="Identifier">T</span></span></tt>).</p>
 <p>For borrow checking a different set of checks is performed. Let <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span></span></tt> be the view and <tt class="docutils literal"><span class="pre"><span class="Identifier">b</span></span></tt> the location that is borrowed from.</p>
 <ul class="simple"><li>The lifetime of <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span></span></tt> must not exceed <tt class="docutils literal"><span class="pre"><span class="Identifier">b</span></span></tt>'s lifetime. Note: The lifetime of a parameter is the complete proc body.</li>
-<li>If <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span></span></tt> is a mutable view and <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span></span></tt> is used to actually mutate the borrowed location, then <tt class="docutils literal"><span class="pre"><span class="Identifier">b</span></span></tt> has to be a mutable location. Note: If it is not actually used for mutation, borrowing a mutable view from an immutable location is allowed! This allows for many important idioms and will be justified in an upcoming RFC.</li>
+<li>If <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span></span></tt> is used for a mutation, <tt class="docutils literal"><span class="pre"><span class="Identifier">b</span></span></tt> must be a mutable location too.</li>
 <li>During <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span></span></tt>'s lifetime, <tt class="docutils literal"><span class="pre"><span class="Identifier">G</span><span class="Punctuation">(</span><span class="Identifier">b</span><span class="Punctuation">)</span></span></tt> can only be modified by <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span></span></tt> (and only if <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span></span></tt> is a mutable view).</li>
 <li>If <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">result</span></span></tt> then <tt class="docutils literal"><span class="pre"><span class="Identifier">b</span></span></tt> has to be a location derived from the first formal parameter or from a constant location.</li>
 <li>A view cannot be used for a read or a write access before it was assigned to.</li>
@@ -1280,7 +1275,7 @@ f(x, y) = g(a, b)</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-07 01:13:04 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-16 00:51:06 UTC</small>
       </div>
     </div>
   </div>

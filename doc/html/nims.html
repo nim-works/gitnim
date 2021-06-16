@@ -34,7 +34,6 @@ function main() {
     }
   }
 
-  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
   function switchTheme(e) {
       if (e.target.checked) {
           document.documentElement.setAttribute('data-theme', 'dark');
@@ -45,13 +44,19 @@ function main() {
       }
   }
 
-  toggleSwitch.addEventListener('change', switchTheme, false);
+  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+  if (toggleSwitch !== null) {
+    toggleSwitch.addEventListener('change', switchTheme, false);
+  }
 
-  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  var currentTheme = localStorage.getItem('theme');
+  if (!currentTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    currentTheme = 'dark';
+  }
   if (currentTheme) {
     document.documentElement.setAttribute('data-theme', currentTheme);
 
-    if (currentTheme === 'dark') {
+    if (currentTheme === 'dark' && toggleSwitch !== null) {
       toggleSwitch.checked = true;
     }
   }
@@ -133,13 +138,13 @@ window.addEventListener('DOMContentLoaded', main);
 <p>Here are few examples of using the <tt class="docutils literal"><span class="pre"><span class="Identifier">switch</span></span></tt> proc:</p>
 <pre class="listing"><span class="Comment"># command-line: --opt:size</span>
 <span class="Identifier">switch</span><span class="Punctuation">(</span><span class="StringLit">&quot;opt&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;size&quot;</span><span class="Punctuation">)</span>
-<span class="Comment"># command-line: --define:foo or -d:foo</span>
-<span class="Identifier">switch</span><span class="Punctuation">(</span><span class="StringLit">&quot;define&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">)</span>
+<span class="Comment"># command-line: --define:release or -d:release</span>
+<span class="Identifier">switch</span><span class="Punctuation">(</span><span class="StringLit">&quot;define&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;release&quot;</span><span class="Punctuation">)</span>
 <span class="Comment"># command-line: --forceBuild</span>
 <span class="Identifier">switch</span><span class="Punctuation">(</span><span class="StringLit">&quot;forceBuild&quot;</span><span class="Punctuation">)</span></pre><p>NimScripts also support <tt class="docutils literal"><span class="pre option">--</span></tt> templates for convenience, which look like command-line switches written as-is in the NimScript file. So the above example can be rewritten as:</p>
 <pre class="listing"><span class="Operator">--</span><span class="Identifier">opt</span><span class="Punctuation">:</span><span class="Identifier">size</span>
-<span class="Operator">--</span><span class="Identifier">define</span><span class="Punctuation">:</span><span class="Identifier">foo</span>
-<span class="Operator">--</span><span class="Identifier">forceBuild</span></pre><p><strong>Note</strong>: In general, the <em>define</em> switches can also be set in NimScripts using <tt class="docutils literal"><span class="pre"><span class="Identifier">switch</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Operator">--</span></span></tt>, as shown in above examples. Only the <tt class="docutils literal"><span class="pre"><span class="Identifier">release</span></span></tt> define (<tt class="docutils literal"><span class="pre option">-d:release</span></tt>) cannot be set in NimScripts.</p>
+<span class="Operator">--</span><span class="Identifier">define</span><span class="Punctuation">:</span><span class="Identifier">release</span>
+<span class="Operator">--</span><span class="Identifier">forceBuild</span></pre><p><strong>Note</strong>: In general, the <em>define</em> switches can also be set in NimScripts using <tt class="docutils literal"><span class="pre"><span class="Identifier">switch</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Operator">--</span></span></tt>, as shown in above examples. Few <tt class="docutils literal"><span class="pre"><span class="Identifier">define</span></span></tt> switches such as <tt class="docutils literal"><span class="pre option">-d:strip</span></tt>, <tt class="docutils literal"><span class="pre option">-d:lto</span></tt> and <tt class="docutils literal"><span class="pre option">-d:lto_incremental</span></tt> cannot be set in NimScripts.</p>
 
 <h1 id="nimscript-as-a-build-tool">NimScript as a build tool</h1><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">task</span></span></tt> template that the <tt class="docutils literal"><span class="pre"><span class="Identifier">system</span></span></tt> module defines allows a NimScript file to be used as a build tool. The following example defines a task <tt class="docutils literal"><span class="pre"><span class="Identifier">build</span></span></tt> that is an alias for the <tt class="docutils literal"><span class="pre option">c</span></tt> command:</p>
 <pre class="listing"><span class="Identifier">task</span> <span class="Identifier">build</span><span class="Punctuation">,</span> <span class="StringLit">&quot;builds an example&quot;</span><span class="Punctuation">:</span>
@@ -242,7 +247,7 @@ FR = chat</pre><ul class="simple"><li><a class="reference external" href="https:
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-07 01:13:23 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-16 00:51:23 UTC</small>
       </div>
     </div>
   </div>

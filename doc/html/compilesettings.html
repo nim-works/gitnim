@@ -34,7 +34,6 @@ function main() {
     }
   }
 
-  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
   function switchTheme(e) {
       if (e.target.checked) {
           document.documentElement.setAttribute('data-theme', 'dark');
@@ -45,13 +44,19 @@ function main() {
       }
   }
 
-  toggleSwitch.addEventListener('change', switchTheme, false);
+  const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+  if (toggleSwitch !== null) {
+    toggleSwitch.addEventListener('change', switchTheme, false);
+  }
 
-  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  var currentTheme = localStorage.getItem('theme');
+  if (!currentTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    currentTheme = 'dark';
+  }
   if (currentTheme) {
     document.documentElement.setAttribute('data-theme', currentTheme);
 
-    if (currentTheme === 'dark') {
+    if (currentTheme === 'dark' && toggleSwitch !== null) {
       toggleSwitch.checked = true;
     }
   }
@@ -76,21 +81,12 @@ window.addEventListener('DOMContentLoaded', main);
   </div>
   <div id="global-links">
     <ul class="simple-boot">
-      <li>
-        <a href="manual.html">Manual</a>
-      </li>
-      <li>
-        <a href="lib.html">Standard library</a>
-      </li>
-      <li>
-        <a href="theindex.html">Index</a>
-      </li>
-      <li>
-        <a href="compiler/theindex.html">Compiler docs</a>
-      </li>
-      <li>
-        <a href="https://nim-lang.github.io/fusion/theindex.html">Fusion docs</a>
-      </li>
+      <li><a href="manual.html">Manual</a></li>
+      <li><a href="lib.html">Standard library</a></li>
+      <li> <a href="theindex.html">Index</a></li>
+      <li><a href="compiler/theindex.html">Compiler docs</a></li>
+      <li><a href="https://nim-lang.github.io/fusion/theindex.html">Fusion docs</a></li>
+      <li><a href="https://nim-lang.github.io/Nim/">devel</a>, <a href="https://nim-lang.org/documentation.html">stable</a></li>
     </ul>
   </div>
   <div id="searchInputDiv">
@@ -119,7 +115,8 @@ window.addEventListener('DOMContentLoaded', main);
   ccompilerPath,            ## the path to the C/C++ compiler
   backend, ## the backend (eg: c|cpp|objc|js); both `nim doc --backend:js`
             ## and `nim js` would imply backend=js
-  libPath                    ## the absolute path to the stdlib library, i.e. nim's `--lib`, since 1.5.1">SingleValueSetting</a></li>
+  libPath,                  ## the absolute path to the stdlib library, i.e. nim's `--lib`, since 1.5.1
+  gc                         ## gc selected">SingleValueSetting</a></li>
   <li><a class="reference" href="#MultipleValueSetting"
     title="MultipleValueSetting {.pure.} = enum
   nimblePaths,              ## the nimble path(s)
@@ -180,7 +177,8 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">ccompilerPath</span><span class="Other">,</span>            <span class="Comment">## the path to the C/C++ compiler</span>
   <span class="Identifier">backend</span><span class="Other">,</span> <span class="Comment">## the backend (eg: c|cpp|objc|js); both `nim doc --backend:js`</span>
             <span class="Comment">## and `nim js` would imply backend=js</span>
-  <span class="Identifier">libPath</span>                    <span class="Comment">## the absolute path to the stdlib library, i.e. nim's `--lib`, since 1.5.1</span></pre></dt>
+  <span class="Identifier">libPath</span><span class="Other">,</span>                  <span class="Comment">## the absolute path to the stdlib library, i.e. nim's `--lib`, since 1.5.1</span>
+  <span class="Identifier">gc</span>                         <span class="Comment">## gc selected</span></pre></dt>
 <dd>
 
 
@@ -204,9 +202,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 settings resulting in a seq of string values
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/compilesettings.nim#L36"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/compilesettings.nim#L37"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/compilesettings.nim#L36" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/compilesettings.nim#L37" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -228,9 +226,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Keyword">const</span> <span class="Identifier">nimcache</span> <span class="Operator">=</span> <span class="Identifier">querySetting</span><span class="Punctuation">(</span><span class="Identifier">SingleValueSetting</span><span class="Operator">.</span><span class="Identifier">nimcacheDir</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/compilesettings.nim#L45"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/compilesettings.nim#L46"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/compilesettings.nim#L45" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/compilesettings.nim#L46" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="querySettingSeq,MultipleValueSetting"></a>
@@ -247,9 +245,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Keyword">const</span> <span class="Identifier">nimblePaths</span> <span class="Operator">=</span> <span class="Identifier">querySettingSeq</span><span class="Punctuation">(</span><span class="Identifier">MultipleValueSetting</span><span class="Operator">.</span><span class="Identifier">nimblePaths</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/std/compilesettings.nim#L56"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/std/compilesettings.nim#L57"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/compilesettings.nim#L56" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/std/compilesettings.nim#L57" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -262,7 +260,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-07 01:13:35 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-16 00:51:34 UTC</small>
       </div>
     </div>
   </div>
