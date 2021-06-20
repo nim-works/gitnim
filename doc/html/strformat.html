@@ -156,15 +156,24 @@ window.addEventListener('DOMContentLoaded', main);
   <a class="reference reference-toplevel" href="#17" id="67">Macros</a>
   <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">&
-      <li><a class="reference" href="#%26.m%2Cstring"
-    title="`&amp;`(pattern: string): untyped">`&amp;`(pattern: string): untyped</a></li>
+      <li><a class="reference" href="#%26.m"
+    title="`&amp;`(pattern: string{lit}): string">`&amp;`(pattern: string{lit}): string</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">fmt
-      <li><a class="reference" href="#fmt.m%2Cstring"
-    title="fmt(pattern: string): untyped">fmt(pattern: string): untyped</a></li>
-  <li><a class="reference" href="#fmt.m%2Cstring%2Cchar%2Cchar"
-    title="fmt(pattern: string; openChar, closeChar: char): untyped">fmt(pattern: string; openChar, closeChar: char): untyped</a></li>
+      <li><a class="reference" href="#fmt.m%2Cstaticstring%2Cstaticchar%2Cstaticchar"
+    title="fmt(pattern: static string; openChar: static char; closeChar: static char): string">fmt(pattern: static string; openChar: static char; closeChar: static char): string</a></li>
+
+  </ul>
+
+  </ul>
+</li>
+<li>
+  <a class="reference reference-toplevel" href="#18" id="68">Templates</a>
+  <ul class="simple simple-toc-section">
+      <ul class="simple nested-toc-section">fmt
+      <li><a class="reference" href="#fmt.t%2Cstaticstring"
+    title="fmt(pattern: static string): untyped">fmt(pattern: static string): untyped</a></li>
 
   </ul>
 
@@ -448,42 +457,62 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="17">
 <h1><a class="toc-backref" href="#17">Macros</a></h1>
 <dl class="item">
-<a id="&.m,string"></a>
-<dt><pre><span class="Keyword">macro</span> <a href="#%26.m%2Cstring"><span class="Identifier">`&amp;`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a></pre></dt>
+<a id="fmt.m,staticstring,staticchar,staticchar"></a>
+<dt><pre><span class="Keyword">macro</span> <a href="#fmt.m%2Cstaticstring%2Cstaticchar%2Cstaticchar"><span class="Identifier">fmt</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#static"><span class="Identifier">static</span></a> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">openChar</span><span class="Other">:</span> <a href="system.html#static"><span class="Identifier">static</span></a> <span class="Identifier">char</span><span class="Other">;</span> <span class="Identifier">closeChar</span><span class="Other">:</span> <a href="system.html#static"><span class="Identifier">static</span></a> <span class="Identifier">char</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
 <dd>
 
-For a specification of the <tt class="docutils literal"><span class="pre"><span class="Operator">&amp;</span></span></tt> macro, see the module level documentation.
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L670"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L670" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="fmt.m,string"></a>
-<dt><pre><span class="Keyword">macro</span> <a href="#fmt.m%2Cstring"><span class="Identifier">fmt</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a></pre></dt>
-<dd>
-
-An alias for <a class="reference external" href="#&amp;.m,string">&amp;</a>.
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L673"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L673" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="fmt.m,string,char,char"></a>
-<dt><pre><span class="Keyword">macro</span> <a href="#fmt.m%2Cstring%2Cchar%2Cchar"><span class="Identifier">fmt</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">openChar</span><span class="Other">,</span> <span class="Identifier">closeChar</span><span class="Other">:</span> <a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a></pre></dt>
-<dd>
-
-The same as <a class="reference external" href="#fmt.m,string">fmt</a>, but uses <tt class="docutils literal"><span class="pre"><span class="Identifier">openChar</span></span></tt> instead of <tt class="docutils literal"><span class="pre"><span class="CharLit">'{'</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">closeChar</span></span></tt> instead of <tt class="docutils literal"><span class="pre"><span class="CharLit">'}'</span></span></tt>.
+Interpolates <tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span></span></tt> using symbols in scope.
 <p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">testInt</span> <span class="Operator">=</span> <span class="DecNumber">123</span>
-<span class="Identifier">assert</span> <span class="StringLit">&quot;&lt;testInt&gt;&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span><span class="Punctuation">(</span><span class="CharLit">'&lt;'</span><span class="Punctuation">,</span> <span class="CharLit">'&gt;'</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;123&quot;</span>
-<span class="Identifier">assert</span> <span class="LongStringLit">&quot;&quot;&quot;(()&quot;foo&quot; &amp; &quot;bar&quot;())&quot;&quot;&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span><span class="Punctuation">(</span><span class="CharLit">')'</span><span class="Punctuation">,</span> <span class="CharLit">'('</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;(foobar)&quot;</span>
-<span class="Identifier">assert</span> <span class="LongStringLit">&quot;&quot;&quot; &quot;&quot;{&quot;123+123&quot;}&quot;&quot; &quot;&quot;&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span><span class="Punctuation">(</span><span class="CharLit">'&quot;'</span><span class="Punctuation">,</span> <span class="CharLit">'&quot;'</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot; </span><span class="EscapeSequence">\&quot;</span><span class="StringLit">{246}</span><span class="EscapeSequence">\&quot;</span><span class="StringLit"> &quot;</span></pre>
+<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="DecNumber">7</span>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;var is {x * 2}&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span> <span class="Operator">==</span> <span class="StringLit">&quot;var is 14&quot;</span>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;var is {{x}}&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span> <span class="Operator">==</span> <span class="StringLit">&quot;var is {x}&quot;</span> <span class="Comment"># escape via doubling</span>
+<span class="Keyword">const</span> <span class="Identifier">s</span> <span class="Operator">=</span> <span class="StringLit">&quot;foo: {x}&quot;</span>
+<span class="Identifier">assert</span> <span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">fmt</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo: 7&quot;</span> <span class="Comment"># also works with const strings</span>
+
+<span class="Identifier">assert</span> <span class="RawData">fmt&quot;\n&quot;</span> <span class="Operator">==</span> <span class="RawData">r&quot;\n&quot;</span> <span class="Comment"># raw string literal</span>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;</span><span class="EscapeSequence">\n</span><span class="StringLit">&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span> <span class="Operator">==</span> <span class="StringLit">&quot;</span><span class="EscapeSequence">\n</span><span class="StringLit">&quot;</span> <span class="Comment"># regular literal (likewise with `fmt(&quot;\n&quot;)` or `fmt &quot;\n&quot;`)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Comment"># custom `openChar`, `closeChar`</span>
+<span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="DecNumber">7</span>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;&lt;x&gt;&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span><span class="Punctuation">(</span><span class="CharLit">'&lt;'</span><span class="Punctuation">,</span> <span class="CharLit">'&gt;'</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;7&quot;</span>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;&lt;&lt;&lt;x&gt;&gt;&gt;&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span><span class="Punctuation">(</span><span class="CharLit">'&lt;'</span><span class="Punctuation">,</span> <span class="CharLit">'&gt;'</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;&lt;7&gt;&quot;</span>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;`x`&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span><span class="Punctuation">(</span><span class="CharLit">'`'</span><span class="Punctuation">,</span> <span class="CharLit">'`'</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;7&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L676"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L663"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L676" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L663" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="&.m"></a>
+<dt><pre><span class="Keyword">macro</span> <a href="#%26.m"><span class="Identifier">`&amp;`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">{</span><span class="Identifier">lit</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
+<dd>
+
+<tt class="docutils literal"><span class="pre"><span class="Operator">&amp;</span><span class="Identifier">pattern</span></span></tt> is the same as <tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span><span class="Operator">.</span><span class="Identifier">fmt</span></span></tt>. For a specification of the <tt class="docutils literal"><span class="pre"><span class="Operator">&amp;</span></span></tt> macro, see the module level documentation.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="DecNumber">7</span>
+<span class="Identifier">assert</span> <span class="Operator">&amp;</span><span class="StringLit">&quot;{x}</span><span class="EscapeSequence">\n</span><span class="StringLit">&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;7</span><span class="EscapeSequence">\n</span><span class="StringLit">&quot;</span> <span class="Comment"># regular string literal</span>
+<span class="Identifier">assert</span> <span class="Operator">&amp;</span><span class="StringLit">&quot;{x}</span><span class="EscapeSequence">\n</span><span class="StringLit">&quot;</span> <span class="Operator">==</span> <span class="StringLit">&quot;7</span><span class="EscapeSequence">\n</span><span class="StringLit">&quot;</span><span class="Operator">.</span><span class="Identifier">fmt</span> <span class="Comment"># `fmt` can be used instead</span>
+<span class="Identifier">assert</span> <span class="Operator">&amp;</span><span class="StringLit">&quot;{x}</span><span class="EscapeSequence">\n</span><span class="StringLit">&quot;</span> <span class="Operator">!=</span> <span class="RawData">fmt&quot;7\n&quot;</span> <span class="Comment"># see `fmt` docs, this would use a raw string literal</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L686"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L686" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+
+</dl></div>
+<div class="section" id="18">
+<h1><a class="toc-backref" href="#18">Templates</a></h1>
+<dl class="item">
+<a id="fmt.t,staticstring"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#fmt.t%2Cstaticstring"><span class="Identifier">fmt</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#static"><span class="Identifier">static</span></a> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a></pre></dt>
+<dd>
+
+Alias for <tt class="docutils literal"><span class="pre"><span class="Identifier">fmt</span><span class="Punctuation">(</span><span class="Identifier">pattern</span><span class="Punctuation">,</span> <span class="CharLit">'{'</span><span class="Punctuation">,</span> <span class="CharLit">'}'</span><span class="Punctuation">)</span></span></tt>.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/strformat.nim#L682"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/strformat.nim#L682" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -496,7 +525,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-16 00:52:07 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-20 00:50:34 UTC</small>
       </div>
     </div>
   </div>
