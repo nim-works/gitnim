@@ -95,7 +95,8 @@ window.addEventListener('DOMContentLoaded', main);
   </div>
   
   <ul class="simple simple-toc" id="toc-list">
-<li>
+<ul class="simple"><li><a class="reference" id="playing-with-colorful-and-styled-text_toc" href="#playing-with-colorful-and-styled-text">Playing with colorful and styled text</a></li>
+</ul><li>
   <a class="reference reference-toplevel" href="#6" id="56">Imports</a>
   <ul class="simple simple-toc-section">
     
@@ -445,7 +446,25 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="nine columns" id="content">
   <div id="tocRoot"></div>
   
-  <p class="module-desc">This module contains a few procedures to control the <em>terminal</em> (also called <em>console</em>). On UNIX, the implementation simply uses ANSI escape sequences and does not depend on any other module, on Windows it uses the Windows API. Changing the style is permanent even after program termination! Use the code <tt class="docutils literal"><span class="pre"><span class="Identifier">exitprocs</span><span class="Operator">.</span><span class="Identifier">addExitProc</span><span class="Punctuation">(</span><span class="Identifier">resetAttributes</span><span class="Punctuation">)</span></span></tt> to restore the defaults. Similarly, if you hide the cursor, make sure to unhide it with <tt class="docutils literal"><span class="pre"><span class="Identifier">showCursor</span></span></tt> before quitting.</p>
+  <p class="module-desc">This module contains a few procedures to control the <em>terminal</em> (also called <em>console</em>). On UNIX, the implementation simply uses ANSI escape sequences and does not depend on any other module, on Windows it uses the Windows API. Changing the style is permanent even after program termination! Use the code <tt class="docutils literal"><span class="pre"><span class="Identifier">exitprocs</span><span class="Operator">.</span><span class="Identifier">addExitProc</span><span class="Punctuation">(</span><span class="Identifier">resetAttributes</span><span class="Punctuation">)</span></span></tt> to restore the defaults. Similarly, if you hide the cursor, make sure to unhide it with <tt class="docutils literal"><span class="pre"><span class="Identifier">showCursor</span></span></tt> before quitting.
+<h2><a class="toc-backref" id="playing-with-colorful-and-styled-text" href="#playing-with-colorful-and-styled-text">Playing with colorful and styled text</a></h2>Procs like <tt class="docutils literal"><span class="pre"><span class="Identifier">styledWriteLine</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">styledEcho</span></span></tt> etc. have a temporary effect on text parameters. Style parameters only affect the text parameter right after them. After being called, these procs will reset the default style of the terminal. While <tt class="docutils literal"><span class="pre"><span class="Identifier">setBackGroundColor</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">setForeGroundColor</span></span></tt> etc. have a lasting influence on the terminal, you can use <tt class="docutils literal"><span class="pre"><span class="Identifier">resetAttributes</span></span></tt> to reset the default style of the terminal.
+<p><strong class="examples_text">Example: cmd: -r:off</strong></p>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">terminal</span>
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">styledWriteLine</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="Identifier">styleBright</span><span class="Punctuation">,</span> <span class="Identifier">styleBlink</span><span class="Punctuation">,</span> <span class="Identifier">styleUnderscore</span><span class="Punctuation">}</span><span class="Punctuation">,</span> <span class="StringLit">&quot;styled text &quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">styledWriteLine</span><span class="Punctuation">(</span><span class="Identifier">fgRed</span><span class="Punctuation">,</span> <span class="StringLit">&quot;red text &quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">styledWriteLine</span><span class="Punctuation">(</span><span class="Identifier">fgWhite</span><span class="Punctuation">,</span> <span class="Identifier">bgRed</span><span class="Punctuation">,</span> <span class="StringLit">&quot;white text in red background&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">styledWriteLine</span><span class="Punctuation">(</span><span class="StringLit">&quot; ordinary text without style &quot;</span><span class="Punctuation">)</span>
+
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">setBackGroundColor</span><span class="Punctuation">(</span><span class="Identifier">bgCyan</span><span class="Punctuation">,</span> <span class="Identifier">true</span><span class="Punctuation">)</span>
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">setForeGroundColor</span><span class="Punctuation">(</span><span class="Identifier">fgBlue</span><span class="Punctuation">)</span>
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">write</span><span class="Punctuation">(</span><span class="StringLit">&quot;blue text in cyan background&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">resetAttributes</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+
+<span class="Comment"># You can specify multiple text parameters. Style parameters</span>
+<span class="Comment"># only affect the text parameter right after them.</span>
+<span class="Identifier">styledEcho</span> <span class="Identifier">styleBright</span><span class="Punctuation">,</span> <span class="Identifier">fgGreen</span><span class="Punctuation">,</span> <span class="StringLit">&quot;[PASS]&quot;</span><span class="Punctuation">,</span> <span class="Identifier">resetStyle</span><span class="Punctuation">,</span> <span class="Identifier">fgGreen</span><span class="Punctuation">,</span> <span class="StringLit">&quot; Yay!&quot;</span>
+
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">styledWriteLine</span><span class="Punctuation">(</span><span class="Identifier">fgRed</span><span class="Punctuation">,</span> <span class="StringLit">&quot;red text &quot;</span><span class="Punctuation">,</span> <span class="Identifier">styleBright</span><span class="Punctuation">,</span> <span class="StringLit">&quot;bold red&quot;</span><span class="Punctuation">,</span> <span class="Identifier">fgDefault</span><span class="Punctuation">,</span> <span class="StringLit">&quot; bold text&quot;</span><span class="Punctuation">)</span></pre></p>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
@@ -467,11 +486,11 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">styleStrikethrough</span>         <span class="Comment">## strikethrough</span></pre></dt>
 <dd>
 
-different styles for text output
+Different styles for text output.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L483"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L514"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L483" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L514" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ForegroundColor"></a>
@@ -488,11 +507,11 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">fgDefault</span>                  <span class="Comment">## default terminal foreground color</span></pre></dt>
 <dd>
 
-terminal's foreground colors
+Terminal's foreground colors.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L537"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L568"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L537" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L568" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="BackgroundColor"></a>
@@ -509,11 +528,11 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">bgDefault</span>                  <span class="Comment">## default terminal background color</span></pre></dt>
 <dd>
 
-terminal's background colors
+Terminal's background colors.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L549"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L580"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L549" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L580" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TerminalCmd"></a>
@@ -525,9 +544,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 commands that can be expressed as arguments
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L678"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L709"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L678" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L709" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -541,9 +560,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L53"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L81"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L53" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L81" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -557,9 +576,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns terminal width from first fd that supports the ioctl.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L223"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L251"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L223" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L251" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="terminalHeightIoctl,openArray[int]"></a>
@@ -568,9 +587,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns terminal height from first fd that supports the ioctl.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L232"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L260"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L232" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L260" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="terminalWidth"></a>
@@ -579,9 +598,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns some reasonable terminal width from either standard file descriptors, controlling terminal, environment variables or tradition.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L243"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L271"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L243" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L271" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="terminalHeight"></a>
@@ -590,9 +609,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns some reasonable terminal height from either standard file descriptors, controlling terminal, environment variables or tradition. Zero is returned if the height could not be determined.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L260"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L288"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L260" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="terminalSize"></a>
@@ -602,9 +621,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the terminal width and height as a tuple. Internally calls <tt class="docutils literal"><span class="pre"><span class="Identifier">terminalWidth</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">terminalHeight</span></span></tt>, so the same assumptions apply.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L278"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L306"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L278" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L306" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hideCursor,File"></a>
@@ -613,9 +632,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Hides the cursor.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L293"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L321"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L293" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L321" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="showCursor,File"></a>
@@ -624,9 +643,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Shows the cursor.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L300"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L328"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L300" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setCursorPos,File,int,int"></a>
@@ -636,9 +655,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets the terminal's cursor to the (x,y) position. (0,0) is the upper left of the screen.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L307"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L335"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L307" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L335" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setCursorXPos,File,int"></a>
@@ -648,9 +667,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets the terminal's cursor to the x position. The y position is not changed.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L316"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L344"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L344" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cursorUp,File,int"></a>
@@ -659,9 +678,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Moves the cursor up by <tt class="docutils literal"><span class="pre"><span class="Identifier">count</span></span></tt> rows.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L348"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L376"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L348" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L376" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cursorDown,File,int"></a>
@@ -671,9 +690,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Moves the cursor down by <tt class="docutils literal"><span class="pre"><span class="Identifier">count</span></span></tt> rows.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L358"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L386"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L358" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L386" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cursorForward,File,int"></a>
@@ -683,9 +702,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Moves the cursor forward by <tt class="docutils literal"><span class="pre"><span class="Identifier">count</span></span></tt> columns.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L368"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L396"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L368" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L396" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cursorBackward,File,int"></a>
@@ -695,9 +714,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Moves the cursor backward by <tt class="docutils literal"><span class="pre"><span class="Identifier">count</span></span></tt> columns.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L378"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L406"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L378" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L406" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="eraseLine,File"></a>
@@ -705,10 +724,13 @@ class="link-seesrc" target="_blank">Source</a>
 <dd>
 
 Erases the entire current line.
+<p><strong class="examples_text">Example: cmd: -r:off</strong></p>
+<pre class="listing"><span class="Identifier">write</span><span class="Punctuation">(</span><span class="Identifier">stdout</span><span class="Punctuation">,</span> <span class="StringLit">&quot;never mind&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">eraseLine</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># nothing will be printed on the screen</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L419"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L447"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L419" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L447" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="eraseScreen,File"></a>
@@ -717,9 +739,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Erases the screen with the background colour and moves the cursor to home.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L442"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L473"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L442" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L473" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="resetAttributes,File"></a>
@@ -728,9 +750,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Resets all attributes.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L469"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L500"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L469" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L500" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ansiStyleCode,int"></a>
@@ -739,9 +761,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L494"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L525"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L494" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L525" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setStyle,File,set[Style]"></a>
@@ -751,9 +773,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets the terminal style.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L504"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L535"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L504" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L535" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="writeStyled,string,set[Style]"></a>
@@ -763,9 +785,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Writes the text <tt class="docutils literal"><span class="pre"><span class="Identifier">txt</span></span></tt> in a given <tt class="docutils literal"><span class="pre"><span class="Identifier">style</span></span></tt> to stdout.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L519"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L550"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L519" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L550" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setForegroundColor,File,ForegroundColor"></a>
@@ -775,9 +797,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets the terminal's foreground color.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L564"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L595"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L564" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L595" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setBackgroundColor,File,BackgroundColor"></a>
@@ -787,9 +809,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets the terminal's background color.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L593"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L624"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L593" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L624" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ansiForegroundColorCode,ForegroundColor"></a>
@@ -799,9 +821,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L622"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L653"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L622" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L653" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ansiForegroundColorCode,Color"></a>
@@ -811,9 +833,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L631"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L662"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L631" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L662" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ansiBackgroundColorCode,Color"></a>
@@ -823,9 +845,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L640"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L671"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L640" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L671" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setForegroundColor,File,Color"></a>
@@ -835,9 +857,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets the terminal's foreground true color.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L649"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L680"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L649" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L680" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setBackgroundColor,File,Color"></a>
@@ -847,9 +869,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sets the terminal's background true color.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L654"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L685"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L654" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L685" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isatty,File"></a>
@@ -858,20 +880,20 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns true if <tt class="docutils literal"><span class="pre"><span class="Identifier">f</span></span></tt> is associated with a terminal device.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L666"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L697"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L666" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L697" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getch"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#getch"><span class="Identifier">getch</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#char"><span class="Identifier">char</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">EOFError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-Read a single character from the terminal, blocking until it is entered. The character is not printed to the terminal.
+Reads a single character from the terminal, blocking until it is entered. The character is not printed to the terminal.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L749"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L772"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L749" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L772" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="readPasswordFromStdin,string,string"></a>
@@ -881,9 +903,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L798"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L821"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L798" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L821" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="readPasswordFromStdin,string"></a>
@@ -893,9 +915,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Reads a password from stdin without printing it.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L812"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L835"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L812" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L835" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="resetAttributes"></a>
@@ -904,9 +926,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Resets all attributes on stdout. It is advisable to register this as a quit proc with <tt class="docutils literal"><span class="pre"><span class="Identifier">exitprocs</span><span class="Operator">.</span><span class="Identifier">addExitProc</span><span class="Punctuation">(</span><span class="Identifier">resetAttributes</span><span class="Punctuation">)</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L841"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L864"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L841" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L864" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isTrueColorSupported"></a>
@@ -915,31 +937,31 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns true if a terminal supports true color.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L847"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L870"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L847" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L870" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="enableTrueColors"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#enableTrueColors"><span class="Identifier">enableTrueColors</span></a><span class="Other">(</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-Enable true color.
+Enables true color.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L854"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L877"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L854" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L877" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="disableTrueColors"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#disableTrueColors"><span class="Identifier">disableTrueColors</span></a><span class="Other">(</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-Disable true color.
+Disables true color.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L887"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L910"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L887" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L910" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -951,14 +973,14 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><span class="Keyword">macro</span> <a href="#styledWrite.m%2CFile%2Cvarargs%5Btyped%5D"><span class="Identifier">styledWrite</span></a><span class="Other">(</span><span class="Identifier">f</span><span class="Other">:</span> <a href="io.html#File"><span class="Identifier">File</span></a><span class="Other">;</span> <span class="Identifier">m</span><span class="Other">:</span> <a href="system.html#varargs"><span class="Identifier">varargs</span></a><span class="Other">[</span><a href="system.html#typed"><span class="Identifier">typed</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#untyped"><span class="Identifier">untyped</span></a></pre></dt>
 <dd>
 
-<p>Similar to <tt class="docutils literal"><span class="pre"><span class="Identifier">write</span></span></tt>, but treating terminal style arguments specially. When some argument is <tt class="docutils literal"><span class="pre"><span class="Identifier">Style</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">set</span><span class="Punctuation">[</span><span class="Identifier">Style</span><span class="Punctuation">]</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">ForegroundColor</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">BackgroundColor</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">TerminalCmd</span></span></tt> then it is not sent directly to <tt class="docutils literal"><span class="pre"><span class="Identifier">f</span></span></tt>, but instead corresponding terminal style proc is called.</p>
-<p>Example:</p>
+Similar to <tt class="docutils literal"><span class="pre"><span class="Identifier">write</span></span></tt>, but treating terminal style arguments specially. When some argument is <tt class="docutils literal"><span class="pre"><span class="Identifier">Style</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">set</span><span class="Punctuation">[</span><span class="Identifier">Style</span><span class="Punctuation">]</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">ForegroundColor</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">BackgroundColor</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">TerminalCmd</span></span></tt> then it is not sent directly to <tt class="docutils literal"><span class="pre"><span class="Identifier">f</span></span></tt>, but instead corresponding terminal style proc is called.
+<p><strong class="examples_text">Example: cmd: -r:off</strong></p>
 <pre class="listing"><span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">styledWrite</span><span class="Punctuation">(</span><span class="Identifier">fgRed</span><span class="Punctuation">,</span> <span class="StringLit">&quot;red text &quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">stdout</span><span class="Operator">.</span><span class="Identifier">styledWrite</span><span class="Punctuation">(</span><span class="Identifier">fgGreen</span><span class="Punctuation">,</span> <span class="StringLit">&quot;green text&quot;</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L699"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L730"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L699" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L730" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -972,9 +994,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L497"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L528"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L497" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L528" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ansiStyleCode.t,static[Style]"></a>
@@ -983,9 +1005,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L501"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L532"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L501" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L532" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ansiForegroundColorCode.t,static[ForegroundColor],static[bool]"></a>
@@ -995,9 +1017,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L627"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L658"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L627" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L658" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ansiForegroundColorCode.t,static[Color]"></a>
@@ -1006,9 +1028,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L635"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L666"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L635" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L666" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ansiBackgroundColorCode.t,static[Color]"></a>
@@ -1017,23 +1039,23 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L644"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L675"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L644" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L675" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="styledWriteLine.t,File,varargs[untyped]"></a>
 <dt><pre><span class="Keyword">template</span> <a href="#styledWriteLine.t%2CFile%2Cvarargs%5Buntyped%5D"><span class="Identifier">styledWriteLine</span></a><span class="Other">(</span><span class="Identifier">f</span><span class="Other">:</span> <a href="io.html#File"><span class="Identifier">File</span></a><span class="Other">;</span> <span class="Identifier">args</span><span class="Other">:</span> <a href="system.html#varargs"><span class="Identifier">varargs</span></a><span class="Other">[</span><a href="system.html#untyped"><span class="Identifier">untyped</span></a><span class="Other">]</span><span class="Other">)</span></pre></dt>
 <dd>
 
-<p>Calls <tt class="docutils literal"><span class="pre"><span class="Identifier">styledWrite</span></span></tt> and appends a newline at the end.</p>
-<p>Example:</p>
+Calls <tt class="docutils literal"><span class="pre"><span class="Identifier">styledWrite</span></span></tt> and appends a newline at the end.
+<p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">error</span><span class="Punctuation">(</span><span class="Identifier">msg</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span> <span class="Operator">=</span>
   <span class="Identifier">styledWriteLine</span><span class="Punctuation">(</span><span class="Identifier">stderr</span><span class="Punctuation">,</span> <span class="Identifier">fgRed</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Error: &quot;</span><span class="Punctuation">,</span> <span class="Identifier">resetStyle</span><span class="Punctuation">,</span> <span class="Identifier">msg</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L732"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L759"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L732" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L759" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="styledEcho.t,varargs[untyped]"></a>
@@ -1042,9 +1064,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Echoes styles arguments to stdout using <tt class="docutils literal"><span class="pre"><span class="Identifier">styledWriteLine</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L745"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L768"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L745" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L768" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="hideCursor.t"></a>
@@ -1053,9 +1075,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L819"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L842"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L819" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L842" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="showCursor.t"></a>
@@ -1064,9 +1086,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L820"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L843"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L820" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L843" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setCursorPos.t,int,int"></a>
@@ -1075,9 +1097,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L821"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L844"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L821" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L844" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setCursorXPos.t,int"></a>
@@ -1086,9 +1108,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L822"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L845"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L822" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L845" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cursorUp.t,int"></a>
@@ -1097,9 +1119,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L825"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L848"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L825" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L848" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cursorDown.t,int"></a>
@@ -1108,9 +1130,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L826"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L849"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L826" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L849" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cursorForward.t,int"></a>
@@ -1119,9 +1141,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L827"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L850"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L827" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L850" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="cursorBackward.t,int"></a>
@@ -1130,9 +1152,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L828"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L851"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L828" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L851" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="eraseLine.t"></a>
@@ -1141,9 +1163,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L829"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L852"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L829" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L852" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="eraseScreen.t"></a>
@@ -1152,9 +1174,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L830"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L853"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L830" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L853" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setStyle.t,set[Style]"></a>
@@ -1163,9 +1185,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L831"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L854"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L831" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L854" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setForegroundColor.t,ForegroundColor"></a>
@@ -1174,9 +1196,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L833"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L856"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L833" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L856" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setBackgroundColor.t,BackgroundColor"></a>
@@ -1185,9 +1207,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L835"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L858"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L835" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L858" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setForegroundColor.t,Color"></a>
@@ -1196,9 +1218,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L837"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L860"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L837" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L860" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setBackgroundColor.t,Color"></a>
@@ -1207,9 +1229,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L839"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/terminal.nim#L862"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L839" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/terminal.nim#L862" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1222,7 +1244,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-20 00:50:37 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-24 00:42:55 UTC</small>
       </div>
     </div>
   </div>

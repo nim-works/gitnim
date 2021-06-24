@@ -268,6 +268,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/private/strimpl.nim
   cp lib/std/private/underscored_calls.nim $libdir/std/private/underscored_calls.nim
   chmod 644 $libdir/std/private/underscored_calls.nim
+  cp lib/std/private/digitsutils.nim $libdir/std/private/digitsutils.nim
+  chmod 644 $libdir/std/private/digitsutils.nim
   cp lib/std/private/vmutils.nim $libdir/std/private/vmutils.nim
   chmod 644 $libdir/std/private/vmutils.nim
   cp lib/std/private/decode_helpers.nim $libdir/std/private/decode_helpers.nim

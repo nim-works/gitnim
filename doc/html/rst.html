@@ -131,6 +131,7 @@ window.addEventListener('DOMContentLoaded', main);
   meNewSectionExpected = &quot;new section expected $1&quot;,
   meGeneralParseError = &quot;general parse error&quot;,
   meInvalidDirective = &quot;invalid directive: \'$1\'&quot;,
+  meInvalidRstField = &quot;invalid field: $1&quot;,
   meFootnoteMismatch = &quot;mismatch in number of footnotes and their refs: $1&quot;,
   mwRedefinitionOfLabel = &quot;redefinition of label \'$1\'&quot;,
   mwUnknownSubstitution = &quot;unknown substitution \'$1\'&quot;,
@@ -142,6 +143,8 @@ window.addEventListener('DOMContentLoaded', main);
                    arg: string) {.closure, gcsafe.}">MsgHandler</a></li>
   <li><a class="reference" href="#FindFileHandler"
     title="FindFileHandler = proc (filename: string): string {.closure, gcsafe.}">FindFileHandler</a></li>
+  <li><a class="reference" href="#PRstSharedState"
+    title="PRstSharedState = ref RstSharedState">PRstSharedState</a></li>
   <li><a class="reference" href="#EParseError"
     title="EParseError = object of ValueError">EParseError</a></li>
 
@@ -162,7 +165,14 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">defaultFindFile
+      <ul class="simple nested-toc-section">newRstSharedState
+      <li><a class="reference" href="#newRstSharedState%2CRstParseOptions%2Cstring%2CFindFileHandler%2CMsgHandler"
+    title="newRstSharedState(options: RstParseOptions; filename: string;
+                  findFile: FindFileHandler; msgHandler: MsgHandler): PRstSharedState">newRstSharedState(options: RstParseOptions; filename: string;
+                  findFile: FindFileHandler; msgHandler: MsgHandler): PRstSharedState</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">defaultFindFile
       <li><a class="reference" href="#defaultFindFile%2Cstring"
     title="defaultFindFile(filename: string): string">defaultFindFile(filename: string): string</a></li>
 
@@ -172,6 +182,13 @@ window.addEventListener('DOMContentLoaded', main);
     title="getFieldValue(n: PRstNode): string">getFieldValue(n: PRstNode): string</a></li>
   <li><a class="reference" href="#getFieldValue%2CPRstNode%2Cstring"
     title="getFieldValue(n: PRstNode; fieldname: string): string">getFieldValue(n: PRstNode; fieldname: string): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">rstParsePass1
+      <li><a class="reference" href="#rstParsePass1%2Cstring%2Cstring%2Cint%2Cint%2CRstParseOptions%2CPRstSharedState"
+    title="rstParsePass1(fragment, filename: string; line, column: int;
+              options: RstParseOptions; sharedState: PRstSharedState): PRstNode">rstParsePass1(fragment, filename: string; line, column: int;
+              options: RstParseOptions; sharedState: PRstSharedState): PRstNode</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">defaultMsgHandler
@@ -191,6 +208,11 @@ window.addEventListener('DOMContentLoaded', main);
     title="addNodes(n: PRstNode): string">addNodes(n: PRstNode): string</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">preparePass2
+      <li><a class="reference" href="#preparePass2%2CPRstSharedState%2CPRstNode"
+    title="preparePass2(s: PRstSharedState; mainNode: PRstNode)">preparePass2(s: PRstSharedState; mainNode: PRstNode)</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">rstParse
       <li><a class="reference" href="#rstParse%2Cstring%2Cstring%2Cint%2Cint%2Cbool%2CRstParseOptions%2CFindFileHandler%2CMsgHandler"
     title="rstParse(text, filename: string; line, column: int; hasToc: var bool;
@@ -203,6 +225,11 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple nested-toc-section">rstnodeToRefname
       <li><a class="reference" href="#rstnodeToRefname%2CPRstNode"
     title="rstnodeToRefname(n: PRstNode): string">rstnodeToRefname(n: PRstNode): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">resolveSubs
+      <li><a class="reference" href="#resolveSubs%2CPRstSharedState%2CPRstNode"
+    title="resolveSubs(s: PRstSharedState; n: PRstNode): PRstNode">resolveSubs(s: PRstSharedState; n: PRstNode): PRstNode</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">whichMsgClass
@@ -402,6 +429,7 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">meNewSectionExpected</span> <span class="Other">=</span> <span class="StringLit">&quot;new section expected $1&quot;</span><span class="Other">,</span>
   <span class="Identifier">meGeneralParseError</span> <span class="Other">=</span> <span class="StringLit">&quot;general parse error&quot;</span><span class="Other">,</span>
   <span class="Identifier">meInvalidDirective</span> <span class="Other">=</span> <span class="StringLit">&quot;invalid directive: \'$1\'&quot;</span><span class="Other">,</span>
+  <span class="Identifier">meInvalidRstField</span> <span class="Other">=</span> <span class="StringLit">&quot;invalid field: $1&quot;</span><span class="Other">,</span>
   <span class="Identifier">meFootnoteMismatch</span> <span class="Other">=</span> <span class="StringLit">&quot;mismatch in number of footnotes and their refs: $1&quot;</span><span class="Other">,</span>
   <span class="Identifier">mwRedefinitionOfLabel</span> <span class="Other">=</span> <span class="StringLit">&quot;redefinition of label \'$1\'&quot;</span><span class="Other">,</span>
   <span class="Identifier">mwUnknownSubstitution</span> <span class="Other">=</span> <span class="StringLit">&quot;unknown substitution \'$1\'&quot;</span><span class="Other">,</span>
@@ -424,9 +452,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 what to do in case of an error
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L235"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L236"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L235" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L236" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="FindFileHandler"></a>
@@ -435,9 +463,20 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L237"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L238"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L237" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="PRstSharedState"></a>
+<dt><pre><a href="rst.html#PRstSharedState"><span class="Identifier">PRstSharedState</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Identifier">RstSharedState</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L515"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L515" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="EParseError"></a>
@@ -446,9 +485,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L526"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L527"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L526" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L527" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -462,9 +501,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Initial line number for standalone RST text
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L529"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L530"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L529" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L530" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ColRstInit"></a>
@@ -473,9 +512,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Initial column number for standalone RST text (Nim global reporting adds ColOffset=1)
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L530"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L531"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L530" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L531" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="ColRstOffset"></a>
@@ -484,9 +523,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 1: a replica of ColOffset for internal use
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L532"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L533"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L532" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L533" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -500,9 +539,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns which message class <tt class="docutils literal"><span class="pre"><span class="Identifier">k</span></span></tt> belongs to.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L538"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L539"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L538" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L539" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="defaultMsgHandler,string,int,int,MsgKind,string"></a>
@@ -513,9 +552,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L546"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L547"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L546" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L547" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="defaultFindFile,string"></a>
@@ -525,9 +564,22 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L556"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L557"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L556" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L557" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="newRstSharedState,RstParseOptions,string,FindFileHandler,MsgHandler"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#newRstSharedState%2CRstParseOptions%2Cstring%2CFindFileHandler%2CMsgHandler"><span class="Identifier">newRstSharedState</span></a><span class="Other">(</span><span class="Identifier">options</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span>
+                       <span class="Identifier">findFile</span><span class="Other">:</span> <a href="rst.html#FindFileHandler"><span class="Identifier">FindFileHandler</span></a><span class="Other">;</span> <span class="Identifier">msgHandler</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a><span class="Other">)</span><span class="Other">:</span> <a href="rst.html#PRstSharedState"><span class="Identifier">PRstSharedState</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L582"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L582" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addNodes,PRstNode"></a>
@@ -536,9 +588,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L699"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L705"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L699" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L705" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rstnodeToRefname,PRstNode"></a>
@@ -547,9 +599,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L753"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L759"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L753" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L759" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFieldValue,PRstNode"></a>
@@ -560,9 +612,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This proc will assert if the node is not of the expected type. The empty string will be returned as a minimum. Any value in the rst will be stripped form leading/trailing whitespace.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L1700"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L1738"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L1700" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L1738" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFieldValue,PRstNode,string"></a>
@@ -572,9 +624,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L1712"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L1750"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L1712" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L1750" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getArgument,PRstNode"></a>
@@ -583,9 +635,46 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L1725"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L1763"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L1725" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L1763" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="rstParsePass1,string,string,int,int,RstParseOptions,PRstSharedState"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#rstParsePass1%2Cstring%2Cstring%2Cint%2Cint%2CRstParseOptions%2CPRstSharedState"><span class="Identifier">rstParsePass1</span></a><span class="Other">(</span><span class="Identifier">fragment</span><span class="Other">,</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">line</span><span class="Other">,</span> <span class="Identifier">column</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span>
+                   <span class="Identifier">options</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a><span class="Other">;</span> <span class="Identifier">sharedState</span><span class="Other">:</span> <a href="rst.html#PRstSharedState"><span class="Identifier">PRstSharedState</span></a><span class="Other">)</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+Parses an RST <tt class="docutils literal"><span class="pre"><span class="Identifier">fragment</span></span></tt>. The result should be further processed by <tt class="docutils literal"><span class="pre"><span class="Identifier">preparePass2</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">resolveSubs</span></span></tt> (which is pass 2).
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L2846"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L2846" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="preparePass2,PRstSharedState,PRstNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#preparePass2%2CPRstSharedState%2CPRstNode"><span class="Identifier">preparePass2</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="rst.html#PRstSharedState"><span class="Identifier">PRstSharedState</span></a><span class="Other">;</span> <span class="Identifier">mainNode</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+Records titles in node <tt class="docutils literal"><span class="pre"><span class="Identifier">mainNode</span></span></tt> and orders footnotes.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L2860"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L2860" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="resolveSubs,PRstSharedState,PRstNode"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#resolveSubs%2CPRstSharedState%2CPRstNode"><span class="Identifier">resolveSubs</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="rst.html#PRstSharedState"><span class="Identifier">PRstSharedState</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+Makes pass 2 of RST parsing. Resolves substitutions and anchor aliases, groups footnotes. Takes input node <tt class="docutils literal"><span class="pre"><span class="Identifier">n</span></span></tt> and returns the same node with recursive substitutions in <tt class="docutils literal"><span class="pre"><span class="Identifier">n</span><span class="Operator">.</span><span class="Identifier">sons</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">result</span></span></tt>.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L2865"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L2865" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rstParse,string,string,int,int,bool,RstParseOptions,FindFileHandler,MsgHandler"></a>
@@ -595,11 +684,11 @@ class="link-seesrc" target="_blank">Source</a>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-
+Parses the whole <tt class="docutils literal"><span class="pre"><span class="Identifier">text</span></span></tt>. The result is ready for <tt class="docutils literal"><span class="pre"><span class="Identifier">rstgen</span><span class="Operator">.</span><span class="Identifier">renderRstToOut</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L2922"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rst.nim#L2979"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L2922" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rst.nim#L2979" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -612,7 +701,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-20 00:50:54 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-24 00:43:08 UTC</small>
       </div>
     </div>
   </div>

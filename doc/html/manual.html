@@ -325,7 +325,6 @@ window.addEventListener('DOMContentLoaded', main);
 <li><a class="reference" id="implementation-specific-pragmas-importobjc-pragma_toc" href="#implementation-specific-pragmas-importobjc-pragma">ImportObjC pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-codegendecl-pragma_toc" href="#implementation-specific-pragmas-codegendecl-pragma">CodegenDecl pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-nimcppnonpod-pragma_toc" href="#implementation-specific-pragmas-nimcppnonpod-pragma"><tt class="docutils literal"><span class="pre"><span class="Identifier">cppNonPod</span></span></tt> pragma</a></li>
-<li><a class="reference" id="implementation-specific-pragmas-injectstmt-pragma_toc" href="#implementation-specific-pragmas-injectstmt-pragma">InjectStmt pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-compileminustime-define-pragmas_toc" href="#implementation-specific-pragmas-compileminustime-define-pragmas">compile-time define pragmas</a></li>
 </ul><li><a class="reference" id="userminusdefined-pragmas_toc" href="#userminusdefined-pragmas">User-defined pragmas</a></li>
 <ul class="simple"><li><a class="reference" id="userminusdefined-pragmas-pragma-pragma_toc" href="#userminusdefined-pragmas-pragma-pragma">pragma pragma</a></li>
@@ -1247,19 +1246,20 @@ ord(Direction.west) == 3</pre>
 <span class="Punctuation">}</span> <span class="Identifier">MySeq</span><span class="Punctuation">;</span></pre><p>The base type of the unchecked array may not contain any GC'ed memory but this is currently not checked.</p>
 <p><strong>Future directions</strong>: GC'ed memory should be allowed in unchecked arrays and there should be an explicit annotation of how the GC is to determine the runtime size of the array.</p>
 
-<h2><a class="toc-backref" id="types-tuples-and-object-types" href="#types-tuples-and-object-types">Tuples and object types</a></h2><p>A variable of a tuple or object type is a heterogeneous storage container. A tuple or object defines various named <em>fields</em> of a type. A tuple also defines a lexicographic <em>order</em> of the fields. Tuples are meant to be heterogeneous storage types with few abstractions. The <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span><span class="Punctuation">)</span></span></tt> syntax can be used to construct tuples. The order of the fields in the constructor must match the order of the tuple's definition. Different tuple-types are <em>equivalent</em> if they specify the same fields of the same type in the same order. The <em>names</em> of the fields also have to be identical.</p>
+<h2><a class="toc-backref" id="types-tuples-and-object-types" href="#types-tuples-and-object-types">Tuples and object types</a></h2><p>A variable of a tuple or object type is a heterogeneous storage container. A tuple or object defines various named <em>fields</em> of a type. A tuple also defines a lexicographic <em>order</em> of the fields. Tuples are meant to be heterogeneous storage types with few abstractions. The <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span><span class="Punctuation">)</span></span></tt> syntax can be used to construct tuples. The order of the fields in the constructor must match the order of the tuple's definition. Different tuple-types are <em>equivalent</em> if they specify the same fields of the same type in the same order. The <em>names</em> of the fields also have to be the same.</p>
 <p>The assignment operator for tuples copies each component. The default assignment operator for objects copies each component. Overloading of the assignment operator is described <a class="reference external" href="manual_experimental.html#type-bound-operations">here</a>.</p>
 <pre class="listing"><span class="Keyword">type</span>
   <span class="Identifier">Person</span> <span class="Operator">=</span> <span class="Keyword">tuple</span><span class="Punctuation">[</span><span class="Identifier">name</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">age</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">]</span> <span class="Comment"># type representing a person:</span>
-                                         <span class="Comment"># a person consists of a name</span>
-                                         <span class="Comment"># and an age</span>
-<span class="Keyword">var</span>
-  <span class="Identifier">person</span><span class="Punctuation">:</span> <span class="Identifier">Person</span>
+                                         <span class="Comment"># it consists of a name and an age.</span>
+<span class="Keyword">var</span> <span class="Identifier">person</span><span class="Punctuation">:</span> <span class="Identifier">Person</span>
 <span class="Identifier">person</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="Identifier">name</span><span class="Punctuation">:</span> <span class="StringLit">&quot;Peter&quot;</span><span class="Punctuation">,</span> <span class="Identifier">age</span><span class="Punctuation">:</span> <span class="DecNumber">30</span><span class="Punctuation">)</span>
-<span class="Identifier">echo</span> <span class="Identifier">person</span><span class="Operator">.</span><span class="Identifier">name</span>
+<span class="Identifier">assert</span> <span class="Identifier">person</span><span class="Operator">.</span><span class="Identifier">name</span> <span class="Operator">==</span> <span class="StringLit">&quot;Peter&quot;</span>
 <span class="Comment"># the same, but less readable:</span>
 <span class="Identifier">person</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="StringLit">&quot;Peter&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">30</span><span class="Punctuation">)</span>
-<span class="Identifier">echo</span> <span class="Identifier">person</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span></pre><p>A tuple with one unnamed field can be constructed with the parentheses and a trailing comma:</p>
+<span class="Identifier">assert</span> <span class="Identifier">person</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span> <span class="Operator">==</span> <span class="StringLit">&quot;Peter&quot;</span>
+<span class="Identifier">assert</span> <span class="Identifier">Person</span> <span class="Keyword">is</span> <span class="Punctuation">(</span><span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">)</span>
+<span class="Identifier">assert</span> <span class="Punctuation">(</span><span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Keyword">is</span> <span class="Identifier">Person</span>
+<span class="Identifier">assert</span> <span class="Identifier">Person</span> <span class="Keyword">isnot</span> <span class="Keyword">tuple</span><span class="Punctuation">[</span><span class="Identifier">other</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">age</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">]</span> <span class="Comment"># `other` is a different identifier</span></pre><p>A tuple with one unnamed field can be constructed with the parentheses and a trailing comma:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">echoUnaryTuple</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">,</span><span class="Punctuation">)</span><span class="Punctuation">)</span> <span class="Operator">=</span>
   <span class="Identifier">echo</span> <span class="Identifier">a</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span>
 
@@ -2692,10 +2692,8 @@ declared, defined, definedInScope, compiles, getAst, astToStr</pre>
     <span class="Identifier">echo</span> <span class="StringLit">&quot;sum: &quot;</span> <span class="Operator">&amp;</span> <span class="Operator">$</span><span class="Punctuation">(</span><span class="Identifier">parseInt</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">)</span> <span class="Operator">+</span> <span class="Identifier">parseInt</span><span class="Punctuation">(</span><span class="Identifier">b</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
   <span class="Keyword">except</span> <span class="Identifier">OverflowDefect</span><span class="Punctuation">:</span>
     <span class="Identifier">echo</span> <span class="StringLit">&quot;overflow!&quot;</span>
-  <span class="Keyword">except</span> <span class="Identifier">ValueError</span><span class="Punctuation">:</span>
-    <span class="Identifier">echo</span> <span class="StringLit">&quot;could not convert string to integer&quot;</span>
-  <span class="Keyword">except</span> <span class="Identifier">IOError</span><span class="Punctuation">:</span>
-    <span class="Identifier">echo</span> <span class="StringLit">&quot;IO error!&quot;</span>
+  <span class="Keyword">except</span> <span class="Identifier">ValueError</span><span class="Punctuation">,</span> <span class="Identifier">IOError</span><span class="Punctuation">:</span>
+    <span class="Identifier">echo</span> <span class="StringLit">&quot;catch multiple exceptions!&quot;</span>
   <span class="Keyword">except</span><span class="Punctuation">:</span>
     <span class="Identifier">echo</span> <span class="StringLit">&quot;Unknown exception!&quot;</span>
   <span class="Keyword">finally</span><span class="Punctuation">:</span>
@@ -4029,10 +4027,6 @@ using namespace gui;
   <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">cint</span>
 <span class="Keyword">proc</span> <span class="Identifier">main</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Operator">=</span>
   <span class="Keyword">var</span> <span class="Identifier">a</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">threadvar</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span> <span class="Identifier">Foo</span></pre>
-<h2><a class="toc-backref" id="implementation-specific-pragmas-injectstmt-pragma" href="#implementation-specific-pragmas-injectstmt-pragma">InjectStmt pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">injectStmt</span></span></tt> pragma can be used to inject a statement before every other statement in the current module. It is only supposed to be used for debugging:</p>
-<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">injectStmt</span><span class="Punctuation">:</span> <span class="Identifier">gcInvariants</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span>
-
-<span class="Comment"># ... complex code here that produces crashes ...</span></pre>
 <h2><a class="toc-backref" id="implementation-specific-pragmas-compileminustime-define-pragmas" href="#implementation-specific-pragmas-compileminustime-define-pragmas">compile-time define pragmas</a></h2><p>The pragmas listed here can be used to optionally accept values from the <tt class="docutils literal"><span class="pre option">-d/--define</span></tt> option at compile time.</p>
 <p>The implementation currently provides the following possible options (various others may be added later).</p>
 <table border="1" class="docutils"><tr><th>pragma</th><th>description</th></tr>
@@ -4208,7 +4202,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-20 00:49:52 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-24 00:42:17 UTC</small>
       </div>
     </div>
   </div>
