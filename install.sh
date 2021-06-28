@@ -296,6 +296,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/effecttraits.nim
   cp lib/std/wrapnils.nim $libdir/std/wrapnils.nim
   chmod 644 $libdir/std/wrapnils.nim
+  cp lib/std/vmutils.nim $libdir/std/vmutils.nim
+  chmod 644 $libdir/std/vmutils.nim
   cp lib/std/decls.nim $libdir/std/decls.nim
   chmod 644 $libdir/std/decls.nim
   cp lib/std/wordwrap.nim $libdir/std/wordwrap.nim

@@ -1615,24 +1615,16 @@ proc getDirective(p: var RstParser): string =
             "too many colons for a directive (should be ::)",
             p.tok[afterIdx].line, p.tok[afterIdx].col)
 
-proc parseComment(p: var RstParser): PRstNode =
-  case currentTok(p).kind
-  of tkIndent, tkEof:
-    if currentTok(p).kind != tkEof and nextTok(p).kind == tkIndent:
-      inc p.idx              # empty comment
-    else:
-      var indent = currentTok(p).ival
-      while true:
-        case currentTok(p).kind
-        of tkEof:
-          break
-        of tkIndent:
-          if currentTok(p).ival < indent: break
-        else:
-          discard
-        inc p.idx
+proc parseComment(p: var RstParser, col: int): PRstNode =
+  if currentTok(p).kind != tkEof and nextTok(p).kind == tkIndent:
+    inc p.idx              # empty comment
   else:
-    while currentTok(p).kind notin {tkIndent, tkEof}: inc p.idx
+    while currentTok(p).kind != tkEof:
+      if currentTok(p).kind == tkIndent and currentTok(p).ival > col or
+         currentTok(p).kind != tkIndent and currentTok(p).col > col:
+        inc p.idx
+      else:
+        break
   result = nil
 
 proc parseLine(p: var RstParser, father: PRstNode) =
@@ -2253,7 +2245,7 @@ proc parseOptionList(p: var RstParser): PRstNode =
         popInd(p)
       else:
         parseLine(p, b)
-      if currentTok(p).kind == tkIndent: inc p.idx
+      while currentTok(p).kind == tkIndent: inc p.idx
       c.add(a)
       c.add(b)
       c.order = order; inc order
@@ -2270,6 +2262,8 @@ proc parseDefinitionList(p: var RstParser): PRstNode =
     var col = currentTok(p).col
     result = newRstNodeA(p, rnDefList)
     while true:
+      if isOptionList(p):
+        break  # option list has priority over def.list
       j = p.idx
       var a = newRstNode(rnDefName)
       parseLine(p, a)
@@ -2841,7 +2835,7 @@ proc parseDotDot(p: var RstParser): PRstNode =
       (n = parseFootnote(p); n != nil):
     result = n
   else:
-    result = parseComment(p)
+    result = parseComment(p, col)
 
 proc rstParsePass1*(fragment, filename: string,
                     line, column: int,

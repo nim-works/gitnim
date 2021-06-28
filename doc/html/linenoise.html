@@ -104,6 +104,16 @@ window.addEventListener('DOMContentLoaded', main);
   cvec*: cstringArray">Completions</a></li>
   <li><a class="reference" href="#CompletionCallback"
     title="CompletionCallback = proc (a2: cstring; a3: ptr Completions) {.cdecl.}">CompletionCallback</a></li>
+  <li><a class="reference" href="#LinenoiseData"
+    title="LinenoiseData = object
+  status: LinenoiseStatus">LinenoiseData</a></li>
+  <li><a class="reference" href="#Status"
+    title="Status = enum
+  lnCtrlUnkown, lnCtrlC, lnCtrlD">Status</a></li>
+  <li><a class="reference" href="#ReadLineResult"
+    title="ReadLineResult = object
+  line*: string
+  status*: Status">ReadLineResult</a></li>
 
   </ul>
 </li>
@@ -138,6 +148,11 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple nested-toc-section">clearScreen
       <li><a class="reference" href="#clearScreen"
     title="clearScreen()">clearScreen()</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">readLineStatus
+      <li><a class="reference" href="#readLineStatus%2Cstring%2CReadLineResult"
+    title="readLineStatus(prompt: string; result: var ReadLineResult)">readLineStatus(prompt: string; result: var ReadLineResult)</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">historySave
@@ -207,6 +222,45 @@ class="link-seesrc" target="_blank">Source</a>
 href="https://github.com/nim-lang/Nim/tree/devel/lib/wrappers/linenoise/linenoise.nim#L15"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/wrappers/linenoise/linenoise.nim#L15" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="LinenoiseData"></a>
+<dt><pre><a href="linenoise.html#LinenoiseData"><span class="Identifier">LinenoiseData</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">status</span><span class="Other">:</span> <span class="Identifier">LinenoiseStatus</span>
+</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/wrappers/linenoise/linenoise.nim#L42"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/wrappers/linenoise/linenoise.nim#L42" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="Status"></a>
+<dt><pre><a href="linenoise.html#Status"><span class="Identifier">Status</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">lnCtrlUnkown</span><span class="Other">,</span> <span class="Identifier">lnCtrlC</span><span class="Other">,</span> <span class="Identifier">lnCtrlD</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/wrappers/linenoise/linenoise.nim#L48"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/wrappers/linenoise/linenoise.nim#L48" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="ReadLineResult"></a>
+<dt><pre><a href="linenoise.html#ReadLineResult"><span class="Identifier">ReadLineResult</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">line</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
+  <span class="Identifier">status</span><span class="Operator">*</span><span class="Other">:</span> <a href="linenoise.html#Status"><span class="Identifier">Status</span></a>
+</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/wrappers/linenoise/linenoise.nim#L53"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/wrappers/linenoise/linenoise.nim#L53" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -338,6 +392,25 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/wrappers/linenoise/linenoise.nim#L33" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="readLineStatus,string,ReadLineResult"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#readLineStatus%2Cstring%2CReadLineResult"><span class="Identifier">readLineStatus</span></a><span class="Other">(</span><span class="Identifier">prompt</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">result</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="linenoise.html#ReadLineResult"><span class="Identifier">ReadLineResult</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+line editing API that allows returning the line entered and an indicator of which control key was entered, allowing user to distinguish between for example ctrl-C vs ctrl-D.
+<p><strong class="examples_text">Example: cmd: -d:nimExperimentalLinenoiseExtra -r:off</strong></p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">ret</span><span class="Punctuation">:</span> <span class="Identifier">ReadLineResult</span>
+<span class="Keyword">while</span> <span class="Identifier">true</span><span class="Punctuation">:</span>
+  <span class="Identifier">readLineStatus</span><span class="Punctuation">(</span><span class="StringLit">&quot;name: &quot;</span><span class="Punctuation">,</span> <span class="Identifier">ret</span><span class="Punctuation">)</span> <span class="Comment"># ctrl-D will exit, ctrl-C will go to next prompt</span>
+  <span class="Keyword">if</span> <span class="Identifier">ret</span><span class="Operator">.</span><span class="Identifier">line</span><span class="Operator">.</span><span class="Identifier">len</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="Identifier">ret</span><span class="Operator">.</span><span class="Identifier">line</span>
+  <span class="Keyword">if</span> <span class="Identifier">ret</span><span class="Operator">.</span><span class="Identifier">status</span> <span class="Operator">==</span> <span class="Identifier">lnCtrlD</span><span class="Punctuation">:</span> <span class="Keyword">break</span>
+<span class="Identifier">echo</span> <span class="StringLit">&quot;exiting&quot;</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/wrappers/linenoise/linenoise.nim#L57"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/wrappers/linenoise/linenoise.nim#L57" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 
 </dl></div>
 
@@ -348,7 +421,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-24 00:42:17 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-06-27 00:54:14 UTC</small>
       </div>
     </div>
   </div>

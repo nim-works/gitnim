@@ -83,6 +83,119 @@ suite "RST parsing":
               rnLeaf  'set'
         """)
 
+  test "items of 1 option list can be separated by blank lines":
+    check(dedent"""
+        -a  desc1
+
+        -b  desc2
+        """.toAst ==
+      dedent"""
+        rnOptionList
+          rnOptionListItem  order=1
+            rnOptionGroup
+              rnLeaf  '-'
+              rnLeaf  'a'
+            rnDescription
+              rnLeaf  'desc1'
+          rnOptionListItem  order=2
+            rnOptionGroup
+              rnLeaf  '-'
+              rnLeaf  'b'
+            rnDescription
+              rnLeaf  'desc2'
+      """)
+
+  test "option list has priority over definition list":
+    check(dedent"""
+        defName
+            defBody
+
+        -b  desc2
+        """.toAst ==
+      dedent"""
+        rnInner
+          rnDefList
+            rnDefItem
+              rnDefName
+                rnLeaf  'defName'
+              rnDefBody
+                rnInner
+                  rnLeaf  'defBody'
+          rnOptionList
+            rnOptionListItem  order=1
+              rnOptionGroup
+                rnLeaf  '-'
+                rnLeaf  'b'
+              rnDescription
+                rnLeaf  'desc2'
+      """)
+
+  test "RST comment":
+    check(dedent"""
+        .. comment1
+         comment2
+        someParagraph""".toAst ==
+      dedent"""
+        rnLeaf  'someParagraph'
+        """)
+
+    check(dedent"""
+        ..
+         comment1
+         comment2
+        someParagraph""".toAst ==
+      dedent"""
+        rnLeaf  'someParagraph'
+        """)
+
+  test "check that additional line right after .. ends comment":
+    check(dedent"""
+        ..
+
+         notAcomment1
+         notAcomment2
+        someParagraph""".toAst ==
+      dedent"""
+        rnInner
+          rnBlockQuote
+            rnInner
+              rnLeaf  'notAcomment1'
+              rnLeaf  ' '
+              rnLeaf  'notAcomment2'
+          rnParagraph
+            rnLeaf  'someParagraph'
+        """)
+
+  test "but blank lines after 2nd non-empty line don't end the comment":
+    check(dedent"""
+        ..
+           comment1
+
+
+         comment2
+        someParagraph""".toAst ==
+      dedent"""
+        rnLeaf  'someParagraph'
+        """)
+
+  test "using .. as separator b/w directives and block quotes":
+    check(dedent"""
+        .. note:: someNote
+    
+        ..
+    
+          someBlockQuote""".toAst ==
+      dedent"""
+        rnInner
+          rnAdmonition  adType=note
+            [nil]
+            [nil]
+            rnLeaf  'someNote'
+          rnBlockQuote
+            rnInner
+              rnLeaf  'someBlockQuote'
+        """)
+
 suite "RST indentation":
   test "nested bullet lists":
     let input = dedent """
