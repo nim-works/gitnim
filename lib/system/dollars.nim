@@ -7,9 +7,7 @@ proc `$`*(x: int): string {.magic: "IntToStr", noSideEffect.}
   ## spelling `toString`:idx:.
 
 template dollarImpl(x: uint | uint64, result: var string) =
-  let length = digits10(x)
-  setLen(result, length)
-  numToString(result, x, length)
+  addIntImpl(result, x)
 
 when defined(js):
   import std/private/since
@@ -115,7 +113,7 @@ proc `$`*[T: tuple|object](x: T): string =
   ##   $() == "()"
   result = "("
   const isNamed = T is object or isNamedTuple(T)
-  var count = 0
+  var count {.used.} = 0
   for name, value in fieldPairs(x):
     if count > 0: result.add(", ")
     when isNamed:
