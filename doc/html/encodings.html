@@ -151,7 +151,33 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="nine columns" id="content">
   <div id="tocRoot"></div>
   
-  <p class="module-desc">Converts between different character encodings. On UNIX, this uses the <span id="iconv_1">iconv</span> library, on Windows the Windows API.</p>
+  <p class="module-desc"><p>Routines for converting between different character encodings. On UNIX, this uses the <span id="iconv_1">iconv</span> library, on Windows the Windows API.</p>
+<p>The following example shows how to change character encodings.</p>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">encodings</span>
+<span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">windows</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Keyword">let</span>
+    <span class="Identifier">orig</span> <span class="Operator">=</span> <span class="StringLit">&quot;öäüß&quot;</span>
+    <span class="Comment"># convert `orig` from &quot;UTF-8&quot; to &quot;CP1252&quot;</span>
+    <span class="Identifier">cp1252</span> <span class="Operator">=</span> <span class="Identifier">convert</span><span class="Punctuation">(</span><span class="Identifier">orig</span><span class="Punctuation">,</span> <span class="StringLit">&quot;CP1252&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;UTF-8&quot;</span><span class="Punctuation">)</span>
+    <span class="Comment"># convert `cp1252` from &quot;CP1252&quot; to &quot;ibm850&quot;</span>
+    <span class="Identifier">ibm850</span> <span class="Operator">=</span> <span class="Identifier">convert</span><span class="Punctuation">(</span><span class="Identifier">cp1252</span><span class="Punctuation">,</span> <span class="StringLit">&quot;ibm850&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;CP1252&quot;</span><span class="Punctuation">)</span>
+    <span class="Identifier">current</span> <span class="Operator">=</span> <span class="Identifier">getCurrentEncoding</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Identifier">assert</span> <span class="Identifier">orig</span> <span class="Operator">==</span> <span class="StringLit">&quot;</span><span class="EscapeSequence">\195</span><span class="EscapeSequence">\182</span><span class="EscapeSequence">\195</span><span class="EscapeSequence">\164</span><span class="EscapeSequence">\195</span><span class="EscapeSequence">\188</span><span class="EscapeSequence">\195</span><span class="EscapeSequence">\159</span><span class="StringLit">&quot;</span>
+  <span class="Identifier">assert</span> <span class="Identifier">ibm850</span> <span class="Operator">==</span> <span class="StringLit">&quot;</span><span class="EscapeSequence">\148</span><span class="EscapeSequence">\132</span><span class="EscapeSequence">\129</span><span class="EscapeSequence">\225</span><span class="StringLit">&quot;</span>
+  <span class="Identifier">assert</span> <span class="Identifier">convert</span><span class="Punctuation">(</span><span class="Identifier">ibm850</span><span class="Punctuation">,</span> <span class="Identifier">current</span><span class="Punctuation">,</span> <span class="StringLit">&quot;ibm850&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">orig</span></pre>The example below uses a reuseable <tt class="docutils literal"><span class="pre"><span class="Identifier">EncodingConverter</span></span></tt> object which is created by <tt class="docutils literal"><span class="pre"><span class="Identifier">open</span></span></tt> with <tt class="docutils literal"><span class="pre"><span class="Identifier">destEncoding</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">srcEncoding</span></span></tt> specified. You can use <tt class="docutils literal"><span class="pre"><span class="Identifier">convert</span></span></tt> on this object multiple times.
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">encodings</span>
+<span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">windows</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Keyword">var</span> <span class="Identifier">fromGB2312</span> <span class="Operator">=</span> <span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;utf-8&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;gb2312&quot;</span><span class="Punctuation">)</span>
+  <span class="Keyword">let</span> <span class="Identifier">first</span> <span class="Operator">=</span> <span class="StringLit">&quot;</span><span class="EscapeSequence">\203</span><span class="EscapeSequence">\173</span><span class="EscapeSequence">\197</span><span class="EscapeSequence">\194</span><span class="EscapeSequence">\163</span><span class="EscapeSequence">\191</span><span class="EscapeSequence">\210</span><span class="EscapeSequence">\187</span><span class="StringLit">&quot;</span> <span class="Operator">&amp;</span>
+      <span class="StringLit">&quot;</span><span class="EscapeSequence">\203</span><span class="EscapeSequence">\242</span><span class="EscapeSequence">\209</span><span class="EscapeSequence">\204</span><span class="EscapeSequence">\211</span><span class="EscapeSequence">\234</span><span class="EscapeSequence">\200</span><span class="EscapeSequence">\206</span><span class="EscapeSequence">\198</span><span class="EscapeSequence">\189</span><span class="EscapeSequence">\201</span><span class="EscapeSequence">\250</span><span class="StringLit">&quot;</span>
+  <span class="Identifier">assert</span> <span class="Identifier">fromGB2312</span><span class="Operator">.</span><span class="Identifier">convert</span><span class="Punctuation">(</span><span class="Identifier">first</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;谁怕？一蓑烟雨任平生&quot;</span>
+
+  <span class="Keyword">let</span> <span class="Identifier">second</span> <span class="Operator">=</span> <span class="StringLit">&quot;</span><span class="EscapeSequence">\211</span><span class="EscapeSequence">\208</span><span class="EscapeSequence">\176</span><span class="EscapeSequence">\215</span><span class="EscapeSequence">\205</span><span class="EscapeSequence">\183</span><span class="EscapeSequence">\200</span><span class="EscapeSequence">\231</span><span class="StringLit">&quot;</span> <span class="Operator">&amp;</span>
+      <span class="StringLit">&quot;</span><span class="EscapeSequence">\208</span><span class="EscapeSequence">\194</span><span class="EscapeSequence">\163</span><span class="EscapeSequence">\172</span><span class="EscapeSequence">\199</span><span class="EscapeSequence">\227</span><span class="EscapeSequence">\184</span><span class="EscapeSequence">\199</span><span class="EscapeSequence">\200</span><span class="EscapeSequence">\231</span><span class="EscapeSequence">\185</span><span class="EscapeSequence">\202</span><span class="StringLit">&quot;</span>
+  <span class="Identifier">assert</span> <span class="Identifier">fromGB2312</span><span class="Operator">.</span><span class="Identifier">convert</span><span class="Punctuation">(</span><span class="Identifier">second</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;有白头如新，倾盖如故&quot;</span></pre></p>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
@@ -164,22 +190,22 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><a href="encodings.html#EncodingConverter"><span class="Identifier">EncodingConverter</span></a> <span class="Other">=</span> <span class="Keyword">ptr</span> <span class="Identifier">ConverterObj</span></pre></dt>
 <dd>
 
-can convert between two character sets
+Can convert between two character sets.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L18"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L47"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L18" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L47" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="EncodingError"></a>
 <dt><pre><a href="encodings.html#EncodingError"><span class="Identifier">EncodingError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="system.html#ValueError"><span class="Identifier">ValueError</span></a></pre></dt>
 <dd>
 
-exception that is raised for encoding errors
+Exception that is raised for encoding errors.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L27"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L56"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L27" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L56" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -191,11 +217,11 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><span class="Keyword">proc</span> <a href="#getCurrentEncoding"><span class="Identifier">getCurrentEncoding</span></a><span class="Other">(</span><span class="Identifier">uiApp</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-retrieves the current encoding. On Unix, always &quot;UTF-8&quot; is returned. The <tt class="docutils literal"><span class="pre"><span class="Identifier">uiApp</span></span></tt> parameter is Windows specific. If true, the UI's code-page is returned, if false, the Console's code-page is returned.
+Retrieves the current encoding. On Unix, &quot;UTF-8&quot; is always returned. The <tt class="docutils literal"><span class="pre"><span class="Identifier">uiApp</span></span></tt> parameter is Windows specific. If true, the UI's code-page is returned, if false, the Console's code-page is returned.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L300"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L329"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L300" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L329" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="open,string,string"></a>
@@ -203,22 +229,22 @@ class="link-seesrc" target="_blank">Source</a>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">EncodingError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-opens a converter that can convert from <tt class="docutils literal"><span class="pre"><span class="Identifier">srcEncoding</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">destEncoding</span></span></tt>. Raises <tt class="docutils literal"><span class="pre"><span class="Identifier">IOError</span></span></tt> if it cannot fulfill the request.
+Opens a converter that can convert from <tt class="docutils literal"><span class="pre"><span class="Identifier">srcEncoding</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">destEncoding</span></span></tt>. Raises <tt class="docutils literal"><span class="pre"><span class="Identifier">IOError</span></span></tt> if it cannot fulfill the request.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L309"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L338"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L309" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L338" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="close,EncodingConverter"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#close%2CEncodingConverter"><span class="Identifier">close</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="encodings.html#EncodingConverter"><span class="Identifier">EncodingConverter</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-frees the resources the converter <tt class="docutils literal"><span class="pre"><span class="Identifier">c</span></span></tt> holds.
+Frees the resources the converter <tt class="docutils literal"><span class="pre"><span class="Identifier">c</span></span></tt> holds.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L328"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L357"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L357" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="convert,EncodingConverter,string"></a>
@@ -226,11 +252,13 @@ class="link-seesrc" target="_blank">Source</a>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
+Converts <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">destEncoding</span></span></tt> that was given to the converter <tt class="docutils literal"><span class="pre"><span class="Identifier">c</span></span></tt>. It assumes that <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> is in <tt class="docutils literal"><span class="pre"><span class="Identifier">srcEncoding</span></span></tt>.<div class="admonition admonition-warning"><span class="admonition-warning-text"><b>Warning:</b></span>
+UTF-16BE and UTF-32 conversions are not supported on Windows.</div>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L429"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L455"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L429" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L455" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="convert,string,string,string"></a>
@@ -238,11 +266,13 @@ class="link-seesrc" target="_blank">Source</a>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">EncodingError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-converts <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">destEncoding</span></span></tt>. It assumed that <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> is in <tt class="docutils literal"><span class="pre"><span class="Identifier">srcEncoding</span></span></tt>. This opens a converter, uses it and closes it again and is thus more convenient but also likely less efficient than re-using a converter. utf-16BE, utf-32 conversions not supported on windows
+Converts <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">destEncoding</span></span></tt>. It assumed that <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> is in <tt class="docutils literal"><span class="pre"><span class="Identifier">srcEncoding</span></span></tt>. This opens a converter, uses it and closes it again and is thus more convenient but also likely less efficient than re-using a converter.<div class="admonition admonition-warning"><span class="admonition-warning-text"><b>Warning:</b></span>
+UTF-16BE and UTF-32 conversions are not supported on Windows.</div>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L468"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/encodings.nim#L498"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L468" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/encodings.nim#L498" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -255,7 +285,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-03 00:46:57 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-14 00:49:59 UTC</small>
       </div>
     </div>
   </div>

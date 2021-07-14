@@ -488,6 +488,11 @@ proc `=sink`*[T](x: var T; y: T) {.inline, magic: "Asgn".} =
   ## Generic `sink`:idx: implementation that can be overridden.
   shallowCopy(x, y)
 
+when defined(nimHasTrace):
+  proc `=trace`*[T](x: var T; env: pointer) {.inline, magic: "Trace".} =
+    ## Generic `trace`:idx: implementation that can be overridden.
+    discard
+
 type
   HSlice*[T, U] = object   ## "Heterogeneous" slice type.
     a*: T                  ## The lower bound (inclusive).
@@ -1779,7 +1784,6 @@ when not defined(js) and defined(nimV2):
       align: int
       name: cstring
       traceImpl: pointer
-      disposeImpl: pointer
       typeInfoV1: pointer # for backwards compat, usually nil
       flags: int
     PNimTypeV2 = ptr TNimTypeV2

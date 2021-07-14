@@ -125,11 +125,8 @@ window.addEventListener('DOMContentLoaded', main);
   cpuSparc, cpuVm, cpuHppa, cpuIa64, cpuAmd64, cpuMips, cpuMipsel, cpuArm,
   cpuArm64, cpuJS, cpuNimVM, cpuAVR, cpuMSP430, cpuSparc64, cpuMips64,
   cpuMips64el, cpuRiscV32, cpuRiscV64, cpuEsp, cpuWasm32">TSystemCPU</a></li>
-  <li><a class="reference" href="#TEndian"
-    title="TEndian = enum
-  littleEndian, bigEndian">TEndian</a></li>
   <li><a class="reference" href="#TInfoCPU"
-    title="TInfoCPU = tuple[name: string, intSize: int, endian: TEndian,
+    title="TInfoCPU = tuple[name: string, intSize: int, endian: Endianness,
                  floatSize, bit: int]">TInfoCPU</a></li>
   <li><a class="reference" href="#Target"
     title="Target = object
@@ -244,7 +241,7 @@ window.addEventListener('DOMContentLoaded', main);
     newLine: &quot;\n&quot;, pathSep: &quot;:&quot;, dirSep: &quot;/&quot;, scriptExt: &quot;.sh&quot;, curDir: &quot;.&quot;,
     exeExt: &quot;&quot;, extSep: &quot;.&quot;, props: {})]">OS</a></li>
   <li><a class="reference" href="#EndianToStr"
-    title="EndianToStr: array[TEndian, string] = [&quot;littleEndian&quot;, &quot;bigEndian&quot;]">EndianToStr</a></li>
+    title="EndianToStr: array[Endianness, string] = [&quot;littleEndian&quot;, &quot;bigEndian&quot;]">EndianToStr</a></li>
   <li><a class="reference" href="#CPU"
     title="CPU: array[succ(low(TSystemCPU)) .. high(TSystemCPU), TInfoCPU] = [
     (name: &quot;i386&quot;, intSize: 32, endian: littleEndian, floatSize: 64, bit: 32),
@@ -398,9 +395,9 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="TEndian"></a>
-<dt><pre><a href="platform.html#TEndian"><span class="Identifier">TEndian</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">littleEndian</span><span class="Other">,</span> <span class="Identifier">bigEndian</span></pre></dt>
+<a id="TInfoCPU"></a>
+<dt><pre><a href="platform.html#TInfoCPU"><span class="Identifier">TInfoCPU</span></a> <span class="Other">=</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">name</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">intSize</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">endian</span><span class="Other">:</span> <span class="Identifier">Endianness</span><span class="Other">,</span>
+                 <span class="Identifier">floatSize</span><span class="Other">,</span> <span class="Identifier">bit</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">]</span></pre></dt>
 <dd>
 
 
@@ -408,18 +405,6 @@ class="link-seesrc" target="_blank">Source</a>
 href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L199"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L199" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="TInfoCPU"></a>
-<dt><pre><a href="platform.html#TInfoCPU"><span class="Identifier">TInfoCPU</span></a> <span class="Other">=</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">name</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">intSize</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">endian</span><span class="Other">:</span> <a href="platform.html#TEndian"><span class="Identifier">TEndian</span></a><span class="Other">,</span>
-                 <span class="Identifier">floatSize</span><span class="Other">,</span> <span class="Identifier">bit</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">]</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L201"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L201" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="Target"></a>
@@ -435,9 +420,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L236"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L234"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L236" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L234" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -553,14 +538,14 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 <a id="EndianToStr"></a>
-<dt><pre><a href="platform.html#EndianToStr"><span class="Identifier">EndianToStr</span></a><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">TEndian</span><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="StringLit">&quot;littleEndian&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;bigEndian&quot;</span><span class="Other">]</span></pre></dt>
+<dt><pre><a href="platform.html#EndianToStr"><span class="Identifier">EndianToStr</span></a><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">Endianness</span><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="StringLit">&quot;littleEndian&quot;</span><span class="Other">,</span> <span class="StringLit">&quot;bigEndian&quot;</span><span class="Other">]</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L205"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L203"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L205" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L203" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="CPU"></a>
@@ -596,9 +581,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L206"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L204"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L206" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L204" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -613,9 +598,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L244"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L242"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L244" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L242" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="nameToOS,string"></a>
@@ -624,9 +609,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L255"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L253"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L255" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L253" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="listOSnames"></a>
@@ -635,9 +620,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L261"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L259"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L261" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L259" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="nameToCPU,string"></a>
@@ -646,9 +631,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L265"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L263"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L265" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L263" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="listCPUnames"></a>
@@ -657,9 +642,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L271"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L269"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L271" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L269" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="setTargetFromSystem,Target"></a>
@@ -668,9 +653,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L275"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/platform.nim#L273"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L275" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/platform.nim#L273" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -683,7 +668,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-03 00:47:23 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-14 00:50:28 UTC</small>
       </div>
     </div>
   </div>

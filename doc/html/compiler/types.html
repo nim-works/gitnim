@@ -111,6 +111,15 @@ window.addEventListener('DOMContentLoaded', main);
     title="TPreferedDesc = enum
   preferName, preferDesc, preferExported, preferModuleInfo, preferGenericArg,
   preferTypeName, preferResolved, preferMixed">TPreferedDesc</a></li>
+  <li><a class="reference" href="#TTypeRelation"
+    title="TTypeRelation = enum
+  isNone, isConvertible, isIntConv, isSubtype, isSubrange,
+  isBothMetaConvertible, isInferred, isInferredConvertible, isGeneric,
+  isFromIntLit, isEqual">TTypeRelation</a></li>
+  <li><a class="reference" href="#ProcConvMismatch"
+    title="ProcConvMismatch = enum
+  pcmNoSideEffect, pcmNotGcSafe, pcmLockDifference, pcmNotIterator,
+  pcmDifferentCallConv">ProcConvMismatch</a></li>
   <li><a class="reference" href="#TTypeIter"
     title="TTypeIter = proc (t: PType; closure: RootRef): bool {.nimcall.}">TTypeIter</a></li>
   <li><a class="reference" href="#TTypeMutator"
@@ -187,6 +196,13 @@ window.addEventListener('DOMContentLoaded', main);
       <ul class="simple nested-toc-section">elemType
       <li><a class="reference" href="#elemType%2CPType"
     title="elemType(t: PType): PType">elemType(t: PType): PType</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">getProcConvMismatch
+      <li><a class="reference" href="#getProcConvMismatch%2CConfigRef%2CPType%2CPType"
+    title="getProcConvMismatch(c: ConfigRef; f, a: PType; rel = isNone): (
+    set[ProcConvMismatch], TTypeRelation)">getProcConvMismatch(c: ConfigRef; f, a: PType; rel = isNone): (
+    set[ProcConvMismatch], TTypeRelation)</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">sameObjectTypes
@@ -288,6 +304,13 @@ window.addEventListener('DOMContentLoaded', main);
     title="skipHiddenSubConv(n: PNode; g: ModuleGraph; idgen: IdGenerator): PNode">skipHiddenSubConv(n: PNode; g: ModuleGraph; idgen: IdGenerator): PNode</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">addPragmaAndCallConvMismatch
+      <li><a class="reference" href="#addPragmaAndCallConvMismatch%2Cstring%2CPType%2CPType%2CConfigRef"
+    title="addPragmaAndCallConvMismatch(message: var string; formal, actual: PType;
+                             conf: ConfigRef)">addPragmaAndCallConvMismatch(message: var string; formal, actual: PType;
+                             conf: ConfigRef)</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">isSinkTypeForParam
       <li><a class="reference" href="#isSinkTypeForParam%2CPType"
     title="isSinkTypeForParam(t: PType): bool">isSinkTypeForParam(t: PType): bool</a></li>
@@ -313,14 +336,14 @@ window.addEventListener('DOMContentLoaded', main);
     title="containsObject(t: PType): bool">containsObject(t: PType): bool</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">containsTyRef
-      <li><a class="reference" href="#containsTyRef%2CPType"
-    title="containsTyRef(typ: PType): bool">containsTyRef(typ: PType): bool</a></li>
-
-  </ul>
   <ul class="simple nested-toc-section">sameBackendType
       <li><a class="reference" href="#sameBackendType%2CPType%2CPType"
     title="sameBackendType(x, y: PType): bool">sameBackendType(x, y: PType): bool</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">containsTyRef
+      <li><a class="reference" href="#containsTyRef%2CPType"
+    title="containsTyRef(typ: PType): bool">containsTyRef(typ: PType): bool</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">isUnsigned
@@ -502,6 +525,11 @@ window.addEventListener('DOMContentLoaded', main);
     title="isCompileTimeOnly(t: PType): bool">isCompileTimeOnly(t: PType): bool</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">addTypeDeclVerboseMaybe
+      <li><a class="reference" href="#addTypeDeclVerboseMaybe%2Cstring%2CConfigRef%2CPType"
+    title="addTypeDeclVerboseMaybe(result: var string; conf: ConfigRef; typ: PType)">addTypeDeclVerboseMaybe(result: var string; conf: ConfigRef; typ: PType)</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">containsGarbageCollectedRef
       <li><a class="reference" href="#containsGarbageCollectedRef%2CPType"
     title="containsGarbageCollectedRef(typ: PType): bool">containsGarbageCollectedRef(typ: PType): bool</a></li>
@@ -605,15 +633,42 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L17" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="TTypeRelation"></a>
+<dt><pre><a href="types.html#TTypeRelation"><span class="Identifier">TTypeRelation</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">isNone</span><span class="Other">,</span> <span class="Identifier">isConvertible</span><span class="Other">,</span> <span class="Identifier">isIntConv</span><span class="Other">,</span> <span class="Identifier">isSubtype</span><span class="Other">,</span> <span class="Identifier">isSubrange</span><span class="Other">,</span>
+  <span class="Identifier">isBothMetaConvertible</span><span class="Other">,</span> <span class="Identifier">isInferred</span><span class="Other">,</span> <span class="Identifier">isInferredConvertible</span><span class="Other">,</span> <span class="Identifier">isGeneric</span><span class="Other">,</span>
+  <span class="Identifier">isFromIntLit</span><span class="Other">,</span> <span class="Identifier">isEqual</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L29"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L29" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="ProcConvMismatch"></a>
+<dt><pre><a href="types.html#ProcConvMismatch"><span class="Identifier">ProcConvMismatch</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">pcmNoSideEffect</span><span class="Other">,</span> <span class="Identifier">pcmNotGcSafe</span><span class="Other">,</span> <span class="Identifier">pcmLockDifference</span><span class="Other">,</span> <span class="Identifier">pcmNotIterator</span><span class="Other">,</span>
+  <span class="Identifier">pcmDifferentCallConv</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L45"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L45" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="TTypeIter"></a>
 <dt><pre><a href="types.html#TTypeIter"><span class="Identifier">TTypeIter</span></a> <span class="Other">=</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">;</span> <span class="Identifier">closure</span><span class="Other">:</span> <span class="Identifier">RootRef</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">nimcall</span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L37"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L68"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L37" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L68" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TTypeMutator"></a>
@@ -622,9 +677,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L38"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L69"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L38" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L69" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TTypePredicate"></a>
@@ -633,9 +688,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L39"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L70"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L39" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L70" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TParamsEquality"></a>
@@ -645,9 +700,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L47"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L78"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L47" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L78" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TTypeFieldResult"></a>
@@ -657,9 +712,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L266"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L297"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L266" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L297" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TDistinctCompare"></a>
@@ -672,9 +727,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 how distinct types are to be compared
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L854"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L885"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L854" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L885" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TTypeCmpFlag"></a>
@@ -686,9 +741,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L860"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L891"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L860" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L891" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TTypeCmpFlags"></a>
@@ -697,9 +752,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L869"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L900"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L869" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L900" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="EffectsCompat"></a>
@@ -710,9 +765,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1329"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1360"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1329" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1360" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="OrdinalType"></a>
@@ -722,9 +777,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1388"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1419"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1388" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1419" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -739,9 +794,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L62"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L93"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L62" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L93" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="abstractVar"></a>
@@ -751,9 +806,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L64"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L95"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L64" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L95" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="abstractRange"></a>
@@ -763,9 +818,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L66"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L97"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L66" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L97" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="abstractInstOwned"></a>
@@ -775,9 +830,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L68"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L99"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L68" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L99" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skipPtrs"></a>
@@ -787,9 +842,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L69"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L100"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L69" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L100" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="typedescPtrs"></a>
@@ -799,9 +854,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L72"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L103"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L72" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L103" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="typedescInst"></a>
@@ -811,9 +866,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L73"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L104"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L73" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L104" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="szUnknownSize"></a>
@@ -865,15 +920,27 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="12">
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
+<a id="addTypeDeclVerboseMaybe,string,ConfigRef,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addTypeDeclVerboseMaybe%2Cstring%2CConfigRef%2CPType"><span class="Identifier">addTypeDeclVerboseMaybe</span></a><span class="Other">(</span><span class="Identifier">result</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span> <span class="Identifier">typ</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L54"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L54" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="base,PType"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#base%2CPType"><span class="Identifier">base</span></a><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L32"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L63"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L32" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L63" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="invalidGenericInst,PType"></a>
@@ -882,9 +949,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L75"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L106"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L75" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L106" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isPureObject,PType"></a>
@@ -893,9 +960,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L78"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L109"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L78" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L109" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isUnsigned,PType"></a>
@@ -904,9 +971,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L84"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L115"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L84" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L115" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getOrdValue,PNode"></a>
@@ -916,9 +983,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L87"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L118"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L87" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L118" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getFloatValue,PNode"></a>
@@ -927,9 +994,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L111"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L142"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L111" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L142" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isIntLit,PType"></a>
@@ -938,9 +1005,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L117"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L148"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L117" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L148" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isFloatLit,PType"></a>
@@ -949,9 +1016,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L120"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L151"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L120" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L151" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="addTypeHeader,string,ConfigRef,PType,TPreferedDesc"></a>
@@ -963,9 +1030,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L123"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L154"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L123" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L154" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getProcHeader,ConfigRef,PSym,TPreferedDesc"></a>
@@ -976,9 +1043,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L127"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L158"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L127" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L158" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="elemType,PType"></a>
@@ -987,9 +1054,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L148"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L179"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L148" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L179" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="enumHasHoles,PType"></a>
@@ -998,9 +1065,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L157"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L188"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L157" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L188" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isOrdinalType,PType,bool"></a>
@@ -1010,9 +1077,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L161"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L192"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L161" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L192" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="iterOverType,PType,TTypeIter,RootRef"></a>
@@ -1022,9 +1089,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L199"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L230"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L199" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L230" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="searchTypeFor,PType,TTypePredicate"></a>
@@ -1034,9 +1101,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L250"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L281"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L281" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="containsObject,PType"></a>
@@ -1045,9 +1112,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L257"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L288"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L257" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="analyseObjectWithTypeField,PType"></a>
@@ -1057,9 +1124,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L300"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L331"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L300" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L331" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="containsGarbageCollectedRef,PType"></a>
@@ -1069,9 +1136,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L313"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L344"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L313" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L344" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="containsManagedMemory,PType"></a>
@@ -1081,9 +1148,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L322"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L353"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L322" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L353" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="containsTyRef,PType"></a>
@@ -1092,9 +1159,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L328"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L359"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L359" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="containsHiddenPointer,PType"></a>
@@ -1104,9 +1171,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L335"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L366"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L335" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L366" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isFinal,PType"></a>
@@ -1115,9 +1182,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L378"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L409"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L378" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L409" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="canFormAcycle,PType"></a>
@@ -1126,9 +1193,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L382"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L413"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L382" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L413" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mutateType,PType,TTypeMutator,RootRef"></a>
@@ -1138,9 +1205,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L414"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L445"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L414" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L445" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="typeToString,PType,TPreferedDesc"></a>
@@ -1150,9 +1217,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L466"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L497"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L466" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L497" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="firstOrd,ConfigRef,PType"></a>
@@ -1163,9 +1230,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L712"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L743"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L712" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L743" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="firstFloat,PType"></a>
@@ -1176,9 +1243,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L752"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L783"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L752" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L783" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lastOrd,ConfigRef,PType"></a>
@@ -1189,9 +1256,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L767"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L798"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L767" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L798" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lastFloat,PType"></a>
@@ -1202,9 +1269,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L811"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L842"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L811" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L842" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="floatRangeCheck,BiggestFloat,PType"></a>
@@ -1215,9 +1282,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L826"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L857"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L826" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L857" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="lengthOrd,ConfigRef,PType"></a>
@@ -1228,9 +1295,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L843"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L874"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L843" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L874" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sameType,PType,PType,TTypeCmpFlags"></a>
@@ -1240,9 +1307,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L895"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L926"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L895" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L926" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sameTypeOrNil,PType,PType,TTypeCmpFlags"></a>
@@ -1252,9 +1319,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L900"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L931"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L900" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L931" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="equalParams,PNode,PNode"></a>
@@ -1264,9 +1331,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L931"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L962"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L931" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L962" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sameObjectTypes,PType,PType"></a>
@@ -1276,9 +1343,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1006"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1037"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1006" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1037" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sameDistinctTypes,PType,PType"></a>
@@ -1288,9 +1355,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1012"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1043"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1012" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1043" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sameEnumTypes,PType,PType"></a>
@@ -1299,9 +1366,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1015"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1046"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1015" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1046" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isGenericAlias,PType"></a>
@@ -1310,9 +1377,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1058"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1089"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1058" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1089" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skipGenericAlias,PType"></a>
@@ -1321,9 +1388,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1061"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1092"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1061" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1092" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sameFlags,PType,PType"></a>
@@ -1332,9 +1399,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1064"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1095"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1064" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1095" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="sameBackendType,PType,PType"></a>
@@ -1344,9 +1411,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1187"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1218"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1187" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1218" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="compareTypes,PType,PType,TDistinctCompare,TTypeCmpFlags"></a>
@@ -1357,9 +1424,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 compares two type for equality (modulo type distinction)
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1193"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1224"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1193" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1224" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="inheritanceDiff,PType,PType"></a>
@@ -1368,9 +1435,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1204"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1235"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1204" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1235" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="commonSuperclass,PType,PType"></a>
@@ -1380,9 +1447,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1228"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1259"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1228" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1259" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="matchType,PType,openArray[tuple[TTypeKind,int]],TTypeKind"></a>
@@ -1392,9 +1459,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1252"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1283"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1252" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1283" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="computeSize,ConfigRef,PType"></a>
@@ -1405,9 +1472,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1264"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1295"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1264" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1295" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getReturnType,PSym"></a>
@@ -1416,9 +1483,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1268"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1299"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1268" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1299" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getAlign,ConfigRef,PType"></a>
@@ -1429,9 +1496,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1273"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1304"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1273" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1304" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="getSize,ConfigRef,PType"></a>
@@ -1442,9 +1509,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1277"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1308"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1277" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1308" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="containsGenericType,PType"></a>
@@ -1454,9 +1521,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1294"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1325"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1294" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1325" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="baseOfDistinct,PType,ModuleGraph,IdGenerator"></a>
@@ -1466,9 +1533,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1297"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1328"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1297" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1328" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="safeInheritanceDiff,PType,PType"></a>
@@ -1478,9 +1545,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1311"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1342"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1311" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1342" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="compatibleEffects,PType,PType"></a>
@@ -1490,9 +1557,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1337"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1368"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1337" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1368" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isCompileTimeOnly,PType"></a>
@@ -1501,9 +1568,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1370"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1401"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1370" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1401" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="containsCompileTimeOnly,PType"></a>
@@ -1512,9 +1579,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1373"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1404"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1373" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1404" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="safeSkipTypes,PType,TTypeKinds"></a>
@@ -1523,9 +1590,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 same as 'skipTypes' but with a simple cycle detector.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1380"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1411"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1380" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1411" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="classify,PType"></a>
@@ -1534,9 +1601,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 for convenient type checking:
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1391"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1422"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1391" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1422" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skipConv,PNode"></a>
@@ -1545,9 +1612,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1402"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1433"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1402" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1433" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skipHidden,PNode"></a>
@@ -1556,9 +1623,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1415"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1446"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1415" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1446" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skipConvTakeType,PNode"></a>
@@ -1567,9 +1634,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1427"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1458"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1427" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1458" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isEmptyContainer,PType"></a>
@@ -1578,9 +1645,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1431"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1462"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1431" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1462" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="takeType,PType,PType,ModuleGraph,IdGenerator"></a>
@@ -1590,9 +1657,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1440"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1471"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1440" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1471" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="skipHiddenSubConv,PNode,ModuleGraph,IdGenerator"></a>
@@ -1602,9 +1669,34 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1457"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1488"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1457" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1488" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="getProcConvMismatch,ConfigRef,PType,PType"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#getProcConvMismatch%2CConfigRef%2CPType%2CPType"><span class="Identifier">getProcConvMismatch</span></a><span class="Other">(</span><span class="Identifier">c</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">;</span> <span class="Identifier">f</span><span class="Other">,</span> <span class="Identifier">a</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">;</span> <span class="Identifier">rel</span> <span class="Other">=</span> <span class="Identifier">isNone</span><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span>
+    <span class="Identifier">set</span><span class="Other">[</span><a href="types.html#ProcConvMismatch"><span class="Identifier">ProcConvMismatch</span></a><span class="Other">]</span><span class="Other">,</span> <a href="types.html#TTypeRelation"><span class="Identifier">TTypeRelation</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+Returns a set of the reason of mismatch, and the relation for conversion.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1505"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1505" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="addPragmaAndCallConvMismatch,string,PType,PType,ConfigRef"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#addPragmaAndCallConvMismatch%2Cstring%2CPType%2CPType%2CConfigRef"><span class="Identifier">addPragmaAndCallConvMismatch</span></a><span class="Other">(</span><span class="Identifier">message</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">formal</span><span class="Other">,</span> <span class="Identifier">actual</span><span class="Other">:</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">;</span>
+                                  <span class="Identifier">conf</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1542"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1542" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="typeMismatch,ConfigRef,TLineInfo,PType,PType,PNode"></a>
@@ -1616,9 +1708,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1474"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1567"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1474" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1567" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isTupleRecursive,PType"></a>
@@ -1627,9 +1719,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1528"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1623"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1528" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1623" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isException,PType"></a>
@@ -1638,9 +1730,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1532"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1627"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1532" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1627" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isDefectException,PType"></a>
@@ -1649,9 +1741,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1543"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1638"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1543" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1638" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isSinkTypeForParam,PType"></a>
@@ -1660,9 +1752,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1554"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L1649"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1554" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L1649" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1676,9 +1768,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L30"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L61"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L30" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L61" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="bindConcreteTypeToUserTypeClass.t,PType,PType"></a>
@@ -1687,9 +1779,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L450"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L481"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L450" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L481" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="isResolvedUserTypeClass.t,PType"></a>
@@ -1698,9 +1790,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L460"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/types.nim#L491"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L460" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/types.nim#L491" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="foldSizeOf.t,ConfigRef,PNode,PNode"></a>
@@ -1746,7 +1838,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-03 00:47:24 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-14 00:50:29 UTC</small>
       </div>
     </div>
   </div>
