@@ -1,3 +1,4 @@
+import std/tables
 import std/algorithm
 import std/deques
 import std/options
@@ -75,6 +76,8 @@ macro repo(): untyped =
   result = getEnv.newCall(binsENV.newLit, embBINS.newLit)
 
 proc crash(why: string) {.used.} =
+  when defined(debug):
+    writeStackTrace()
   error why
   quit 1
 
@@ -152,16 +155,16 @@ proc run(exe: string; args: openArray[string];
     if not result.ok:
       notice exe & " " & arguments.join(" ")
 
-proc useColor(args: openArray[string]): bool =
-  if stdout.isAtty:
-    result = result or args.anyIt it == "log"
-    result = result or args.anyIt it.startsWith("--sort")
+proc maybeStripColor(args: openArray[string]): seq[string] =
+  result = @args
+  if not stdout.isAtty:
+    result = filterIt result: it != "--color"
+    if "--no-color" notin result:
+      result.insert("--no-color", 1)
 
 proc git(args: openArray[string]; options = capture): string {.discardable.} =
   ## run git with some arguments
-  var also = @args
-  if args.useColor:
-    also.insert("--color", 1)
+  let also = maybeStripColor args
   let ran = run("git", also, options = options)
   if ran.ok:
     result = ran.output
@@ -303,12 +306,35 @@ proc toggleModules(fetch = on) =
     while exposed.len > 0:
       stashInAttic popFirst(exposed)
 
+proc parseBranches(input: string): Table[string, string] =
+  ## parse some git output into a table of ref->sha | sha->ref
+  let input = strip input
+  var sha, path: string   # store the sha as a string because lazy
+  for line in input.splitLines(keepEol = false):
+    when true:
+      (sha, path) = line.split(' ', maxsplit = 1)
+      if path == "":
+        crash "unable to parse git output\n" & line
+    else:
+      # the scanf call is broken on 1.0 🙄
+      if not scanf(line, "$+ $+$.", sha, path):
+        crash "unable to parse git output\n" & line
+    # NOTE: we overwrite a HEAD with a proper branch here;
+    #       and we map in both directions because why not
+    result[path] = sha
+    result[sha] = path
+
 proc currentBranch(): string =
   ## find the current branch; note that you must choose the directory
-  result = strip git"branch --show-current --format='%(objectname)'"
-  if result == "":
+  let parsed =
+    parseBranches:
+      git"branch --sort=refname --format='%(objectname) %(refname)'"
+  let sha = strip git"rev-parse --verify HEAD"
+  try:
+    result = parsed[sha].lastPathPart
+    debug "the current branch of " & getCurrentDir() & " is " & result
+  except KeyError:
     crash "unable to determine branch"
-  debug "the current branch of " & getCurrentDir() & " is " & result
 
 proc nim(args: string; options = capture): string =
   ## run nim with some arguments
@@ -506,9 +532,9 @@ when isMainModule:
         refresh()
         withinNimDirectory:
           info "specify a branch; eg. `git nim 1.2.2` or `git nim origin/1.0.7`:"
-          info git"branch --all --sort=version:refname --verbose"
+          info git"branch --color --all --sort=version:refname --verbose"
           info "or you can specify one of these tags; eg. `git nim latest`:"
-          info git"tag --list -n2 --sort=version:refname"
+          info git"tag --color --list -n2 --sort=version:refname"
       else:
         # the user knows what they want; give it to them with as little
         # latency as possible and then display the nim version
