@@ -244,7 +244,10 @@ proc exposedModules(): Deque[string] =
         # obviously, it can't start with a period
         if not module.startsWith ".":
           available.add module
+    # 'member i said we'd sort them by name?
     sort available
+    # i guess we write whens against the major/minor now
+    # because it's too much work to port the stdlib to 1.2.
     when (NimMajor, NimMinor) >= (1, 3):
       result = available.toDeque
     else:
@@ -262,7 +265,10 @@ proc update(m: Module; fetch = on) =
       git ["submodule", "update", "--init", "--depth=1", m.name]
 
 proc toggleModules(fetch = on) =
-  ## expose or hide modules according to .gitmodules
+  ## expose or hide modules according to .gitmodules;
+  ## setting fetch to `off` indicates that you don't
+  ## want to use the network to update out-of-date modules,
+  ## but we always add missing modules via the network.
   withinDistribution:
     debug "toggling modules with " & fetchFlag fetch
     # the attic is a place to store modules we aren't using
