@@ -180,7 +180,9 @@ window.addEventListener('DOMContentLoaded', main);
 
   </ul>
   <ul class="simple nested-toc-section">delete
-      <li><a class="reference" href="#delete%2Cseq%5BT%5D%2CNatural%2CNatural"
+      <li><a class="reference" href="#delete%2Cseq%5BT%5D%2CSlice%5Bint%5D"
+    title="delete[T](s: var seq[T]; slice: Slice[int])">delete[T](s: var seq[T]; slice: Slice[int])</a></li>
+  <li><a class="reference" href="#delete%2Cseq%5BT%5D%2CNatural%2CNatural"
     title="delete[T](s: var seq[T]; first, last: Natural)">delete[T](s: var seq[T]; first, last: Natural)</a></li>
 
   </ul>
@@ -709,20 +711,47 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L482" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="delete,seq[T],Natural,Natural"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#delete%2Cseq%5BT%5D%2CNatural%2CNatural"><span class="Identifier">delete</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">first</span><span class="Other">,</span> <span class="Identifier">last</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a><span class="Other">)</span></pre></dt>
+<a id="delete,seq[T],Slice[int]"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#delete%2Cseq%5BT%5D%2CSlice%5Bint%5D"><span class="Identifier">delete</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">slice</span><span class="Other">:</span> <a href="system.html#Slice"><span class="Identifier">Slice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span></pre></dt>
 <dd>
 
-Deletes the items of a sequence <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> at positions <tt class="docutils literal"><span class="pre"><span class="Identifier">first</span><span class="Operator">..</span><span class="Identifier">last</span></span></tt> (including both ends of the range). This modifies <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> itself, it does not return a copy. 
+<p>Deletes the items <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span><span class="Punctuation">[</span><span class="Identifier">slice</span><span class="Punctuation">]</span></span></tt>, raising <tt class="docutils literal"><span class="pre"><span class="Identifier">IndexDefect</span></span></tt> if the slice contains elements out of range.</p>
+<p>This operation moves all elements after <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span><span class="Punctuation">[</span><span class="Identifier">slice</span><span class="Punctuation">]</span></span></tt> in linear time.</p>
+
 <p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">10</span><span class="Punctuation">,</span> <span class="DecNumber">11</span><span class="Punctuation">,</span> <span class="DecNumber">12</span><span class="Punctuation">,</span> <span class="DecNumber">13</span><span class="Punctuation">,</span> <span class="DecNumber">14</span><span class="Punctuation">]</span>
+<span class="Identifier">doAssertRaises</span><span class="Punctuation">(</span><span class="Identifier">IndexDefect</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">delete</span><span class="Punctuation">(</span><span class="FloatNumber">4.</span><span class="Operator">.</span><span class="DecNumber">5</span><span class="Punctuation">)</span>
+<span class="Identifier">assert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">10</span><span class="Punctuation">,</span> <span class="DecNumber">11</span><span class="Punctuation">,</span> <span class="DecNumber">12</span><span class="Punctuation">,</span> <span class="DecNumber">13</span><span class="Punctuation">,</span> <span class="DecNumber">14</span><span class="Punctuation">]</span>
+<span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">delete</span><span class="Punctuation">(</span><span class="FloatNumber">4.</span><span class="Operator">.</span><span class="DecNumber">4</span><span class="Punctuation">)</span>
+<span class="Identifier">assert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">10</span><span class="Punctuation">,</span> <span class="DecNumber">11</span><span class="Punctuation">,</span> <span class="DecNumber">12</span><span class="Punctuation">,</span> <span class="DecNumber">13</span><span class="Punctuation">]</span>
+<span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">delete</span><span class="Punctuation">(</span><span class="FloatNumber">1.</span><span class="Operator">.</span><span class="DecNumber">2</span><span class="Punctuation">)</span>
+<span class="Identifier">assert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">10</span><span class="Punctuation">,</span> <span class="DecNumber">13</span><span class="Punctuation">]</span>
+<span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">delete</span><span class="Punctuation">(</span><span class="FloatNumber">1.</span><span class="Operator">.&lt;</span><span class="DecNumber">1</span><span class="Punctuation">)</span> <span class="Comment"># empty slice</span>
+<span class="Identifier">assert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">10</span><span class="Punctuation">,</span> <span class="DecNumber">13</span><span class="Punctuation">]</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L512"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L512" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="delete,seq[T],Natural,Natural"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#delete%2Cseq%5BT%5D%2CNatural%2CNatural"><span class="Identifier">delete</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">first</span><span class="Other">,</span> <span class="Identifier">last</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a><span class="Other">)</span> {.
+    <span class="Identifier">deprecated</span><span class="Other">:</span> <span class="StringLit">&quot;use `delete(s, first..last)`&quot;</span>.}</pre></dt>
+<dd>
+  <div class="deprecation-message">
+    <b>Deprecated:</b> use `delete(s, first..last)`
+  </div>
+
+Deletes the items of a sequence <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> at positions <tt class="docutils literal"><span class="pre"><span class="Identifier">first</span><span class="Operator">..</span><span class="Identifier">last</span></span></tt> (including both ends of the range). This modifies <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt> itself, it does not return a copy.
+<p><strong class="examples_text">Example: cmd: --warning:deprecated:off</strong></p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">outcome</span> <span class="Operator">=</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">]</span>
 <span class="Keyword">var</span> <span class="Identifier">dest</span> <span class="Operator">=</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">1</span><span class="Punctuation">]</span>
 <span class="Identifier">dest</span><span class="Operator">.</span><span class="Identifier">delete</span><span class="Punctuation">(</span><span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">8</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Identifier">outcome</span> <span class="Operator">==</span> <span class="Identifier">dest</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L512"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L552"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L512" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L552" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="insert,seq[T],openArray[T],int"></a>
@@ -740,9 +769,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">dest</span><span class="Operator">.</span><span class="Identifier">insert</span><span class="Punctuation">(</span><span class="Identifier">src</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Identifier">dest</span> <span class="Operator">==</span> <span class="Identifier">outcome</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L537"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L576"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L537" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L576" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="all,openArray[T],proc(T)"></a>
@@ -760,9 +789,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">all</span><span class="Punctuation">(</span><span class="Identifier">numbers</span><span class="Punctuation">,</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">bool</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Operator">&lt;</span> <span class="DecNumber">10</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">true</span>
 <span class="Identifier">assert</span> <span class="Identifier">all</span><span class="Punctuation">(</span><span class="Identifier">numbers</span><span class="Punctuation">,</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">bool</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Operator">&lt;</span> <span class="DecNumber">9</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">false</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L649"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L688"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L649" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L688" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="any,openArray[T],proc(T)"></a>
@@ -780,9 +809,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">any</span><span class="Punctuation">(</span><span class="Identifier">numbers</span><span class="Punctuation">,</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">bool</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Operator">&gt;</span> <span class="DecNumber">8</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">true</span>
 <span class="Identifier">assert</span> <span class="Identifier">any</span><span class="Punctuation">(</span><span class="Identifier">numbers</span><span class="Punctuation">,</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">bool</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Operator">&gt;</span> <span class="DecNumber">9</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">false</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L691"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L730"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L691" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L730" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -820,9 +849,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Iterates over each element yielded by a closure iterator. This may not seem particularly useful on its own, but this allows closure iterators to be used by the mapIt, filterIt, allIt, anyIt, etc. templates.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L1079"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L1118"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L1079" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L1118" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -850,9 +879,9 @@ Applies <tt class="docutils literal"><span class="pre"><span class="Identifier">
 <span class="Identifier">assert</span> <span class="Identifier">c</span> <span class="Operator">==</span> <span class="Punctuation">(</span><span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="StringLit">&quot;2&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;3&quot;</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="StringLit">&quot;4&quot;</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="StringLit">&quot;5&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;6&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Identifier">d</span> <span class="Operator">==</span> <span class="Punctuation">(</span><span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="StringLit">&quot;4&quot;</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="DecNumber">5</span><span class="Punctuation">,</span> <span class="DecNumber">6</span><span class="Punctuation">)</span><span class="Punctuation">)</span></pre>There are no constraints for the <tt class="docutils literal"><span class="pre"><span class="Identifier">constructor</span></span></tt> AST, it works for nested tuples of arrays of sets etc.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L1053"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L1092"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L1053" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L1092" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -881,9 +910,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">acceptable</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="Operator">-</span><span class="FloatNumber">2.0</span><span class="Punctuation">,</span> <span class="FloatNumber">24.5</span><span class="Punctuation">,</span> <span class="FloatNumber">44.31</span><span class="Punctuation">]</span>
 <span class="Identifier">assert</span> <span class="Identifier">notAcceptable</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="Operator">-</span><span class="FloatNumber">272.15</span><span class="Punctuation">,</span> <span class="FloatNumber">99.9</span><span class="Punctuation">,</span> <span class="Operator">-</span><span class="FloatNumber">113.44</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L571"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L610"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L571" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L610" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="keepItIf.t,seq,untyped"></a>
@@ -902,9 +931,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">candidates</span><span class="Operator">.</span><span class="Identifier">keepItIf</span><span class="Punctuation">(</span><span class="Identifier">it</span><span class="Operator">.</span><span class="Identifier">len</span> <span class="Operator">==</span> <span class="DecNumber">3</span> <span class="Keyword">and</span> <span class="Identifier">it</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span> <span class="Operator">==</span> <span class="CharLit">'b'</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Identifier">candidates</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;bar&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;baz&quot;</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L601"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L640"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L601" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L640" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="countIt.t,untyped,untyped"></a>
@@ -921,9 +950,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">numbers</span><span class="Operator">.</span><span class="Identifier">countIt</span><span class="Punctuation">(</span><span class="Identifier">it</span> <span class="Operator">&lt;</span> <span class="DecNumber">0</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">3</span>
 <span class="Identifier">assert</span> <span class="Identifier">countIt</span><span class="Punctuation">(</span><span class="Identifier">iota</span><span class="Punctuation">(</span><span class="DecNumber">10</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">it</span> <span class="Operator">&lt;</span> <span class="DecNumber">2</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">2</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L631"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L670"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L631" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L670" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="allIt.t,untyped,untyped"></a>
@@ -942,9 +971,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">numbers</span><span class="Operator">.</span><span class="Identifier">allIt</span><span class="Punctuation">(</span><span class="Identifier">it</span> <span class="Operator">&lt;</span> <span class="DecNumber">10</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">true</span>
 <span class="Identifier">assert</span> <span class="Identifier">numbers</span><span class="Operator">.</span><span class="Identifier">allIt</span><span class="Punctuation">(</span><span class="Identifier">it</span> <span class="Operator">&lt;</span> <span class="DecNumber">9</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">false</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L667"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L706"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L667" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L706" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="anyIt.t,untyped,untyped"></a>
@@ -963,9 +992,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">numbers</span><span class="Operator">.</span><span class="Identifier">anyIt</span><span class="Punctuation">(</span><span class="Identifier">it</span> <span class="Operator">&gt;</span> <span class="DecNumber">8</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">true</span>
 <span class="Identifier">assert</span> <span class="Identifier">numbers</span><span class="Operator">.</span><span class="Identifier">anyIt</span><span class="Punctuation">(</span><span class="Identifier">it</span> <span class="Operator">&gt;</span> <span class="DecNumber">9</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">false</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L709"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L748"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L709" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L748" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="toSeq.t,untyped"></a>
@@ -986,9 +1015,9 @@ Transforms any iterable (anything that can be iterated over, e.g. with a for-loo
 <span class="Identifier">assert</span> <span class="Identifier">mySeq1</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">4</span><span class="Punctuation">,</span> <span class="DecNumber">5</span><span class="Punctuation">]</span>
 <span class="Identifier">assert</span> <span class="Identifier">mySeq2</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">1'i8</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">5</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L774"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L813"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L774" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L813" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="foldl.t,untyped,untyped"></a>
@@ -1023,9 +1052,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">concatenation</span> <span class="Operator">==</span> <span class="StringLit">&quot;nimiscool&quot;</span>
 <span class="Identifier">assert</span> <span class="Identifier">foldl</span><span class="Punctuation">(</span><span class="Identifier">procs</span><span class="Punctuation">,</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">)</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;procIsAlsoFine&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L812"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L851"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L812" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L851" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="foldl.t,,,"></a>
@@ -1045,9 +1074,9 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">digits</span> <span class="Operator">=</span> <span class="Identifier">foldl</span><span class="Punctuation">(</span><span class="Identifier">numbers</span><span class="Punctuation">,</span> <span class="Identifier">a</span> <span class="Operator">&amp;</span> <span class="Punctuation">(</span><span class="Identifier">chr</span><span class="Punctuation">(</span><span class="Identifier">b</span> <span class="Operator">+</span> <span class="Identifier">ord</span><span class="Punctuation">(</span><span class="CharLit">'0'</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Identifier">digits</span> <span class="Operator">==</span> <span class="StringLit">&quot;0815&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L861"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L900"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L861" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L900" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="foldr.t,untyped,untyped"></a>
@@ -1075,9 +1104,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">assert</span> <span class="Identifier">multiplication</span> <span class="Operator">==</span> <span class="DecNumber">495</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Multiplication is (5*(9*(11)))&quot;</span>
 <span class="Identifier">assert</span> <span class="Identifier">concatenation</span> <span class="Operator">==</span> <span class="StringLit">&quot;nimiscool&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L888"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L927"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L888" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L927" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="mapIt.t,typed,untyped"></a>
@@ -1100,9 +1129,9 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">strings</span> <span class="Operator">=</span> <span class="Identifier">nums</span><span class="Operator">.</span><span class="Identifier">mapIt</span><span class="Punctuation">(</span><span class="Operator">$</span><span class="Punctuation">(</span><span class="DecNumber">4</span> <span class="Operator">*</span> <span class="Identifier">it</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Identifier">strings</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;4&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;8&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;12&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;16&quot;</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L930"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L969"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L930" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L969" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="applyIt.t,untyped,untyped"></a>
@@ -1121,9 +1150,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">nums</span><span class="Operator">.</span><span class="Identifier">applyIt</span><span class="Punctuation">(</span><span class="Identifier">it</span> <span class="Operator">*</span> <span class="DecNumber">3</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Identifier">nums</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span> <span class="Operator">+</span> <span class="Identifier">nums</span><span class="Punctuation">[</span><span class="DecNumber">3</span><span class="Punctuation">]</span> <span class="Operator">==</span> <span class="DecNumber">15</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L995"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L1034"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L995" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L1034" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="newSeqWith.t,int,untyped"></a>
@@ -1145,9 +1174,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Keyword">var</span> <span class="Identifier">seqRand</span> <span class="Operator">=</span> <span class="Identifier">newSeqWith</span><span class="Punctuation">(</span><span class="DecNumber">20</span><span class="Punctuation">,</span> <span class="Identifier">rand</span><span class="Punctuation">(</span><span class="FloatNumber">1.0</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Identifier">seqRand</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span> <span class="Operator">!=</span> <span class="Identifier">seqRand</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">]</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L1016"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sequtils.nim#L1055"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L1016" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sequtils.nim#L1055" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1160,7 +1189,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-14 00:50:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-17 00:49:13 UTC</small>
       </div>
     </div>
   </div>
