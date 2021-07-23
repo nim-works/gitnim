@@ -119,11 +119,11 @@ window.addEventListener('DOMContentLoaded', main);
   tocPart*: seq[TocEntry]
   hasToc*: bool
   theIndex: string
-  options*: RstParseOptions
   findFile*: FindFileHandler
   msgHandler*: MsgHandler
   outDir*: string            ## output directory, initialized by docgen.nim
   destFile*: string          ## output (HTML) file, initialized by docgen.nim
+  filenames*: RstFileTable
   filename*: string          ## source Nim or Rst file
   meta*: array[MetaEnum, string]
   currentSection: string ## \
@@ -183,14 +183,14 @@ window.addEventListener('DOMContentLoaded', main);
 
   </ul>
   <ul class="simple nested-toc-section">initRstGenerator
-      <li><a class="reference" href="#initRstGenerator%2CRstGenerator%2COutputTarget%2CStringTableRef%2Cstring%2CRstParseOptions%2CFindFileHandler%2CMsgHandler"
+      <li><a class="reference" href="#initRstGenerator%2CRstGenerator%2COutputTarget%2CStringTableRef%2Cstring%2CFindFileHandler%2CMsgHandler"
     title="initRstGenerator(g: var RstGenerator; target: OutputTarget;
                  config: StringTableRef; filename: string;
-                 options: RstParseOptions; findFile: FindFileHandler = nil;
-                 msgHandler: MsgHandler = nil)">initRstGenerator(g: var RstGenerator; target: OutputTarget;
+                 findFile: FindFileHandler = nil; msgHandler: MsgHandler = nil;
+                 filenames = default(RstFileTable))">initRstGenerator(g: var RstGenerator; target: OutputTarget;
                  config: StringTableRef; filename: string;
-                 options: RstParseOptions; findFile: FindFileHandler = nil;
-                 msgHandler: MsgHandler = nil)</a></li>
+                 findFile: FindFileHandler = nil; msgHandler: MsgHandler = nil;
+                 filenames = default(RstFileTable))</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">prettyLink
@@ -276,7 +276,7 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
 <dl class="item">
-<a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="os.html">os</a>, <a class="reference external" href="hashes.html">hashes</a>, <a class="reference external" href="strtabs.html">strtabs</a>, <a class="reference external" href="rstast.html">rstast</a>, <a class="reference external" href="rst.html">rst</a>, <a class="reference external" href="highlite.html">highlite</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="sequtils.html">sequtils</a>, <a class="reference external" href="algorithm.html">algorithm</a>, <a class="reference external" href="parseutils.html">parseutils</a>, <a class="reference external" href="since.html">since</a>
+<a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="os.html">os</a>, <a class="reference external" href="hashes.html">hashes</a>, <a class="reference external" href="strtabs.html">strtabs</a>, <a class="reference external" href="rstast.html">rstast</a>, <a class="reference external" href="rst.html">rst</a>, <a class="reference external" href="highlite.html">highlite</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="sequtils.html">sequtils</a>, <a class="reference external" href="algorithm.html">algorithm</a>, <a class="reference external" href="parseutils.html">parseutils</a>, <a class="reference external" href="strbasics.html">strbasics</a>, <a class="reference external" href="since.html">since</a>
 </dl></div>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
@@ -314,11 +314,11 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">tocPart</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><span class="Identifier">TocEntry</span><span class="Other">]</span>
   <span class="Identifier">hasToc</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>
   <span class="Identifier">theIndex</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
-  <span class="Identifier">options</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a>
   <span class="Identifier">findFile</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#FindFileHandler"><span class="Identifier">FindFileHandler</span></a>
   <span class="Identifier">msgHandler</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a>
   <span class="Identifier">outDir</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>            <span class="Comment">## output directory, initialized by docgen.nim</span>
   <span class="Identifier">destFile</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>          <span class="Comment">## output (HTML) file, initialized by docgen.nim</span>
+  <span class="Identifier">filenames</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#RstFileTable"><span class="Identifier">RstFileTable</span></a>
   <span class="Identifier">filename</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>          <span class="Comment">## source Nim or Rst file</span>
   <span class="Identifier">meta</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="Identifier">MetaEnum</span><span class="Other">,</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span>
   <span class="Identifier">currentSection</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Comment">## \</span>
@@ -373,11 +373,12 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L104" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="initRstGenerator,RstGenerator,OutputTarget,StringTableRef,string,RstParseOptions,FindFileHandler,MsgHandler"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#initRstGenerator%2CRstGenerator%2COutputTarget%2CStringTableRef%2Cstring%2CRstParseOptions%2CFindFileHandler%2CMsgHandler"><span class="Identifier">initRstGenerator</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">target</span><span class="Other">:</span> <a href="rstgen.html#OutputTarget"><span class="Identifier">OutputTarget</span></a><span class="Other">;</span>
+<a id="initRstGenerator,RstGenerator,OutputTarget,StringTableRef,string,FindFileHandler,MsgHandler"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#initRstGenerator%2CRstGenerator%2COutputTarget%2CStringTableRef%2Cstring%2CFindFileHandler%2CMsgHandler"><span class="Identifier">initRstGenerator</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">target</span><span class="Other">:</span> <a href="rstgen.html#OutputTarget"><span class="Identifier">OutputTarget</span></a><span class="Other">;</span>
                       <span class="Identifier">config</span><span class="Other">:</span> <a href="strtabs.html#StringTableRef"><span class="Identifier">StringTableRef</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span>
-                      <span class="Identifier">options</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a><span class="Other">;</span> <span class="Identifier">findFile</span><span class="Other">:</span> <a href="rst.html#FindFileHandler"><span class="Identifier">FindFileHandler</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
-                      <span class="Identifier">msgHandler</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
+                      <span class="Identifier">findFile</span><span class="Other">:</span> <a href="rst.html#FindFileHandler"><span class="Identifier">FindFileHandler</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
+                      <span class="Identifier">msgHandler</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
+                      <span class="Identifier">filenames</span> <span class="Other">=</span> <span class="Identifier">default</span><span class="Other">(</span><a href="rst.html#RstFileTable"><span class="Identifier">RstFileTable</span></a><span class="Other">)</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
@@ -543,9 +544,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">renderRstToOut</span><span class="Punctuation">(</span><span class="Identifier">gen</span><span class="Punctuation">,</span> <span class="Identifier">rst</span><span class="Punctuation">,</span> <span class="Identifier">generatedHtml</span><span class="Punctuation">)</span>
 <span class="Identifier">echo</span> <span class="Identifier">generatedHtml</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1200"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1201"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1200" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1201" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="formatNamedVars,string,openArray[string],openArray[string]"></a>
@@ -556,9 +557,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1410"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1411"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1410" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1411" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="defaultConfig"></a>
@@ -570,15 +571,15 @@ class="link-seesrc" target="_blank">Source</a>
 <p>The only difference between the contents of that file and the values provided by this proc is the <tt class="docutils literal"><span class="pre">doc.file</span></tt> variable. The <tt class="docutils literal"><span class="pre">doc.file</span></tt> variable of the configuration file contains HTML to build standalone pages, while this proc returns just the content for procs like <tt class="docutils literal"><span class="pre">rstToHtml</span></tt> to generate the bare minimum HTML.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1471"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1472"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1471" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1472" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rstToHtml,string,RstParseOptions,StringTableRef,MsgHandler"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#rstToHtml%2Cstring%2CRstParseOptions%2CStringTableRef%2CMsgHandler"><span class="Identifier">rstToHtml</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">options</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="strtabs.html#StringTableRef"><span class="Identifier">StringTableRef</span></a><span class="Other">;</span>
                <span class="Identifier">msgHandler</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a> <span class="Other">=</span> <span class="Identifier">rst</span><span class="Other">.</span><span class="Identifier">defaultMsgHandler</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 <p>Converts an input rst string into embeddable HTML.</p>
@@ -590,23 +591,23 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Comment"># --&gt; &lt;em&gt;Hello&lt;/em&gt; &lt;strong&gt;world&lt;/strong&gt;!</span></pre><p>If you need to allow the rst <tt class="docutils literal"><span class="pre">include</span></tt> directive or tweak the generated output you have to create your own <tt class="docutils literal"><span class="pre">RstGenerator</span></tt> with <tt class="docutils literal"><span class="pre">initRstGenerator</span></tt> and related procs.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1539"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1540"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1539" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1540" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="rstToLatex,string,RstParseOptions"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#rstToLatex%2Cstring%2CRstParseOptions"><span class="Identifier">rstToLatex</span></a><span class="Other">(</span><span class="Identifier">rstSource</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">options</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span>
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 Convenience proc for <tt class="docutils literal"><span class="pre"><span class="Identifier">renderRstToOut</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">initRstGenerator</span></span></tt>.
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">rstToLatex</span><span class="Punctuation">(</span><span class="StringLit">&quot;*Hello* **world**&quot;</span><span class="Punctuation">,</span> <span class="Punctuation">{</span><span class="Punctuation">}</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="LongStringLit">&quot;&quot;&quot;\emph{Hello} \textbf{world}&quot;&quot;&quot;</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1576"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1578"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1576" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1578" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -619,7 +620,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-18 00:53:23 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-23 00:53:25 UTC</small>
       </div>
     </div>
   </div>
