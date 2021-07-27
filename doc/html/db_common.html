@@ -98,16 +98,29 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#7" id="57">Types</a>
   <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#DbError"
-    title="DbError = object of IOError">DbError</a></li>
-  <li><a class="reference" href="#SqlQuery"
-    title="SqlQuery = distinct string">SqlQuery</a></li>
+      <li><a class="reference" href="#DbColumn"
+    title="DbColumn = object
+  name*: string              ## name of the column
+  tableName*: string         ## name of the table the column belongs to (optional)
+  typ*: DbType               ## type of the column
+  primaryKey*: bool          ## is this a primary key?
+  foreignKey*: bool          ## is this a foreign key?">DbColumn</a></li>
+  <li><a class="reference" href="#DbColumns"
+    title="DbColumns = seq[DbColumn]">DbColumns</a></li>
   <li><a class="reference" href="#DbEffect"
     title="DbEffect = object of IOEffect">DbEffect</a></li>
-  <li><a class="reference" href="#ReadDbEffect"
-    title="ReadDbEffect = object of DbEffect">ReadDbEffect</a></li>
-  <li><a class="reference" href="#WriteDbEffect"
-    title="WriteDbEffect = object of DbEffect">WriteDbEffect</a></li>
+  <li><a class="reference" href="#DbError"
+    title="DbError = object of IOError">DbError</a></li>
+  <li><a class="reference" href="#DbType"
+    title="DbType = object
+  kind*: DbTypeKind          ## the kind of the described type
+  notNull*: bool             ## does the type contain NULL?
+  name*: string              ## the name of the type
+  size*: Natural             ## the size of the datatype; 0 if of variable size
+  maxReprLen*: Natural       ## maximal length required for the representation
+  precision*, scale*: Natural ## precision and scale of the number
+  min*, max*: BiggestInt     ## the minimum and maximum of allowed values
+  validValues*: seq[string]  ## valid values of an enum or a set">DbType</a></li>
   <li><a class="reference" href="#DbTypeKind"
     title="DbTypeKind = enum
   dbUnknown,                ## unknown datatype
@@ -152,25 +165,12 @@ window.addEventListener('DOMContentLoaded', main);
   dbUser3,                  ## user definable datatype 3 (for unknown extensions)
   dbUser4,                  ## user definable datatype 4 (for unknown extensions)
   dbUser5                    ## user definable datatype 5 (for unknown extensions)">DbTypeKind</a></li>
-  <li><a class="reference" href="#DbType"
-    title="DbType = object
-  kind*: DbTypeKind          ## the kind of the described type
-  notNull*: bool             ## does the type contain NULL?
-  name*: string              ## the name of the type
-  size*: Natural             ## the size of the datatype; 0 if of variable size
-  maxReprLen*: Natural       ## maximal length required for the representation
-  precision*, scale*: Natural ## precision and scale of the number
-  min*, max*: BiggestInt     ## the minimum and maximum of allowed values
-  validValues*: seq[string]  ## valid values of an enum or a set">DbType</a></li>
-  <li><a class="reference" href="#DbColumn"
-    title="DbColumn = object
-  name*: string              ## name of the column
-  tableName*: string         ## name of the table the column belongs to (optional)
-  typ*: DbType               ## type of the column
-  primaryKey*: bool          ## is this a primary key?
-  foreignKey*: bool          ## is this a foreign key?">DbColumn</a></li>
-  <li><a class="reference" href="#DbColumns"
-    title="DbColumns = seq[DbColumn]">DbColumns</a></li>
+  <li><a class="reference" href="#ReadDbEffect"
+    title="ReadDbEffect = object of DbEffect">ReadDbEffect</a></li>
+  <li><a class="reference" href="#SqlQuery"
+    title="SqlQuery = distinct string">SqlQuery</a></li>
+  <li><a class="reference" href="#WriteDbEffect"
+    title="WriteDbEffect = object of DbEffect">WriteDbEffect</a></li>
 
   </ul>
 </li>
@@ -212,26 +212,32 @@ class="link-seesrc" target="_blank">Source</a>
   <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
 <dl class="item">
-<a id="DbError"></a>
-<dt><pre><a href="db_common.html#DbError"><span class="Identifier">DbError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="system.html#IOError"><span class="Identifier">IOError</span></a></pre></dt>
+<a id="DbColumn"></a>
+<dt><pre><a href="db_common.html#DbColumn"><span class="Identifier">DbColumn</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">name</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>              <span class="Comment">## name of the column</span>
+  <span class="Identifier">tableName</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>         <span class="Comment">## name of the table the column belongs to (optional)</span>
+  <span class="Identifier">typ</span><span class="Operator">*</span><span class="Other">:</span> <a href="db_common.html#DbType"><span class="Identifier">DbType</span></a>               <span class="Comment">## type of the column</span>
+  <span class="Identifier">primaryKey</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>          <span class="Comment">## is this a primary key?</span>
+  <span class="Identifier">foreignKey</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>          <span class="Comment">## is this a foreign key?</span>
+  </pre></dt>
 <dd>
 
-exception that is raised if a database error occurs
+information about a database column
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L15"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L78"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L15" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L78" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="SqlQuery"></a>
-<dt><pre><a href="db_common.html#SqlQuery"><span class="Identifier">SqlQuery</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
+<a id="DbColumns"></a>
+<dt><pre><a href="db_common.html#DbColumns"><span class="Identifier">DbColumns</span></a> <span class="Other">=</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="db_common.html#DbColumn"><span class="Identifier">DbColumn</span></a><span class="Other">]</span></pre></dt>
 <dd>
 
-an SQL query string
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L17"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L84"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L17" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L84" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="DbEffect"></a>
@@ -245,26 +251,35 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L20" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="ReadDbEffect"></a>
-<dt><pre><a href="db_common.html#ReadDbEffect"><span class="Identifier">ReadDbEffect</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="db_common.html#DbEffect"><span class="Identifier">DbEffect</span></a></pre></dt>
+<a id="DbError"></a>
+<dt><pre><a href="db_common.html#DbError"><span class="Identifier">DbError</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="system.html#IOError"><span class="Identifier">IOError</span></a></pre></dt>
 <dd>
 
-effect that denotes a read operation
+exception that is raised if a database error occurs
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L21"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L15"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L21" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L15" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="WriteDbEffect"></a>
-<dt><pre><a href="db_common.html#WriteDbEffect"><span class="Identifier">WriteDbEffect</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="db_common.html#DbEffect"><span class="Identifier">DbEffect</span></a></pre></dt>
+<a id="DbType"></a>
+<dt><pre><a href="db_common.html#DbType"><span class="Identifier">DbType</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="db_common.html#DbTypeKind"><span class="Identifier">DbTypeKind</span></a>          <span class="Comment">## the kind of the described type</span>
+  <span class="Identifier">notNull</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>             <span class="Comment">## does the type contain NULL?</span>
+  <span class="Identifier">name</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>              <span class="Comment">## the name of the type</span>
+  <span class="Identifier">size</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a>             <span class="Comment">## the size of the datatype; 0 if of variable size</span>
+  <span class="Identifier">maxReprLen</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a>       <span class="Comment">## maximal length required for the representation</span>
+  <span class="Identifier">precision</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">scale</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a> <span class="Comment">## precision and scale of the number</span>
+  <span class="Identifier">min</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">max</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#BiggestInt"><span class="Identifier">BiggestInt</span></a>     <span class="Comment">## the minimum and maximum of allowed values</span>
+  <span class="Identifier">validValues</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span>  <span class="Comment">## valid values of an enum or a set</span>
+  </pre></dt>
 <dd>
 
-effect that denotes a write operation
+describes a database type
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L22"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L68"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L22" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L68" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="DbTypeKind"></a>
@@ -320,52 +335,37 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L24" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="DbType"></a>
-<dt><pre><a href="db_common.html#DbType"><span class="Identifier">DbType</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="db_common.html#DbTypeKind"><span class="Identifier">DbTypeKind</span></a>          <span class="Comment">## the kind of the described type</span>
-  <span class="Identifier">notNull</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>             <span class="Comment">## does the type contain NULL?</span>
-  <span class="Identifier">name</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>              <span class="Comment">## the name of the type</span>
-  <span class="Identifier">size</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a>             <span class="Comment">## the size of the datatype; 0 if of variable size</span>
-  <span class="Identifier">maxReprLen</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a>       <span class="Comment">## maximal length required for the representation</span>
-  <span class="Identifier">precision</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">scale</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#Natural"><span class="Identifier">Natural</span></a> <span class="Comment">## precision and scale of the number</span>
-  <span class="Identifier">min</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">max</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#BiggestInt"><span class="Identifier">BiggestInt</span></a>     <span class="Comment">## the minimum and maximum of allowed values</span>
-  <span class="Identifier">validValues</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span>  <span class="Comment">## valid values of an enum or a set</span>
-  </pre></dt>
+<a id="ReadDbEffect"></a>
+<dt><pre><a href="db_common.html#ReadDbEffect"><span class="Identifier">ReadDbEffect</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="db_common.html#DbEffect"><span class="Identifier">DbEffect</span></a></pre></dt>
 <dd>
 
-describes a database type
+effect that denotes a read operation
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L68"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L21"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L68" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L21" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="DbColumn"></a>
-<dt><pre><a href="db_common.html#DbColumn"><span class="Identifier">DbColumn</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">name</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>              <span class="Comment">## name of the column</span>
-  <span class="Identifier">tableName</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>         <span class="Comment">## name of the table the column belongs to (optional)</span>
-  <span class="Identifier">typ</span><span class="Operator">*</span><span class="Other">:</span> <a href="db_common.html#DbType"><span class="Identifier">DbType</span></a>               <span class="Comment">## type of the column</span>
-  <span class="Identifier">primaryKey</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>          <span class="Comment">## is this a primary key?</span>
-  <span class="Identifier">foreignKey</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>          <span class="Comment">## is this a foreign key?</span>
-  </pre></dt>
+<a id="SqlQuery"></a>
+<dt><pre><a href="db_common.html#SqlQuery"><span class="Identifier">SqlQuery</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
 <dd>
 
-information about a database column
+an SQL query string
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L78"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L17"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L78" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L17" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="DbColumns"></a>
-<dt><pre><a href="db_common.html#DbColumns"><span class="Identifier">DbColumns</span></a> <span class="Other">=</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="db_common.html#DbColumn"><span class="Identifier">DbColumn</span></a><span class="Other">]</span></pre></dt>
+<a id="WriteDbEffect"></a>
+<dt><pre><a href="db_common.html#WriteDbEffect"><span class="Identifier">WriteDbEffect</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="db_common.html#DbEffect"><span class="Identifier">DbEffect</span></a></pre></dt>
 <dd>
 
-
+effect that denotes a write operation
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L84"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/db_common.nim#L22"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L84" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/db_common.nim#L22" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -412,7 +412,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-23 00:53:02 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-27 00:54:03 UTC</small>
       </div>
     </div>
   </div>

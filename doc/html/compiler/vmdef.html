@@ -107,14 +107,82 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#7" id="57">Types</a>
   <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#TInstrType"
-    title="TInstrType = uint64">TInstrType</a></li>
-  <li><a class="reference" href="#TRegister"
-    title="TRegister = range[0 .. 65535'u64.int]">TRegister</a></li>
+      <li><a class="reference" href="#PCtx"
+    title="PCtx = ref TCtx">PCtx</a></li>
+  <li><a class="reference" href="#PEvalContext"
+    title="PEvalContext = PCtx">PEvalContext</a></li>
+  <li><a class="reference" href="#PProc"
+    title="PProc = ref object
+  blocks*: seq[TBlock]
+  sym*: PSym
+  regInfo*: seq[tuple[inUse: bool, kind: TSlotKind]]">PProc</a></li>
+  <li><a class="reference" href="#Profiler"
+    title="Profiler = object
+  tEnter*: float
+  tos*: PStackFrame">Profiler</a></li>
+  <li><a class="reference" href="#PStackFrame"
+    title="PStackFrame = ref TStackFrame">PStackFrame</a></li>
+  <li><a class="reference" href="#TBlock"
+    title="TBlock = object
+  label*: PSym
+  fixups*: seq[TPosition]">TBlock</a></li>
+  <li><a class="reference" href="#TCtx"
+    title="TCtx = object of TPassContext
+  code*: seq[TInstr]
+  debug*: seq[TLineInfo]
+  globals*: PNode
+  constants*: PNode
+  types*: seq[PType]
+  currentExceptionA*, currentExceptionB*: PNode
+  exceptionInstr*: int
+  prc*: PProc
+  module*: PSym
+  callsite*: PNode
+  mode*: TEvalMode
+  features*: TSandboxFlags
+  traceActive*: bool
+  loopIterations*: int
+  comesFromHeuristic*: TLineInfo
+  callbacks*: seq[tuple[key: string, value: VmCallback]]
+  errorFlag*: string
+  cache*: IdentCache
+  config*: ConfigRef
+  graph*: ModuleGraph
+  oldErrorCount*: int
+  profiler*: Profiler
+  templInstCounter*: ref int
+  vmstateDiff*: seq[(PSym, PNode)]
+  procToCodePos*: Table[int, int]">TCtx</a></li>
   <li><a class="reference" href="#TDest"
     title="TDest = range[-1 .. 65535'u64.int]">TDest</a></li>
+  <li><a class="reference" href="#TEvalMode"
+    title="TEvalMode = enum
+  emRepl,                   ## evaluate because in REPL mode
+  emConst,                  ## evaluate for 'const' according to spec
+  emOptimize,               ## evaluate for optimization purposes (same as
+                             ## emConst?)
+  emStaticExpr,             ## evaluate for enforced compile time eval
+                             ## ('static' context)
+  emStaticStmt               ## 'static' as an expression">TEvalMode</a></li>
+  <li><a class="reference" href="#TFullReg"
+    title="TFullReg = object
+  case kind*: TRegisterKind
+  of rkNone:
+    nil
+  of rkInt:
+    intVal*: BiggestInt
+  of rkFloat:
+    floatVal*: BiggestFloat
+  of rkNode:
+    node*: PNode
+  of rkRegisterAddr:
+    regAddr*: ptr TFullReg
+  of rkNodeAddr:
+    nodeAddr*: ptr PNode">TFullReg</a></li>
   <li><a class="reference" href="#TInstr"
     title="TInstr = distinct TInstrType">TInstr</a></li>
+  <li><a class="reference" href="#TInstrType"
+    title="TInstrType = uint64">TInstrType</a></li>
   <li><a class="reference" href="#TOpcode"
     title="TOpcode = enum
   opcEof, opcRet, opcYldYoid, opcYldVal, opcAsgnInt, opcAsgnFloat, opcAsgnRef,
@@ -150,19 +218,13 @@ window.addEventListener('DOMContentLoaded', main);
   opcLdGlobalAddr, opcLdGlobalDerefFFI, opcLdGlobalAddrDerefFFI, opcLdImmInt,
   opcNBindSym, opcNDynBindSym, opcSetType, opcTypeTrait, opcMarshalLoad,
   opcMarshalStore, opcSymOwner, opcSymIsInstantiationOf">TOpcode</a></li>
-  <li><a class="reference" href="#TBlock"
-    title="TBlock = object
-  label*: PSym
-  fixups*: seq[TPosition]">TBlock</a></li>
-  <li><a class="reference" href="#TEvalMode"
-    title="TEvalMode = enum
-  emRepl,                   ## evaluate because in REPL mode
-  emConst,                  ## evaluate for 'const' according to spec
-  emOptimize,               ## evaluate for optimization purposes (same as
-                             ## emConst?)
-  emStaticExpr,             ## evaluate for enforced compile time eval
-                             ## ('static' context)
-  emStaticStmt               ## 'static' as an expression">TEvalMode</a></li>
+  <li><a class="reference" href="#TPosition"
+    title="TPosition = distinct int">TPosition</a></li>
+  <li><a class="reference" href="#TRegister"
+    title="TRegister = range[0 .. 65535'u64.int]">TRegister</a></li>
+  <li><a class="reference" href="#TRegisterKind"
+    title="TRegisterKind = enum
+  rkNone, rkNode, rkInt, rkFloat, rkRegisterAddr, rkNodeAddr">TRegisterKind</a></li>
   <li><a class="reference" href="#TSandboxFlag"
     title="TSandboxFlag = enum
   allowCast,                ## allow unsafe language feature: 'cast'
@@ -173,29 +235,13 @@ window.addEventListener('DOMContentLoaded', main);
     title="TSlotKind = enum
   slotEmpty, slotFixedVar, slotFixedLet, slotTempUnknown, slotTempInt,
   slotTempFloat, slotTempStr, slotTempComplex, slotTempPerm">TSlotKind</a></li>
-  <li><a class="reference" href="#TRegisterKind"
-    title="TRegisterKind = enum
-  rkNone, rkNode, rkInt, rkFloat, rkRegisterAddr, rkNodeAddr">TRegisterKind</a></li>
-  <li><a class="reference" href="#TFullReg"
-    title="TFullReg = object
-  case kind*: TRegisterKind
-  of rkNone:
-    nil
-  of rkInt:
-    intVal*: BiggestInt
-  of rkFloat:
-    floatVal*: BiggestFloat
-  of rkNode:
-    node*: PNode
-  of rkRegisterAddr:
-    regAddr*: ptr TFullReg
-  of rkNodeAddr:
-    nodeAddr*: ptr PNode">TFullReg</a></li>
-  <li><a class="reference" href="#PProc"
-    title="PProc = ref object
-  blocks*: seq[TBlock]
-  sym*: PSym
-  regInfo*: seq[tuple[inUse: bool, kind: TSlotKind]]">PProc</a></li>
+  <li><a class="reference" href="#TStackFrame"
+    title="TStackFrame {.acyclic.} = object
+  prc*: PSym
+  slots*: seq[TFullReg]
+  next*: PStackFrame
+  comesFrom*: int
+  safePoints*: seq[int]">TStackFrame</a></li>
   <li><a class="reference" href="#VmArgs"
     title="VmArgs = object
   ra*, rb*, rc*: Natural
@@ -204,52 +250,6 @@ window.addEventListener('DOMContentLoaded', main);
   currentLineInfo*: TLineInfo">VmArgs</a></li>
   <li><a class="reference" href="#VmCallback"
     title="VmCallback = proc (args: VmArgs) {.closure.}">VmCallback</a></li>
-  <li><a class="reference" href="#PCtx"
-    title="PCtx = ref TCtx">PCtx</a></li>
-  <li><a class="reference" href="#TCtx"
-    title="TCtx = object of TPassContext
-  code*: seq[TInstr]
-  debug*: seq[TLineInfo]
-  globals*: PNode
-  constants*: PNode
-  types*: seq[PType]
-  currentExceptionA*, currentExceptionB*: PNode
-  exceptionInstr*: int
-  prc*: PProc
-  module*: PSym
-  callsite*: PNode
-  mode*: TEvalMode
-  features*: TSandboxFlags
-  traceActive*: bool
-  loopIterations*: int
-  comesFromHeuristic*: TLineInfo
-  callbacks*: seq[tuple[key: string, value: VmCallback]]
-  errorFlag*: string
-  cache*: IdentCache
-  config*: ConfigRef
-  graph*: ModuleGraph
-  oldErrorCount*: int
-  profiler*: Profiler
-  templInstCounter*: ref int
-  vmstateDiff*: seq[(PSym, PNode)]
-  procToCodePos*: Table[int, int]">TCtx</a></li>
-  <li><a class="reference" href="#PStackFrame"
-    title="PStackFrame = ref TStackFrame">PStackFrame</a></li>
-  <li><a class="reference" href="#TStackFrame"
-    title="TStackFrame {.acyclic.} = object
-  prc*: PSym
-  slots*: seq[TFullReg]
-  next*: PStackFrame
-  comesFrom*: int
-  safePoints*: seq[int]">TStackFrame</a></li>
-  <li><a class="reference" href="#Profiler"
-    title="Profiler = object
-  tEnter*: float
-  tos*: PStackFrame">Profiler</a></li>
-  <li><a class="reference" href="#TPosition"
-    title="TPosition = distinct int">TPosition</a></li>
-  <li><a class="reference" href="#PEvalContext"
-    title="PEvalContext = PCtx">PEvalContext</a></li>
 
   </ul>
 </li>
@@ -258,55 +258,50 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#byteExcess"
     title="byteExcess = 128">byteExcess</a></li>
-  <li><a class="reference" href="#regOShift"
-    title="regOShift = 0'u">regOShift</a></li>
-  <li><a class="reference" href="#regAShift"
-    title="regAShift = 8'u64">regAShift</a></li>
-  <li><a class="reference" href="#regBShift"
-    title="regBShift = 24'u64">regBShift</a></li>
-  <li><a class="reference" href="#regCShift"
-    title="regCShift = 40'u64">regCShift</a></li>
-  <li><a class="reference" href="#regBxShift"
-    title="regBxShift = 24'u64">regBxShift</a></li>
-  <li><a class="reference" href="#regOMask"
-    title="regOMask = 255'u64">regOMask</a></li>
-  <li><a class="reference" href="#regAMask"
-    title="regAMask = 65535'u64">regAMask</a></li>
-  <li><a class="reference" href="#regBMask"
-    title="regBMask = 65535'u64">regBMask</a></li>
-  <li><a class="reference" href="#regCMask"
-    title="regCMask = 65535'u64">regCMask</a></li>
-  <li><a class="reference" href="#regBxMask"
-    title="regBxMask = 16777215'u64">regBxMask</a></li>
-  <li><a class="reference" href="#wordExcess"
-    title="wordExcess = 8388608">wordExcess</a></li>
-  <li><a class="reference" href="#regBxMin"
-    title="regBxMin = -8388607">regBxMin</a></li>
-  <li><a class="reference" href="#regBxMax"
-    title="regBxMax = 8388607">regBxMax</a></li>
   <li><a class="reference" href="#firstABxInstr"
     title="firstABxInstr = opcTJmp">firstABxInstr</a></li>
   <li><a class="reference" href="#largeInstrs"
     title="largeInstrs = {opcSubStr, opcConv, opcCast, opcNewSeq, opcOf, opcMarshalLoad,
                opcMarshalStore}">largeInstrs</a></li>
-  <li><a class="reference" href="#slotSomeTemp"
-    title="slotSomeTemp = slotTempUnknown">slotSomeTemp</a></li>
-  <li><a class="reference" href="#relativeJumps"
-    title="relativeJumps = {opcTJmp, opcFJmp, opcJmp, opcJmpBack}">relativeJumps</a></li>
   <li><a class="reference" href="#nimNodeFlag"
     title="nimNodeFlag = 16">nimNodeFlag</a></li>
+  <li><a class="reference" href="#regAMask"
+    title="regAMask = 65535'u64">regAMask</a></li>
+  <li><a class="reference" href="#regAShift"
+    title="regAShift = 8'u64">regAShift</a></li>
+  <li><a class="reference" href="#regBMask"
+    title="regBMask = 65535'u64">regBMask</a></li>
+  <li><a class="reference" href="#regBShift"
+    title="regBShift = 24'u64">regBShift</a></li>
+  <li><a class="reference" href="#regBxMask"
+    title="regBxMask = 16777215'u64">regBxMask</a></li>
+  <li><a class="reference" href="#regBxMax"
+    title="regBxMax = 8388607">regBxMax</a></li>
+  <li><a class="reference" href="#regBxMin"
+    title="regBxMin = -8388607">regBxMin</a></li>
+  <li><a class="reference" href="#regBxShift"
+    title="regBxShift = 24'u64">regBxShift</a></li>
+  <li><a class="reference" href="#regCMask"
+    title="regCMask = 65535'u64">regCMask</a></li>
+  <li><a class="reference" href="#regCShift"
+    title="regCShift = 40'u64">regCShift</a></li>
+  <li><a class="reference" href="#regOMask"
+    title="regOMask = 255'u64">regOMask</a></li>
+  <li><a class="reference" href="#regOShift"
+    title="regOShift = 0'u">regOShift</a></li>
+  <li><a class="reference" href="#relativeJumps"
+    title="relativeJumps = {opcTJmp, opcFJmp, opcJmp, opcJmpBack}">relativeJumps</a></li>
+  <li><a class="reference" href="#slotSomeTemp"
+    title="slotSomeTemp = slotTempUnknown">slotSomeTemp</a></li>
+  <li><a class="reference" href="#wordExcess"
+    title="wordExcess = 8388608">wordExcess</a></li>
 
   </ul>
 </li>
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">registerCallback
-      <li><a class="reference" href="#registerCallback%2CPCtx%2Cstring%2CVmCallback"
-    title="registerCallback(c: PCtx; name: string; callback: VmCallback): int">registerCallback(c: PCtx; name: string; callback: VmCallback): int</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">newCtx
+      <ul class="simple nested-toc-section">newCtx
       <li><a class="reference" href="#newCtx%2CPSym%2CIdentCache%2CModuleGraph%2CIdGenerator"
     title="newCtx(module: PSym; cache: IdentCache; g: ModuleGraph; idgen: IdGenerator): PCtx">newCtx(module: PSym; cache: IdentCache; g: ModuleGraph; idgen: IdGenerator): PCtx</a></li>
 
@@ -314,6 +309,11 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple nested-toc-section">refresh
       <li><a class="reference" href="#refresh%2CPCtx%2CPSym%2CIdGenerator"
     title="refresh(c: PCtx; module: PSym; idgen: IdGenerator)">refresh(c: PCtx; module: PSym; idgen: IdGenerator)</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">registerCallback
+      <li><a class="reference" href="#registerCallback%2CPCtx%2Cstring%2CVmCallback"
+    title="registerCallback(c: PCtx; name: string; callback: VmCallback): int">registerCallback(c: PCtx; name: string; callback: VmCallback): int</a></li>
 
   </ul>
 
@@ -327,14 +327,19 @@ window.addEventListener('DOMContentLoaded', main);
     title="jmpDiff(x: TInstr): int">jmpDiff(x: TInstr): int</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">regB
-      <li><a class="reference" href="#regB.t%2CTInstr"
-    title="regB(x: TInstr): TRegister">regB(x: TInstr): TRegister</a></li>
+  <ul class="simple nested-toc-section">opcode
+      <li><a class="reference" href="#opcode.t%2CTInstr"
+    title="opcode(x: TInstr): TOpcode">opcode(x: TInstr): TOpcode</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">regA
       <li><a class="reference" href="#regA.t%2CTInstr"
     title="regA(x: TInstr): TRegister">regA(x: TInstr): TRegister</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">regB
+      <li><a class="reference" href="#regB.t%2CTInstr"
+    title="regB(x: TInstr): TRegister">regB(x: TInstr): TRegister</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">regBx
@@ -345,11 +350,6 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple nested-toc-section">regC
       <li><a class="reference" href="#regC.t%2CTInstr"
     title="regC(x: TInstr): TRegister">regC(x: TInstr): TRegister</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">opcode
-      <li><a class="reference" href="#opcode.t%2CTInstr"
-    title="opcode(x: TInstr): TOpcode">opcode(x: TInstr): TOpcode</a></li>
 
   </ul>
 
@@ -376,26 +376,117 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
 <dl class="item">
-<a id="TInstrType"></a>
-<dt><pre><a href="vmdef.html#TInstrType"><span class="Identifier">TInstrType</span></a> <span class="Other">=</span> <span class="Identifier">uint64</span></pre></dt>
+<a id="PCtx"></a>
+<dt><pre><a href="vmdef.html#PCtx"><span class="Identifier">PCtx</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <a href="vmdef.html#TCtx"><span class="Identifier">TCtx</span></a></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L17"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L243"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L17" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L243" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="TRegister"></a>
-<dt><pre><a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a> <span class="Other">=</span> <span class="Identifier">range</span><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">65535'u64</span><span class="Other">.</span><span class="Identifier">int</span><span class="Other">]</span></pre></dt>
+<a id="PEvalContext"></a>
+<dt><pre><a href="vmdef.html#PEvalContext"><span class="Identifier">PEvalContext</span></a> <span class="Other">=</span> <a href="vmdef.html#PCtx"><span class="Identifier">PCtx</span></a></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L48"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L288"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L48" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="PProc"></a>
+<dt><pre><a href="vmdef.html#PProc"><span class="Identifier">PProc</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
+  <span class="Identifier">blocks</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="vmdef.html#TBlock"><span class="Identifier">TBlock</span></a><span class="Other">]</span>
+  <span class="Identifier">sym</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
+  <span class="Identifier">regInfo</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">inUse</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">,</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="vmdef.html#TSlotKind"><span class="Identifier">TSlotKind</span></a><span class="Other">]</span><span class="Other">]</span>
+</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L231"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L231" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="Profiler"></a>
+<dt><pre><a href="vmdef.html#Profiler"><span class="Identifier">Profiler</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">tEnter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">float</span>
+  <span class="Identifier">tos</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#PStackFrame"><span class="Identifier">PStackFrame</span></a>
+</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L282"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L282" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="PStackFrame"></a>
+<dt><pre><a href="vmdef.html#PStackFrame"><span class="Identifier">PStackFrame</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <a href="vmdef.html#TStackFrame"><span class="Identifier">TStackFrame</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L272"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L272" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="TBlock"></a>
+<dt><pre><a href="vmdef.html#TBlock"><span class="Identifier">TBlock</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">label</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
+  <span class="Identifier">fixups</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="vmdef.html#TPosition"><span class="Identifier">TPosition</span></a><span class="Other">]</span>
+</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L187"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L187" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="TCtx"></a>
+<dt><pre><a href="vmdef.html#TCtx"><span class="Identifier">TCtx</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="modulegraphs.html#TPassContext"><span class="Identifier">TPassContext</span></a>
+  <span class="Identifier">code</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">]</span>
+  <span class="Identifier">debug</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">]</span>
+  <span class="Identifier">globals</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
+  <span class="Identifier">constants</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
+  <span class="Identifier">types</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">]</span>
+  <span class="Identifier">currentExceptionA</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">currentExceptionB</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
+  <span class="Identifier">exceptionInstr</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">prc</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#PProc"><span class="Identifier">PProc</span></a>
+  <span class="Identifier">module</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
+  <span class="Identifier">callsite</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
+  <span class="Identifier">mode</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#TEvalMode"><span class="Identifier">TEvalMode</span></a>
+  <span class="Identifier">features</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#TSandboxFlags"><span class="Identifier">TSandboxFlags</span></a>
+  <span class="Identifier">traceActive</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
+  <span class="Identifier">loopIterations</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">comesFromHeuristic</span><span class="Operator">*</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a>
+  <span class="Identifier">callbacks</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">key</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">value</span><span class="Other">:</span> <a href="vmdef.html#VmCallback"><span class="Identifier">VmCallback</span></a><span class="Other">]</span><span class="Other">]</span>
+  <span class="Identifier">errorFlag</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
+  <span class="Identifier">cache</span><span class="Operator">*</span><span class="Other">:</span> <a href="idents.html#IdentCache"><span class="Identifier">IdentCache</span></a>
+  <span class="Identifier">config</span><span class="Operator">*</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a>
+  <span class="Identifier">graph</span><span class="Operator">*</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a>
+  <span class="Identifier">oldErrorCount</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">profiler</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#Profiler"><span class="Identifier">Profiler</span></a>
+  <span class="Identifier">templInstCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ref</span> <span class="Identifier">int</span>
+  <span class="Identifier">vmstateDiff</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">,</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">]</span>
+  <span class="Identifier">procToCodePos</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span>
+</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L244"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L244" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TDest"></a>
@@ -409,6 +500,49 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L49" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="TEvalMode"></a>
+<dt><pre><a href="vmdef.html#TEvalMode"><span class="Identifier">TEvalMode</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">emRepl</span><span class="Other">,</span>                   <span class="Comment">## evaluate because in REPL mode</span>
+  <span class="Identifier">emConst</span><span class="Other">,</span>                  <span class="Comment">## evaluate for 'const' according to spec</span>
+  <span class="Identifier">emOptimize</span><span class="Other">,</span>               <span class="Comment">## evaluate for optimization purposes (same as</span>
+                             <span class="Comment">## emConst?)</span>
+  <span class="Identifier">emStaticExpr</span><span class="Other">,</span>             <span class="Comment">## evaluate for enforced compile time eval</span>
+                             <span class="Comment">## ('static' context)</span>
+  <span class="Identifier">emStaticStmt</span>               <span class="Comment">## 'static' as an expression</span></pre></dt>
+<dd>
+
+reason for evaluation
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L191"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="TFullReg"></a>
+<dt><pre><a href="vmdef.html#TFullReg"><span class="Identifier">TFullReg</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Keyword">case</span> <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#TRegisterKind"><span class="Identifier">TRegisterKind</span></a>
+  <span class="Keyword">of</span> <span class="Identifier">rkNone</span><span class="Other">:</span>
+    <span class="Keyword">nil</span>
+  <span class="Keyword">of</span> <span class="Identifier">rkInt</span><span class="Other">:</span>
+    <span class="Identifier">intVal</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">BiggestInt</span>
+  <span class="Keyword">of</span> <span class="Identifier">rkFloat</span><span class="Other">:</span>
+    <span class="Identifier">floatVal</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">BiggestFloat</span>
+  <span class="Keyword">of</span> <span class="Identifier">rkNode</span><span class="Other">:</span>
+    <span class="Identifier">node</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
+  <span class="Keyword">of</span> <span class="Identifier">rkRegisterAddr</span><span class="Other">:</span>
+    <span class="Identifier">regAddr</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="vmdef.html#TFullReg"><span class="Identifier">TFullReg</span></a>
+  <span class="Keyword">of</span> <span class="Identifier">rkNodeAddr</span><span class="Other">:</span>
+    <span class="Identifier">nodeAddr</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
+  </pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L221"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L221" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="TInstr"></a>
 <dt><pre><a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <a href="vmdef.html#TInstrType"><span class="Identifier">TInstrType</span></a></pre></dt>
 <dd>
@@ -418,6 +552,17 @@ class="link-seesrc" target="_blank">Source</a>
 href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L50"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L50" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="TInstrType"></a>
+<dt><pre><a href="vmdef.html#TInstrType"><span class="Identifier">TInstrType</span></a> <span class="Other">=</span> <span class="Identifier">uint64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L17"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L17" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TOpcode"></a>
@@ -464,36 +609,38 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L52" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="TBlock"></a>
-<dt><pre><a href="vmdef.html#TBlock"><span class="Identifier">TBlock</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">label</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
-  <span class="Identifier">fixups</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="vmdef.html#TPosition"><span class="Identifier">TPosition</span></a><span class="Other">]</span>
-</pre></dt>
+<a id="TPosition"></a>
+<dt><pre><a href="vmdef.html#TPosition"><span class="Identifier">TPosition</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <span class="Identifier">int</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L187"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L286"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L187" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L286" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="TEvalMode"></a>
-<dt><pre><a href="vmdef.html#TEvalMode"><span class="Identifier">TEvalMode</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">emRepl</span><span class="Other">,</span>                   <span class="Comment">## evaluate because in REPL mode</span>
-  <span class="Identifier">emConst</span><span class="Other">,</span>                  <span class="Comment">## evaluate for 'const' according to spec</span>
-  <span class="Identifier">emOptimize</span><span class="Other">,</span>               <span class="Comment">## evaluate for optimization purposes (same as</span>
-                             <span class="Comment">## emConst?)</span>
-  <span class="Identifier">emStaticExpr</span><span class="Other">,</span>             <span class="Comment">## evaluate for enforced compile time eval</span>
-                             <span class="Comment">## ('static' context)</span>
-  <span class="Identifier">emStaticStmt</span>               <span class="Comment">## 'static' as an expression</span></pre></dt>
+<a id="TRegister"></a>
+<dt><pre><a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a> <span class="Other">=</span> <span class="Identifier">range</span><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">65535'u64</span><span class="Other">.</span><span class="Identifier">int</span><span class="Other">]</span></pre></dt>
 <dd>
 
-reason for evaluation
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L191"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L48"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L48" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="TRegisterKind"></a>
+<dt><pre><a href="vmdef.html#TRegisterKind"><span class="Identifier">TRegisterKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">rkNone</span><span class="Other">,</span> <span class="Identifier">rkNode</span><span class="Other">,</span> <span class="Identifier">rkInt</span><span class="Other">,</span> <span class="Identifier">rkFloat</span><span class="Other">,</span> <span class="Identifier">rkRegisterAddr</span><span class="Other">,</span> <span class="Identifier">rkNodeAddr</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L219"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L219" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="TSandboxFlag"></a>
@@ -533,56 +680,21 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L205" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="TRegisterKind"></a>
-<dt><pre><a href="vmdef.html#TRegisterKind"><span class="Identifier">TRegisterKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">rkNone</span><span class="Other">,</span> <span class="Identifier">rkNode</span><span class="Other">,</span> <span class="Identifier">rkInt</span><span class="Other">,</span> <span class="Identifier">rkFloat</span><span class="Other">,</span> <span class="Identifier">rkRegisterAddr</span><span class="Other">,</span> <span class="Identifier">rkNodeAddr</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L219"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L219" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="TFullReg"></a>
-<dt><pre><a href="vmdef.html#TFullReg"><span class="Identifier">TFullReg</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Keyword">case</span> <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#TRegisterKind"><span class="Identifier">TRegisterKind</span></a>
-  <span class="Keyword">of</span> <span class="Identifier">rkNone</span><span class="Other">:</span>
-    <span class="Keyword">nil</span>
-  <span class="Keyword">of</span> <span class="Identifier">rkInt</span><span class="Other">:</span>
-    <span class="Identifier">intVal</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">BiggestInt</span>
-  <span class="Keyword">of</span> <span class="Identifier">rkFloat</span><span class="Other">:</span>
-    <span class="Identifier">floatVal</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">BiggestFloat</span>
-  <span class="Keyword">of</span> <span class="Identifier">rkNode</span><span class="Other">:</span>
-    <span class="Identifier">node</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
-  <span class="Keyword">of</span> <span class="Identifier">rkRegisterAddr</span><span class="Other">:</span>
-    <span class="Identifier">regAddr</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="vmdef.html#TFullReg"><span class="Identifier">TFullReg</span></a>
-  <span class="Keyword">of</span> <span class="Identifier">rkNodeAddr</span><span class="Other">:</span>
-    <span class="Identifier">nodeAddr</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
-  </pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L221"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L221" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="PProc"></a>
-<dt><pre><a href="vmdef.html#PProc"><span class="Identifier">PProc</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
-  <span class="Identifier">blocks</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="vmdef.html#TBlock"><span class="Identifier">TBlock</span></a><span class="Other">]</span>
-  <span class="Identifier">sym</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
-  <span class="Identifier">regInfo</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">inUse</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">,</span> <span class="Identifier">kind</span><span class="Other">:</span> <a href="vmdef.html#TSlotKind"><span class="Identifier">TSlotKind</span></a><span class="Other">]</span><span class="Other">]</span>
+<a id="TStackFrame"></a>
+<dt><pre><a href="vmdef.html#TStackFrame"><span class="Identifier">TStackFrame</span></a> {.<span class="Identifier">acyclic</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">prc</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
+  <span class="Identifier">slots</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="vmdef.html#TFullReg"><span class="Identifier">TFullReg</span></a><span class="Other">]</span>
+  <span class="Identifier">next</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#PStackFrame"><span class="Identifier">PStackFrame</span></a>
+  <span class="Identifier">comesFrom</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">safePoints</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span>
 </pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L231"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L273"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L231" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L273" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="VmArgs"></a>
@@ -612,118 +724,6 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L241" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="PCtx"></a>
-<dt><pre><a href="vmdef.html#PCtx"><span class="Identifier">PCtx</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <a href="vmdef.html#TCtx"><span class="Identifier">TCtx</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L243"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L243" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="TCtx"></a>
-<dt><pre><a href="vmdef.html#TCtx"><span class="Identifier">TCtx</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="modulegraphs.html#TPassContext"><span class="Identifier">TPassContext</span></a>
-  <span class="Identifier">code</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">]</span>
-  <span class="Identifier">debug</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">]</span>
-  <span class="Identifier">globals</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
-  <span class="Identifier">constants</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
-  <span class="Identifier">types</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">]</span>
-  <span class="Identifier">currentExceptionA</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">currentExceptionB</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
-  <span class="Identifier">exceptionInstr</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">prc</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#PProc"><span class="Identifier">PProc</span></a>
-  <span class="Identifier">module</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
-  <span class="Identifier">callsite</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
-  <span class="Identifier">mode</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#TEvalMode"><span class="Identifier">TEvalMode</span></a>
-  <span class="Identifier">features</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#TSandboxFlags"><span class="Identifier">TSandboxFlags</span></a>
-  <span class="Identifier">traceActive</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
-  <span class="Identifier">loopIterations</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">comesFromHeuristic</span><span class="Operator">*</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a>
-  <span class="Identifier">callbacks</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">key</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">value</span><span class="Other">:</span> <a href="vmdef.html#VmCallback"><span class="Identifier">VmCallback</span></a><span class="Other">]</span><span class="Other">]</span>
-  <span class="Identifier">errorFlag</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
-  <span class="Identifier">cache</span><span class="Operator">*</span><span class="Other">:</span> <a href="idents.html#IdentCache"><span class="Identifier">IdentCache</span></a>
-  <span class="Identifier">config</span><span class="Operator">*</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a>
-  <span class="Identifier">graph</span><span class="Operator">*</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a>
-  <span class="Identifier">oldErrorCount</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">profiler</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#Profiler"><span class="Identifier">Profiler</span></a>
-  <span class="Identifier">templInstCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ref</span> <span class="Identifier">int</span>
-  <span class="Identifier">vmstateDiff</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">,</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">]</span>
-  <span class="Identifier">procToCodePos</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">,</span> <span class="Identifier">int</span><span class="Other">]</span>
-</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L244"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L244" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="PStackFrame"></a>
-<dt><pre><a href="vmdef.html#PStackFrame"><span class="Identifier">PStackFrame</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <a href="vmdef.html#TStackFrame"><span class="Identifier">TStackFrame</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L272"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L272" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="TStackFrame"></a>
-<dt><pre><a href="vmdef.html#TStackFrame"><span class="Identifier">TStackFrame</span></a> {.<span class="Identifier">acyclic</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">prc</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
-  <span class="Identifier">slots</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="vmdef.html#TFullReg"><span class="Identifier">TFullReg</span></a><span class="Other">]</span>
-  <span class="Identifier">next</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#PStackFrame"><span class="Identifier">PStackFrame</span></a>
-  <span class="Identifier">comesFrom</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">safePoints</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">int</span><span class="Other">]</span>
-</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L273"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L273" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="Profiler"></a>
-<dt><pre><a href="vmdef.html#Profiler"><span class="Identifier">Profiler</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">tEnter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">float</span>
-  <span class="Identifier">tos</span><span class="Operator">*</span><span class="Other">:</span> <a href="vmdef.html#PStackFrame"><span class="Identifier">PStackFrame</span></a>
-</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L282"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L282" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="TPosition"></a>
-<dt><pre><a href="vmdef.html#TPosition"><span class="Identifier">TPosition</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <span class="Identifier">int</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L286"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L286" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="PEvalContext"></a>
-<dt><pre><a href="vmdef.html#PEvalContext"><span class="Identifier">PEvalContext</span></a> <span class="Other">=</span> <a href="vmdef.html#PCtx"><span class="Identifier">PCtx</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L288"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
 
 </dl></div>
 <div class="section" id="10">
@@ -738,149 +738,6 @@ class="link-seesrc" target="_blank">Source</a>
 href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L26"
 class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L26" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regOShift"></a>
-<dt><pre><a href="vmdef.html#regOShift"><span class="Identifier">regOShift</span></a> <span class="Other">=</span> <span class="DecNumber">0'u</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L31"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L31" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regAShift"></a>
-<dt><pre><a href="vmdef.html#regAShift"><span class="Identifier">regAShift</span></a> <span class="Other">=</span> <span class="DecNumber">8'u64</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L32"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L32" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regBShift"></a>
-<dt><pre><a href="vmdef.html#regBShift"><span class="Identifier">regBShift</span></a> <span class="Other">=</span> <span class="DecNumber">24'u64</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L33"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L33" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regCShift"></a>
-<dt><pre><a href="vmdef.html#regCShift"><span class="Identifier">regCShift</span></a> <span class="Other">=</span> <span class="DecNumber">40'u64</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L34"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L34" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regBxShift"></a>
-<dt><pre><a href="vmdef.html#regBxShift"><span class="Identifier">regBxShift</span></a> <span class="Other">=</span> <span class="DecNumber">24'u64</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L35"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L35" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regOMask"></a>
-<dt><pre><a href="vmdef.html#regOMask"><span class="Identifier">regOMask</span></a> <span class="Other">=</span> <span class="DecNumber">255'u64</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L37"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L37" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regAMask"></a>
-<dt><pre><a href="vmdef.html#regAMask"><span class="Identifier">regAMask</span></a> <span class="Other">=</span> <span class="DecNumber">65535'u64</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L38"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L38" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regBMask"></a>
-<dt><pre><a href="vmdef.html#regBMask"><span class="Identifier">regBMask</span></a> <span class="Other">=</span> <span class="DecNumber">65535'u64</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L39"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L39" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regCMask"></a>
-<dt><pre><a href="vmdef.html#regCMask"><span class="Identifier">regCMask</span></a> <span class="Other">=</span> <span class="DecNumber">65535'u64</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L40"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L40" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regBxMask"></a>
-<dt><pre><a href="vmdef.html#regBxMask"><span class="Identifier">regBxMask</span></a> <span class="Other">=</span> <span class="DecNumber">16777215'u64</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L41"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L41" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="wordExcess"></a>
-<dt><pre><a href="vmdef.html#wordExcess"><span class="Identifier">wordExcess</span></a> <span class="Other">=</span> <span class="DecNumber">8388608</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L43"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L43" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regBxMin"></a>
-<dt><pre><a href="vmdef.html#regBxMin"><span class="Identifier">regBxMin</span></a> <span class="Other">=</span> <span class="DecNumber">-8388607</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L44"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L44" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="regBxMax"></a>
-<dt><pre><a href="vmdef.html#regBxMax"><span class="Identifier">regBxMax</span></a> <span class="Other">=</span> <span class="DecNumber">8388607</span></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L45"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L45" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="firstABxInstr"></a>
@@ -906,15 +763,147 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L309" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="slotSomeTemp"></a>
-<dt><pre><a href="vmdef.html#slotSomeTemp"><span class="Identifier">slotSomeTemp</span></a> <span class="Other">=</span> <span class="DecNumber">slotTempUnknown</span></pre></dt>
+<a id="nimNodeFlag"></a>
+<dt><pre><a href="vmdef.html#nimNodeFlag"><span class="Identifier">nimNodeFlag</span></a> <span class="Other">=</span> <span class="DecNumber">16</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L312"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L316"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L312" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regAMask"></a>
+<dt><pre><a href="vmdef.html#regAMask"><span class="Identifier">regAMask</span></a> <span class="Other">=</span> <span class="DecNumber">65535'u64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L38"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L38" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regAShift"></a>
+<dt><pre><a href="vmdef.html#regAShift"><span class="Identifier">regAShift</span></a> <span class="Other">=</span> <span class="DecNumber">8'u64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L32"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L32" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regBMask"></a>
+<dt><pre><a href="vmdef.html#regBMask"><span class="Identifier">regBMask</span></a> <span class="Other">=</span> <span class="DecNumber">65535'u64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L39"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L39" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regBShift"></a>
+<dt><pre><a href="vmdef.html#regBShift"><span class="Identifier">regBShift</span></a> <span class="Other">=</span> <span class="DecNumber">24'u64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L33"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L33" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regBxMask"></a>
+<dt><pre><a href="vmdef.html#regBxMask"><span class="Identifier">regBxMask</span></a> <span class="Other">=</span> <span class="DecNumber">16777215'u64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L41"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L41" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regBxMax"></a>
+<dt><pre><a href="vmdef.html#regBxMax"><span class="Identifier">regBxMax</span></a> <span class="Other">=</span> <span class="DecNumber">8388607</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L45"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L45" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regBxMin"></a>
+<dt><pre><a href="vmdef.html#regBxMin"><span class="Identifier">regBxMin</span></a> <span class="Other">=</span> <span class="DecNumber">-8388607</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L44"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L44" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regBxShift"></a>
+<dt><pre><a href="vmdef.html#regBxShift"><span class="Identifier">regBxShift</span></a> <span class="Other">=</span> <span class="DecNumber">24'u64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L35"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L35" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regCMask"></a>
+<dt><pre><a href="vmdef.html#regCMask"><span class="Identifier">regCMask</span></a> <span class="Other">=</span> <span class="DecNumber">65535'u64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L40"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L40" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regCShift"></a>
+<dt><pre><a href="vmdef.html#regCShift"><span class="Identifier">regCShift</span></a> <span class="Other">=</span> <span class="DecNumber">40'u64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L34"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L34" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regOMask"></a>
+<dt><pre><a href="vmdef.html#regOMask"><span class="Identifier">regOMask</span></a> <span class="Other">=</span> <span class="DecNumber">255'u64</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L37"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L37" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="regOShift"></a>
+<dt><pre><a href="vmdef.html#regOShift"><span class="Identifier">regOShift</span></a> <span class="Other">=</span> <span class="DecNumber">0'u</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L31"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L31" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="relativeJumps"></a>
@@ -928,15 +917,26 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L313" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="nimNodeFlag"></a>
-<dt><pre><a href="vmdef.html#nimNodeFlag"><span class="Identifier">nimNodeFlag</span></a> <span class="Other">=</span> <span class="DecNumber">16</span></pre></dt>
+<a id="slotSomeTemp"></a>
+<dt><pre><a href="vmdef.html#slotSomeTemp"><span class="Identifier">slotSomeTemp</span></a> <span class="Other">=</span> <span class="DecNumber">slotTempUnknown</span></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L316"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L312"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L312" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="wordExcess"></a>
+<dt><pre><a href="vmdef.html#wordExcess"><span class="Identifier">wordExcess</span></a> <span class="Other">=</span> <span class="DecNumber">8388608</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L43"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L43" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -984,6 +984,17 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="18">
 <h1><a class="toc-backref" href="#18">Templates</a></h1>
 <dl class="item">
+<a id="jmpDiff.t,TInstr"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#jmpDiff.t%2CTInstr"><span class="Identifier">jmpDiff</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L324"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L324" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="opcode.t,TInstr"></a>
 <dt><pre><span class="Keyword">template</span> <a href="#opcode.t%2CTInstr"><span class="Identifier">opcode</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#TOpcode"><span class="Identifier">TOpcode</span></a></pre></dt>
 <dd>
@@ -1017,17 +1028,6 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L320" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="regC.t,TInstr"></a>
-<dt><pre><span class="Keyword">template</span> <a href="#regC.t%2CTInstr"><span class="Identifier">regC</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L321"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L321" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
 <a id="regBx.t,TInstr"></a>
 <dt><pre><span class="Keyword">template</span> <a href="#regBx.t%2CTInstr"><span class="Identifier">regBx</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
 <dd>
@@ -1039,15 +1039,15 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L322" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="jmpDiff.t,TInstr"></a>
-<dt><pre><span class="Keyword">template</span> <a href="#jmpDiff.t%2CTInstr"><span class="Identifier">jmpDiff</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+<a id="regC.t,TInstr"></a>
+<dt><pre><span class="Keyword">template</span> <a href="#regC.t%2CTInstr"><span class="Identifier">regC</span></a><span class="Other">(</span><span class="Identifier">x</span><span class="Other">:</span> <a href="vmdef.html#TInstr"><span class="Identifier">TInstr</span></a><span class="Other">)</span><span class="Other">:</span> <a href="vmdef.html#TRegister"><span class="Identifier">TRegister</span></a></pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L324"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/vmdef.nim#L321"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L324" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/vmdef.nim#L321" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -1060,7 +1060,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-23 00:53:35 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-27 00:54:36 UTC</small>
       </div>
     </div>
   </div>

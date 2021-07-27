@@ -133,9 +133,9 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">remainingArgs
-      <li><a class="reference" href="#remainingArgs%2COptParser"
-    title="remainingArgs(p: OptParser): seq[string]">remainingArgs(p: OptParser): seq[string]</a></li>
+      <ul class="simple nested-toc-section">cmdLineRest
+      <li><a class="reference" href="#cmdLineRest%2COptParser"
+    title="cmdLineRest(p: OptParser): string">cmdLineRest(p: OptParser): string</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">initOptParser
@@ -154,9 +154,9 @@ window.addEventListener('DOMContentLoaded', main);
     title="next(p: var OptParser)">next(p: var OptParser)</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">cmdLineRest
-      <li><a class="reference" href="#cmdLineRest%2COptParser"
-    title="cmdLineRest(p: OptParser): string">cmdLineRest(p: OptParser): string</a></li>
+  <ul class="simple nested-toc-section">remainingArgs
+      <li><a class="reference" href="#remainingArgs%2COptParser"
+    title="remainingArgs(p: OptParser): seq[string]">remainingArgs(p: OptParser): seq[string]</a></li>
 
   </ul>
 
@@ -166,12 +166,12 @@ window.addEventListener('DOMContentLoaded', main);
   <a class="reference reference-toplevel" href="#15" id="65">Iterators</a>
   <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">getopt
-      <li><a class="reference" href="#getopt.i%2COptParser"
-    title="getopt(p: var OptParser): tuple[kind: CmdLineKind, key, val: string]">getopt(p: var OptParser): tuple[kind: CmdLineKind, key, val: string]</a></li>
-  <li><a class="reference" href="#getopt.i%2Cseq%5Bstring%5D%2Cset%5Bchar%5D%2Cseq%5Bstring%5D"
+      <li><a class="reference" href="#getopt.i%2Cseq%5Bstring%5D%2Cset%5Bchar%5D%2Cseq%5Bstring%5D"
     title="getopt(cmdline: seq[string] = @[]; shortNoVal: set[char] = {};
        longNoVal: seq[string] = @[]): tuple[kind: CmdLineKind, key, val: string]">getopt(cmdline: seq[string] = @[]; shortNoVal: set[char] = {};
        longNoVal: seq[string] = @[]): tuple[kind: CmdLineKind, key, val: string]</a></li>
+  <li><a class="reference" href="#getopt.i%2COptParser"
+    title="getopt(p: var OptParser): tuple[kind: CmdLineKind, key, val: string]">getopt(p: var OptParser): tuple[kind: CmdLineKind, key, val: string]</a></li>
 
   </ul>
 
@@ -326,6 +326,29 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="12">
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
+<a id="cmdLineRest,OptParser"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#cmdLineRest%2COptParser"><span class="Identifier">cmdLineRest</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="parseopt.html#OptParser"><span class="Identifier">OptParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">extern</span><span class="Other">:</span> <span class="StringLit">&quot;npo$1&quot;</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+<p>Retrieves the rest of the command line that has not been parsed yet.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#remainingArgs,OptParser">remainingArgs proc</a></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">initOptParser</span><span class="Punctuation">(</span><span class="StringLit">&quot;--left -r:2 -- foo.txt bar.txt&quot;</span><span class="Punctuation">)</span>
+<span class="Keyword">while</span> <span class="Identifier">true</span><span class="Punctuation">:</span>
+  <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">next</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Keyword">if</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">==</span> <span class="Identifier">cmdLongOption</span> <span class="Keyword">and</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">key</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">:</span>  <span class="Comment"># Look for &quot;--&quot;</span>
+    <span class="Keyword">break</span>
+  <span class="Keyword">else</span><span class="Punctuation">:</span> <span class="Keyword">continue</span>
+<span class="Identifier">doAssert</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">cmdLineRest</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo.txt bar.txt&quot;</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L381"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L381" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="initOptParser,string,set[char],seq[string]"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#initOptParser%2Cstring%2Cset%5Bchar%5D%2Cseq%5Bstring%5D"><span class="Identifier">initOptParser</span></a><span class="Other">(</span><span class="Identifier">cmdline</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">shortNoVal</span><span class="Other">:</span> <a href="system.html#set"><span class="Identifier">set</span></a><span class="Other">[</span><a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">;</span>
                    <span class="Identifier">longNoVal</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Operator">@</span><span class="Other">[</span><span class="Other">]</span><span class="Other">;</span>
@@ -398,29 +421,6 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L310" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="cmdLineRest,OptParser"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#cmdLineRest%2COptParser"><span class="Identifier">cmdLineRest</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="parseopt.html#OptParser"><span class="Identifier">OptParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">extern</span><span class="Other">:</span> <span class="StringLit">&quot;npo$1&quot;</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-<p>Retrieves the rest of the command line that has not been parsed yet.</p>
-<p>See also:</p>
-<ul class="simple"><li><a class="reference external" href="#remainingArgs,OptParser">remainingArgs proc</a></li>
-</ul>
-<p><strong>Examples:</strong></p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">initOptParser</span><span class="Punctuation">(</span><span class="StringLit">&quot;--left -r:2 -- foo.txt bar.txt&quot;</span><span class="Punctuation">)</span>
-<span class="Keyword">while</span> <span class="Identifier">true</span><span class="Punctuation">:</span>
-  <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">next</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-  <span class="Keyword">if</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">==</span> <span class="Identifier">cmdLongOption</span> <span class="Keyword">and</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">key</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">:</span>  <span class="Comment"># Look for &quot;--&quot;</span>
-    <span class="Keyword">break</span>
-  <span class="Keyword">else</span><span class="Punctuation">:</span> <span class="Keyword">continue</span>
-<span class="Identifier">doAssert</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">cmdLineRest</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo.txt bar.txt&quot;</span></pre>
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L381"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L381" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
 <a id="remainingArgs,OptParser"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#remainingArgs%2COptParser"><span class="Identifier">remainingArgs</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="parseopt.html#OptParser"><span class="Identifier">OptParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">extern</span><span class="Other">:</span> <span class="StringLit">&quot;npo$1&quot;</span><span class="Other">,</span>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
@@ -449,42 +449,6 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="15">
 <h1><a class="toc-backref" href="#15">Iterators</a></h1>
 <dl class="item">
-<a id="getopt.i,OptParser"></a>
-<dt><pre><span class="Keyword">iterator</span> <a href="#getopt.i%2COptParser"><span class="Identifier">getopt</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parseopt.html#OptParser"><span class="Identifier">OptParser</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">kind</span><span class="Other">:</span> <a href="parseopt.html#CmdLineKind"><span class="Identifier">CmdLineKind</span></a><span class="Other">,</span> <span class="Identifier">key</span><span class="Other">,</span> <span class="Identifier">val</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-<p>Convenience iterator for iterating over the given <a class="reference external" href="#OptParser">OptParser</a>.</p>
-<p>There is no need to check for <tt class="docutils literal"><span class="pre"><span class="Identifier">cmdEnd</span></span></tt> while iterating.</p>
-<p>See also:</p>
-<ul class="simple"><li><a class="reference external" href="#initOptParser,string,set[char],seq[string]">initOptParser proc</a></li>
-</ul>
-<p><strong>Examples:</strong></p>
-<pre class="listing"><span class="Comment"># these are placeholders, of course</span>
-<span class="Keyword">proc</span> <span class="Identifier">writeHelp</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
-<span class="Keyword">proc</span> <span class="Identifier">writeVersion</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
-
-<span class="Keyword">var</span> <span class="Identifier">filename</span><span class="Punctuation">:</span> <span class="Identifier">string</span>
-<span class="Keyword">var</span> <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">initOptParser</span><span class="Punctuation">(</span><span class="StringLit">&quot;--left --debug:3 -l -r:2&quot;</span><span class="Punctuation">)</span>
-
-<span class="Keyword">for</span> <span class="Identifier">kind</span><span class="Punctuation">,</span> <span class="Identifier">key</span><span class="Punctuation">,</span> <span class="Identifier">val</span> <span class="Keyword">in</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">getopt</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-  <span class="Keyword">case</span> <span class="Identifier">kind</span>
-  <span class="Keyword">of</span> <span class="Identifier">cmdArgument</span><span class="Punctuation">:</span>
-    <span class="Identifier">filename</span> <span class="Operator">=</span> <span class="Identifier">key</span>
-  <span class="Keyword">of</span> <span class="Identifier">cmdLongOption</span><span class="Punctuation">,</span> <span class="Identifier">cmdShortOption</span><span class="Punctuation">:</span>
-    <span class="Keyword">case</span> <span class="Identifier">key</span>
-    <span class="Keyword">of</span> <span class="StringLit">&quot;help&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;h&quot;</span><span class="Punctuation">:</span> <span class="Identifier">writeHelp</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-    <span class="Keyword">of</span> <span class="StringLit">&quot;version&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;v&quot;</span><span class="Punctuation">:</span> <span class="Identifier">writeVersion</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
-  <span class="Keyword">of</span> <span class="Identifier">cmdEnd</span><span class="Punctuation">:</span> <span class="Identifier">assert</span><span class="Punctuation">(</span><span class="Identifier">false</span><span class="Punctuation">)</span> <span class="Comment"># cannot happen</span>
-<span class="Keyword">if</span> <span class="Identifier">filename</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">:</span>
-  <span class="Comment"># no filename has been given, so we show the help</span>
-  <span class="Identifier">writeHelp</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L418"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L418" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
 <a id="getopt.i,seq[string],set[char],seq[string]"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#getopt.i%2Cseq%5Bstring%5D%2Cset%5Bchar%5D%2Cseq%5Bstring%5D"><span class="Identifier">getopt</span></a><span class="Other">(</span><span class="Identifier">cmdline</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Operator">@</span><span class="Other">[</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">shortNoVal</span><span class="Other">:</span> <a href="system.html#set"><span class="Identifier">set</span></a><span class="Other">[</span><a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">;</span>
                 <span class="Identifier">longNoVal</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Operator">@</span><span class="Other">[</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">kind</span><span class="Other">:</span> <a href="parseopt.html#CmdLineKind"><span class="Identifier">CmdLineKind</span></a><span class="Other">,</span>
@@ -524,6 +488,42 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L457" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="getopt.i,OptParser"></a>
+<dt><pre><span class="Keyword">iterator</span> <a href="#getopt.i%2COptParser"><span class="Identifier">getopt</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="parseopt.html#OptParser"><span class="Identifier">OptParser</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">kind</span><span class="Other">:</span> <a href="parseopt.html#CmdLineKind"><span class="Identifier">CmdLineKind</span></a><span class="Other">,</span> <span class="Identifier">key</span><span class="Other">,</span> <span class="Identifier">val</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+<p>Convenience iterator for iterating over the given <a class="reference external" href="#OptParser">OptParser</a>.</p>
+<p>There is no need to check for <tt class="docutils literal"><span class="pre"><span class="Identifier">cmdEnd</span></span></tt> while iterating.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#initOptParser,string,set[char],seq[string]">initOptParser proc</a></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<pre class="listing"><span class="Comment"># these are placeholders, of course</span>
+<span class="Keyword">proc</span> <span class="Identifier">writeHelp</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
+<span class="Keyword">proc</span> <span class="Identifier">writeVersion</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
+
+<span class="Keyword">var</span> <span class="Identifier">filename</span><span class="Punctuation">:</span> <span class="Identifier">string</span>
+<span class="Keyword">var</span> <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">initOptParser</span><span class="Punctuation">(</span><span class="StringLit">&quot;--left --debug:3 -l -r:2&quot;</span><span class="Punctuation">)</span>
+
+<span class="Keyword">for</span> <span class="Identifier">kind</span><span class="Punctuation">,</span> <span class="Identifier">key</span><span class="Punctuation">,</span> <span class="Identifier">val</span> <span class="Keyword">in</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">getopt</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Keyword">case</span> <span class="Identifier">kind</span>
+  <span class="Keyword">of</span> <span class="Identifier">cmdArgument</span><span class="Punctuation">:</span>
+    <span class="Identifier">filename</span> <span class="Operator">=</span> <span class="Identifier">key</span>
+  <span class="Keyword">of</span> <span class="Identifier">cmdLongOption</span><span class="Punctuation">,</span> <span class="Identifier">cmdShortOption</span><span class="Punctuation">:</span>
+    <span class="Keyword">case</span> <span class="Identifier">key</span>
+    <span class="Keyword">of</span> <span class="StringLit">&quot;help&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;h&quot;</span><span class="Punctuation">:</span> <span class="Identifier">writeHelp</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+    <span class="Keyword">of</span> <span class="StringLit">&quot;version&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;v&quot;</span><span class="Punctuation">:</span> <span class="Identifier">writeVersion</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Keyword">of</span> <span class="Identifier">cmdEnd</span><span class="Punctuation">:</span> <span class="Identifier">assert</span><span class="Punctuation">(</span><span class="Identifier">false</span><span class="Punctuation">)</span> <span class="Comment"># cannot happen</span>
+<span class="Keyword">if</span> <span class="Identifier">filename</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">:</span>
+  <span class="Comment"># no filename has been given, so we show the help</span>
+  <span class="Identifier">writeHelp</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L418"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L418" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 
 </dl></div>
 
@@ -534,7 +534,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-23 00:53:05 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-27 00:54:06 UTC</small>
       </div>
     </div>
   </div>

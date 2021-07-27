@@ -107,12 +107,23 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#7" id="57">Types</a>
   <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#Regex"
+      <li><a class="reference" href="#CaptureBounds"
+    title="CaptureBounds = distinct RegexMatch">CaptureBounds</a></li>
+  <li><a class="reference" href="#Captures"
+    title="Captures = distinct RegexMatch">Captures</a></li>
+  <li><a class="reference" href="#InvalidUnicodeError"
+    title="InvalidUnicodeError = ref object of RegexError
+  pos*: int                  ## the location of the invalid unicode in bytes">InvalidUnicodeError</a></li>
+  <li><a class="reference" href="#Regex"
     title="Regex = ref object
   pattern*: string           ## not nil
   pcreObj: ptr pcre.Pcre     ## not nil
   pcreExtra: ptr pcre.ExtraData ## nil
   captureNameToId: Table[string, int]">Regex</a></li>
+  <li><a class="reference" href="#RegexError"
+    title="RegexError = ref object of CatchableError">RegexError</a></li>
+  <li><a class="reference" href="#RegexInternalError"
+    title="RegexInternalError = ref object of RegexError">RegexInternalError</a></li>
   <li><a class="reference" href="#RegexMatch"
     title="RegexMatch = object
   pattern*: Regex            ## The regex doing the matching.
@@ -122,59 +133,39 @@ window.addEventListener('DOMContentLoaded', main);
   pcreMatchBounds: seq[HSlice[cint, cint]] ## First item is the bounds of the match
                                            ## Other items are the captures
                                            ## `a` is inclusive start, `b` is exclusive end">RegexMatch</a></li>
-  <li><a class="reference" href="#Captures"
-    title="Captures = distinct RegexMatch">Captures</a></li>
-  <li><a class="reference" href="#CaptureBounds"
-    title="CaptureBounds = distinct RegexMatch">CaptureBounds</a></li>
-  <li><a class="reference" href="#RegexError"
-    title="RegexError = ref object of CatchableError">RegexError</a></li>
-  <li><a class="reference" href="#RegexInternalError"
-    title="RegexInternalError = ref object of RegexError">RegexInternalError</a></li>
-  <li><a class="reference" href="#InvalidUnicodeError"
-    title="InvalidUnicodeError = ref object of RegexError
-  pos*: int                  ## the location of the invalid unicode in bytes">InvalidUnicodeError</a></li>
+  <li><a class="reference" href="#StudyError"
+    title="StudyError = ref object of RegexError">StudyError</a></li>
   <li><a class="reference" href="#SyntaxError"
     title="SyntaxError = ref object of RegexError
   pos*: int                  ## the location of the syntax error in bytes
   pattern*: string           ## the pattern that caused the problem">SyntaxError</a></li>
-  <li><a class="reference" href="#StudyError"
-    title="StudyError = ref object of RegexError">StudyError</a></li>
 
   </ul>
 </li>
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">contains
-      <li><a class="reference" href="#contains%2CCaptureBounds%2Cint"
-    title="contains(pattern: CaptureBounds; i: int): bool">contains(pattern: CaptureBounds; i: int): bool</a></li>
-  <li><a class="reference" href="#contains%2CCaptures%2Cint"
-    title="contains(pattern: Captures; i: int): bool">contains(pattern: Captures; i: int): bool</a></li>
-  <li><a class="reference" href="#contains%2CCaptureBounds%2Cstring"
-    title="contains(pattern: CaptureBounds; name: string): bool">contains(pattern: CaptureBounds; name: string): bool</a></li>
-  <li><a class="reference" href="#contains%2CCaptures%2Cstring"
-    title="contains(pattern: Captures; name: string): bool">contains(pattern: Captures; name: string): bool</a></li>
-  <li><a class="reference" href="#contains%2Cstring%2CRegex%2Cint"
-    title="contains(str: string; pattern: Regex; start = 0; endpos = int.high): bool">contains(str: string; pattern: Regex; start = 0; endpos = int.high): bool</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">replace
-      <li><a class="reference" href="#replace%2Cstring%2CRegex%2Cproc%28RegexMatch%29"
-    title="replace(str: string; pattern: Regex; subproc: proc (match: RegexMatch): string): string">replace(str: string; pattern: Regex; subproc: proc (match: RegexMatch): string): string</a></li>
-  <li><a class="reference" href="#replace%2Cstring%2CRegex%2Cproc%28string%29"
-    title="replace(str: string; pattern: Regex; subproc: proc (match: string): string): string">replace(str: string; pattern: Regex; subproc: proc (match: string): string): string</a></li>
-  <li><a class="reference" href="#replace%2Cstring%2CRegex%2Cstring"
-    title="replace(str: string; pattern: Regex; sub: string): string">replace(str: string; pattern: Regex; sub: string): string</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">escapeRe
-      <li><a class="reference" href="#escapeRe%2Cstring"
-    title="escapeRe(str: string): string">escapeRe(str: string): string</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">$
+      <ul class="simple nested-toc-section">$
       <li><a class="reference" href="#%24%2CRegexMatch"
     title="`$`(pattern: RegexMatch): string">`$`(pattern: RegexMatch): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">==
+      <li><a class="reference" href="#%3D%3D%2CRegex%2CRegex"
+    title="`==`(a, b: Regex): bool">`==`(a, b: Regex): bool</a></li>
+  <li><a class="reference" href="#%3D%3D%2CRegexMatch%2CRegexMatch"
+    title="`==`(a, b: RegexMatch): bool">`==`(a, b: RegexMatch): bool</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">[]
+      <li><a class="reference" href="#%5B%5D%2CCaptureBounds%2Cint"
+    title="`[]`(pattern: CaptureBounds; i: int): HSlice[int, int]">`[]`(pattern: CaptureBounds; i: int): HSlice[int, int]</a></li>
+  <li><a class="reference" href="#%5B%5D%2CCaptureBounds%2Cstring"
+    title="`[]`(pattern: CaptureBounds; name: string): HSlice[int, int]">`[]`(pattern: CaptureBounds; name: string): HSlice[int, int]</a></li>
+  <li><a class="reference" href="#%5B%5D%2CCaptures%2Cint"
+    title="`[]`(pattern: Captures; i: int): string">`[]`(pattern: Captures; i: int): string</a></li>
+  <li><a class="reference" href="#%5B%5D%2CCaptures%2Cstring"
+    title="`[]`(pattern: Captures; name: string): string">`[]`(pattern: Captures; name: string): string</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">captureBounds
@@ -182,14 +173,49 @@ window.addEventListener('DOMContentLoaded', main);
     title="captureBounds(pattern: RegexMatch): CaptureBounds">captureBounds(pattern: RegexMatch): CaptureBounds</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">split
-      <li><a class="reference" href="#split%2Cstring%2CRegex%2Cint%2Cint"
-    title="split(str: string; pattern: Regex; maxSplit = -1; start = 0): seq[string]">split(str: string; pattern: Regex; maxSplit = -1; start = 0): seq[string]</a></li>
+  <ul class="simple nested-toc-section">captureCount
+      <li><a class="reference" href="#captureCount%2CRegex"
+    title="captureCount(pattern: Regex): int">captureCount(pattern: Regex): int</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">matchBounds
-      <li><a class="reference" href="#matchBounds%2CRegexMatch"
-    title="matchBounds(pattern: RegexMatch): HSlice[int, int]">matchBounds(pattern: RegexMatch): HSlice[int, int]</a></li>
+  <ul class="simple nested-toc-section">captureNameId
+      <li><a class="reference" href="#captureNameId%2CRegex"
+    title="captureNameId(pattern: Regex): Table[string, int]">captureNameId(pattern: Regex): Table[string, int]</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">captures
+      <li><a class="reference" href="#captures%2CRegexMatch"
+    title="captures(pattern: RegexMatch): Captures">captures(pattern: RegexMatch): Captures</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">contains
+      <li><a class="reference" href="#contains%2CCaptureBounds%2Cint"
+    title="contains(pattern: CaptureBounds; i: int): bool">contains(pattern: CaptureBounds; i: int): bool</a></li>
+  <li><a class="reference" href="#contains%2CCaptureBounds%2Cstring"
+    title="contains(pattern: CaptureBounds; name: string): bool">contains(pattern: CaptureBounds; name: string): bool</a></li>
+  <li><a class="reference" href="#contains%2CCaptures%2Cint"
+    title="contains(pattern: Captures; i: int): bool">contains(pattern: Captures; i: int): bool</a></li>
+  <li><a class="reference" href="#contains%2CCaptures%2Cstring"
+    title="contains(pattern: Captures; name: string): bool">contains(pattern: Captures; name: string): bool</a></li>
+  <li><a class="reference" href="#contains%2Cstring%2CRegex%2Cint"
+    title="contains(str: string; pattern: Regex; start = 0; endpos = int.high): bool">contains(str: string; pattern: Regex; start = 0; endpos = int.high): bool</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">escapeRe
+      <li><a class="reference" href="#escapeRe%2Cstring"
+    title="escapeRe(str: string): string">escapeRe(str: string): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">find
+      <li><a class="reference" href="#find%2Cstring%2CRegex%2Cint"
+    title="find(str: string; pattern: Regex; start = 0; endpos = int.high): Option[
+    RegexMatch]">find(str: string; pattern: Regex; start = 0; endpos = int.high): Option[
+    RegexMatch]</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">findAll
+      <li><a class="reference" href="#findAll%2Cstring%2CRegex%2Cint"
+    title="findAll(str: string; pattern: Regex; start = 0; endpos = int.high): seq[string]">findAll(str: string; pattern: Regex; start = 0; endpos = int.high): seq[string]</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">match
@@ -201,11 +227,28 @@ window.addEventListener('DOMContentLoaded', main);
     RegexMatch]</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">toTable
-      <li><a class="reference" href="#toTable%2CCaptures"
-    title="toTable(pattern: Captures): Table[string, string]">toTable(pattern: Captures): Table[string, string]</a></li>
-  <li><a class="reference" href="#toTable%2CCaptureBounds"
-    title="toTable(pattern: CaptureBounds): Table[string, HSlice[int, int]]">toTable(pattern: CaptureBounds): Table[string, HSlice[int, int]]</a></li>
+  <ul class="simple nested-toc-section">matchBounds
+      <li><a class="reference" href="#matchBounds%2CRegexMatch"
+    title="matchBounds(pattern: RegexMatch): HSlice[int, int]">matchBounds(pattern: RegexMatch): HSlice[int, int]</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">re
+      <li><a class="reference" href="#re%2Cstring"
+    title="re(pattern: string): Regex">re(pattern: string): Regex</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">replace
+      <li><a class="reference" href="#replace%2Cstring%2CRegex%2Cstring"
+    title="replace(str: string; pattern: Regex; sub: string): string">replace(str: string; pattern: Regex; sub: string): string</a></li>
+  <li><a class="reference" href="#replace%2Cstring%2CRegex%2Cproc%28RegexMatch%29"
+    title="replace(str: string; pattern: Regex; subproc: proc (match: RegexMatch): string): string">replace(str: string; pattern: Regex; subproc: proc (match: RegexMatch): string): string</a></li>
+  <li><a class="reference" href="#replace%2Cstring%2CRegex%2Cproc%28string%29"
+    title="replace(str: string; pattern: Regex; subproc: proc (match: string): string): string">replace(str: string; pattern: Regex; subproc: proc (match: string): string): string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">split
+      <li><a class="reference" href="#split%2Cstring%2CRegex%2Cint%2Cint"
+    title="split(str: string; pattern: Regex; maxSplit = -1; start = 0): seq[string]">split(str: string; pattern: Regex; maxSplit = -1; start = 0): seq[string]</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">toSeq
@@ -219,54 +262,11 @@ window.addEventListener('DOMContentLoaded', main);
     Option[string]]</a></li>
 
   </ul>
-  <ul class="simple nested-toc-section">findAll
-      <li><a class="reference" href="#findAll%2Cstring%2CRegex%2Cint"
-    title="findAll(str: string; pattern: Regex; start = 0; endpos = int.high): seq[string]">findAll(str: string; pattern: Regex; start = 0; endpos = int.high): seq[string]</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">captureNameId
-      <li><a class="reference" href="#captureNameId%2CRegex"
-    title="captureNameId(pattern: Regex): Table[string, int]">captureNameId(pattern: Regex): Table[string, int]</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">captures
-      <li><a class="reference" href="#captures%2CRegexMatch"
-    title="captures(pattern: RegexMatch): Captures">captures(pattern: RegexMatch): Captures</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">captureCount
-      <li><a class="reference" href="#captureCount%2CRegex"
-    title="captureCount(pattern: Regex): int">captureCount(pattern: Regex): int</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">re
-      <li><a class="reference" href="#re%2Cstring"
-    title="re(pattern: string): Regex">re(pattern: string): Regex</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">find
-      <li><a class="reference" href="#find%2Cstring%2CRegex%2Cint"
-    title="find(str: string; pattern: Regex; start = 0; endpos = int.high): Option[
-    RegexMatch]">find(str: string; pattern: Regex; start = 0; endpos = int.high): Option[
-    RegexMatch]</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">==
-      <li><a class="reference" href="#%3D%3D%2CRegex%2CRegex"
-    title="`==`(a, b: Regex): bool">`==`(a, b: Regex): bool</a></li>
-  <li><a class="reference" href="#%3D%3D%2CRegexMatch%2CRegexMatch"
-    title="`==`(a, b: RegexMatch): bool">`==`(a, b: RegexMatch): bool</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">[]
-      <li><a class="reference" href="#%5B%5D%2CCaptureBounds%2Cint"
-    title="`[]`(pattern: CaptureBounds; i: int): HSlice[int, int]">`[]`(pattern: CaptureBounds; i: int): HSlice[int, int]</a></li>
-  <li><a class="reference" href="#%5B%5D%2CCaptures%2Cint"
-    title="`[]`(pattern: Captures; i: int): string">`[]`(pattern: Captures; i: int): string</a></li>
-  <li><a class="reference" href="#%5B%5D%2CCaptureBounds%2Cstring"
-    title="`[]`(pattern: CaptureBounds; name: string): HSlice[int, int]">`[]`(pattern: CaptureBounds; name: string): HSlice[int, int]</a></li>
-  <li><a class="reference" href="#%5B%5D%2CCaptures%2Cstring"
-    title="`[]`(pattern: Captures; name: string): string">`[]`(pattern: Captures; name: string): string</a></li>
+  <ul class="simple nested-toc-section">toTable
+      <li><a class="reference" href="#toTable%2CCaptureBounds"
+    title="toTable(pattern: CaptureBounds): Table[string, HSlice[int, int]]">toTable(pattern: CaptureBounds): Table[string, HSlice[int, int]]</a></li>
+  <li><a class="reference" href="#toTable%2CCaptures"
+    title="toTable(pattern: Captures): Table[string, string]">toTable(pattern: Captures): Table[string, string]</a></li>
 
   </ul>
 
@@ -275,18 +275,18 @@ window.addEventListener('DOMContentLoaded', main);
 <li>
   <a class="reference reference-toplevel" href="#15" id="65">Iterators</a>
   <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">items
+      <ul class="simple nested-toc-section">findIter
+      <li><a class="reference" href="#findIter.i%2Cstring%2CRegex%2Cint"
+    title="findIter(str: string; pattern: Regex; start = 0; endpos = int.high): RegexMatch">findIter(str: string; pattern: Regex; start = 0; endpos = int.high): RegexMatch</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">items
       <li><a class="reference" href="#items.i%2CCaptureBounds"
     title="items(pattern: CaptureBounds; default = none(HSlice[int, int])): Option[
     HSlice[int, int]]">items(pattern: CaptureBounds; default = none(HSlice[int, int])): Option[
     HSlice[int, int]]</a></li>
   <li><a class="reference" href="#items.i%2CCaptures%2COption%5Bstring%5D"
     title="items(pattern: Captures; default: Option[string] = none(string)): Option[string]">items(pattern: Captures; default: Option[string] = none(string)): Option[string]</a></li>
-
-  </ul>
-  <ul class="simple nested-toc-section">findIter
-      <li><a class="reference" href="#findIter.i%2Cstring%2CRegex%2Cint"
-    title="findIter(str: string; pattern: Regex; start = 0; endpos = int.high): RegexMatch">findIter(str: string; pattern: Regex; start = 0; endpos = int.high): RegexMatch</a></li>
 
   </ul>
 
@@ -363,6 +363,41 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
 <dl class="item">
+<a id="CaptureBounds"></a>
+<dt><pre><a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L207"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L207" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="Captures"></a>
+<dt><pre><a href="nre.html#Captures"><span class="Identifier">Captures</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L206"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L206" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="InvalidUnicodeError"></a>
+<dt><pre><a href="nre.html#InvalidUnicodeError"><span class="Identifier">InvalidUnicodeError</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="nre.html#RegexError"><span class="Identifier">RegexError</span></a>
+  <span class="Identifier">pos</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                  <span class="Comment">## the location of the invalid unicode in bytes</span>
+  </pre></dt>
+<dd>
+
+Thrown when matching fails due to invalid unicode in strings
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L214"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L214" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="Regex"></a>
 <dt><pre><a href="nre.html#Regex"><span class="Identifier">Regex</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
   <span class="Identifier">pattern</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>           <span class="Comment">## not nil</span>
@@ -412,6 +447,29 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L77" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
+<a id="RegexError"></a>
+<dt><pre><a href="nre.html#RegexError"><span class="Identifier">RegexError</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="system.html#CatchableError"><span class="Identifier">CatchableError</span></a></pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L209"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L209" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="RegexInternalError"></a>
+<dt><pre><a href="nre.html#RegexInternalError"><span class="Identifier">RegexInternalError</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="nre.html#RegexError"><span class="Identifier">RegexError</span></a>
+  </pre></dt>
+<dd>
+
+Internal error in the module, this probably means that there is a bug
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L211"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L211" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="RegexMatch"></a>
 <dt><pre><a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">pattern</span><span class="Operator">*</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a>            <span class="Comment">## The regex doing the matching.</span>
@@ -459,62 +517,16 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L154" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="Captures"></a>
-<dt><pre><a href="nre.html#Captures"><span class="Identifier">Captures</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L206"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L206" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="CaptureBounds"></a>
-<dt><pre><a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L207"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L207" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="RegexError"></a>
-<dt><pre><a href="nre.html#RegexError"><span class="Identifier">RegexError</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="system.html#CatchableError"><span class="Identifier">CatchableError</span></a></pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L209"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L209" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="RegexInternalError"></a>
-<dt><pre><a href="nre.html#RegexInternalError"><span class="Identifier">RegexInternalError</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="nre.html#RegexError"><span class="Identifier">RegexError</span></a>
+<a id="StudyError"></a>
+<dt><pre><a href="nre.html#StudyError"><span class="Identifier">StudyError</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="nre.html#RegexError"><span class="Identifier">RegexError</span></a>
   </pre></dt>
 <dd>
 
-Internal error in the module, this probably means that there is a bug
+Thrown when studying the regular expression fails for whatever reason. The message contains the error code.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L211"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L224"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L211" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="InvalidUnicodeError"></a>
-<dt><pre><a href="nre.html#InvalidUnicodeError"><span class="Identifier">InvalidUnicodeError</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="nre.html#RegexError"><span class="Identifier">RegexError</span></a>
-  <span class="Identifier">pos</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                  <span class="Comment">## the location of the invalid unicode in bytes</span>
-  </pre></dt>
-<dd>
-
-Thrown when matching fails due to invalid unicode in strings
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L214"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L214" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L224" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="SyntaxError"></a>
@@ -531,230 +543,11 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L218" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="StudyError"></a>
-<dt><pre><a href="nre.html#StudyError"><span class="Identifier">StudyError</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="nre.html#RegexError"><span class="Identifier">RegexError</span></a>
-  </pre></dt>
-<dd>
-
-Thrown when studying the regular expression fails for whatever reason. The message contains the error code.
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L224"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L224" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
 
 </dl></div>
 <div class="section" id="12">
 <h1><a class="toc-backref" href="#12">Procs</a></h1>
 <dl class="item">
-<a id="captureCount,Regex"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#captureCount%2CRegex"><span class="Identifier">captureCount</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L300"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L300" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="captureNameId,Regex"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#captureNameId%2CRegex"><span class="Identifier">captureNameId</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">)</span><span class="Other">:</span> <a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L303"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L303" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="captureBounds,RegexMatch"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#captureBounds%2CRegexMatch"><span class="Identifier">captureBounds</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">)</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L328"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="captures,RegexMatch"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#captures%2CRegexMatch"><span class="Identifier">captures</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">)</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L330"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L330" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="contains,CaptureBounds,int"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#contains%2CCaptureBounds%2Cint"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L332"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L332" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="contains,Captures,int"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#contains%2CCaptures%2Cint"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L336"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L336" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="[],CaptureBounds,int"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#%5B%5D%2CCaptureBounds%2Cint"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L339"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L339" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="[],Captures,int"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#%5B%5D%2CCaptures%2Cint"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L347"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L347" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="match,RegexMatch"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#match%2CRegexMatch"><span class="Identifier">match</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L353"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L353" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="matchBounds,RegexMatch"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#matchBounds%2CRegexMatch"><span class="Identifier">matchBounds</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L356"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L356" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="contains,CaptureBounds,string"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#contains%2CCaptureBounds%2Cstring"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L359"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L359" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="contains,Captures,string"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#contains%2CCaptures%2Cstring"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L366"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L366" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="[],CaptureBounds,string"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#%5B%5D%2CCaptureBounds%2Cstring"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L373"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L373" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="[],Captures,string"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#%5B%5D%2CCaptures%2Cstring"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L379"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L379" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="toTable,Captures"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#toTable%2CCaptures"><span class="Identifier">toTable</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">)</span><span class="Other">:</span> <a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L390"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L390" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="toTable,CaptureBounds"></a>
-<dt><pre><span class="Keyword">func</span> <a href="#toTable%2CCaptureBounds"><span class="Identifier">toTable</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">)</span><span class="Other">:</span> <a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">]</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L394"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L394" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="toSeq,CaptureBounds"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#toSeq%2CCaptureBounds"><span class="Identifier">toSeq</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">default</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span>
-    <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L417"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L417" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="toSeq,Captures,Option[string]"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#toSeq%2CCaptures%2COption%5Bstring%5D"><span class="Identifier">toSeq</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">default</span><span class="Other">:</span> <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span>
-    <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L422"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L422" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
 <a id="$,RegexMatch"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#%24%2CRegexMatch"><span class="Identifier">`$`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
@@ -788,32 +581,174 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L438" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="re,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#re%2Cstring"><span class="Identifier">re</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">SyntaxError</span><span class="Other">,</span> <span class="Identifier">StudyError</span><span class="Other">,</span>
-    <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<a id="[],CaptureBounds,int"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#%5B%5D%2CCaptureBounds%2Cint"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L497"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L339"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L497" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L339" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="match,string,Regex,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#match%2Cstring%2CRegex%2Cint"><span class="Identifier">match</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">start</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">;</span> <span class="Identifier">endpos</span> <span class="Other">=</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">.</span><span class="Identifier">high</span><span class="Other">)</span><span class="Other">:</span> <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span>
-    <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">]</span><span class="Other">,</span>
-                  <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<a id="[],CaptureBounds,string"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#%5B%5D%2CCaptureBounds%2Cstring"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-Like <a class="reference external" href="#find,string,Regex,int">find(...)</a>, but anchored to the start of the string. 
-<p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Identifier">doAssert</span> <span class="StringLit">&quot;foo&quot;</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="RawData">re&quot;f&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">isSome</span>
-<span class="Identifier">doAssert</span> <span class="StringLit">&quot;foo&quot;</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="RawData">re&quot;o&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">isNone</span></pre>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L540"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L373"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L540" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L373" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="[],Captures,int"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#%5B%5D%2CCaptures%2Cint"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L347"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L347" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="[],Captures,string"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#%5B%5D%2CCaptures%2Cstring"><span class="Identifier">`[]`</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L379"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L379" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="captureBounds,RegexMatch"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#captureBounds%2CRegexMatch"><span class="Identifier">captureBounds</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">)</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L328"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L328" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="captureCount,Regex"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#captureCount%2CRegex"><span class="Identifier">captureCount</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L300"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L300" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="captureNameId,Regex"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#captureNameId%2CRegex"><span class="Identifier">captureNameId</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">)</span><span class="Other">:</span> <a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L303"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L303" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="captures,RegexMatch"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#captures%2CRegexMatch"><span class="Identifier">captures</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">)</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L330"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L330" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="contains,CaptureBounds,int"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#contains%2CCaptureBounds%2Cint"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L332"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L332" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="contains,CaptureBounds,string"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#contains%2CCaptureBounds%2Cstring"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L359"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L359" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="contains,Captures,int"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#contains%2CCaptures%2Cint"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">i</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L336"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L336" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="contains,Captures,string"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#contains%2CCaptures%2Cstring"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L366"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L366" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="contains,string,Regex,int"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#contains%2Cstring%2CRegex%2Cint"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">start</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">;</span> <span class="Identifier">endpos</span> <span class="Other">=</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">.</span><span class="Identifier">high</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+Determine if the string contains the given pattern between the end and start positions: This function is equivalent to <tt class="docutils literal"><span class="pre"><span class="Identifier">isSome</span><span class="Punctuation">(</span><span class="Identifier">str</span><span class="Operator">.</span><span class="Identifier">find</span><span class="Punctuation">(</span><span class="Identifier">pattern</span><span class="Punctuation">,</span> <span class="Identifier">start</span><span class="Punctuation">,</span> <span class="Identifier">endpos</span><span class="Punctuation">)</span><span class="Punctuation">)</span></span></tt>. 
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">doAssert</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="RawData">re&quot;bc&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">doAssert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="RawData">re&quot;cd&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">doAssert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="RawData">re&quot;a&quot;</span><span class="Punctuation">,</span> <span class="Identifier">start</span> <span class="Operator">=</span> <span class="DecNumber">1</span><span class="Punctuation">)</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L618"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L618" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="escapeRe,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#escapeRe%2Cstring"><span class="Identifier">escapeRe</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+<p>Escapes the string so it doesn't match any special characters. Incompatible with the Extra flag (<tt class="docutils literal"><span class="pre"><span class="Identifier">X</span></span></tt>).</p>
+<p>Escaped char: <tt class="docutils literal"><span class="pre"><span class="Operator">\</span> <span class="Operator">+</span> <span class="Operator">*</span> <span class="Operator">?</span> <span class="Punctuation">[</span> <span class="Operator">^</span> <span class="Punctuation">]</span> <span class="Operator">$</span> <span class="Punctuation">(</span> <span class="Punctuation">)</span> <span class="Punctuation">{</span> <span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Operator">!</span> <span class="Operator">&lt;</span> <span class="Operator">&gt;</span> <span class="Operator">|</span> <span class="Punctuation">:</span> <span class="Operator">-</span></span></tt></p>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">escapeRe</span><span class="Punctuation">(</span><span class="StringLit">&quot;fly+wind&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;fly</span><span class="EscapeSequence">\\</span><span class="StringLit">+wind&quot;</span>
+<span class="Identifier">doAssert</span> <span class="Identifier">escapeRe</span><span class="Punctuation">(</span><span class="StringLit">&quot;!&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;</span><span class="EscapeSequence">\\</span><span class="StringLit">!&quot;</span>
+<span class="Identifier">doAssert</span> <span class="Identifier">escapeRe</span><span class="Punctuation">(</span><span class="StringLit">&quot;nim*&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;nim</span><span class="EscapeSequence">\\</span><span class="StringLit">*&quot;</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L744"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L744" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="find,string,Regex,int"></a>
@@ -847,46 +782,67 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L613" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="contains,string,Regex,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#contains%2Cstring%2CRegex%2Cint"><span class="Identifier">contains</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">start</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">;</span> <span class="Identifier">endpos</span> <span class="Other">=</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">.</span><span class="Identifier">high</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<a id="match,RegexMatch"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#match%2CRegexMatch"><span class="Identifier">match</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-Determine if the string contains the given pattern between the end and start positions: This function is equivalent to <tt class="docutils literal"><span class="pre"><span class="Identifier">isSome</span><span class="Punctuation">(</span><span class="Identifier">str</span><span class="Operator">.</span><span class="Identifier">find</span><span class="Punctuation">(</span><span class="Identifier">pattern</span><span class="Punctuation">,</span> <span class="Identifier">start</span><span class="Punctuation">,</span> <span class="Identifier">endpos</span><span class="Punctuation">)</span><span class="Punctuation">)</span></span></tt>. 
-<p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Identifier">doAssert</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="RawData">re&quot;bc&quot;</span><span class="Punctuation">)</span>
-<span class="Identifier">doAssert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="RawData">re&quot;cd&quot;</span><span class="Punctuation">)</span>
-<span class="Identifier">doAssert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="RawData">re&quot;a&quot;</span><span class="Punctuation">,</span> <span class="Identifier">start</span> <span class="Operator">=</span> <span class="DecNumber">1</span><span class="Punctuation">)</span></pre>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L618"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L353"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L618" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L353" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="split,string,Regex,int,int"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#split%2Cstring%2CRegex%2Cint%2Cint"><span class="Identifier">split</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">maxSplit</span> <span class="Other">=</span> <span class="DecNumber">-1</span><span class="Other">;</span> <span class="Identifier">start</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<a id="match,string,Regex,int"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#match%2Cstring%2CRegex%2Cint"><span class="Identifier">match</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">start</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">;</span> <span class="Identifier">endpos</span> <span class="Other">=</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">.</span><span class="Identifier">high</span><span class="Other">)</span><span class="Other">:</span> <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span>
+    <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">]</span><span class="Other">,</span>
+                  <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
-<p>Splits the string with the given regex. This works according to the rules that Perl and Javascript use.</p>
-<p><tt class="docutils literal"><span class="pre"><span class="Identifier">start</span></span></tt> behaves the same as in <a class="reference external" href="#find,string,Regex,int">find(...)</a>. </p>
-
+Like <a class="reference external" href="#find,string,Regex,int">find(...)</a>, but anchored to the start of the string. 
 <p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Comment"># -  If the match is zero-width, then the string is still split:</span>
-<span class="Identifier">doAssert</span> <span class="StringLit">&quot;123&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">(</span><span class="RawData">re&quot;&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;2&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;3&quot;</span><span class="Punctuation">]</span>
-
-<span class="Comment"># -  If the pattern has a capture in it, it is added after the string</span>
-<span class="Comment">#    split:</span>
-<span class="Identifier">doAssert</span> <span class="StringLit">&quot;12&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">(</span><span class="RawData">re&quot;(\d)&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;2&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">]</span>
-
-<span class="Comment"># -  If `maxsplit != -1`, then the string will only be split</span>
-<span class="Comment">#    `maxsplit - 1` times. This means that there will be `maxsplit`</span>
-<span class="Comment">#    strings in the output seq.</span>
-<span class="Identifier">doAssert</span> <span class="StringLit">&quot;1.2.3&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">(</span><span class="RawData">re&quot;\.&quot;</span><span class="Punctuation">,</span> <span class="Identifier">maxsplit</span> <span class="Operator">=</span> <span class="DecNumber">2</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;2.3&quot;</span><span class="Punctuation">]</span></pre>
+<pre class="listing"><span class="Identifier">doAssert</span> <span class="StringLit">&quot;foo&quot;</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="RawData">re&quot;f&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">isSome</span>
+<span class="Identifier">doAssert</span> <span class="StringLit">&quot;foo&quot;</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="RawData">re&quot;o&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">isNone</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L630"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L540"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L630" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L540" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="matchBounds,RegexMatch"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#matchBounds%2CRegexMatch"><span class="Identifier">matchBounds</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L356"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L356" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="re,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#re%2Cstring"><span class="Identifier">re</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">SyntaxError</span><span class="Other">,</span> <span class="Identifier">StudyError</span><span class="Other">,</span>
+    <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L497"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L497" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="replace,string,Regex,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#replace%2Cstring%2CRegex%2Cstring"><span class="Identifier">replace</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">sub</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L739"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L739" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="replace,string,Regex,proc(RegexMatch)"></a>
@@ -927,34 +883,78 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L735" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="replace,string,Regex,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#replace%2Cstring%2CRegex%2Cstring"><span class="Identifier">replace</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">sub</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
+<a id="split,string,Regex,int,int"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#split%2Cstring%2CRegex%2Cint%2Cint"><span class="Identifier">split</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">maxSplit</span> <span class="Other">=</span> <span class="DecNumber">-1</span><span class="Other">;</span> <span class="Identifier">start</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+<p>Splits the string with the given regex. This works according to the rules that Perl and Javascript use.</p>
+<p><tt class="docutils literal"><span class="pre"><span class="Identifier">start</span></span></tt> behaves the same as in <a class="reference external" href="#find,string,Regex,int">find(...)</a>. </p>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Comment"># -  If the match is zero-width, then the string is still split:</span>
+<span class="Identifier">doAssert</span> <span class="StringLit">&quot;123&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">(</span><span class="RawData">re&quot;&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;2&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;3&quot;</span><span class="Punctuation">]</span>
+
+<span class="Comment"># -  If the pattern has a capture in it, it is added after the string</span>
+<span class="Comment">#    split:</span>
+<span class="Identifier">doAssert</span> <span class="StringLit">&quot;12&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">(</span><span class="RawData">re&quot;(\d)&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;2&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">]</span>
+
+<span class="Comment"># -  If `maxsplit != -1`, then the string will only be split</span>
+<span class="Comment">#    `maxsplit - 1` times. This means that there will be `maxsplit`</span>
+<span class="Comment">#    strings in the output seq.</span>
+<span class="Identifier">doAssert</span> <span class="StringLit">&quot;1.2.3&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">(</span><span class="RawData">re&quot;\.&quot;</span><span class="Punctuation">,</span> <span class="Identifier">maxsplit</span> <span class="Operator">=</span> <span class="DecNumber">2</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;2.3&quot;</span><span class="Punctuation">]</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L630"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L630" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="toSeq,CaptureBounds"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#toSeq%2CCaptureBounds"><span class="Identifier">toSeq</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">default</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span>
+    <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L417"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L417" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="toSeq,Captures,Option[string]"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#toSeq%2CCaptures%2COption%5Bstring%5D"><span class="Identifier">toSeq</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">;</span> <span class="Identifier">default</span><span class="Other">:</span> <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span>
+    <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L422"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L422" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="toTable,CaptureBounds"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#toTable%2CCaptureBounds"><span class="Identifier">toTable</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">)</span><span class="Other">:</span> <a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L394"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L394" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="toTable,Captures"></a>
+<dt><pre><span class="Keyword">func</span> <a href="#toTable%2CCaptures"><span class="Identifier">toTable</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Captures"><span class="Identifier">Captures</span></a><span class="Other">)</span><span class="Other">:</span> <a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L739"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L390"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L739" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="escapeRe,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#escapeRe%2Cstring"><span class="Identifier">escapeRe</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-<p>Escapes the string so it doesn't match any special characters. Incompatible with the Extra flag (<tt class="docutils literal"><span class="pre"><span class="Identifier">X</span></span></tt>).</p>
-<p>Escaped char: <tt class="docutils literal"><span class="pre"><span class="Operator">\</span> <span class="Operator">+</span> <span class="Operator">*</span> <span class="Operator">?</span> <span class="Punctuation">[</span> <span class="Operator">^</span> <span class="Punctuation">]</span> <span class="Operator">$</span> <span class="Punctuation">(</span> <span class="Punctuation">)</span> <span class="Punctuation">{</span> <span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Operator">!</span> <span class="Operator">&lt;</span> <span class="Operator">&gt;</span> <span class="Operator">|</span> <span class="Punctuation">:</span> <span class="Operator">-</span></span></tt></p>
-
-<p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">escapeRe</span><span class="Punctuation">(</span><span class="StringLit">&quot;fly+wind&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;fly</span><span class="EscapeSequence">\\</span><span class="StringLit">+wind&quot;</span>
-<span class="Identifier">doAssert</span> <span class="Identifier">escapeRe</span><span class="Punctuation">(</span><span class="StringLit">&quot;!&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;</span><span class="EscapeSequence">\\</span><span class="StringLit">!&quot;</span>
-<span class="Identifier">doAssert</span> <span class="Identifier">escapeRe</span><span class="Punctuation">(</span><span class="StringLit">&quot;nim*&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;nim</span><span class="EscapeSequence">\\</span><span class="StringLit">*&quot;</span></pre>
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L744"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L744" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L390" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -962,6 +962,23 @@ class="link-seesrc" target="_blank">Source</a>
 <div class="section" id="15">
 <h1><a class="toc-backref" href="#15">Iterators</a></h1>
 <dl class="item">
+<a id="findIter.i,string,Regex,int"></a>
+<dt><pre><span class="Keyword">iterator</span> <a href="#findIter.i%2Cstring%2CRegex%2Cint"><span class="Identifier">findIter</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">start</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">;</span> <span class="Identifier">endpos</span> <span class="Other">=</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">.</span><span class="Identifier">high</span><span class="Other">)</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+<p>Works the same as <a class="reference external" href="#find,string,Regex,int">find(...)</a>, but finds every non-overlapping match. <tt class="docutils literal"><span class="pre"><span class="StringLit">&quot;2222&quot;</span><span class="Operator">.</span><span class="Identifier">find</span><span class="Punctuation">(</span><span class="RawData">re&quot;22&quot;</span><span class="Punctuation">)</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="StringLit">&quot;22&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;22&quot;</span></span></tt>, not <tt class="docutils literal"><span class="pre"><span class="StringLit">&quot;22&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;22&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;22&quot;</span></span></tt>.</p>
+<p>Arguments are the same as <a class="reference external" href="#find,string,Regex,int">find(...)</a></p>
+<p>Variants:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span> <span class="Identifier">findAll</span><span class="Punctuation">(</span><span class="Operator">...</span><span class="Punctuation">)</span></span></tt> returns a <tt class="docutils literal"><span class="pre"><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span></span></tt></li>
+</ul>
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L550"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L550" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
 <a id="items.i,CaptureBounds"></a>
 <dt><pre><span class="Keyword">iterator</span> <a href="#items.i%2CCaptureBounds"><span class="Identifier">items</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#CaptureBounds"><span class="Identifier">CaptureBounds</span></a><span class="Other">;</span> <span class="Identifier">default</span> <span class="Other">=</span> <span class="Identifier">none</span><span class="Other">(</span><a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="options.html#Option"><span class="Identifier">Option</span></a><span class="Other">[</span>
     <a href="system.html#HSlice"><span class="Identifier">HSlice</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
@@ -986,23 +1003,6 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L413" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="findIter.i,string,Regex,int"></a>
-<dt><pre><span class="Keyword">iterator</span> <a href="#findIter.i%2Cstring%2CRegex%2Cint"><span class="Identifier">findIter</span></a><span class="Other">(</span><span class="Identifier">str</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">pattern</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a><span class="Other">;</span> <span class="Identifier">start</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">;</span> <span class="Identifier">endpos</span> <span class="Other">=</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">.</span><span class="Identifier">high</span><span class="Other">)</span><span class="Other">:</span> <a href="nre.html#RegexMatch"><span class="Identifier">RegexMatch</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">RegexInternalError</span><span class="Other">,</span> <span class="Identifier">InvalidUnicodeError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
-<dd>
-
-<p>Works the same as <a class="reference external" href="#find,string,Regex,int">find(...)</a>, but finds every non-overlapping match. <tt class="docutils literal"><span class="pre"><span class="StringLit">&quot;2222&quot;</span><span class="Operator">.</span><span class="Identifier">find</span><span class="Punctuation">(</span><span class="RawData">re&quot;22&quot;</span><span class="Punctuation">)</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="StringLit">&quot;22&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;22&quot;</span></span></tt>, not <tt class="docutils literal"><span class="pre"><span class="StringLit">&quot;22&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;22&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;22&quot;</span></span></tt>.</p>
-<p>Arguments are the same as <a class="reference external" href="#find,string,Regex,int">find(...)</a></p>
-<p>Variants:</p>
-<ul class="simple"><li><tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span> <span class="Identifier">findAll</span><span class="Punctuation">(</span><span class="Operator">...</span><span class="Punctuation">)</span></span></tt> returns a <tt class="docutils literal"><span class="pre"><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span></span></tt></li>
-</ul>
-
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L550"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L550" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
 
 </dl></div>
 <div class="section" id="19">
@@ -1018,7 +1018,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-23 00:53:22 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-27 00:54:23 UTC</small>
       </div>
     </div>
   </div>

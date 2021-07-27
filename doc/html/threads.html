@@ -117,25 +117,25 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#copy%2CThread%5BTArg%5D%2CThread%5BTArg%5D"
     title="`=copy`*[TArg](x: var Thread[TArg]; y: Thread[TArg])">`=copy`</a></li>
-  <li><a class="reference" href="#onThreadDestruction%2Cproc%29"
-    title="onThreadDestruction*(handler: proc () {.closure, gcsafe, raises: [].})">onThreadDestruction</a></li>
-  <li><a class="reference" href="#running%2CThread%5BTArg%5D"
-    title="running*[TArg](t: Thread[TArg]): bool">running</a></li>
+  <li><a class="reference" href="#createThread%2CThread%5Bvoid%5D%2Cproc%29"
+    title="createThread*(t: var Thread[void]; tp: proc () {.thread, nimcall.})">createThread</a></li>
+  <li><a class="reference" href="#createThread%2CThread%5BTArg%5D%2Cproc%28TArg%29%2CTArg"
+    title="createThread*[TArg](t: var Thread[TArg];
+                    tp: proc (arg: TArg) {.thread, nimcall.}; param: TArg)">createThread</a></li>
+  <li><a class="reference" href="#getThreadId"
+    title="getThreadId*(): int">getThreadId</a></li>
   <li><a class="reference" href="#handle%2CThread%5BTArg%5D"
     title="handle*[TArg](t: Thread[TArg]): SysThread">handle</a></li>
   <li><a class="reference" href="#joinThread%2CThread%5BTArg%5D"
     title="joinThread*[TArg](t: Thread[TArg])">joinThread</a></li>
   <li><a class="reference" href="#joinThreads%2Cvarargs%5BThread%5BTArg%5D%5D"
     title="joinThreads*[TArg](t: varargs[Thread[TArg]])">joinThreads</a></li>
-  <li><a class="reference" href="#createThread%2CThread%5BTArg%5D%2Cproc%28TArg%29%2CTArg"
-    title="createThread*[TArg](t: var Thread[TArg];
-                    tp: proc (arg: TArg) {.thread, nimcall.}; param: TArg)">createThread</a></li>
+  <li><a class="reference" href="#onThreadDestruction%2Cproc%29"
+    title="onThreadDestruction*(handler: proc () {.closure, gcsafe, raises: [].})">onThreadDestruction</a></li>
   <li><a class="reference" href="#pinToCpu%2CThread%5BArg%5D%2CNatural"
     title="pinToCpu*[Arg](t: var Thread[Arg]; cpu: Natural)">pinToCpu</a></li>
-  <li><a class="reference" href="#createThread%2CThread%5Bvoid%5D%2Cproc%29"
-    title="createThread*(t: var Thread[void]; tp: proc () {.thread, nimcall.})">createThread</a></li>
-  <li><a class="reference" href="#getThreadId"
-    title="getThreadId*(): int">getThreadId</a></li>
+  <li><a class="reference" href="#running%2CThread%5BTArg%5D"
+    title="running*[TArg](t: Thread[TArg]): bool">running</a></li>
 
   </ul>
 </li>
@@ -214,28 +214,40 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L93" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="onThreadDestruction,proc)"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#onThreadDestruction%2Cproc%29"><span class="Identifier">onThreadDestruction</span></a><span class="Operator">*</span><span class="Other">(</span><span class="Identifier">handler</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span> {.<span class="Identifier">closure</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}<span class="Other">)</span></pre></dt>
+<a id="createThread,Thread[void],proc)"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#createThread%2CThread%5Bvoid%5D%2Cproc%29"><span class="Identifier">createThread</span></a><span class="Operator">*</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">Thread</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">tp</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span> {.<span class="Identifier">thread</span><span class="Other">,</span> <span class="Identifier">nimcall</span>.}<span class="Other">)</span></pre></dt>
 <dd>
 
-<p>Registers a <em>thread local</em> handler that is called at the thread's destruction.</p>
-<p>A thread is destructed when the <tt class="docutils literal"><span class="pre"><span class="Operator">.</span><span class="Identifier">thread</span></span></tt> proc returns normally or when it raises an exception. Note that unhandled exceptions in a thread nevertheless cause the whole process to die.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L98"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L343"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L98" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L343" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="running,Thread[TArg]"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#running%2CThread%5BTArg%5D"><span class="Identifier">running</span></a><span class="Operator">*</span><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Identifier">Thread</span><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span>.}</pre></dt>
+<a id="createThread,Thread[TArg],proc(TArg),TArg"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#createThread%2CThread%5BTArg%5D%2Cproc%28TArg%29%2CTArg"><span class="Identifier">createThread</span></a><span class="Operator">*</span><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">Thread</span><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span><span class="Other">;</span>
+                         <span class="Identifier">tp</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">arg</span><span class="Other">:</span> <span class="Identifier">TArg</span><span class="Other">)</span> {.<span class="Identifier">thread</span><span class="Other">,</span> <span class="Identifier">nimcall</span>.}<span class="Other">;</span> <span class="Identifier">param</span><span class="Other">:</span> <span class="Identifier">TArg</span><span class="Other">)</span></pre></dt>
 <dd>
 
-Returns true if <tt class="docutils literal"><span class="pre"><span class="Identifier">t</span></span></tt> is running.
+<p>Creates a new thread <tt class="docutils literal"><span class="pre"><span class="Identifier">t</span></span></tt> and starts its execution.</p>
+<p>Entry point is the proc <tt class="docutils literal"><span class="pre"><span class="Identifier">tp</span></span></tt>. <tt class="docutils literal"><span class="pre"><span class="Identifier">param</span></span></tt> is passed to <tt class="docutils literal"><span class="pre"><span class="Identifier">tp</span></span></tt>. <tt class="docutils literal"><span class="pre"><span class="Identifier">TArg</span></span></tt> can be <tt class="docutils literal"><span class="pre"><span class="Identifier">void</span></span></tt> if you don't need to pass any data to the thread.</p>
+
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L200"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L260"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L200" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L260" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+<a id="getThreadId"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#getThreadId"><span class="Identifier">getThreadId</span></a><span class="Operator">*</span><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+<dd>
+
+Gets the ID of the currently running thread.
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L350"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L350" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="handle,Thread[TArg]"></a>
@@ -271,18 +283,17 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L215" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="createThread,Thread[TArg],proc(TArg),TArg"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#createThread%2CThread%5BTArg%5D%2Cproc%28TArg%29%2CTArg"><span class="Identifier">createThread</span></a><span class="Operator">*</span><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">Thread</span><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span><span class="Other">;</span>
-                         <span class="Identifier">tp</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">arg</span><span class="Other">:</span> <span class="Identifier">TArg</span><span class="Other">)</span> {.<span class="Identifier">thread</span><span class="Other">,</span> <span class="Identifier">nimcall</span>.}<span class="Other">;</span> <span class="Identifier">param</span><span class="Other">:</span> <span class="Identifier">TArg</span><span class="Other">)</span></pre></dt>
+<a id="onThreadDestruction,proc)"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#onThreadDestruction%2Cproc%29"><span class="Identifier">onThreadDestruction</span></a><span class="Operator">*</span><span class="Other">(</span><span class="Identifier">handler</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span> {.<span class="Identifier">closure</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}<span class="Other">)</span></pre></dt>
 <dd>
 
-<p>Creates a new thread <tt class="docutils literal"><span class="pre"><span class="Identifier">t</span></span></tt> and starts its execution.</p>
-<p>Entry point is the proc <tt class="docutils literal"><span class="pre"><span class="Identifier">tp</span></span></tt>. <tt class="docutils literal"><span class="pre"><span class="Identifier">param</span></span></tt> is passed to <tt class="docutils literal"><span class="pre"><span class="Identifier">tp</span></span></tt>. <tt class="docutils literal"><span class="pre"><span class="Identifier">TArg</span></span></tt> can be <tt class="docutils literal"><span class="pre"><span class="Identifier">void</span></span></tt> if you don't need to pass any data to the thread.</p>
+<p>Registers a <em>thread local</em> handler that is called at the thread's destruction.</p>
+<p>A thread is destructed when the <tt class="docutils literal"><span class="pre"><span class="Operator">.</span><span class="Identifier">thread</span></span></tt> proc returns normally or when it raises an exception. Note that unhandled exceptions in a thread nevertheless cause the whole process to die.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L260"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L98"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L260" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L98" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 <a id="pinToCpu,Thread[Arg],Natural"></a>
@@ -298,26 +309,15 @@ class="link-seesrc" target="_blank">Source</a>
 &nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L279" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
-<a id="createThread,Thread[void],proc)"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#createThread%2CThread%5Bvoid%5D%2Cproc%29"><span class="Identifier">createThread</span></a><span class="Operator">*</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">Thread</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">tp</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span> {.<span class="Identifier">thread</span><span class="Other">,</span> <span class="Identifier">nimcall</span>.}<span class="Other">)</span></pre></dt>
+<a id="running,Thread[TArg]"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#running%2CThread%5BTArg%5D"><span class="Identifier">running</span></a><span class="Operator">*</span><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Identifier">Thread</span><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">inline</span>.}</pre></dt>
 <dd>
 
-
+Returns true if <tt class="docutils literal"><span class="pre"><span class="Identifier">t</span></span></tt> is running.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L343"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L200"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L343" class="link-seesrc" target="_blank" >Edit</a>
-
-</dd>
-<a id="getThreadId"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#getThreadId"><span class="Identifier">getThreadId</span></a><span class="Operator">*</span><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
-<dd>
-
-Gets the ID of the currently running thread.
-&nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/system/threads.nim#L350"
-class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L350" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/system/threads.nim#L200" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 
@@ -330,7 +330,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-23 00:52:04 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-27 00:53:06 UTC</small>
       </div>
     </div>
   </div>
