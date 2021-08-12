@@ -426,21 +426,23 @@ arm.linux.gcc.linkerexe = &quot;arm-linux-gcc&quot;</pre>
   <span class="Identifier">NimMain</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># initialize garbage collector memory, types and stack</span></pre><p>Note: XCode's &quot;make clean&quot; gets confused about the generated nim.c files, so you need to clean those files manually to do a clean build.</p>
 
 <h1><a class="toc-backref" id="crossminuscompilation-for-nintendo-switch" href="#crossminuscompilation-for-nintendo-switch">Cross-compilation for Nintendo Switch</a></h1><p>Simply add <tt class="docutils literal"><span class="pre option">--os:nintendoswitch</span></tt> to your usual <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">c</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">cpp</span></span></tt> command and set the <tt class="docutils literal"><span class="pre option">passC</span></tt> and <tt class="docutils literal"><span class="pre option">passL</span></tt> command line switches to something like:</p>
-<pre class="listing"><span class="program">nim</span> <span class="option">c</span> <span class="Identifier">...</span> <span class="option">--passC=</span><span class="option">&quot;-I$DEVKITPRO/libnx/include&quot;</span> <span class="Identifier">...</span>
+<pre class="listing"><span class="program">nim</span> <span class="option">c</span> <span class="Identifier">...</span> <span class="option">--d:nimAllocPagesViaMalloc</span> <span class="option">--gc:orc</span> <span class="option">--passC=</span><span class="option">&quot;-I$DEVKITPRO/libnx/include&quot;</span> <span class="Identifier">...</span>
 <span class="Identifier">--passL=</span><span class="option">&quot;-specs=$DEVKITPRO/libnx/switch.specs -L$DEVKITPRO/libnx/lib -lnx&quot;</span></pre><p>or setup a <tt class="docutils literal"><span class="pre">nim.cfg</span></tt> file like so:<pre>#nim.cfg
+--gc:orc
+--d:nimAllocPagesViaMalloc
 --passC=&quot;-I$DEVKITPRO/libnx/include&quot;
 --passL=&quot;-specs=$DEVKITPRO/libnx/switch.specs -L$DEVKITPRO/libnx/lib -lnx&quot;</pre>
 </p>
-<p>The DevkitPro setup must be the same as the default with their new installer <a class="reference external" href="https://github.com/devkitPro/pacman/releases">here for Mac/Linux</a> or <a class="reference external" href="https://github.com/devkitPro/installer/releases">here for Windows</a>.</p>
+<p>The devkitPro setup must be the same as the default with their new installer <a class="reference external" href="https://github.com/devkitPro/pacman/releases">here for Mac/Linux</a> or <a class="reference external" href="https://github.com/devkitPro/installer/releases">here for Windows</a>.</p>
 <p>For example, with the above-mentioned config:</p>
-<pre class="listing"><span class="program">nim</span> <span class="option">c</span> <span class="option">--os:nintendoswitch</span> <span class="Identifier">switchhomebrew.nim</span></pre><p>This will generate a file called <tt class="docutils literal"><span class="pre">switchhomebrew.elf</span></tt> which can then be turned into an nro file with the <tt class="docutils literal"><span class="pre"><span class="program">elf2nro</span></span></tt> tool in the DevkitPro release. Examples can be found at <a class="reference external" href="https://github.com/jyapayne/nim-libnx.git">the nim-libnx github repo</a>.</p>
-<p>There are a few things that don't work because the DevkitPro libraries don't support them. They are:</p>
+<pre class="listing"><span class="program">nim</span> <span class="option">c</span> <span class="option">--os:nintendoswitch</span> <span class="Identifier">switchhomebrew.nim</span></pre><p>This will generate a file called <tt class="docutils literal"><span class="pre">switchhomebrew.elf</span></tt> which can then be turned into an nro file with the <tt class="docutils literal"><span class="pre"><span class="program">elf2nro</span></span></tt> tool in the devkitPro release. Examples can be found at <a class="reference external" href="https://github.com/jyapayne/nim-libnx.git">the nim-libnx github repo</a>.</p>
+<p>There are a few things that don't work because the devkitPro libraries don't support them. They are:</p>
 <ol class="simple"><li>Waiting for a subprocess to finish. A subprocess can be started, but right now it can't be waited on, which sort of makes subprocesses a bit hard to use</li>
-<li>Dynamic calls. DevkitPro libraries have no dlopen/dlclose functions.</li>
-<li>Command line parameters. It doesn't make sense to have these for a console anyways, so no big deal here.</li>
+<li>Dynamic calls. Switch OS (Horizon) doesn't support dynamic libraries, so dlopen/dlclose are not available.</li>
 <li>mqueue. Sadly there are no mqueue headers.</li>
 <li>ucontext. No headers for these either. No coroutines for now :(</li>
 <li>nl_types. No headers for this.</li>
+<li>As mmap is not supported, the nimAllocPagesViaMalloc option has to be used.</li>
 </ol>
 
 <h1><a class="toc-backref" id="dll-generation" href="#dll-generation">DLL generation</a></h1><p>Nim supports the generation of DLLs. However, there must be only one instance of the GC per process/address space. This instance is contained in <tt class="docutils literal"><span class="pre">nimrtl.dll</span></tt>. This means that every generated Nim DLL depends on <tt class="docutils literal"><span class="pre">nimrtl.dll</span></tt>. To generate the &quot;nimrtl.dll&quot; file, use the command:</p>
@@ -542,7 +544,7 @@ arm.linux.gcc.linkerexe = &quot;arm-linux-gcc&quot;</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-08-02 00:55:20 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-08-12 00:53:07 UTC</small>
       </div>
     </div>
   </div>

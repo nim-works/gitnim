@@ -87,7 +87,6 @@ if [ $# -eq 1 ] ; then
   mkdir -p $libdir/js
   mkdir -p $libdir/system
   mkdir -p $libdir/system/mm
-  mkdir -p $libdir/nintendoswitch
   mkdir -p $libdir/std
   mkdir -p $libdir/std/private
   mkdir -p $libdir/pure
@@ -422,8 +421,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/system/atomics.nim
   cp lib/stdlib.nimble $libdir/stdlib.nimble
   chmod 644 $libdir/stdlib.nimble
-  cp lib/nintendoswitch/switch_memory.nim $libdir/nintendoswitch/switch_memory.nim
-  chmod 644 $libdir/nintendoswitch/switch_memory.nim
   cp lib/nimhcr.nim.cfg $libdir/nimhcr.nim.cfg
   chmod 644 $libdir/nimhcr.nim.cfg
   cp lib/std/socketstreams.nim $libdir/std/socketstreams.nim
@@ -470,8 +467,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/private/digitsutils.nim
   cp lib/std/private/gitutils.nim $libdir/std/private/gitutils.nim
   chmod 644 $libdir/std/private/gitutils.nim
-  cp lib/std/private/vmutils.nim $libdir/std/private/vmutils.nim
-  chmod 644 $libdir/std/private/vmutils.nim
+  cp lib/std/private/bitops_utils.nim $libdir/std/private/bitops_utils.nim
+  chmod 644 $libdir/std/private/bitops_utils.nim
   cp lib/std/varints.nim $libdir/std/varints.nim
   chmod 644 $libdir/std/varints.nim
   cp lib/std/channels.nim $libdir/std/channels.nim
