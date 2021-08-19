@@ -369,6 +369,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/system/mm/malloc.nim
   cp lib/system/mm/go.nim $libdir/system/mm/go.nim
   chmod 644 $libdir/system/mm/go.nim
+  cp lib/system/repr_impl.nim $libdir/system/repr_impl.nim
+  chmod 644 $libdir/system/repr_impl.nim
   cp lib/system/nimscript.nim $libdir/system/nimscript.nim
   chmod 644 $libdir/system/nimscript.nim
   cp lib/system/seqs_v2_reimpl.nim $libdir/system/seqs_v2_reimpl.nim
@@ -461,6 +463,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/private/win_setenv.nim
   cp lib/std/private/decode_helpers.nim $libdir/std/private/decode_helpers.nim
   chmod 644 $libdir/std/private/decode_helpers.nim
+  cp lib/std/private/dbutils.nim $libdir/std/private/dbutils.nim
+  chmod 644 $libdir/std/private/dbutils.nim
   cp lib/std/private/strimpl.nim $libdir/std/private/strimpl.nim
   chmod 644 $libdir/std/private/strimpl.nim
   cp lib/std/private/digitsutils.nim $libdir/std/private/digitsutils.nim
