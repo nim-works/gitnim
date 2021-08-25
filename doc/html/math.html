@@ -255,6 +255,11 @@ window.addEventListener('DOMContentLoaded', main);
     title="ceil(x: float64): float64">ceil(x: float64): float64</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">ceilDiv
+      <li><a class="reference" href="#ceilDiv%2CT%2CT"
+    title="ceilDiv[T: SomeInteger](x, y: T): T">ceilDiv[T: SomeInteger](x, y: T): T</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">clamp
       <li><a class="reference" href="#clamp%2CT%2CSlice%5BT%5D"
     title="clamp[T](val: T; bounds: Slice[T]): T">clamp[T](val: T; bounds: Slice[T]): T</a></li>
@@ -749,9 +754,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">doAssert</span> <span class="Operator">-</span><span class="DecNumber">3</span> <span class="Operator">^</span> <span class="DecNumber">1</span> <span class="Operator">==</span> <span class="Operator">-</span><span class="DecNumber">3</span>
 <span class="Identifier">doAssert</span> <span class="Operator">-</span><span class="DecNumber">3</span> <span class="Operator">^</span> <span class="DecNumber">2</span> <span class="Operator">==</span> <span class="DecNumber">9</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1086"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1138"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1086" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1138" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1204,6 +1209,29 @@ class="link-seesrc" target="_blank">Source</a>
 
 </dd>
 </div>
+<div id="ceilDiv,T,T">
+<dt><pre><span class="Keyword">func</span> <a href="#ceilDiv%2CT%2CT"><span class="Identifier">ceilDiv</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">:</span> <a href="system.html#SomeInteger"><span class="Identifier">SomeInteger</span></a><span class="Other">]</span><span class="Other">(</span><span class="Identifier">x</span><span class="Other">,</span> <span class="Identifier">y</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span> {.<span class="Identifier">inline</span>.}</pre></dt>
+<dd>
+
+<p>Ceil division is conceptually defined as <tt class="docutils literal"><span class="pre"><span class="Identifier">ceil</span><span class="Punctuation">(</span><span class="Identifier">x</span> <span class="Operator">/</span> <span class="Identifier">y</span><span class="Punctuation">)</span></span></tt>.</p>
+<p>Assumes <tt class="docutils literal"><span class="pre"><span class="Identifier">x</span> <span class="Operator">&gt;=</span> <span class="DecNumber">0</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">y</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span></span></tt> (and <tt class="docutils literal"><span class="pre"><span class="Identifier">x</span> <span class="Operator">+</span> <span class="Identifier">y</span> <span class="Operator">-</span> <span class="DecNumber">1</span> <span class="Operator">&lt;=</span> <span class="Identifier">high</span><span class="Punctuation">(</span><span class="Identifier">T</span><span class="Punctuation">)</span></span></tt> if T is SomeUnsignedInt).</p>
+<p>This is different from the <a class="reference external" href="system.html#div,int,int">system.div</a> operator, which works like <tt class="docutils literal"><span class="pre"><span class="Identifier">trunc</span><span class="Punctuation">(</span><span class="Identifier">x</span> <span class="Operator">/</span> <span class="Identifier">y</span><span class="Punctuation">)</span></span></tt>. That is, <tt class="docutils literal"><span class="pre"><span class="Keyword">div</span></span></tt> rounds towards <tt class="docutils literal"><span class="pre"><span class="DecNumber">0</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">ceilDiv</span></span></tt> rounds up.</p>
+<p>This function has the above input limitation, because that allows the compiler to generate faster code and it is rarely used with negative values or unsigned integers close to <tt class="docutils literal"><span class="pre"><span class="Identifier">high</span><span class="Punctuation">(</span><span class="Identifier">T</span><span class="Punctuation">)</span><span class="Operator">/</span><span class="DecNumber">2</span></span></tt>. If you need a <tt class="docutils literal"><span class="pre"><span class="Identifier">ceilDiv</span></span></tt> that works with any input, see: <a class="reference external" href="https://github.com/demotomohiro/divmath">https://github.com/demotomohiro/divmath</a>.</p>
+<p><strong>See also:</strong></p>
+<ul class="simple"><li><a class="reference external" href="system.html#div,int,int">system.div proc</a> for integer division</li>
+<li><a class="reference external" href="#floorDiv,T,T">floorDiv func</a> for integer division which rounds down.</li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">ceilDiv</span><span class="Punctuation">(</span><span class="DecNumber">12</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span> <span class="Operator">==</span>  <span class="DecNumber">4</span>
+<span class="Identifier">assert</span> <span class="Identifier">ceilDiv</span><span class="Punctuation">(</span><span class="DecNumber">13</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span> <span class="Operator">==</span>  <span class="DecNumber">5</span></pre>
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L944"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L944" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
 <div id="clamp,T,Slice[T]">
 <dt><pre><span class="Keyword">func</span> <a href="#clamp%2CT%2CSlice%5BT%5D"><span class="Identifier">clamp</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">;</span> <span class="Identifier">bounds</span><span class="Other">:</span> <a href="system.html#Slice"><span class="Identifier">Slice</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">T</span> {.<span class="Identifier">inline</span>.}</pre></dt>
 <dd>
@@ -1217,9 +1245,9 @@ Like <tt class="docutils literal"><span class="pre"><span class="Identifier">sys
 <span class="Identifier">assert</span> <span class="Identifier">clamp</span><span class="Punctuation">(</span><span class="Punctuation">(</span><span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">0</span><span class="Punctuation">)</span> <span class="Operator">..</span> <span class="Punctuation">(</span><span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">9</span><span class="Punctuation">)</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Punctuation">(</span><span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">9</span><span class="Punctuation">)</span>
 <span class="Identifier">doAssertRaises</span><span class="Punctuation">(</span><span class="Identifier">AssertionDefect</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Keyword">discard</span> <span class="Identifier">clamp</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="FloatNumber">3.</span><span class="Operator">.</span><span class="DecNumber">2</span><span class="Punctuation">)</span> <span class="Comment"># invalid bounds</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1194"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1246"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1194" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1246" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1424,9 +1452,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">almostEqual</span><span class="Punctuation">(</span><span class="Identifier">degToRad</span><span class="Punctuation">(</span><span class="FloatNumber">180.0</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">PI</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1049"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1101"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1049" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1101" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1664,9 +1692,9 @@ Splits <tt class="docutils literal"><span class="pre"><span class="Identifier">x
   <span class="Identifier">doAssert</span> <span class="Identifier">frexp</span><span class="Punctuation">(</span><span class="Identifier">Inf</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">frac</span> <span class="Operator">==</span> <span class="Identifier">Inf</span> <span class="Comment"># +- Inf preserved</span>
   <span class="Identifier">doAssert</span> <span class="Identifier">frexp</span><span class="Punctuation">(</span><span class="Identifier">NaN</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">frac</span><span class="Operator">.</span><span class="Identifier">isNaN</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L944"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L996"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L944" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L996" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1680,9 +1708,9 @@ Overload of <tt class="docutils literal"><span class="pre"><span class="Identifi
 <span class="Identifier">doAssert</span> <span class="Identifier">frexp</span><span class="Punctuation">(</span><span class="FloatNumber">5.0</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="FloatNumber">0.625</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">x</span> <span class="Operator">==</span> <span class="DecNumber">3</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L985"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1037"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L985" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1037" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1733,9 +1761,9 @@ class="link-seesrc" target="_blank">Source</a>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">gcd</span><span class="Punctuation">(</span><span class="DecNumber">12</span><span class="Punctuation">,</span> <span class="DecNumber">8</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">4</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">gcd</span><span class="Punctuation">(</span><span class="DecNumber">17</span><span class="Punctuation">,</span> <span class="DecNumber">63</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">1</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1137"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1189"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1137" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1189" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1753,9 +1781,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">gcd</span><span class="Punctuation">(</span><span class="FloatNumber">13.5</span><span class="Punctuation">,</span> <span class="FloatNumber">9.0</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="FloatNumber">4.5</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1118"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1170"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1118" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1170" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1771,9 +1799,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">gcd</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="FloatNumber">13.5</span><span class="Punctuation">,</span> <span class="FloatNumber">9.0</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="FloatNumber">4.5</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1171"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1223"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1171" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1223" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1854,9 +1882,9 @@ class="link-seesrc" target="_blank">Source</a>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">lcm</span><span class="Punctuation">(</span><span class="DecNumber">24</span><span class="Punctuation">,</span> <span class="DecNumber">30</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">120</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">lcm</span><span class="Punctuation">(</span><span class="DecNumber">13</span><span class="Punctuation">,</span> <span class="DecNumber">39</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">39</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1183"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1235"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1183" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1235" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1872,9 +1900,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">lcm</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="DecNumber">24</span><span class="Punctuation">,</span> <span class="DecNumber">30</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">120</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1206"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1258"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1206" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1258" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1949,9 +1977,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1013"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1065"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1013" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1065" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1972,9 +2000,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">doAssert</span> <span class="Identifier">almostEqual</span><span class="Punctuation">(</span><span class="Identifier">log2</span><span class="Punctuation">(</span><span class="FloatNumber">0.0</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Operator">-</span><span class="Identifier">Inf</span><span class="Punctuation">)</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">log2</span><span class="Punctuation">(</span><span class="Operator">-</span><span class="FloatNumber">2.0</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">isNaN</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1014"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1066"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1014" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1066" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -2124,9 +2152,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">almostEqual</span><span class="Punctuation">(</span><span class="Identifier">radToDeg</span><span class="Punctuation">(</span><span class="DecNumber">2</span> <span class="Operator">*</span> <span class="Identifier">PI</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="FloatNumber">360.0</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1059"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1111"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1059" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1111" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -2223,9 +2251,9 @@ class="link-seesrc" target="_blank">Source</a>
 <span class="Identifier">doAssert</span> <span class="Identifier">sgn</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">0</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">sgn</span><span class="Punctuation">(</span><span class="Operator">-</span><span class="FloatNumber">4.1</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">-</span><span class="DecNumber">1</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1069"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1121"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1069" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1121" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -2320,9 +2348,9 @@ class="link-seesrc" target="_blank">Source</a>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">splitDecimal</span><span class="Punctuation">(</span><span class="FloatNumber">5.25</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Punctuation">(</span><span class="Identifier">intpart</span><span class="Punctuation">:</span> <span class="FloatNumber">5.0</span><span class="Punctuation">,</span> <span class="Identifier">floatpart</span><span class="Punctuation">:</span> <span class="FloatNumber">0.25</span><span class="Punctuation">)</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">splitDecimal</span><span class="Punctuation">(</span><span class="Operator">-</span><span class="FloatNumber">2.73</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Punctuation">(</span><span class="Identifier">intpart</span><span class="Punctuation">:</span> <span class="Operator">-</span><span class="FloatNumber">2.0</span><span class="Punctuation">,</span> <span class="Identifier">floatpart</span><span class="Punctuation">:</span> <span class="Operator">-</span><span class="FloatNumber">0.73</span><span class="Punctuation">)</span></pre>
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1027"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/math.nim#L1079"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1027" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/math.nim#L1079" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -2484,7 +2512,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-08-19 00:54:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-08-24 00:56:35 UTC</small>
       </div>
     </div>
   </div>

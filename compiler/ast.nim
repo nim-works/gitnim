@@ -652,8 +652,8 @@ type
     mUnaryMinusI, mUnaryMinusI64, mAbsI, mNot,
     mUnaryPlusI, mBitnotI,
     mUnaryPlusF64, mUnaryMinusF64,
-    mCharToStr, mBoolToStr, mIntToStr, mInt64ToStr,
-    mFloatToStr, # for -d:nimVersion140
+    mCharToStr, mBoolToStr,
+    mIntToStr, mInt64ToStr, mFloatToStr, # for -d:nimVersion140
     mCStrToStr,
     mStrToStr, mEnumToStr,
     mAnd, mOr,
@@ -722,8 +722,8 @@ const
     mEqRef, mEqProc, mLePtr, mLtPtr, mEqCString, mXor,
     mUnaryMinusI, mUnaryMinusI64, mAbsI, mNot, mUnaryPlusI, mBitnotI,
     mUnaryPlusF64, mUnaryMinusF64,
-    mCharToStr, mBoolToStr, mIntToStr, mInt64ToStr,
-    mFloatToStr,
+    mCharToStr, mBoolToStr,
+    mIntToStr, mInt64ToStr, mFloatToStr,
     mCStrToStr,
     mStrToStr, mEnumToStr,
     mAnd, mOr,
@@ -860,7 +860,7 @@ type
     case kind*: TSymKind
     of routineKinds:
       #procInstCache*: seq[PInstantiation]
-      gcUnsafetyReason*: PSym  # for better error messages wrt gcsafe
+      gcUnsafetyReason*: PSym  # for better error messages regarding gcsafe
       transformedBody*: PNode  # cached body after transf pass
     of skLet, skVar, skField, skForVar:
       guard*: PSym
@@ -1595,7 +1595,7 @@ proc propagateToOwner*(owner, elem: PType; propagateHasAsgn = true) =
   if mask != {} and propagateHasAsgn:
     let o2 = owner.skipTypes({tyGenericInst, tyAlias, tySink})
     if o2.kind in {tyTuple, tyObject, tyArray,
-                   tySequence, tySet, tyDistinct, tyOpenArray, tyVarargs}:
+                   tySequence, tySet, tyDistinct}:
       o2.flags.incl mask
       owner.flags.incl mask
 
