@@ -170,13 +170,15 @@ proc validInd(p: var Parser): bool {.inline.} =
 proc rawSkipComment(p: var Parser, node: PNode) =
   if p.tok.tokType == tkComment:
     if node != nil:
+      var rhs = node.comment
       when defined(nimpretty):
         if p.tok.commentOffsetB > p.tok.commentOffsetA:
-          node.comment.add fileSection(p.lex.config, p.lex.fileIdx, p.tok.commentOffsetA, p.tok.commentOffsetB)
+          rhs.add fileSection(p.lex.config, p.lex.fileIdx, p.tok.commentOffsetA, p.tok.commentOffsetB)
         else:
-          node.comment.add p.tok.literal
+          rhs.add p.tok.literal
       else:
-        node.comment.add  p.tok.literal
+        rhs.add p.tok.literal
+      node.comment = move rhs
     else:
       parMessage(p, errInternal, "skipComment")
     getTok(p)
@@ -465,6 +467,17 @@ proc dotExpr(p: var Parser, a: PNode): PNode =
     if p.tok.tokType == tkParLe and p.tok.strongSpaceA <= 0:
       exprColonEqExprListAux(p, tkParRi, y)
     result = y
+
+proc dotLikeExpr(p: var Parser, a: PNode): PNode =
+  #| dotLikeExpr = expr DOTLIKEOP optInd symbol
+  var info = p.parLineInfo
+  result = newNodeI(nkInfix, info)
+  optInd(p, result)
+  var opNode = newIdentNodeP(p.tok.ident, p)
+  getTok(p)
+  result.add(opNode)
+  result.add(a)
+  result.add(parseSymbol(p, smAfterDot))
 
 proc qualifiedIdent(p: var Parser): PNode =
   #| qualifiedIdent = symbol ('.' optInd symbol)?
@@ -788,10 +801,15 @@ proc commandExpr(p: var Parser; r: PNode; mode: PrimaryMode): PNode =
   p.hasProgress = false
   result.add commandParam(p, isFirstParam, mode)
 
+proc isDotLike(tok: Token): bool =
+  result = tok.tokType == tkOpr and tok.ident.s.len > 1 and
+    tok.ident.s[0] == '.' and tok.ident.s[1] != '.'
+
 proc primarySuffix(p: var Parser, r: PNode,
                    baseIndent: int, mode: PrimaryMode): PNode =
   #| primarySuffix = '(' (exprColonEqExpr comma?)* ')'
   #|       | '.' optInd symbol generalizedLit?
+  #|       | DOTLIKEOP optInd symbol generalizedLit?
   #|       | '[' optInd exprColonEqExprList optPar ']'
   #|       | '{' optInd exprColonEqExprList optPar '}'
   #|       | &( '`'|IDENT|literal|'cast'|'addr'|'type') expr # command syntax
@@ -840,11 +858,19 @@ proc primarySuffix(p: var Parser, r: PNode,
       # `foo ref` or `foo ptr`. Unfortunately, these two are also
       # used as infix operators for the memory regions feature and
       # the current parsing rules don't play well here.
-      if p.inPragma == 0 and (isUnary(p.tok) or p.tok.tokType notin {tkOpr, tkDotDot}):
-        # actually parsing {.push hints:off.} as {.push(hints:off).} is a sweet
-        # solution, but pragmas.nim can't handle that
-        result = commandExpr(p, result, mode)
-      break
+      let isDotLike2 = p.tok.isDotLike
+      if isDotLike2 and p.lex.config.isDefined("nimPreviewDotLikeOps"):
+        # synchronize with `tkDot` branch
+        result = dotLikeExpr(p, result)
+        result = parseGStrLit(p, result)
+      else:
+        if isDotLike2:
+          parMessage(p, warnDotLikeOps, "dot-like operators will be parsed differently with `-d:nimPreviewDotLikeOps`")
+        if p.inPragma == 0 and (isUnary(p.tok) or p.tok.tokType notin {tkOpr, tkDotDot}):
+          # actually parsing {.push hints:off.} as {.push(hints:off).} is a sweet
+          # solution, but pragmas.nim can't handle that
+          result = commandExpr(p, result, mode)
+        break
     else:
       break
 
@@ -1800,8 +1826,10 @@ proc parseRoutine(p: var Parser, kind: TNodeKind): PNode =
     if result.comment.len == 0:
       # proc fn*(a: int): int = a ## foo
       # => moves comment `foo` to `fn`
-      swap(result.comment, body[0].comment)
-    else: discard # xxx either `assert false` or issue a warning (otherwise we'll never know of this edge case)
+      result.comment = body[0].comment
+      body[0].comment = ""
+    else:
+      assert false, p.lex.config$body.info # avoids hard to track bugs, fail early.
 
 proc newCommentStmt(p: var Parser): PNode =
   #| commentStmt = COMMENT
