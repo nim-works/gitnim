@@ -101,6 +101,7 @@ window.addEventListener('DOMContentLoaded', main);
 <li><a class="reference" id="examples_toc" href="#examples">Examples</a></li>
 <li><a class="reference" id="investigating-pending-futures_toc" href="#investigating-pending-futures">Investigating pending futures</a></li>
 <li><a class="reference" id="limitationsslashbugs_toc" href="#limitationsslashbugs">Limitations/Bugs</a></li>
+<li><a class="reference" id="multiple-async-backend-support_toc" href="#multiple-async-backend-support">Multiple async backend support</a></li>
 <li>
   <a class="reference reference-toplevel" href="#6" id="56">Imports</a>
   <ul class="simple simple-toc-section">
@@ -456,6 +457,16 @@ class="link-seesrc" target="_blank">Source</a>
 
 <h1><a class="toc-backref" id="limitationsslashbugs" href="#limitationsslashbugs">Limitations/Bugs</a></h1><ul class="simple"><li>The effect system (<tt class="docutils literal"><span class="pre"><span class="Identifier">raises</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="Punctuation">]</span></span></tt>) does not work with async procedures.</li>
 </ul>
+
+<h1><a class="toc-backref" id="multiple-async-backend-support" href="#multiple-async-backend-support">Multiple async backend support</a></h1><p>Thanks to its powerful macro support, Nim allows <tt class="docutils literal"><span class="pre">async</span></tt>/<tt class="docutils literal"><span class="pre">await</span></tt> to be implemented in libraries with only minimal support from the language - as such, multiple <tt class="docutils literal"><span class="pre">async</span></tt> libraries exist, including <tt class="docutils literal"><span class="pre">asyncdispatch</span></tt> and <tt class="docutils literal"><span class="pre">chronos</span></tt>, and more may come to be developed in the future.</p>
+<p>Libraries built on top of async/await may wish to support multiple async backends - the best way to do so is to create separate modules for each backend that may be imported side-by-side.</p>
+<p>An alternative way is to select backend using a global compile flag - this method makes it difficult to compose applications that use both backends as may happen with transitive dependencies, but may be appropriate in some cases - libraries choosing this path should call the flag <tt class="docutils literal"><span class="pre"><span class="Identifier">asyncBackend</span></span></tt>, allowing applications to choose the backend with <tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="Identifier">d</span><span class="Punctuation">:</span><span class="Identifier">asyncBackend</span><span class="Operator">=&lt;</span><span class="Identifier">backend_name</span><span class="Operator">&gt;</span></span></tt>.</p>
+<p>Known <tt class="docutils literal"><span class="pre"><span class="Identifier">async</span></span></tt> backends include:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre"><span class="Identifier">none</span></span></tt> - <tt class="docutils literal"><span class="pre">-d:asyncBackend=none</span></tt> - disable <tt class="docutils literal"><span class="pre">async</span></tt> support completely</li>
+<li><tt class="docutils literal"><span class="pre"><span class="Identifier">asyncdispatch</span> <span class="Operator">&lt;</span><span class="Identifier">https</span><span class="Punctuation">:</span><span class="Operator">//</span><span class="Identifier">nim</span><span class="Operator">-</span><span class="Identifier">lang</span><span class="Operator">.</span><span class="Identifier">org</span><span class="Operator">/</span><span class="Identifier">docs</span><span class="Operator">/</span><span class="Identifier">asyncdispatch</span><span class="Operator">.</span><span class="Identifier">html</span><span class="Operator">&gt;</span> <span class="Operator">-</span><span class="Punctuation">`</span></span></tt>-d:asyncBackend=asyncdispatch``</li>
+<li><tt class="docutils literal"><span class="pre"><span class="Identifier">chronos</span> <span class="Operator">&lt;</span><span class="Identifier">https</span><span class="Punctuation">:</span><span class="Operator">//</span><span class="Identifier">github</span><span class="Operator">.</span><span class="Identifier">com</span><span class="Operator">/</span><span class="Identifier">status</span><span class="Operator">-</span><span class="Identifier">im</span><span class="Operator">/</span><span class="Identifier">nim</span><span class="Operator">-</span><span class="Identifier">chronos</span><span class="Operator">/&gt;</span></span></tt> - <tt class="docutils literal"><span class="pre">-d:asyncBackend=chronos</span></tt></li>
+</ul>
+<p><tt class="docutils literal"><span class="pre">none</span></tt> can be used when a library supports both a synchronous and asynchronous API, to disable the latter.</p>
 <tt class="docutils literal"><span class="pre"><span class="Identifier">asyncdispatch</span></span></tt> module depends on the <tt class="docutils literal"><span class="pre"><span class="Identifier">asyncmacro</span></span></tt> module to work properly.</p>
   <div class="section" id="6">
 <h1><a class="toc-backref" href="#6">Imports</a></h1>
@@ -471,9 +482,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L274"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L302"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L274" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L302" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -483,9 +494,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L261"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L289"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L261" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L289" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -495,9 +506,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L276"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L304"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L276" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L304" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -512,9 +523,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L244"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L272"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L244" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L272" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -524,9 +535,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L259"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L287"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L259" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L287" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -539,9 +550,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L252"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L280"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L252" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L280" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -556,16 +567,16 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L279"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L307"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L279" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L307" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
 <div id="accept,AsyncFD">
 <dt><pre><span class="Keyword">proc</span> <a href="#accept%2CAsyncFD"><span class="Identifier">accept</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span>
             <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span><a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">]</span><span class="Other">)</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 <p>Accepts a new connection. Returns a future containing the client socket corresponding to that connection.</p>
@@ -573,9 +584,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>The future will complete when the connection is successfully accepted.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1865"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1893"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1865" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1893" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -583,7 +594,8 @@ class="link-seesrc" target="_blank">Source</a>
 <dt><pre><span class="Keyword">proc</span> <a href="#acceptAddr%2CAsyncFD"><span class="Identifier">acceptAddr</span></a><span class="Other">(</span><span class="Identifier">socket</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">;</span> <span class="Identifier">flags</span> <span class="Other">=</span> <span class="Other">{</span><span class="Identifier">SafeDisconn</span><span class="Other">}</span><span class="Other">;</span>
                 <span class="Identifier">inheritable</span> <span class="Other">=</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimInheritHandles</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">owned</span><span class="Other">(</span>
     <a href="asyncfutures.html#Future"><span class="Identifier">Future</span></a><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">address</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <span class="Identifier">client</span><span class="Other">:</span> <a href="asyncdispatch.html#AsyncFD"><span class="Identifier">AsyncFD</span></a><span class="Other">]</span><span class="Other">]</span><span class="Other">)</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span>.}</pre></dt>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span></span>.}</pre></dt>
 <dd>
 
 <p>Accepts a new connection. Returns a future containing the client socket corresponding to that connection and the remote address of the client. The future will complete when the connection is successfully accepted.</p>
@@ -592,9 +604,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">accept</span></span></tt> call may result in an error if the connecting socket disconnects during the duration of the <tt class="docutils literal"><span class="pre"><span class="Identifier">accept</span></span></tt>. If the <tt class="docutils literal"><span class="pre"><span class="Identifier">SafeDisconn</span></span></tt> flag is specified then this error will not be raised and instead accept will be called again.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L706"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L734"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L706" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L734" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -604,9 +616,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the current number of active file descriptors for the current event loop. This is a cheap operation that does not involve a system call.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1937"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1965"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1937" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1965" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -617,9 +629,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Registers callback <tt class="docutils literal"><span class="pre"><span class="Identifier">cb</span></span></tt> to be called when <tt class="docutils literal"><span class="pre"><span class="Identifier">ev</span></span></tt> will be signaled
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1071"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1099"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1071" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1099" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -630,9 +642,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Registers callback <tt class="docutils literal"><span class="pre"><span class="Identifier">cb</span></span></tt> to be called when process with process ID <tt class="docutils literal"><span class="pre"><span class="Identifier">pid</span></span></tt> exited.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1014"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1042"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1014" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1042" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -647,9 +659,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Be sure your callback <tt class="docutils literal"><span class="pre"><span class="Identifier">cb</span></span></tt> returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt>, if you want to remove watch of <tt class="docutils literal"><span class="pre"><span class="Identifier">read</span></span></tt> notifications, and <tt class="docutils literal"><span class="pre"><span class="Identifier">false</span></span></tt>, if you want to continue receiving notifications.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L909"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L937"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L909" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L937" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -668,9 +680,9 @@ class="link-seesrc" target="_blank">Source</a>
 </ul>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L980"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1008"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L980" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1008" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -685,9 +697,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>Be sure your callback <tt class="docutils literal"><span class="pre"><span class="Identifier">cb</span></span></tt> returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt>, if you want to remove watch of <tt class="docutils literal"><span class="pre"><span class="Identifier">write</span></span></tt> notifications, and <tt class="docutils literal"><span class="pre"><span class="Identifier">false</span></span></tt>, if you want to continue receiving notifications.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L927"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L955"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L927" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L955" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -698,9 +710,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Schedule <tt class="docutils literal"><span class="pre"><span class="Identifier">cbproc</span></span></tt> to be called as soon as possible. The callback is called when control returns to the event loop.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1922"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1950"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1922" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1950" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -710,9 +722,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Closes event <tt class="docutils literal"><span class="pre"><span class="Identifier">ev</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1064"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1092"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1064" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1092" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -722,9 +734,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Closes a socket and ensures that it is unregistered.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L805"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L833"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L805" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L833" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -736,9 +748,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1816"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1844"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1816" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1844" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -748,9 +760,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L814"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L842"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L814" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L842" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -762,9 +774,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1638"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1666"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1638" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1666" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -778,9 +790,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1643"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1671"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1643" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1671" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -792,9 +804,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Establishes connection to the specified <tt class="docutils literal"><span class="pre"><span class="Identifier">address</span></span></tt>:<tt class="docutils literal"><span class="pre"><span class="Identifier">port</span></span></tt> pair via the specified protocol. The procedure iterates through possible resolutions of the <tt class="docutils literal"><span class="pre"><span class="Identifier">address</span></span></tt> until it succeeds, meaning that it seamlessly works with both IPv4 and IPv6. Returns the async file descriptor, registered in the dispatcher of the current thread, ready to send or receive data.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1801"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1829"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1801" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1829" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -805,9 +817,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Waits for completion of <strong>all</strong> events and processes them. Raises <tt class="docutils literal"><span class="pre"><span class="Identifier">ValueError</span></span></tt> if there are no pending operations. In contrast to <tt class="docutils literal"><span class="pre"><span class="Identifier">poll</span></span></tt> this processes as many events as are available until the timeout has elapsed.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1609"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1637"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1609" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1637" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -818,9 +830,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L297"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L325"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L297" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L325" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -830,9 +842,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the underlying IO Completion Port handle (Windows) or selector (Unix) for the specified dispatcher.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L302"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L330"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L302" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L330" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -842,9 +854,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> if the global dispatcher has pending operations.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L325"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L353"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L325" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L353" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -854,9 +866,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns the maximum number of active file descriptors for the current process. This involves a system call. For now <tt class="docutils literal"><span class="pre"><span class="Identifier">maxDescriptors</span></span></tt> is supported on the following OSes: Windows, Linux, OSX, BSD.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1949"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1977"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1949" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1977" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -868,9 +880,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>New <tt class="docutils literal"><span class="pre"><span class="Identifier">AsyncEvent</span></span></tt> object is not automatically registered with dispatcher like <tt class="docutils literal"><span class="pre"><span class="Identifier">AsyncSocket</span></span></tt>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1033"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1061"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1033" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1061" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -880,9 +892,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L422"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L450"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L422" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L450" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -892,9 +904,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Creates a new Dispatcher instance.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L281"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L309"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L281" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L309" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -905,9 +917,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Waits for completion events and processes them. Raises <tt class="docutils literal"><span class="pre"><span class="Identifier">ValueError</span></span></tt> if there are no pending operations. This runs the underlying OS <span id="epoll_1">epoll</span> or <span id="kqueue_1">kqueue</span> primitive only once.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1621"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1649"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1621" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1649" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -918,9 +930,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns a future that will complete when all the string data from the specified future stream is retrieved.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1911"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1939"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1911" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1939" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -933,9 +945,9 @@ Reads <strong>up to</strong> <tt class="docutils literal"><span class="pre"><spa
 The <tt class="docutils literal"><span class="pre"><span class="Identifier">Peek</span></span></tt> socket flag is not supported on Windows.</div>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L429"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L457"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L429" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L457" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -948,9 +960,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Receives a datagram data from <tt class="docutils literal"><span class="pre"><span class="Identifier">socket</span></span></tt> into <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span></span></tt>, which must be at least of size <tt class="docutils literal"><span class="pre"><span class="Identifier">size</span></span></tt>, address of datagram's sender will be stored into <tt class="docutils literal"><span class="pre"><span class="Identifier">saddr</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">saddrLen</span></span></tt>. Returned future will complete once one datagram has been received, and will return size of packet received.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L658"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L686"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L658" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L686" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -963,9 +975,9 @@ Reads <strong>up to</strong> <tt class="docutils literal"><span class="pre"><spa
 The <tt class="docutils literal"><span class="pre"><span class="Identifier">Peek</span></span></tt> socket flag is not supported on Windows.</div>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L502"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L530"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L502" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L530" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -975,9 +987,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Registers <tt class="docutils literal"><span class="pre"><span class="Identifier">fd</span></span></tt> with the dispatcher.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L307"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L335"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L307" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L335" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -988,9 +1000,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Begins a never ending global dispatcher poll loop.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1925"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1953"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1925" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1953" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1003,9 +1015,9 @@ Sends <tt class="docutils literal"><span class="pre"><span class="Identifier">si
 Use it with caution. If <tt class="docutils literal"><span class="pre"><span class="Identifier">buf</span></span></tt> refers to GC'ed object, you must use GC_ref/GC_unref calls to avoid early freeing of the buffer.</div>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L568"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L596"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L568" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L596" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1016,9 +1028,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sends <tt class="docutils literal"><span class="pre"><span class="Identifier">data</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">socket</span></span></tt>. The returned future will complete once all data has been sent.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1889"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1917"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1889" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1917" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1030,9 +1042,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Sends <tt class="docutils literal"><span class="pre"><span class="Identifier">data</span></span></tt> to specified destination <tt class="docutils literal"><span class="pre"><span class="Identifier">saddr</span></span></tt>, using socket <tt class="docutils literal"><span class="pre"><span class="Identifier">socket</span></span></tt>. The returned future will complete once all data has been sent.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L613"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L641"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L613" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L641" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1043,9 +1055,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L291"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L319"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L291" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L319" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1057,9 +1069,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>This procedure is not guaranteed to be available for all platforms. Test for availability with <a class="reference external" href="system.html#declared,untyped">declared()</a>.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L803"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L831"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L803" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L831" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1069,9 +1081,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Suspends the execution of the current async procedure for the next <tt class="docutils literal"><span class="pre"><span class="Identifier">ms</span></span></tt> milliseconds.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1831"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1859"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1831" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1859" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1081,9 +1093,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Set event <tt class="docutils literal"><span class="pre"><span class="Identifier">ev</span></span></tt> to signaled state.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1048"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1076"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1048" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1076" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1094,9 +1106,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Unregisters event <tt class="docutils literal"><span class="pre"><span class="Identifier">ev</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1053"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1081"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1053" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1081" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1106,9 +1118,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Unregisters <tt class="docutils literal"><span class="pre"><span class="Identifier">fd</span></span></tt>.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L810"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L838"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L810" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L838" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1118,9 +1130,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 <strong>Blocks</strong> the current thread until the specified future completes.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1930"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1958"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1930" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1958" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1132,9 +1144,9 @@ class="link-seesrc" target="_blank">Source</a>
 <p>If <tt class="docutils literal"><span class="pre"><span class="Identifier">fut</span></span></tt> completes first the returned future will hold true, otherwise, if <tt class="docutils literal"><span class="pre"><span class="Identifier">timeout</span></span></tt> milliseconds has elapsed first, the returned future will hold false.</p>
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1843"
+href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/asyncdispatch.nim#L1871"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1843" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/asyncdispatch.nim#L1871" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1213,7 +1225,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-09-01 00:56:46 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-09-04 00:56:54 UTC</small>
       </div>
     </div>
   </div>

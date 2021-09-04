@@ -1953,6 +1953,10 @@ proc semProcAux(c: PContext, n: PNode, kind: TSymKind,
   if not hasProto:
     implicitPragmas(c, s, n.info, validPragmas)
 
+  if n[pragmasPos].kind != nkEmpty:
+    setEffectsForProcType(c.graph, s.typ, n[pragmasPos], s)
+  s.typ.flags.incl tfEffectSystemWorkaround
+
   # To ease macro generation that produce forwarded .async procs we now
   # allow a bit redundancy in the pragma declarations. The rule is
   # a prototype's pragma list must be a superset of the current pragma
@@ -2211,14 +2215,29 @@ proc evalInclude(c: PContext, n: PNode): PNode =
       incMod(c, n, it, result)
 
 proc setLine(n: PNode, info: TLineInfo) =
-  for i in 0..<n.safeLen: setLine(n[i], info)
-  n.info = info
+  if n != nil:
+    for i in 0..<n.safeLen: setLine(n[i], info)
+    n.info = info
 
 proc semPragmaBlock(c: PContext, n: PNode): PNode =
   checkSonsLen(n, 2, c.config)
   let pragmaList = n[0]
   pragma(c, nil, pragmaList, exprPragmas, isStatement = true)
+
+  var inUncheckedAssignSection = 0
+  for p in pragmaList:
+    if whichPragma(p) == wCast:
+      case whichPragma(p[1])
+      of wGcSafe, wNoSideEffect, wTags, wRaises:
+        discard "handled in sempass2"
+      of wUncheckedAssign:
+        inUncheckedAssignSection = 1
+      else:
+        localError(c.config, p.info, "invalid pragma block: " & $p)
+
+  inc c.inUncheckedAssignSection, inUncheckedAssignSection
   n[1] = semExpr(c, n[1])
+  dec c.inUncheckedAssignSection, inUncheckedAssignSection
   result = n
   result.typ = n[1].typ
   for i in 0..<pragmaList.len:

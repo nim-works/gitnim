@@ -204,7 +204,9 @@ type
     strictFuncs,
     views,
     strictNotNil,
-    overloadableEnums
+    overloadableEnums,
+    strictEffects,
+    unicodeOperators
 
   LegacyFeature* = enum
     allowSemcheckedAstModification,
