@@ -665,8 +665,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/jsformdata.nim
   cp lib/std/enumutils.nim $libdir/std/enumutils.nim
   chmod 644 $libdir/std/enumutils.nim
-  cp lib/std/channels.nim $libdir/std/channels.nim
-  chmod 644 $libdir/std/channels.nim
   cp lib/std/monotimes.nim $libdir/std/monotimes.nim
   chmod 644 $libdir/std/monotimes.nim
   cp lib/std/strbasics.nim $libdir/std/strbasics.nim

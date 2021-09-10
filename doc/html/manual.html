@@ -138,6 +138,7 @@ window.addEventListener('DOMContentLoaded', main);
 <li><a class="reference" id="types-boolean-type_toc" href="#types-boolean-type">Boolean type</a></li>
 <li><a class="reference" id="types-character-type_toc" href="#types-character-type">Character type</a></li>
 <li><a class="reference" id="types-enumeration-types_toc" href="#types-enumeration-types">Enumeration types</a></li>
+<li><a class="reference" id="types-overloadable-enum-field-names_toc" href="#types-overloadable-enum-field-names">Overloadable enum field names</a></li>
 <li><a class="reference" id="types-string-type_toc" href="#types-string-type">String type</a></li>
 <li><a class="reference" id="types-cstring-type_toc" href="#types-cstring-type">cstring type</a></li>
 <li><a class="reference" id="types-structured-types_toc" href="#types-structured-types">Structured types</a></li>
@@ -711,14 +712,14 @@ ampExpr = plusExpr (OP7 optInd plusExpr)*
 plusExpr = mulExpr (OP8 optInd mulExpr)*
 mulExpr = dollarExpr (OP9 optInd dollarExpr)*
 dollarExpr = primary (OP10 optInd primary)*
+operatorB = OP0 | OP1 | OP2 | OP3 | OP4 | OP5 | OP6 | OP7 | OP8 | OP9 |
+            'div' | 'mod' | 'shl' | 'shr' | 'in' | 'notin' |
+            'is' | 'isnot' | 'not' | 'of' | 'as' | 'from' | '..' | 'and' | 'or' | 'xor'
 symbol = '`' (KEYW|IDENT|literal|(operator|'('|')'|'['|']'|'{'|'}'|'=')+)+ '`'
        | IDENT | KEYW
 exprColonEqExpr = expr (':'|'=' expr)?
 exprList = expr ^+ comma
 exprColonEqExprList = exprColonEqExpr (comma exprColonEqExpr)* (comma)?
-dotExpr = expr '.' optInd (symbol | '[:' exprList ']')
-explicitGenericInstantiation = '[:' exprList ']' ( '(' exprColonEqExpr ')' )?
-dotLikeExpr = expr DOTLIKEOP optInd symbol
 qualifiedIdent = symbol ('.' optInd symbol)?
 setOrTableConstr = '{' ((exprColonEqExpr comma)* | ':' ) '}'
 castExpr = 'cast' ('[' optInd typeDesc optPar ']' '(' optInd expr optPar ')') /
@@ -740,12 +741,12 @@ literal = | INT_LIT | INT8_LIT | INT16_LIT | INT32_LIT | INT64_LIT
           | NIL
 generalizedLit = GENERALIZED_STR_LIT | GENERALIZED_TRIPLESTR_LIT
 identOrLiteral = generalizedLit | symbol | literal
-               | par | arrayConstr | setOrTableConstr
+               | par | arrayConstr | setOrTableConstr | tupleConstr
                | castExpr
 tupleConstr = '(' optInd (exprColonEqExpr comma?)* optPar ')'
 arrayConstr = '[' optInd (exprColonEqExpr comma?)* optPar ']'
 primarySuffix = '(' (exprColonEqExpr comma?)* ')'
-      | '.' optInd symbol generalizedLit?
+      | '.' optInd symbol ('[:' exprList ']' ( '(' exprColonEqExpr ')' )?)? generalizedLit?
       | DOTLIKEOP optInd symbol generalizedLit?
       | '[' optInd exprColonEqExprList optPar ']'
       | '{' optInd exprColonEqExprList optPar '}'
@@ -759,17 +760,14 @@ declColonEquals = identWithPragma (comma identWithPragma)* comma?
                   (':' optInd typeDesc)? ('=' optInd expr)?
 identColonEquals = IDENT (comma IDENT)* comma?
      (':' optInd typeDesc)? ('=' optInd expr)?)
-inlTupleDecl = 'tuple'
-    '[' optInd  (identColonEquals (comma/semicolon)?)*  optPar ']'
-extTupleDecl = 'tuple'
+tupleDecl = 'tuple'
+    '[' optInd  (identColonEquals (comma/semicolon)?)*  optPar ']' |
     COMMENT? (IND{&gt;} identColonEquals (IND{=} identColonEquals)*)?
-tupleClass = 'tuple'
 paramList = '(' declColonEquals ^* (comma/semicolon) ')'
 paramListArrow = paramList? ('-&gt;' optInd typeDesc)?
 paramListColon = paramList? (':' optInd typeDesc)?
 doBlock = 'do' paramListArrow pragma? colcom stmt
-procExpr = 'proc' paramListColon pragma? ('=' COMMENT? stmt)?
-distinct = 'distinct' optInd typeDesc
+routineExpr = ('proc' | 'func' | 'iterator') paramListColon pragma? ('=' COMMENT? stmt)?
 forStmt = 'for' (identWithPragma ^+ comma) 'in' expr colcom stmt
 forExpr = forStmt
 expr = (blockExpr
@@ -779,14 +777,13 @@ expr = (blockExpr
       | forExpr
       | tryExpr)
       / simpleExpr
-typeKeyw = 'var' | 'out' | 'ref' | 'ptr' | 'shared' | 'tuple'
-         | 'proc' | 'iterator' | 'distinct' | 'object' | 'enum'
-primary = typeKeyw optInd typeDesc
+primary = operatorB primary primarySuffix* |
+          tupleDecl | routineExpr | enumDecl
+          objectDecl | conceptDecl | ('bind' primary)
+          ('var' | 'out' | 'ref' | 'ptr' | 'distinct') primary
         /  prefixOperator* identOrLiteral primarySuffix*
-        / 'bind' primary
 typeDesc = simpleExpr ('not' expr)?
 typeDefAux = simpleExpr ('not' expr)?
-           | 'concept' typeClass
 postExprBlocks = ':' stmt? ( IND{=} doBlock
                            | IND{=} 'of' exprList ':' stmt
                            | IND{=} 'elif' expr ':' stmt
@@ -836,7 +833,6 @@ tryStmt = 'try' colcom stmt &amp;(IND{=}? 'except'|'finally')
 tryExpr = 'try' colcom stmt &amp;(optInd 'except'|'finally')
            (optInd 'except' exprList colcom stmt)*
            (optInd 'finally' colcom stmt)?
-exceptBlock = 'except' colcom stmt
 blockStmt = 'block' symbol? colcom stmt
 blockExpr = 'block' symbol? colcom stmt
 staticStmt = 'static' colcom stmt
@@ -851,7 +847,7 @@ routine = optInd identVis pattern? genericParamList?
   paramListColon pragma? ('=' COMMENT? stmt)? indAndComment
 commentStmt = COMMENT
 section(RULE) = COMMENT? RULE / (IND{&gt;} (RULE / COMMENT)^+IND{=} DED)
-enum = 'enum' optInd (symbol pragma? optInd ('=' optInd expr COMMENT?)? comma?)+
+enumDecl = 'enum' optInd (symbol pragma? optInd ('=' optInd expr COMMENT?)? comma?)+
 objectWhen = 'when' expr colcom objectPart COMMENT?
             ('elif' expr colcom objectPart COMMENT?)*
             ('else' colcom objectPart COMMENT?)?
@@ -864,9 +860,9 @@ objectCase = 'case' identWithPragma ':' typeDesc ':'? COMMENT?
             | IND{=} objectBranches)
 objectPart = IND{&gt;} objectPart^+IND{=} DED
            / objectWhen / objectCase / 'nil' / 'discard' / declColonEquals
-object = 'object' pragma? ('of' typeDesc)? COMMENT? objectPart
-typeClassParam = ('var' | 'out')? symbol
-typeClass = typeClassParam ^* ',' (pragma)? ('of' typeDesc ^* ',')?
+objectDecl = 'object' pragma? ('of' typeDesc)? COMMENT? objectPart
+conceptParam = ('var' | 'out')? symbol
+conceptDecl = 'concept' conceptParam ^* ',' (pragma)? ('of' typeDesc ^* ',')?
               &amp;IND{&gt;} stmt
 typeDef = identWithPragmaDot genericParamList? '=' optInd typeDefAux
             indAndComment? / identVisDot genericParamList? pragma '=' optInd typeDefAux
@@ -1131,6 +1127,31 @@ ord(Direction.west) == 3</pre>
 <span class="Identifier">echo</span> <span class="Identifier">amb</span>    <span class="Comment"># Error: Unclear whether it's MyEnum.amb or OtherEnum.amb</span>
 <span class="Identifier">echo</span> <span class="Identifier">MyEnum</span><span class="Operator">.</span><span class="Identifier">amb</span> <span class="Comment"># OK.</span></pre><p>To implement bit fields with enums see <a class="reference external" href="#set-type-bit-fields">Bit fields</a></p>
 
+<h2><a class="toc-backref" id="types-overloadable-enum-field-names" href="#types-overloadable-enum-field-names">Overloadable enum field names</a></h2><p>To be enabled via <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">experimental</span><span class="Punctuation">:</span> <span class="StringLit">&quot;overloadableEnums&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt>.</p>
+<p>Enum field names are overloadable much like routines. When an overloaded enum field is used, it produces a closed sym choice construct, here written as <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span><span class="Identifier">E</span><span class="Operator">|</span><span class="Identifier">E</span><span class="Punctuation">)</span></span></tt>. During overload resolution the right <tt class="docutils literal"><span class="pre"><span class="Identifier">E</span></span></tt> is picked, if possible. For (array/object...) constructors the right <tt class="docutils literal"><span class="pre"><span class="Identifier">E</span></span></tt> is picked, comparable to how <tt class="docutils literal"><span class="pre"><span class="Punctuation">[</span><span class="Identifier">byte</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">]</span></span></tt> works, one needs to use <tt class="docutils literal"><span class="pre"><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Operator">.</span><span class="Identifier">E</span><span class="Punctuation">,</span> <span class="Identifier">E2</span><span class="Punctuation">,</span> <span class="Identifier">E3</span><span class="Punctuation">]</span></span></tt>. Ambiguous enum fields produce a static error:</p>
+<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">experimental</span><span class="Punctuation">:</span> <span class="StringLit">&quot;overloadableEnums&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
+
+<span class="Keyword">type</span>
+  <span class="Identifier">E1</span> <span class="Operator">=</span> <span class="Keyword">enum</span>
+    <span class="Identifier">value1</span><span class="Punctuation">,</span>
+    <span class="Identifier">value2</span>
+  <span class="Identifier">E2</span> <span class="Operator">=</span> <span class="Keyword">enum</span>
+    <span class="Identifier">value1</span><span class="Punctuation">,</span>
+    <span class="Identifier">value2</span> <span class="Operator">=</span> <span class="DecNumber">4</span>
+
+<span class="Keyword">const</span>
+  <span class="Identifier">Lookuptable</span> <span class="Operator">=</span> <span class="Punctuation">[</span>
+    <span class="Identifier">E1</span><span class="Operator">.</span><span class="Identifier">value1</span><span class="Punctuation">:</span> <span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span>
+    <span class="Identifier">value2</span><span class="Punctuation">:</span> <span class="StringLit">&quot;2&quot;</span>
+  <span class="Punctuation">]</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">p</span><span class="Punctuation">(</span><span class="Identifier">e</span><span class="Punctuation">:</span> <span class="Identifier">E1</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Comment"># disambiguation in 'case' statements:</span>
+  <span class="Keyword">case</span> <span class="Identifier">e</span>
+  <span class="Keyword">of</span> <span class="Identifier">value1</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;A&quot;</span>
+  <span class="Keyword">of</span> <span class="Identifier">value2</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;B&quot;</span>
+
+<span class="Identifier">p</span> <span class="Identifier">value2</span></pre>
 <h2><a class="toc-backref" id="types-string-type" href="#types-string-type">String type</a></h2><p>All string literals are of the type <tt class="docutils literal"><span class="pre"><span class="Identifier">string</span></span></tt>. A string in Nim is very similar to a sequence of characters. However, strings in Nim are both zero-terminated and have a length field. One can retrieve the length with the builtin <tt class="docutils literal"><span class="pre"><span class="Identifier">len</span></span></tt> procedure; the length never counts the terminating zero.</p>
 <p>The terminating zero cannot be accessed unless the string is converted to the <tt class="docutils literal"><span class="pre"><span class="Identifier">cstring</span></span></tt> type first. The terminating zero assures that this conversion can be done in O(1) and without any allocations.</p>
 <p>The assignment operator for strings always copies the string. The <tt class="docutils literal"><span class="pre"><span class="Operator">&amp;</span></span></tt> operator concatenates strings.</p>
@@ -4236,7 +4257,7 @@ libtcl8.3.so.0</pre>
 <h2><a class="toc-backref" id="foreign-function-interface-dynlib-pragma-for-export" href="#foreign-function-interface-dynlib-pragma-for-export">Dynlib pragma for export</a></h2><p>With the <tt class="docutils literal"><span class="pre"><span class="Identifier">dynlib</span></span></tt> pragma, a procedure can also be exported to a dynamic library. The pragma then has no argument and has to be used in conjunction with the <tt class="docutils literal"><span class="pre"><span class="Identifier">exportc</span></span></tt> pragma:</p>
 <pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">exportme</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">cdecl</span><span class="Punctuation">,</span> <span class="Identifier">exportc</span><span class="Punctuation">,</span> <span class="Identifier">dynlib</span><span class="Operator">.</span><span class="Punctuation">}</span></pre><p>This is only useful if the program is compiled as a dynamic library via the <tt class="docutils literal"><span class="pre option">--app:lib</span></tt> command-line option.</p>
 
-<h1><a class="toc-backref" id="threads" href="#threads">Threads</a></h1><p>To enable thread support the <tt class="docutils literal"><span class="pre option">--threads:on</span></tt> command-line switch needs to be used. The <a class="reference external" href="system.html">system</a> module then contains several threading primitives. See the <a class="reference external" href="threads.html">threads</a> and <a class="reference external" href="channels_builtin.html">channels</a> modules for the low-level thread API. There are also high-level parallelism constructs available. See <a class="reference external" href="manual_experimental.html#parallel-amp-spawn">spawn</a> for further details.</p>
+<h1><a class="toc-backref" id="threads" href="#threads">Threads</a></h1><p>To enable thread support the <tt class="docutils literal"><span class="pre option">--threads:on</span></tt> command-line switch needs to be used. The <a class="reference external" href="system.html">system</a> module then contains several threading primitives. See the <a class="reference external" href="channels_builtin.html">channels</a> modules for the low-level thread API. There are also high-level parallelism constructs available. See <a class="reference external" href="manual_experimental.html#parallel-amp-spawn">spawn</a> for further details.</p>
 <p>Nim's memory model for threads is quite different than that of other common programming languages (C, Pascal, Java): Each thread has its own (garbage collected) heap, and sharing of memory is restricted to global variables. This helps to prevent race conditions. GC efficiency is improved quite a lot, because the GC never has to stop other threads and see what they reference.</p>
 <p>The only way to create a thread is via <tt class="docutils literal"><span class="pre"><span class="Identifier">spawn</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">createThread</span></span></tt>. The invoked proc must not use <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt> parameters nor must any of its parameters contain a <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">closure</span></span></tt> type. This enforces the <em>no heap sharing restriction</em>.</p>
 
@@ -4256,7 +4277,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-09-04 00:56:32 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-09-10 01:02:55 UTC</small>
       </div>
     </div>
   </div>
