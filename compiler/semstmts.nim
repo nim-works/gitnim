@@ -553,7 +553,7 @@ proc semVarOrLet(c: PContext, n: PNode, symkind: TSymKind): PNode =
           typ = typ.lastSon
         if hasEmpty(typ):
           localError(c.config, def.info, errCannotInferTypeOfTheLiteral % typ.kind.toHumanStr)
-        elif typ.kind == tyProc and hasUnresolvedParams(def, {}):
+        elif typ.kind == tyProc and def.kind == nkSym and isGenericRoutine(def.sym.ast):
           # tfUnresolved in typ.flags:
           localError(c.config, def.info, errProcHasNoConcreteType % def.renderTree)
         when false:
@@ -1296,7 +1296,8 @@ proc typeSectionRightSidePass(c: PContext, n: PNode) =
         incl a[2].flags, nfSem # bug #10548
     if sfExportc in s.flags and s.typ.kind == tyAlias:
       localError(c.config, name.info, "{.exportc.} not allowed for type aliases")
-    if tfBorrowDot in s.typ.flags and s.typ.kind != tyDistinct:
+
+    if tfBorrowDot in s.typ.flags and s.typ.skipTypes({tyGenericBody}).kind != tyDistinct:
       excl s.typ.flags, tfBorrowDot
       localError(c.config, name.info, "only a 'distinct' type can borrow `.`")
     let aa = a[2]

@@ -1280,7 +1280,7 @@ proc semSym(c: PContext, n: PNode, sym: PSym, flags: TExprFlags): PNode =
     if p != nil and p.selfSym != nil:
       var ty = skipTypes(p.selfSym.typ, {tyGenericInst, tyVar, tyLent, tyPtr, tyRef,
                                          tyAlias, tySink, tyOwned})
-      while tfBorrowDot in ty.flags: ty = ty.skipTypes({tyDistinct})
+      while tfBorrowDot in ty.flags: ty = ty.skipTypes({tyDistinct, tyGenericInst, tyAlias})
       var check: PNode = nil
       if ty.kind == tyObject:
         while true:
@@ -1412,7 +1412,7 @@ proc builtinFieldAccess(c: PContext, n: PNode, flags: TExprFlags): PNode =
   if ty.kind in tyUserTypeClasses and ty.isResolvedUserTypeClass:
     ty = ty.lastSon
   ty = skipTypes(ty, {tyGenericInst, tyVar, tyLent, tyPtr, tyRef, tyOwned, tyAlias, tySink})
-  while tfBorrowDot in ty.flags: ty = ty.skipTypes({tyDistinct})
+  while tfBorrowDot in ty.flags: ty = ty.skipTypes({tyDistinct, tyGenericInst, tyAlias})
   var check: PNode = nil
   if ty.kind == tyObject:
     while true:
@@ -1511,7 +1511,7 @@ proc maybeInstantiateGeneric(c: PContext, n: PNode, s: PSym): PNode =
   else:
     result = explicitGenericInstantiation(c, n, s)
     if result == n:
-      n[0] = copyTree(result)
+      n[0] = copyTree(result[0])
     else:
       n[0] = result
 

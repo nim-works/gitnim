@@ -147,7 +147,66 @@ class="link-seesrc" target="_blank">Source</a>
 <p><strong>Note:</strong> Channels cannot be passed between threads. Use globals or pass them by <tt class="docutils literal"><span class="pre"><span class="Keyword">ptr</span></span></tt>.</p>
 
 <h1><a class="toc-backref" id="example" href="#example">Example</a></h1><p>The following is a simple example of two different ways to use channels: blocking and non-blocking.</p>
+<pre class="listing"><span class="Comment"># Be sure to compile with --threads:on.</span>
+<span class="Comment"># The channels and threads modules are part of system and should not be</span>
+<span class="Comment"># imported.</span>
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">os</span>
 
+<span class="Comment"># Channels can either be:</span>
+<span class="Comment">#  - declared at the module level, or</span>
+<span class="Comment">#  - passed to procedures by ptr (raw pointer) -- see note on safety.</span>
+<span class="Comment">#</span>
+<span class="Comment"># For simplicity, in this example a channel is declared at module scope.</span>
+<span class="Comment"># Channels are generic, and they include support for passing objects between</span>
+<span class="Comment"># threads.</span>
+<span class="Comment"># Note that objects passed through channels will be deeply copied.</span>
+<span class="Keyword">var</span> <span class="Identifier">chan</span><span class="Punctuation">:</span> <span class="Identifier">Channel</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span>
+
+<span class="Comment"># This proc will be run in another thread using the threads module.</span>
+<span class="Keyword">proc</span> <span class="Identifier">firstWorker</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Identifier">chan</span><span class="Operator">.</span><span class="Identifier">send</span><span class="Punctuation">(</span><span class="StringLit">&quot;Hello World!&quot;</span><span class="Punctuation">)</span>
+
+<span class="Comment"># This is another proc to run in a background thread. This proc takes a while</span>
+<span class="Comment"># to send the message since it sleeps for 2 seconds (or 2000 milliseconds).</span>
+<span class="Keyword">proc</span> <span class="Identifier">secondWorker</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Identifier">sleep</span><span class="Punctuation">(</span><span class="DecNumber">2000</span><span class="Punctuation">)</span>
+  <span class="Identifier">chan</span><span class="Operator">.</span><span class="Identifier">send</span><span class="Punctuation">(</span><span class="StringLit">&quot;Another message&quot;</span><span class="Punctuation">)</span>
+
+<span class="Comment"># Initialize the channel.</span>
+<span class="Identifier">chan</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+
+<span class="Comment"># Launch the worker.</span>
+<span class="Keyword">var</span> <span class="Identifier">worker1</span><span class="Punctuation">:</span> <span class="Identifier">Thread</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span>
+<span class="Identifier">createThread</span><span class="Punctuation">(</span><span class="Identifier">worker1</span><span class="Punctuation">,</span> <span class="Identifier">firstWorker</span><span class="Punctuation">)</span>
+
+<span class="Comment"># Block until the message arrives, then print it out.</span>
+<span class="Identifier">echo</span> <span class="Identifier">chan</span><span class="Operator">.</span><span class="Identifier">recv</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># &quot;Hello World!&quot;</span>
+
+<span class="Comment"># Wait for the thread to exit before moving on to the next example.</span>
+<span class="Identifier">worker1</span><span class="Operator">.</span><span class="Identifier">joinThread</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+
+<span class="Comment"># Launch the other worker.</span>
+<span class="Keyword">var</span> <span class="Identifier">worker2</span><span class="Punctuation">:</span> <span class="Identifier">Thread</span><span class="Punctuation">[</span><span class="Identifier">void</span><span class="Punctuation">]</span>
+<span class="Identifier">createThread</span><span class="Punctuation">(</span><span class="Identifier">worker2</span><span class="Punctuation">,</span> <span class="Identifier">secondWorker</span><span class="Punctuation">)</span>
+<span class="Comment"># This time, use a non-blocking approach with tryRecv.</span>
+<span class="Comment"># Since the main thread is not blocked, it could be used to perform other</span>
+<span class="Comment"># useful work while it waits for data to arrive on the channel.</span>
+<span class="Keyword">while</span> <span class="Identifier">true</span><span class="Punctuation">:</span>
+  <span class="Keyword">let</span> <span class="Identifier">tried</span> <span class="Operator">=</span> <span class="Identifier">chan</span><span class="Operator">.</span><span class="Identifier">tryRecv</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Keyword">if</span> <span class="Identifier">tried</span><span class="Operator">.</span><span class="Identifier">dataAvailable</span><span class="Punctuation">:</span>
+    <span class="Identifier">echo</span> <span class="Identifier">tried</span><span class="Operator">.</span><span class="Identifier">msg</span> <span class="Comment"># &quot;Another message&quot;</span>
+    <span class="Keyword">break</span>
+  
+  <span class="Identifier">echo</span> <span class="StringLit">&quot;Pretend I'm doing useful work...&quot;</span>
+  <span class="Comment"># For this example, sleep in order not to flood stdout with the above</span>
+  <span class="Comment"># message.</span>
+  <span class="Identifier">sleep</span><span class="Punctuation">(</span><span class="DecNumber">400</span><span class="Punctuation">)</span>
+
+<span class="Comment"># Wait for the second thread to exit before cleaning up the channel.</span>
+<span class="Identifier">worker2</span><span class="Operator">.</span><span class="Identifier">joinThread</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+
+<span class="Comment"># Clean up the channel.</span>
+<span class="Identifier">chan</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
 <h2><a class="toc-backref" id="example-sample-output" href="#example-sample-output">Sample output</a></h2><p>The program should output something similar to this, but keep in mind that exact results may vary in the real world:<pre>Hello World!
 Pretend I'm doing useful work...
 Pretend I'm doing useful work...
@@ -159,7 +218,27 @@ Another message</pre>
 
 <h2><a class="toc-backref" id="example-passing-channels-safely" href="#example-passing-channels-safely">Passing Channels Safely</a></h2><p>Note that when passing objects to procedures on another thread by pointer (for example through a thread's argument), objects created using the default allocator will use thread-local, GC-managed memory. Thus it is generally safer to store channel objects in global variables (as in the above example), in which case they will use a process-wide (thread-safe) shared heap.</p>
 <p>However, it is possible to manually allocate shared memory for channels using e.g. <tt class="docutils literal"><span class="pre"><span class="Identifier">system</span><span class="Operator">.</span><span class="Identifier">allocShared0</span></span></tt> and pass these pointers through thread arguments:</p>
-</p>
+<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">worker</span><span class="Punctuation">(</span><span class="Identifier">channel</span><span class="Punctuation">:</span> <span class="Keyword">ptr</span> <span class="Identifier">Channel</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Keyword">let</span> <span class="Identifier">greeting</span> <span class="Operator">=</span> <span class="Identifier">channel</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">recv</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Identifier">echo</span> <span class="Identifier">greeting</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">localChannelExample</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Comment"># Use allocShared0 to allocate some shared-heap memory and zero it.</span>
+  <span class="Comment"># The usual warnings about dealing with raw pointers apply. Exercise caution.</span>
+  <span class="Keyword">var</span> <span class="Identifier">channel</span> <span class="Operator">=</span> <span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Keyword">ptr</span> <span class="Identifier">Channel</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">]</span><span class="Punctuation">(</span>
+    <span class="Identifier">allocShared0</span><span class="Punctuation">(</span><span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">Channel</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+  <span class="Punctuation">)</span>
+  <span class="Identifier">channel</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Comment"># Create a thread which will receive the channel as an argument.</span>
+  <span class="Keyword">var</span> <span class="Identifier">thread</span><span class="Punctuation">:</span> <span class="Identifier">Thread</span><span class="Punctuation">[</span><span class="Keyword">ptr</span> <span class="Identifier">Channel</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span><span class="Punctuation">]</span>
+  <span class="Identifier">createThread</span><span class="Punctuation">(</span><span class="Identifier">thread</span><span class="Punctuation">,</span> <span class="Identifier">worker</span><span class="Punctuation">,</span> <span class="Identifier">channel</span><span class="Punctuation">)</span>
+  <span class="Identifier">channel</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">send</span><span class="Punctuation">(</span><span class="StringLit">&quot;Hello from the main thread!&quot;</span><span class="Punctuation">)</span>
+  <span class="Comment"># Clean up resources.</span>
+  <span class="Identifier">thread</span><span class="Operator">.</span><span class="Identifier">joinThread</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Identifier">channel</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Identifier">deallocShared</span><span class="Punctuation">(</span><span class="Identifier">channel</span><span class="Punctuation">)</span>
+
+<span class="Identifier">localChannelExample</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># &quot;Hello from the main thread!&quot;</span></pre></p>
   <div class="section" id="7">
 <h1><a class="toc-backref" href="#7">Types</a></h1>
 <dl class="item">
@@ -299,7 +378,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-09-10 01:02:42 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-09-17 00:57:47 UTC</small>
       </div>
     </div>
   </div>
