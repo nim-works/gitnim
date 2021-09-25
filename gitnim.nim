@@ -486,7 +486,12 @@ proc install() =
   if nim == "":
     return         # there's a good chance we're out of our depth, here
 
-  let nimbin = nim.parentDir
+  var nimbin = parentDir nim
+
+  # nim-1.0 on windows is dumb
+  if nimbin == "":
+    nimbin = "."
+
   withinDirectory nimbin:
     let app = getAppFilename()
     let bin = nimbin / extractFilename app
