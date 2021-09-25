@@ -89,9 +89,6 @@ template changeDir(path: string) =
 
 template withinDirectory(path: string; body: typed) =
   ## do something within a particular directory
-  if path == "":
-    error "got an empty path in withinDirectory()"
-    writeStackTrace()
   if dirExists $(path):
     let prior = getCurrentDir()
     changeDir path
@@ -494,13 +491,11 @@ proc install() =
     error "found nim path: `" & parentDir(nim) & "`"
 
   let app = getAppFilename()
-  let nimbin = parentDir nim
+  var nimbin = parentDir nim
 
   # nim-1.0 on windows is dumb
   if nimbin == "":
-    warn "couldn't find the parent directory of " & nim
-    warn "you'll need to deposit " & app & " there yourself"
-    quit 1
+    nimbin = "."
 
   withinDirectory nimbin:
     let bin = nimbin / extractFilename app
