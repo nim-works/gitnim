@@ -6,7 +6,7 @@ license = "MIT"
 namedBin = {"gitnim": "git-nim"}.toTable
 
 when not defined(release):
-  requires "https://github.com/disruptek/balls >= 3.0.0 & < 4.0.0"
+  requires "https://github.com/disruptek/balls >= 3.4.0 & < 4.0.0"
 
 task test, "run unit tests":
   when defined(windows):
