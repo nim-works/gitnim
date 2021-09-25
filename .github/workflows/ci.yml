@@ -4,6 +4,8 @@ on:
     - cron: '30 5 * * *'
 
   push:
+    branches:
+      - master
     paths:
       - '**.cfg'
       - '**.nims'
@@ -12,6 +14,8 @@ on:
       - 'tests/**'
       - '.github/workflows/ci.yml'
   pull_request:
+    branches:
+      - '*'
     paths:
       - '**.cfg'
       - '**.nims'
@@ -26,14 +30,14 @@ jobs:
       fail-fast: false
       matrix:
         os: ['windows-latest', 'macos-latest', 'ubuntu-latest']
-        nim: ['devel', 'version-1-4', 'version-1-2', 'version-1-0']
+        nim: ['devel', 'version-1-6', 'version-1-4', 'version-1-2', 'version-1-0']
     name: '${{ matrix.os }} (${{ matrix.nim }})'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          path: gitnim
+          path: ci
 
       - name: Setup Nim
         uses: alaviss/setup-nim@0.1.1
@@ -44,7 +48,7 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          cd gitnim
+          cd ci
           nimble --accept install
           nimble test
 
@@ -52,7 +56,7 @@ jobs:
         if: ${{ matrix.docs }} == 'true'
         shell: bash
         run: |
-          cd gitnim
+          cd ci
           branch=${{ github.ref }}
           branch=${branch##*/}
           nim doc --project --define:docs --path="." \
@@ -69,6 +73,6 @@ jobs:
           matrix.os == 'ubuntu-latest' && matrix.nim == 'devel'
         uses: crazy-max/ghaction-github-pages@v1
         with:
-          build_dir: gitnim/docs
+          build_dir: ci/docs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
