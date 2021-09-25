@@ -489,6 +489,10 @@ proc install() =
   if nim == "":
     return         # there's a good chance we're out of our depth, here
 
+  when defined(windows):
+    error "found nim exe: `" & nim & "`"
+    error "found nim path: `" & parentDir(nim) & "`"
+
   let app = getAppFilename()
   let nimbin = parentDir nim
 
