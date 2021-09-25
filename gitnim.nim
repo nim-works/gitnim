@@ -89,6 +89,9 @@ template changeDir(path: string) =
 
 template withinDirectory(path: string; body: typed) =
   ## do something within a particular directory
+  if path == "":
+    error "got an empty path in withinDirectory()"
+    writeStackTrace()
   if dirExists $(path):
     let prior = getCurrentDir()
     changeDir path
