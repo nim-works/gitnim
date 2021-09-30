@@ -891,7 +891,17 @@ out inside this with no indentation restrictions.
 <span class="Comment"># &quot;(dir: usr/local, name: nimc, ext: .html)&quot;</span>
 <span class="Identifier">echo</span> <span class="Identifier">baddir</span>
 <span class="Identifier">echo</span> <span class="Identifier">badname</span>
-<span class="Identifier">echo</span> <span class="Identifier">badext</span></pre><p>Fields of tuples are always public, they don't need to be explicity marked to be exported, unlike for example fields in an object type.</p>
+<span class="Identifier">echo</span> <span class="Identifier">badext</span></pre><p>Tuple unpacking is also supported in for-loops:</p>
+<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="Punctuation">[</span><span class="Punctuation">(</span><span class="DecNumber">10</span><span class="Punctuation">,</span> <span class="CharLit">'a'</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="DecNumber">20</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="DecNumber">30</span><span class="Punctuation">,</span> <span class="CharLit">'c'</span><span class="Punctuation">)</span><span class="Punctuation">]</span>
+
+<span class="Keyword">for</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">c</span><span class="Punctuation">)</span> <span class="Keyword">in</span> <span class="Identifier">a</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="Identifier">x</span>
+<span class="Comment"># This will output: 10; 20; 30</span>
+
+<span class="Comment"># Accessing the index is also possible:</span>
+<span class="Keyword">for</span> <span class="Identifier">i</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">c</span><span class="Punctuation">)</span> <span class="Keyword">in</span> <span class="Identifier">a</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="Identifier">i</span><span class="Punctuation">,</span> <span class="Identifier">c</span>
+<span class="Comment"># This will output: 0a; 1b; 2c</span></pre><p>Fields of tuples are always public, they don't need to be explicity marked to be exported, unlike for example fields in an object type.</p>
 
 <h2><a class="toc-backref" id="advanced-types-reference-and-pointer-types" href="#advanced-types-reference-and-pointer-types">Reference and pointer types</a></h2><p>References (similar to pointers in other programming languages) are a way to introduce many-to-one relationships. This means different references can point to and modify the same location in memory.</p>
 <p>Nim distinguishes between <span id="traced_1">traced</span> and <span id="untraced_1">untraced</span> references. Untraced references are also called <em>pointers</em>. Traced references point to objects in a garbage-collected heap, untraced references point to manually allocated objects or objects elsewhere in memory. Thus untraced references are <em>unsafe</em>. However, for certain low-level operations (e.g. accessing the hardware), untraced references are necessary.</p>
@@ -901,24 +911,27 @@ out inside this with no indentation restrictions.
   <span class="Identifier">Node</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
     <span class="Identifier">le</span><span class="Punctuation">,</span> <span class="Identifier">ri</span><span class="Punctuation">:</span> <span class="Identifier">Node</span>
     <span class="Identifier">data</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
-<span class="Keyword">var</span>
-  <span class="Identifier">n</span><span class="Punctuation">:</span> <span class="Identifier">Node</span>
-<span class="Identifier">new</span><span class="Punctuation">(</span><span class="Identifier">n</span><span class="Punctuation">)</span>
-<span class="Identifier">n</span><span class="Operator">.</span><span class="Identifier">data</span> <span class="Operator">=</span> <span class="DecNumber">9</span>
-<span class="Comment"># no need to write n[].data; in fact n[].data is highly discouraged!</span></pre><p>To allocate a new traced object, the built-in procedure <tt class="docutils literal"><span class="pre"><span class="Identifier">new</span></span></tt> must be used. To deal with untraced memory, the procedures <tt class="docutils literal"><span class="pre"><span class="Identifier">alloc</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">dealloc</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">realloc</span></span></tt> can be used. The <a class="reference external" href="system.html">system</a> module's documentation contains further details.</p>
+
+<span class="Keyword">var</span> <span class="Identifier">n</span> <span class="Operator">=</span> <span class="Identifier">Node</span><span class="Punctuation">(</span><span class="Identifier">data</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">)</span>
+<span class="Identifier">echo</span> <span class="Identifier">n</span><span class="Operator">.</span><span class="Identifier">data</span>
+<span class="Comment"># no need to write n[].data; in fact n[].data is highly discouraged!</span></pre><p>To allocate a new traced object, the built-in procedure <tt class="docutils literal"><span class="pre"><span class="Identifier">new</span></span></tt> can be used:</p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">n</span><span class="Punctuation">:</span> <span class="Identifier">Node</span>
+<span class="Identifier">new</span><span class="Punctuation">(</span><span class="Identifier">n</span><span class="Punctuation">)</span></pre><p>To deal with untraced memory, the procedures <tt class="docutils literal"><span class="pre"><span class="Identifier">alloc</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">dealloc</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">realloc</span></span></tt> can be used. The <a class="reference external" href="system.html">system</a> module's documentation contains further details.</p>
 <p>If a reference points to <em>nothing</em>, it has the value <tt class="docutils literal"><span class="pre"><span class="Keyword">nil</span></span></tt>.</p>
 
 <h2><a class="toc-backref" id="advanced-types-procedural-type" href="#advanced-types-procedural-type">Procedural type</a></h2><p>A procedural type is a (somewhat abstract) pointer to a procedure. <tt class="docutils literal"><span class="pre"><span class="Keyword">nil</span></span></tt> is an allowed value for a variable of a procedural type. Nim uses procedural types to achieve <span id="functional_1">functional</span> programming techniques.</p>
 <p>Example:</p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">echoItem</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Identifier">echo</span> <span class="Identifier">x</span>
+<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">greet</span><span class="Punctuation">(</span><span class="Identifier">name</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span>
+  <span class="StringLit">&quot;Hello, &quot;</span> <span class="Operator">&amp;</span> <span class="Identifier">name</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;!&quot;</span>
 
-<span class="Keyword">proc</span> <span class="Identifier">forEach</span><span class="Punctuation">(</span><span class="Identifier">action</span><span class="Punctuation">:</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">)</span> <span class="Operator">=</span>
-  <span class="Keyword">const</span>
-    <span class="Identifier">data</span> <span class="Operator">=</span> <span class="Punctuation">[</span><span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">5</span><span class="Punctuation">,</span> <span class="DecNumber">7</span><span class="Punctuation">,</span> <span class="DecNumber">11</span><span class="Punctuation">]</span>
-  <span class="Keyword">for</span> <span class="Identifier">d</span> <span class="Keyword">in</span> <span class="Identifier">items</span><span class="Punctuation">(</span><span class="Identifier">data</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-    <span class="Identifier">action</span><span class="Punctuation">(</span><span class="Identifier">d</span><span class="Punctuation">)</span>
+<span class="Keyword">proc</span> <span class="Identifier">bye</span><span class="Punctuation">(</span><span class="Identifier">name</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span>
+  <span class="StringLit">&quot;Goodbye, &quot;</span> <span class="Operator">&amp;</span> <span class="Identifier">name</span> <span class="Operator">&amp;</span> <span class="StringLit">&quot;.&quot;</span>
 
-<span class="Identifier">forEach</span><span class="Punctuation">(</span><span class="Identifier">echoItem</span><span class="Punctuation">)</span></pre><p>A subtle issue with procedural types is that the calling convention of the procedure influences the type compatibility: procedural types are only compatible if they have the same calling convention. The different calling conventions are listed in the <a class="reference external" href="manual.html#types-procedural-type">manual</a>.</p>
+<span class="Keyword">proc</span> <span class="Identifier">communicate</span><span class="Punctuation">(</span><span class="Identifier">greeting</span><span class="Punctuation">:</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">name</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Identifier">echo</span> <span class="Identifier">greeting</span><span class="Punctuation">(</span><span class="Identifier">name</span><span class="Punctuation">)</span>
+
+<span class="Identifier">communicate</span><span class="Punctuation">(</span><span class="Identifier">greet</span><span class="Punctuation">,</span> <span class="StringLit">&quot;John&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">communicate</span><span class="Punctuation">(</span><span class="Identifier">bye</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Mary&quot;</span><span class="Punctuation">)</span></pre><p>A subtle issue with procedural types is that the calling convention of the procedure influences the type compatibility: procedural types are only compatible if they have the same calling convention. The different calling conventions are listed in the <a class="reference external" href="manual.html#types-procedural-type">manual</a>.</p>
 
 <h2><a class="toc-backref" id="advanced-types-distinct-type" href="#advanced-types-distinct-type">Distinct type</a></h2><p>A Distinct type allows for the creation of a new type that &quot;does not imply a subtype relationship between it and its base type&quot;. You must <strong>explicitly</strong> define all behavior for the distinct type. To help with this, both the distinct type and its base type can cast from one type to the other. Examples are provided in the <a class="reference external" href="manual.html#types-distinct-type">manual</a>.</p>
 
@@ -983,7 +996,7 @@ out inside this with no indentation restrictions.
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-09-24 00:56:19 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-09-29 00:54:04 UTC</small>
       </div>
     </div>
   </div>
