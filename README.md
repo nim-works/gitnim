@@ -6,26 +6,69 @@
 ![latest](https://img.shields.io/badge/nim-1.4.8-informational?style=flat&logo=nim)
 ![devel](https://img.shields.io/badge/nim-1.5.1-informational?style=flat&logo=nim)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](#license)
+[![Matrix](https://img.shields.io/badge/chat-on%20matrix-brightgreen)](https://matrix.to/#/#disruptek:matrix.org)
 
 choosenim for choosey nimions
 
-## What is It?
+## What Is It?
+
+The aim of this tool is two-fold:
+
+- Provide an easy way to install the Nim compiler and tools.
+- Manage multiple Nim installations and allow them to be selected on-demand.
+
+Basically, it gits nim for you.
+
+## Okay, But I Heard It Was Different.  And, Like, Scary?
+
+Yes, it's different.  But not in a scary way; it's open and simple.
 
 This program adds a git subcommand for Nim `git nim` and installs itself
 next to your Nim compiler so that if your compiler is in your `PATH`, so is
 **gitnim**.
 
+## It Installs Itself?  Wait, Maybe It's Already Installed...
+
+No, nimpleton, it's not already installed. 🤦
+
+When you compile the source code, `gitnim.nim`, the output is a binary adjacent
+to your `nim` compiler and named `git-nim`.
+
+This binary is detected by `git` such that `git nim` is a command you can run
+on the command-line and it will do a thing.
+
+## Yeah, Okay, a `git` Subcommand.  But What Does It Do?
+
 The `git nim` subcommand allows you to choose from precompiled Nim releases and
-download/install them directly by managing your Nim installation as any other
-git repository.
+download or install them by managing your Nim installation as any other git
+repository.
+
+## So?  Why Should I Care?  I Already Have Nim Installed.
+
+Yeah, well, you can keep using your current Nim installation. 🤷
+
+The aim of this tool is two-fold:
+
+- Provide an easy way to install the Nim compiler and tools.
+- Manage multiple Nim installations and allow them to be selected on-demand.
+
+If you don't need either of these features, then **gitnim** is not for you.
+
+## So It's a Git Repo with Branches Matching Nim Versions?  Is That All?
 
 This Nim repository also links to the distribution from
 https://github.com/disruptek/dist, which is a hand-curated monorepo holding the
 most useful Nim modules from the ecosystem.
 
+## Okay, So What Makes That a Feature I Should Care About?
+
 When run, **gitnim** displays or switches branches in the Nim repository and
 updates the **dist** submodules to ensure you always have easy access to the
-latest features and fixes as matched to your compiler.
+latest features and fixes _as matched to your active compiler_.
+
+## Y'know, That Actually Makes A Lot Of Sense.
+
+Yeah, I know.  You're welcome.
 
 ## Installation
 
@@ -34,7 +77,7 @@ latest features and fixes as matched to your compiler.
 We use git for distribution; what else?
 
 ```bash
-$ git clone https://github.com/disruptek/gitnim
+$ git clone https://github.com/disruptek/gitnim /somewhere
 ```
 
 ### Add `bin` to `$PATH`
@@ -43,7 +86,7 @@ A critical step; humor me on this one. The location of the compiler is used to
 infer the installation directory for **gitnim** itself.
 
 ```bash
-$ export PATH=`pwd`/gitnim/bin:$PATH
+$ export PATH=/somewhere/bin:$PATH
 ```
 
 ### Build **gitnim**
@@ -55,7 +98,7 @@ This will automatically install the **gitnim** binary next to the compiler
 binary according to your `PATH`, enabling the `git nim` subcommand.
 
 ```bash
-$ cd gitnim
+$ cd /somewhere
 $ nim c gitnim/gitnim.nim
 ```
 
