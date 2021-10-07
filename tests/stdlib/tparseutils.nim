@@ -1,5 +1,5 @@
-import parseutils
-import sequtils
+import std/[parseutils, sequtils]
+
 
 let input = "$test{}  $this is ${an{  example}}  "
 let expected = @[(ikVar, "test"), (ikStr, "{}  "), (ikVar, "this"),
