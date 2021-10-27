@@ -5,7 +5,7 @@
 ![version-1-2](https://img.shields.io/badge/nim-1.2.13-informational?style=flat&logo=nim)
 ![version-1-4](https://img.shields.io/badge/nim-1.4.9-informational?style=flat&logo=nim)
 ![version-1-6](https://img.shields.io/badge/nim-1.6.0-informational?style=flat&logo=nim)
-![devel](https://img.shields.io/badge/nim-1.6.0-informational?style=flat&logo=nim)
+![devel](https://img.shields.io/badge/nim-1.7.1-informational?style=flat&logo=nim)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](#license)
 [![Matrix](https://img.shields.io/badge/chat-on%20matrix-brightgreen)](https://matrix.to/#/#disruptek:matrix.org)
 
