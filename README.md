@@ -1,10 +1,11 @@
 # [gitnim linux_x64](https://gitnim.com/)
 
-[![tests](https://github.com/disruptek/gitnim/workflows/CI/badge.svg?branch=master)](https://github.com/disruptek/gitnim/actions?query=workflow%3ACI)
-![stable](https://img.shields.io/badge/nim-1.0.11-informational?style=flat&logo=nim)
-![status](https://img.shields.io/badge/nim-1.2.13-informational?style=flat&logo=nim)
-![latest](https://img.shields.io/badge/nim-1.4.8-informational?style=flat&logo=nim)
-![devel](https://img.shields.io/badge/nim-1.5.1-informational?style=flat&logo=nim)
+[![tests](https://github.com/nim-works/gitnim/workflows/CI/badge.svg?branch=master)](https://github.com/nim-works/gitnim/actions?query=workflow%3ACI)
+![version-1-0](https://img.shields.io/badge/nim-1.0.11-informational?style=flat&logo=nim)
+![version-1-2](https://img.shields.io/badge/nim-1.2.13-informational?style=flat&logo=nim)
+![version-1-4](https://img.shields.io/badge/nim-1.4.9-informational?style=flat&logo=nim)
+![version-1-6](https://img.shields.io/badge/nim-1.6.0-informational?style=flat&logo=nim)
+![devel](https://img.shields.io/badge/nim-1.6.0-informational?style=flat&logo=nim)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](#license)
 [![Matrix](https://img.shields.io/badge/chat-on%20matrix-brightgreen)](https://matrix.to/#/#disruptek:matrix.org)
 
@@ -57,7 +58,7 @@ If you don't need either of these features, then **gitnim** is not for you.
 ## So It's a Git Repo with Branches Matching Nim Versions?  Is That All?
 
 This Nim repository also links to the distribution from
-https://github.com/disruptek/dist, which is a hand-curated monorepo holding the
+https://github.com/nim-works/dist, which is a hand-curated monorepo holding the
 most useful Nim modules from the ecosystem.
 
 ## Okay, So What Makes That a Feature I Should Care About?
@@ -77,7 +78,7 @@ Yeah, I know.  You're welcome.
 We use git for distribution; what else?
 
 ```bash
-$ git clone https://github.com/disruptek/gitnim /somewhere
+$ git clone https://github.com/nim-works/gitnim /somewhere
 ```
 
 ### Add `bin` to `$PATH`
@@ -114,7 +115,7 @@ The current distribution will be updated from the network, if necessary.
 ```bash
 $ git nim
 ```
-![git nim](https://github.com/disruptek/gitnim/raw/master/docs/gitnim.svg "git nim")
+![git nim](https://github.com/nim-works/gitnim/raw/master/docs/gitnim.svg "git nim")
 
 ### Choose a Release by Version
 
@@ -126,7 +127,7 @@ The distribution will be updated without querying the network, if possible.
 ```bash
 $ git nim 1.4.3
 ```
-![git nim 1.4.3](https://github.com/disruptek/gitnim/raw/master/docs/gitnim143.svg "git nim 1.4.3")
+![git nim 1.4.3](https://github.com/nim-works/gitnim/raw/master/docs/gitnim143.svg "git nim 1.4.3")
 
 ### Choose a Release by Tag
 
@@ -138,12 +139,12 @@ The distribution will be updated without querying the network, if possible.
 ```bash
 $ git nim devel
 ```
-![git nim devel](https://github.com/disruptek/gitnim/raw/master/docs/gitnimdevel.svg "git nim devel")
+![git nim devel](https://github.com/nim-works/gitnim/raw/master/docs/gitnimdevel.svg "git nim devel")
 
 ```bash
 $ git nim stable
 ```
-![git nim stable](https://github.com/disruptek/gitnim/raw/master/docs/gitnimstable.svg "git nim stable")
+![git nim stable](https://github.com/nim-works/gitnim/raw/master/docs/gitnimstable.svg "git nim stable")
 
 ## Advanced Usage
 
@@ -186,7 +187,7 @@ $ git nim jeff/1.3.3
 
 ## Contributing
 
-[https://github.com/disruptek/gitnim](https://github.com/disruptek/gitnim)
+[https://github.com/nim-works/gitnim](https://github.com/nim-works/gitnim)
 
 ## License
 MIT
