@@ -110,7 +110,8 @@ window.addEventListener('DOMContentLoaded', main);
 <li><a class="reference" id="document-types-html_toc" href="#document-types-html">HTML</a></li>
 <li><a class="reference" id="document-types-latex_toc" href="#document-types-latex">LaTeX</a></li>
 <li><a class="reference" id="document-types-json_toc" href="#document-types-json">JSON</a></li>
-</ul><li><a class="reference" id="related-options_toc" href="#related-options">Related Options</a></li>
+</ul><li><a class="reference" id="referencing-nim-symbolscolon-simple-documentation-links_toc" href="#referencing-nim-symbolscolon-simple-documentation-links">Referencing Nim symbols: simple documentation links</a></li>
+<li><a class="reference" id="related-options_toc" href="#related-options">Related Options</a></li>
 <ul class="simple"><li><a class="reference" id="related-options-project-switch_toc" href="#related-options-project-switch">Project switch</a></li>
 <li><a class="reference" id="related-options-index-switch_toc" href="#related-options-index-switch">Index switch</a></li>
 <li><a class="reference" id="related-options-see-source-switch_toc" href="#related-options-see-source-switch">See source switch</a></li>
@@ -245,6 +246,92 @@ proc helloWorld(times: int) {.raises: [], tags: [].}
 </p>
 <p>Note that the <tt class="docutils literal"><span class="pre option">jsondoc</span></tt> command outputs its JSON without pretty-printing it, while <tt class="docutils literal"><span class="pre option">jsondoc0</span></tt> outputs pretty-printed JSON.</p>
 
+<h1><a class="toc-backref" id="referencing-nim-symbolscolon-simple-documentation-links" href="#referencing-nim-symbolscolon-simple-documentation-links">Referencing Nim symbols: simple documentation links</a></h1><p>You can reference Nim identifiers from Nim documentation comments, currently only inside their <tt class="docutils literal"><span class="pre">.nim</span></tt> file (or inside a <tt class="docutils literal"><span class="pre">.rst</span></tt> file included from a <tt class="docutils literal"><span class="pre">.nim</span></tt>). The point is that such links will be resolved automatically by <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">doc</span></span></tt> (or <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">jsondoc</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">doc2tex</span></span></tt>). This pertains to any exported symbol like <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Keyword">const</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Keyword">iterator</span></span></tt>, etc. Syntax for referencing is basically a normal RST one: addition of underscore <tt class="docutils literal"><span class="pre"><span class="Identifier">_</span></span></tt> to a <em>link text</em>. Link text is either one word or a group of words enclosed by backticks <tt class="docutils literal"><span class="pre"><span class="Punctuation">`</span></span></tt> (for a one word case backticks are usually omitted). Link text will be displayed <em>as is</em> while <em>link target</em> will be set to the anchor <sup><strong><a class="reference internal" href="#footnotesym-1">[*]</a></strong></sup> of Nim symbol that corresponds to link text.</p>
+<hr class="footnote"><div class="footnote-group">
+<div id="footnotesym-1"><div class="footnote-label"><sup><strong><a href="#footnotesym-1">[*]</a></strong></sup></div> &ensp; anchors' format is described in <a class="reference internal" href="#html-anchor-generation">HTML anchor generation</a> section below.
+</div>
+</div>
+<p>If you have a constant:</p>
+<pre class="listing"><span class="Keyword">const</span> <span class="Identifier">pi</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="FloatNumber">3.14</span></pre><p>then it should be referenced in one of the 2 forms:</p>
+<ol class="upperalpha simple"><li>non-qualified (no symbol kind specification):<pre>pi_</pre>
+</li>
+<li>qualified (with symbol kind specification):<pre>`const pi`_</pre>
+</li>
+</ol>
+<p>For routine kinds there are more options. Consider this definition:</p>
+<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">foo</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">float</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span></pre><p>Generally following syntax is allowed for referencing <tt class="docutils literal"><span class="pre"><span class="Identifier">foo</span></span></tt>:</p>
+<ul class="simple"><li>short (without parameters):<ol class="upperalpha simple"><li>non-qualified:<pre>foo_</pre>
+</li>
+<li>qualified:<pre>`proc foo`_</pre>
+</li>
+</ol>
+</li>
+<li>longer variants (with parameters):<ol class="upperalpha simple"><li>non-qualified:<ol class="simple"><li>specifying parameters names:<pre>`foo(a, b)`_</pre>
+</li>
+<li>specifying parameters types:<pre>`foo(int, float)`_</pre>
+</li>
+<li>specifying both names and types:<pre>`foo(a: int, b: float)`_</pre>
+</li>
+<li>output parameter can also be specified if you wish:<pre>`foo(a: int, b: float): string`_</pre>
+</li>
+</ol>
+</li>
+<li>qualified: all 4 options above are valid. Particularly you can use the full format:<pre>`proc foo(a: int, b: float): string`_</pre>
+</li>
+</ol>
+</li>
+</ul>
+<div class="admonition admonition-info"><span class="admonition-info-text"><b>Tip:</b></span>
+<p>Avoid cluttering your text with extraneous information by using one of shorter forms:<pre>binarySearch_
+`binarySearch(a, key, cmp)`_</pre>
+</p>
+<p>Brevity is better for reading! If you use a short form and have an ambiguity problem (see below) then just add some additional info.</p>
+</div>
+<p>Symbol kind like <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span></span></tt> can also be specified in the postfix form:<pre>`foo proc`_
+`walkDir(d: string) iterator`_</pre>
+</p>
+<div class="admonition admonition-warning"><span class="admonition-warning-text"><b>Warning:</b></span>
+An ambiguity in resolving documentation links may arise because of:<ol class="simple"><li>clash with other RST anchors<ul class="simple"><li>manually setup anchors</li>
+<li>automatically set up, e.g. section names</li>
+</ul>
+</li>
+<li>collision with other Nim symbols:<ul class="simple"><li>routines with different parameters can exist e.g. for <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Keyword">template</span></span></tt>. In this case they are split between their corresponding sections in output file. Qualified references are useful in this case -- just disambiguate by referring to these sections explicitly:<pre>See `foo proc`_ and `foo template`_.</pre>
+</li>
+<li>because in Nim <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Keyword">iterator</span></span></tt> belong to different namespaces, so there can be a collision even if parameters are the same. Use <tt class="docutils literal"><span class="pre">`proc foo`_</span></tt> or <tt class="docutils literal"><span class="pre">`iterator foo`_</span></tt> then.</li>
+</ul>
+</li>
+</ol>
+<p>Any ambiguity is always reported with Nim compiler warnings and an anchor with higher priority is selected. Manual anchors have highest priority, then go automatic RST anchors; then Nim-generated anchors (while procs have higher priority than other Nim symbol kinds).</p>
+</div>
+<p>Generic parameters can also be used. All in all, this long form will be recognized fine:<pre>`proc binarySearch*[T; K](a: openArray[T], key: K, cmp: proc(T, K)): int`_</pre>
+</p>
+<p><strong>Limitations</strong>:</p>
+<ol class="simple"><li>The parameters of a nested routine type can be specified only with types (without parameter names, see form A.2 above). E.g. for this signature:<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">binarySearch</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">,</span> <span class="Identifier">K</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">;</span> <span class="Identifier">key</span><span class="Punctuation">:</span> <span class="Identifier">K</span><span class="Punctuation">;</span>
+                         <span class="Identifier">cmp</span><span class="Punctuation">:</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">T</span><span class="Punctuation">;</span> <span class="Identifier">y</span><span class="Punctuation">:</span> <span class="Identifier">K</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">closure</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
+                                    <span class="Operator">~~</span>    <span class="Operator">~~</span>   <span class="Operator">~~~~~</span></pre><p>you cannot use names underlined by <tt class="docutils literal"><span class="pre"><span class="Operator">~~</span></span></tt> so it must be referenced with <tt class="docutils literal"><span class="pre">cmp: proc(T, K)</span></tt>. Hence these forms are valid:<pre>`binarySearch(a: openArray[T], key: K, cmp: proc(T, K))`_
+`binarySearch(openArray[T], K, proc(T, K))`_
+`binarySearch(a, key, cmp)`_</pre>
+</p>
+</li>
+<li>Default values in routine parameters are not recognized, one needs to specify the type and/or name instead. E.g. for referencing <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span> <span class="Identifier">f</span><span class="Punctuation">(</span><span class="Identifier">x</span> <span class="Operator">=</span> <span class="DecNumber">7</span><span class="Punctuation">)</span></span></tt> use one of the mentioned forms:<pre>`f(int)`_ or `f(x)`_ or `f(x: int)`_.</pre>
+</li>
+<li>Generic parameters must be given the same way as in the definition of referenced symbol.<ul class="simple"><li>their names should be the same</li>
+<li>parameters list should be given the same way, e.g. without substitutions between commas (,) and semicolons (;).</li>
+</ul>
+</li>
+</ol>
+<div class="admonition admonition-info"><span class="admonition-info-text"><b>Note:</b></span>
+A bit special case is operators (as their signature is also defined with <tt class="docutils literal"><span class="pre"><span class="Punctuation">`</span></span></tt>):<pre class="listing"><span class="Keyword">func</span> <span class="Punctuation">`</span><span class="Operator">$</span><span class="Punctuation">`</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">MyType</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span>
+<span class="Keyword">func</span> <span class="Punctuation">`</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Punctuation">`</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">openArray</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">T</span></pre><p>A short form works without additional backticks:<pre>`$`_
+`[]`_</pre>
+</p>
+<p>However for fully-qualified reference copy-pasting backticks (`) into other backticks will not work in our RST parser (because we use Markdown-like inline markup rules). You need either to delete backticks or keep them and escape with backslash \:<pre>no backticks: `func $`_
+escaped:  `func \`$\``_
+no backticks: `func [][T](x: openArray[T]): T`_
+escaped:  `func \`[]\`[T](x: openArray[T]): T`_</pre>
+</p>
+</div>
+
 <h1><a class="toc-backref" id="related-options" href="#related-options">Related Options</a></h1>
 <h2><a class="toc-backref" id="related-options-project-switch" href="#related-options-project-switch">Project switch</a></h2><pre class="listing"><span class="program">nim</span> <span class="option">doc</span> <span class="option">--project</span> <span class="Identifier">filename.nim</span></pre><p>This will recursively generate documentation of all Nim modules imported into the input module that belong to the Nimble package that <tt class="docutils literal"><span class="pre">filename.nim</span></tt> belongs to. The index files and the corresponding <tt class="docutils literal"><span class="pre">theindex.html</span></tt> will also be generated.</p>
 
@@ -314,7 +401,7 @@ proc helloWorld(times: int) {.raises: [], tags: [].}
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-10-26 00:52:28 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-10-31 01:02:25 UTC</small>
       </div>
     </div>
   </div>

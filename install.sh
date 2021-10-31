@@ -709,6 +709,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/pure/nimtracker.nim
   cp lib/pure/httpclient.nim $libdir/pure/httpclient.nim
   chmod 644 $libdir/pure/httpclient.nim
+  cp lib/packages/docutils/dochelpers.nim $libdir/packages/docutils/dochelpers.nim
+  chmod 644 $libdir/packages/docutils/dochelpers.nim
   cp lib/packages/docutils/rstgen.nim $libdir/packages/docutils/rstgen.nim
   chmod 644 $libdir/packages/docutils/rstgen.nim
   cp lib/packages/docutils/highlite.nim $libdir/packages/docutils/highlite.nim
