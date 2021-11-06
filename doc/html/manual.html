@@ -1952,7 +1952,16 @@ return &quot;ambiguous&quot;</pre>
 
 <h2><a class="toc-backref" id="statements-and-expressions-static-statementslashexpression" href="#statements-and-expressions-static-statementslashexpression">Static statement/expression</a></h2><p>A static statement/expression explicitly requires compile-time execution. Even some code that has side effects is permitted in a static block:</p>
 <pre class="listing"><span class="Keyword">static</span><span class="Punctuation">:</span>
-  <span class="Identifier">echo</span> <span class="StringLit">&quot;echo at compile time&quot;</span></pre><p>There are limitations on what Nim code can be executed at compile time; see <a class="reference external" href="#restrictions-on-compileminustime-execution">Restrictions on Compile-Time Execution</a> for details. It's a static error if the compiler cannot execute the block at compile time.</p>
+  <span class="Identifier">echo</span> <span class="StringLit">&quot;echo at compile time&quot;</span></pre><p><tt class="docutils literal"><span class="pre"><span class="Keyword">static</span></span></tt> can also be used like a routine.</p>
+<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">getNum</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="Identifier">a</span>
+
+<span class="Comment"># Below calls &quot;echo getNum(123)&quot; at compile time.</span>
+<span class="Keyword">static</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="Identifier">getNum</span><span class="Punctuation">(</span><span class="DecNumber">123</span><span class="Punctuation">)</span>
+
+<span class="Comment"># Below call evaluates the &quot;getNum(123)&quot; at compile time, but its</span>
+<span class="Comment"># result gets used at run time.</span>
+<span class="Identifier">echo</span> <span class="Keyword">static</span><span class="Punctuation">(</span><span class="Identifier">getNum</span><span class="Punctuation">(</span><span class="DecNumber">123</span><span class="Punctuation">)</span><span class="Punctuation">)</span></pre><p>There are limitations on what Nim code can be executed at compile time; see <a class="reference external" href="#restrictions-on-compileminustime-execution">Restrictions on Compile-Time Execution</a> for details. It's a static error if the compiler cannot execute the block at compile time.</p>
 
 <h2><a class="toc-backref" id="statements-and-expressions-if-statement" href="#statements-and-expressions-if-statement">If statement</a></h2><p>Example:</p>
 <pre class="listing"><span class="Keyword">var</span> <span class="Identifier">name</span> <span class="Operator">=</span> <span class="Identifier">readLine</span><span class="Punctuation">(</span><span class="Identifier">stdin</span><span class="Punctuation">)</span>
@@ -2218,8 +2227,10 @@ return &quot;ambiguous&quot;</pre>
 
 <span class="Comment"># Will fail: a is untyped since ';' stops type propagation.</span>
 <span class="Keyword">proc</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">;</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">;</span> <span class="Identifier">c</span><span class="Punctuation">,</span> <span class="Identifier">d</span><span class="Punctuation">:</span> <span class="Identifier">bool</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span></pre><p>A parameter may be declared with a default value which is used if the caller does not provide a value for the argument. The value will be reevaluated every time the function is called.</p>
-<pre class="listing"><span class="Comment"># b is optional with 47 as its default value</span>
-<span class="Keyword">proc</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">47</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span></pre><p>Parameters can be declared mutable and so allow the proc to modify those arguments, by using the type modifier <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt>.</p>
+<pre class="listing"><span class="Comment"># b is optional with 47 as its default value.</span>
+<span class="Keyword">proc</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">47</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span></pre><p>Just as the comma propagates the types from right to left until the first parameter or until a semicolon is hit, it also propagates the default value starting from the parameter declared with it.</p>
+<pre class="listing"><span class="Comment"># Both a and b are optional with 47 as their default values.</span>
+<span class="Keyword">proc</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">47</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span></pre><p>Parameters can be declared mutable and so allow the proc to modify those arguments, by using the type modifier <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt>.</p>
 <pre class="listing"><span class="Comment"># &quot;returning&quot; a value to the caller through the 2nd argument</span>
 <span class="Comment"># Notice that the function uses no actual return value at all (ie void)</span>
 <span class="Keyword">proc</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Identifier">inp</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">outp</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span>
@@ -4221,7 +4232,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-11-03 00:59:56 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-11-04 00:58:29 UTC</small>
       </div>
     </div>
   </div>
