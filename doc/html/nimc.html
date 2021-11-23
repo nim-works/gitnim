@@ -130,7 +130,9 @@ window.addEventListener('DOMContentLoaded', main);
 <li><a class="reference" id="nim-idetools-integration_toc" href="#nim-idetools-integration">Nim idetools integration</a></li>
 <li><a class="reference" id="nim-for-embedded-systems_toc" href="#nim-for-embedded-systems">Nim for embedded systems</a></li>
 <ul class="simple"><li><a class="reference" id="nim-for-embedded-systems-nimallocpagesviamalloc_toc" href="#nim-for-embedded-systems-nimallocpagesviamalloc">nimAllocPagesViaMalloc</a></li>
-</ul><li><a class="reference" id="nim-for-realtime-systems_toc" href="#nim-for-realtime-systems">Nim for realtime systems</a></li>
+</ul><li><a class="reference" id="nimpage256-slash-nimpage512-slash-nimpage1k_toc" href="#nimpage256-slash-nimpage512-slash-nimpage1k">nimPage256 / nimPage512 / nimPage1k</a></li>
+<li><a class="reference" id="nimmemaligntiny_toc" href="#nimmemaligntiny">nimMemAlignTiny</a></li>
+<li><a class="reference" id="nim-for-realtime-systems_toc" href="#nim-for-realtime-systems">Nim for realtime systems</a></li>
 <li><a class="reference" id="signal-handling-in-nim_toc" href="#signal-handling-in-nim">Signal handling in Nim</a></li>
 <li><a class="reference" id="optimizing-for-nim_toc" href="#optimizing-for-nim">Optimizing for Nim</a></li>
 <ul class="simple"><li><a class="reference" id="optimizing-for-nim-optimizing-string-handling_toc" href="#optimizing-for-nim-optimizing-string-handling">Optimizing string handling</a></li>
@@ -500,6 +502,16 @@ arm.linux.gcc.linkerexe = &quot;arm-linux-gcc&quot;</pre>
 
 <h2><a class="toc-backref" id="nim-for-embedded-systems-nimallocpagesviamalloc" href="#nim-for-embedded-systems-nimallocpagesviamalloc">nimAllocPagesViaMalloc</a></h2><p>Nim's default allocator is based on TLSF, this algorithm was designed for embedded devices. This allocator gets blocks/pages of memory via a currently undocumented <tt class="docutils literal"><span class="pre"><span class="Identifier">osalloc</span></span></tt> API which usually uses POSIX's <tt class="docutils literal"><span class="pre"><span class="Identifier">mmap</span></span></tt> call. On many environments <tt class="docutils literal"><span class="pre"><span class="Identifier">mmap</span></span></tt> is not available but C's <tt class="docutils literal"><span class="pre"><span class="Identifier">malloc</span></span></tt> is. You can use the <tt class="docutils literal"><span class="pre"><span class="Identifier">nimAllocPagesViaMalloc</span></span></tt> define to use <tt class="docutils literal"><span class="pre"><span class="Identifier">malloc</span></span></tt> instead of <tt class="docutils literal"><span class="pre"><span class="Identifier">mmap</span></span></tt>. <tt class="docutils literal"><span class="pre"><span class="Identifier">nimAllocPagesViaMalloc</span></span></tt> is currently only supported with <tt class="docutils literal"><span class="pre"><span class="Operator">--</span><span class="Identifier">gc</span><span class="Punctuation">:</span><span class="Identifier">arc</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Operator">--</span><span class="Identifier">gc</span><span class="Punctuation">:</span><span class="Identifier">orc</span></span></tt>. (Since version 1.6)</p>
 
+<h1><a class="toc-backref" id="nimpage256-slash-nimpage512-slash-nimpage1k" href="#nimpage256-slash-nimpage512-slash-nimpage1k">nimPage256 / nimPage512 / nimPage1k</a></h1><p>Adjust the page size for Nim's GC allocator. This enables using <tt class="docutils literal"><span class="pre"><span class="Identifier">nimAllocPagesViaMalloc</span></span></tt> on devices with less RAM. The default page size requires too much RAM to work.</p>
+<p>Recommended settings:</p>
+<ul class="simple"><li>&lt; 32 kB of RAM use <tt class="docutils literal"><span class="pre"><span class="Identifier">nimPage256</span></span></tt></li>
+<li>&lt; 512 kB of RAM use <tt class="docutils literal"><span class="pre"><span class="Identifier">nimPage512</span></span></tt></li>
+<li>&lt; 2 MB of RAM use <tt class="docutils literal"><span class="pre"><span class="Identifier">nimPage1k</span></span></tt></li>
+</ul>
+<p>Initial testing hasn't shown much difference between 512B or 1kB page sizes in terms of performance or latency. Using <tt class="docutils literal"><span class="pre"><span class="Identifier">nimPages256</span></span></tt> will limit the total amount of allocatable RAM.</p>
+
+<h1><a class="toc-backref" id="nimmemaligntiny" href="#nimmemaligntiny">nimMemAlignTiny</a></h1><p>Sets <tt class="docutils literal"><span class="pre"><span class="Identifier">MemAlign</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="DecNumber">4</span></span></tt> bytes which reduces the memory alignment to better match some embedded devices.</p>
+
 <h1><a class="toc-backref" id="nim-for-realtime-systems" href="#nim-for-realtime-systems">Nim for realtime systems</a></h1><p>See the documentation of Nim's soft realtime <a class="reference external" href="gc.html">GC</a> for further information.</p>
 
 <h1><a class="toc-backref" id="signal-handling-in-nim" href="#signal-handling-in-nim">Signal handling in Nim</a></h1><p>The Nim programming language has no concept of Posix's signal handling mechanisms. However, the standard library offers some rudimentary support for signal handling, in particular, segmentation faults are turned into fatal errors that produce a stack trace. This can be disabled with the <tt class="docutils literal"><span class="pre option">-d:noSignalHandler</span></tt> switch.</p>
@@ -546,7 +558,7 @@ arm.linux.gcc.linkerexe = &quot;arm-linux-gcc&quot;</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-11-11 01:00:48 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-11-23 01:00:43 UTC</small>
       </div>
     </div>
   </div>
