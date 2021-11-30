@@ -345,7 +345,10 @@ proc currentBranch(): string =
 proc nim(args: string; options = capture): string =
   ## run nim with some arguments
   withinNimDirectory:
-    let nim = "bin" / "nim"
+    when defined(windows):
+      let nim = "bin" / "nim.exe"
+    else:
+      let nim = "bin" / "nim"
     if not nim.fileExists:
       crash "unable to find nim and unwilling to search your path"
     else:
