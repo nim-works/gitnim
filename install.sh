@@ -257,8 +257,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/system/cellsets.nim
   cp lib/system/gc_regions.nim $libdir/system/gc_regions.nim
   chmod 644 $libdir/system/gc_regions.nim
-  cp lib/system/sysspawn.nim $libdir/system/sysspawn.nim
-  chmod 644 $libdir/system/sysspawn.nim
   cp lib/system/avltree.nim $libdir/system/avltree.nim
   chmod 644 $libdir/system/avltree.nim
   cp lib/system/memory.nim $libdir/system/memory.nim
@@ -567,8 +565,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/pure/nimtracker.nim
   cp lib/pure/asyncdispatch.nim.cfg $libdir/pure/asyncdispatch.nim.cfg
   chmod 644 $libdir/pure/asyncdispatch.nim.cfg
-  cp lib/deprecated/pure/sharedstrings.nim $libdir/deprecated/pure/sharedstrings.nim
-  chmod 644 $libdir/deprecated/pure/sharedstrings.nim
   cp lib/deprecated/pure/events.nim $libdir/deprecated/pure/events.nim
   chmod 644 $libdir/deprecated/pure/events.nim
   cp lib/deprecated/pure/ospaths.nim $libdir/deprecated/pure/ospaths.nim
