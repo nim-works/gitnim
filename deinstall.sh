@@ -19,7 +19,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/lib/nim
       docdir=/usr/share/nim/doc
       datadir=/usr/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.6.1"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.6.3"
       ;;
     "/usr/local/bin")
       bindir=/usr/local/bin
@@ -27,7 +27,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/local/lib/nim
       docdir=/usr/local/share/nim/doc
       datadir=/usr/local/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/compiler-1.6.1"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.6.3"
       ;;
     "/opt")
       bindir="/opt/nim/bin"
@@ -35,7 +35,7 @@ if [ $# -eq 1 ] ; then
       libdir="/opt/nim/lib"
       docdir="/opt/nim/doc"
       datadir="/opt/nim/data"
-      nimbleDir="/opt/nimble/pkgs/compiler-1.6.1"
+      nimbleDir="/opt/nimble/pkgs/compiler-1.6.3"
       ;;
     *)
       bindir="$1/nim/bin"
@@ -98,16 +98,16 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/gorgeimpl.nim
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
+    rm -f $nimbleDir/compiler/ic/integrity.nim
+    rm -f $nimbleDir/compiler/ic/rodfiles.nim
     rm -f $nimbleDir/compiler/ic/replayer.nim
     rm -f $nimbleDir/compiler/ic/cbackend.nim
+    rm -f $nimbleDir/compiler/ic/navigator.nim
     rm -f $nimbleDir/compiler/ic/packed_ast.nim
     rm -f $nimbleDir/compiler/ic/bitabs.nim
-    rm -f $nimbleDir/compiler/ic/navigator.nim
-    rm -f $nimbleDir/compiler/ic/ic.nim
-    rm -f $nimbleDir/compiler/ic/rodfiles.nim
-    rm -f $nimbleDir/compiler/ic/integrity.nim
     rm -f $nimbleDir/compiler/ic/dce.nim
     rm -f $nimbleDir/compiler/ic/design.rst
+    rm -f $nimbleDir/compiler/ic/ic.nim
     rm -f $nimbleDir/compiler/idents.nim
     rm -f $nimbleDir/compiler/importer.nim
     rm -f $nimbleDir/compiler/index.nim
@@ -142,8 +142,8 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/nimblecmd.nim
     rm -f $nimbleDir/compiler/nimconf.nim
     rm -f $nimbleDir/compiler/nimeval.nim
-    rm -f $nimbleDir/compiler/nimfix/prettybase.nim
     rm -f $nimbleDir/compiler/nimfix/nimfix.nim
+    rm -f $nimbleDir/compiler/nimfix/prettybase.nim
     rm -f $nimbleDir/compiler/nimfix/nimfix.nim.cfg
     rm -f $nimbleDir/compiler/nimlexbase.nim
     rm -f $nimbleDir/compiler/nimpaths.nim
@@ -160,8 +160,8 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/pathutils.nim
     rm -f $nimbleDir/compiler/patterns.nim
     rm -f $nimbleDir/compiler/platform.nim
-    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/active.nim
+    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/itersgen.nim
     rm -f $nimbleDir/compiler/pluginsupport.nim
     rm -f $nimbleDir/compiler/pragmas.nim
