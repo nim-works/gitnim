@@ -349,6 +349,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 $libdir/std/private/win_setenv.nim
   cp lib/std/private/digitsutils.nim $libdir/std/private/digitsutils.nim
   chmod 644 $libdir/std/private/digitsutils.nim
+  cp lib/std/private/win_getsysteminfo.nim $libdir/std/private/win_getsysteminfo.nim
+  chmod 644 $libdir/std/private/win_getsysteminfo.nim
   cp lib/std/private/bitops_utils.nim $libdir/std/private/bitops_utils.nim
   chmod 644 $libdir/std/private/bitops_utils.nim
   cp lib/std/private/miscdollars.nim $libdir/std/private/miscdollars.nim

@@ -749,7 +749,7 @@ primarySuffix = '(' (exprColonEqExpr comma?)* ')'
       | DOTLIKEOP optInd symbol generalizedLit?
       | '[' optInd exprColonEqExprList optPar ']'
       | '{' optInd exprColonEqExprList optPar '}'
-      | &amp;( '`'|IDENT|literal|'cast'|'addr'|'type') expr # command syntax
+      | &amp;( '`'|IDENT|literal|'cast'|'addr'|'type') expr (comma expr)* # command syntax
 pragma = '{.' optInd (exprColonEqExpr comma?)* optPar ('.}' | '}')
 identVis = symbol OPR?  # postfix position
 identVisDot = symbol '.' optInd symbol OPR?
@@ -782,7 +782,8 @@ primary = operatorB primary primarySuffix* |
           ('var' | 'out' | 'ref' | 'ptr' | 'distinct') primary
         /  prefixOperator* identOrLiteral primarySuffix*
 typeDesc = simpleExpr ('not' expr)?
-typeDefAux = simpleExpr ('not' expr)?
+typeDefAux = simpleExpr ('not' expr
+                        | postExprBlocks)?
 postExprBlocks = ':' stmt? ( IND{=} doBlock
                            | IND{=} 'of' exprList ':' stmt
                            | IND{=} 'elif' expr ':' stmt
@@ -4323,7 +4324,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-01-02 00:59:48 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-01-10 00:59:37 UTC</small>
       </div>
     </div>
   </div>
