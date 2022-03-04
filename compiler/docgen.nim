@@ -221,6 +221,7 @@ template declareClosures =
     of meInvalidDirective: k = errRstInvalidDirectiveX
     of meInvalidField: k = errRstInvalidField
     of meFootnoteMismatch: k = errRstFootnoteMismatch
+    of meSandboxedDirective: k = errRstSandboxedDirective
     of mwRedefinitionOfLabel: k = warnRstRedefinitionOfLabel
     of mwUnknownSubstitution: k = warnRstUnknownSubstitutionX
     of mwBrokenLink: k = warnRstBrokenLink
@@ -265,7 +266,7 @@ proc newDocumentor*(filename: AbsoluteFile; cache: IdentCache; conf: ConfigRef,
   result.cache = cache
   result.outDir = conf.outDir.string
   result.isPureRst = isPureRst
-  var options= {roSupportRawDirective, roSupportMarkdown, roPreferMarkdown}
+  var options= {roSupportRawDirective, roSupportMarkdown, roPreferMarkdown, roSandboxDisabled}
   if not isPureRst: options.incl roNimFile
   result.sharedState = newRstSharedState(
       options, filename.string,
