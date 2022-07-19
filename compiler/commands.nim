@@ -113,7 +113,7 @@ const
   errInvalidCmdLineOption = "invalid command line option: '$1'"
   errOnOrOffExpectedButXFound = "'on' or 'off' expected, but '$1' found"
   errOnOffOrListExpectedButXFound = "'on', 'off' or 'list' expected, but '$1' found"
-  errOffHintsError = "'off', 'hint' or 'error' expected, but '$1' found"
+  errOffHintsError = "'off', 'hint', 'error' or 'usages' expected, but '$1' found"
 
 proc invalidCmdLineOption(conf: ConfigRef; pass: TCmdLinePass, switch: string, info: TLineInfo) =
   if switch == " ": localError(conf, info, errInvalidCmdLineOption % "-")
@@ -1090,6 +1090,8 @@ proc processArgument*(pass: TCmdLinePass; p: OptParser;
   else:
     if pass == passCmd1: config.commandArgs.add p.key
     if argsCount == 1:
+      if p.key.endsWith(".nims"):
+        incl(config.globalOptions, optWasNimscript)
       # support UNIX style filenames everywhere for portable build scripts:
       if config.projectName.len == 0:
         config.projectName = unixToNativePath(p.key)

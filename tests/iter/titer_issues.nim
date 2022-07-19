@@ -29,6 +29,14 @@ end
 9018
 @[1, 2]
 @[1, 2, 3]
+nested finally
+outer finally
+nested finally
+outer finally
+nested finally
+outer finally
+nested finally
+outer finally
 '''
 """
 
@@ -135,7 +143,7 @@ block t3837_chained:
 
 
 block t3221_complex:
-  iterator permutations[T](ys: openarray[T]): seq[T] =
+  iterator permutations[T](ys: openArray[T]): seq[T] =
     var
       d = 1
       c = newSeq[int](ys.len)
@@ -228,7 +236,7 @@ block t2023_objiter:
 
 block:
   # bug #13739
-  iterator myIter(arg: openarray[int]): int =
+  iterator myIter(arg: openArray[int]): int =
     var tmp = 0
     let len = arg.len
     while tmp < len:
@@ -251,3 +259,94 @@ block:
 
   for x in ff(@[1, 2], @[1, 2, 3]):
     echo x
+
+
+# bug #19575
+
+iterator bb() {.closure.} =
+    while true:
+        try: discard
+        except: break
+        finally: break
+
+var a = bb
+
+iterator cc() {.closure.} =
+    while true:
+        try: discard
+        except:
+          if true:
+            break
+        finally:
+          if true:
+            break
+
+var a2 = cc
+
+
+block:
+  # bug #19911 (return in nested try)
+
+  # try yield -> try
+  iterator p1: int {.closure.} =
+    try:
+      yield 0
+      try:
+        return
+      finally:
+        echo "nested finally"
+      echo "shouldn't run"
+    finally:
+      echo "outer finally"
+    echo "shouldn't run"
+
+  for _ in p1():
+    discard
+
+  # try -> try yield
+  iterator p2: int {.closure.} =
+    try:
+      try:
+        yield 0
+        return
+      finally:
+        echo "nested finally"
+      echo "shouldn't run"
+    finally:
+      echo "outer finally"
+    echo "shouldn't run"
+
+  for _ in p2():
+    discard
+
+  # try yield -> try yield
+  iterator p3: int {.closure.} =
+    try:
+      yield 0
+      try:
+        yield 0
+        return
+      finally:
+        echo "nested finally"
+      echo "shouldn't run"
+    finally:
+      echo "outer finally"
+    echo "shouldn't run"
+
+  for _ in p3():
+    discard
+
+  # try -> try
+  iterator p4: int {.closure.} =
+    try:
+      try:
+        return
+      finally:
+        echo "nested finally"
+      echo "shouldn't run"
+    finally:
+      echo "outer finally"
+    echo "shouldn't run"
+
+  for _ in p4():
+    discard

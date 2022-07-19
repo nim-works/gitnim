@@ -116,8 +116,9 @@ elif defined(nimBuiltinSetjmp):
     proc c_builtin_setjmp(jmpb: ptr pointer): cint {.
       importc: "__builtin_setjmp", nodecl.}
     c_builtin_setjmp(unsafeAddr jmpb[0])
+
 elif defined(nimRawSetjmp) and not defined(nimStdSetjmp):
-  when defined(windows):
+  when defined(windows) and not defined(vcc):
     # No `_longjmp()` on Windows.
     proc c_longjmp*(jmpb: C_JmpBuf, retval: cint) {.
       header: "<setjmp.h>", importc: "longjmp".}
@@ -127,10 +128,16 @@ elif defined(nimRawSetjmp) and not defined(nimStdSetjmp):
     # prone to stack corruption during unwinding, so we disable that by setting
     # it to NULL.
     # More details: https://github.com/status-im/nimbus-eth2/issues/3121
+    when defined(nimHasStyleChecks):
+      {.push styleChecks: off.}
+
     proc c_setjmp*(jmpb: C_JmpBuf): cint =
       proc c_setjmp_win(jmpb: C_JmpBuf, ctx: pointer): cint {.
         header: "<setjmp.h>", importc: "_setjmp".}
       c_setjmp_win(jmpb, nil)
+
+    when defined(nimHasStyleChecks):
+      {.pop.}
   else:
     proc c_longjmp*(jmpb: C_JmpBuf, retval: cint) {.
       header: "<setjmp.h>", importc: "_longjmp".}
@@ -174,14 +181,29 @@ proc c_sprintf*(buf, frmt: cstring): cint {.
   importc: "sprintf", header: "<stdio.h>", varargs, noSideEffect.}
   # we use it only in a way that cannot lead to security issues
 
-proc c_malloc*(size: csize_t): pointer {.
-  importc: "malloc", header: "<stdlib.h>".}
-proc c_calloc*(nmemb, size: csize_t): pointer {.
-  importc: "calloc", header: "<stdlib.h>".}
-proc c_free*(p: pointer) {.
-  importc: "free", header: "<stdlib.h>".}
-proc c_realloc*(p: pointer, newsize: csize_t): pointer {.
-  importc: "realloc", header: "<stdlib.h>".}
+when defined(zephyr) and not defined(zephyrUseLibcMalloc):
+  proc c_malloc*(size: csize_t): pointer {.
+    importc: "k_malloc", header: "<kernel.h>".}
+  proc c_calloc*(nmemb, size: csize_t): pointer {.
+    importc: "k_calloc", header: "<kernel.h>".}
+  proc c_free*(p: pointer) {.
+    importc: "k_free", header: "<kernel.h>".}
+  proc c_realloc*(p: pointer, newsize: csize_t): pointer =
+    # Zephyr's kernel malloc doesn't support realloc
+    result = c_malloc(newSize)
+    # match the ansi c behavior
+    if not result.isNil():
+      copyMem(result, p, newSize)
+      c_free(p)
+else:
+  proc c_malloc*(size: csize_t): pointer {.
+    importc: "malloc", header: "<stdlib.h>".}
+  proc c_calloc*(nmemb, size: csize_t): pointer {.
+    importc: "calloc", header: "<stdlib.h>".}
+  proc c_free*(p: pointer) {.
+    importc: "free", header: "<stdlib.h>".}
+  proc c_realloc*(p: pointer, newsize: csize_t): pointer {.
+    importc: "realloc", header: "<stdlib.h>".}
 
 proc c_fwrite*(buf: pointer, size, n: csize_t, f: CFilePtr): cint {.
   importc: "fwrite", header: "<stdio.h>".}

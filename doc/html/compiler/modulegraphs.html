@@ -161,6 +161,8 @@ window.addEventListener('DOMContentLoaded', main);
   doStopCompile*: proc (): bool {.closure.}
   usageSym*: PSym
   owners*: seq[PSym]
+  suggestSymbols*: Table[FileIndex, seq[tuple[sym: PSym, info: TLineInfo]]]
+  suggestErrors*: Table[FileIndex, seq[Suggest]]
   methods*: seq[tuple[methods: seq[PSym], dispatcher: PSym]]
   systemModule*: PSym
   sysTypes*: array[TTypeKind, PType]
@@ -364,6 +366,13 @@ window.addEventListener('DOMContentLoaded', main);
     title="moduleOpenForCodegen(g: ModuleGraph; m: FileIndex): bool">moduleOpenForCodegen(g: ModuleGraph; m: FileIndex): bool</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">needsCompilation
+      <li><a class="reference" href="#needsCompilation%2CModuleGraph"
+    title="needsCompilation(g: ModuleGraph): bool">needsCompilation(g: ModuleGraph): bool</a></li>
+  <li><a class="reference" href="#needsCompilation%2CModuleGraph%2CFileIndex"
+    title="needsCompilation(g: ModuleGraph; fileIdx: FileIndex): bool">needsCompilation(g: ModuleGraph; fileIdx: FileIndex): bool</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">newModuleGraph
       <li><a class="reference" href="#newModuleGraph%2CIdentCache%2CConfigRef"
     title="newModuleGraph(cache: IdentCache; config: ConfigRef): ModuleGraph">newModuleGraph(cache: IdentCache; config: ConfigRef): ModuleGraph</a></li>
@@ -460,6 +469,11 @@ window.addEventListener('DOMContentLoaded', main);
     title="systemModuleSym(g: ModuleGraph; name: PIdent): PSym">systemModuleSym(g: ModuleGraph; name: PIdent): PSym</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">unmarkAllDirty
+      <li><a class="reference" href="#unmarkAllDirty%2CModuleGraph"
+    title="unmarkAllDirty(g: ModuleGraph)">unmarkAllDirty(g: ModuleGraph)</a></li>
+
+  </ul>
 
   </ul>
 </li>
@@ -479,6 +493,16 @@ window.addEventListener('DOMContentLoaded', main);
   <ul class="simple nested-toc-section">procInstCacheItems
       <li><a class="reference" href="#procInstCacheItems.i%2CModuleGraph%2CPSym"
     title="procInstCacheItems(g: ModuleGraph; s: PSym): PInstantiation">procInstCacheItems(g: ModuleGraph; s: PSym): PInstantiation</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">suggestErrorsIter
+      <li><a class="reference" href="#suggestErrorsIter.i%2CModuleGraph"
+    title="suggestErrorsIter(g: ModuleGraph): Suggest">suggestErrorsIter(g: ModuleGraph): Suggest</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">suggestSymbolsIter
+      <li><a class="reference" href="#suggestSymbolsIter.i%2CModuleGraph"
+    title="suggestSymbolsIter(g: ModuleGraph): tuple[sym: PSym, info: TLineInfo]">suggestSymbolsIter(g: ModuleGraph): tuple[sym: PSym, info: TLineInfo]</a></li>
 
   </ul>
   <ul class="simple nested-toc-section">systemModuleSyms
@@ -650,6 +674,8 @@ class="link-seesrc" target="_blank">Source</a>
   <span class="Identifier">doStopCompile</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span class="Identifier">closure</span>.}
   <span class="Identifier">usageSym</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
   <span class="Identifier">owners</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span>
+  <span class="Identifier">suggestSymbols</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">,</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">]</span><span class="Other">]</span><span class="Other">]</span>
+  <span class="Identifier">suggestErrors</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="options.html#Suggest"><span class="Identifier">Suggest</span></a><span class="Other">]</span><span class="Other">]</span>
   <span class="Identifier">methods</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">methods</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">dispatcher</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span><span class="Other">]</span>
   <span class="Identifier">systemModule</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a>
   <span class="Identifier">sysTypes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">TTypeKind</span><span class="Other">,</span> <a href="ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">]</span>
@@ -700,9 +726,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L202"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L204"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L202" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L204" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -727,9 +753,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L110"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L112"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L110" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L112" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -752,9 +778,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L116"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L118"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L116" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L118" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -765,9 +791,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L113"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L115"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L113" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L115" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -779,9 +805,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L108"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L110"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L108" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L110" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -792,9 +818,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L112"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L114"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L112" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L114" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -804,9 +830,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L114"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L116"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L114" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L116" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -821,9 +847,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L354"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L356"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L354" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L356" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -833,9 +859,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L357"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L359"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L357" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L359" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -845,9 +871,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L520"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L538"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L520" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L538" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -858,9 +884,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L528"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L546"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L528" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L546" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -871,9 +897,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L324"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L326"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L324" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L326" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -885,9 +911,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L501"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L519"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L501" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L519" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -898,9 +924,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L306"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L308"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L306" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L308" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -910,9 +936,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L583"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L632"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L583" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L632" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -923,9 +949,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L331"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L333"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L331" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L333" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -936,9 +962,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L393"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L405"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L393" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L405" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -949,9 +975,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns the requested attached operation for type <tt class="docutils literal"><span class="pre"><span class="Identifier">t</span></span></tt>. Can return nil if no such operation exists.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L292"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L294"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L292" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L294" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -962,9 +988,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L570"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L619"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L570" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L619" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -974,9 +1000,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L474"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L492"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L474" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L492" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -987,9 +1013,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L312"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L314"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L312" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L314" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -999,9 +1025,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L327"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L329"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L327" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L329" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1011,9 +1037,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L360"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L362"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L360" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L362" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1023,9 +1049,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L365"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L367"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L365" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L367" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1036,9 +1062,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L194"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L196"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L194" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L196" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1049,9 +1075,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L209"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L211"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L209" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L211" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1061,9 +1087,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L418"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L430"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L418" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L430" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1073,9 +1099,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L175"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L177"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L175" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L177" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1085,9 +1111,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L567"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L580"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L567" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L580" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1098,9 +1124,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L337"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L339"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L337" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L339" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1111,9 +1137,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L350"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L352"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L350" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L352" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1123,9 +1149,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L553"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L583"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L553" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L583" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1135,9 +1161,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L549"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L567"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L549" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L567" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1151,9 +1177,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 Returns 'nil' if the module needs to be recompiled.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L577"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L626"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L577" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L626" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1164,9 +1190,34 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L481"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L499"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L481" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L499" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="needsCompilation,ModuleGraph">
+<dt><pre><span class="Keyword">proc</span> <a href="#needsCompilation%2CModuleGraph"><span class="Identifier">needsCompilation</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L601"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L601" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="needsCompilation,ModuleGraph,FileIndex">
+<dt><pre><span class="Keyword">proc</span> <a href="#needsCompilation%2CModuleGraph%2CFileIndex"><span class="Identifier">needsCompilation</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">fileIdx</span><span class="Other">:</span> <a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L609"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L609" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1177,9 +1228,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L435"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L473"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L435" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L473" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1190,9 +1241,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L219"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L221"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L219" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L221" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1206,9 +1257,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L588"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L637"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L588" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L637" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1219,9 +1270,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 returns 'fileIdx' if the file belonging to this index is directly used as a module or else the module that first references this include file.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L531"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L549"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L531" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L549" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1232,9 +1283,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L401"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L413"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L401" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L413" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1245,9 +1296,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L415"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L427"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L415" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L427" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1258,9 +1309,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L487"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L505"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L487" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L505" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1271,9 +1322,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L495"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L513"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L495" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L513" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1283,9 +1334,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L462"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L479"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L462" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L479" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1295,9 +1346,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L121"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L123"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L121" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L123" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1308,9 +1359,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 we also need to record this to the packed module.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L297"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L299"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L297" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L299" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1322,9 +1373,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 we also need to record this to the packed module.
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L301"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L303"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L301" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L303" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1335,9 +1386,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L316"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L318"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L316" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L318" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1348,9 +1399,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L189"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L191"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L189" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L191" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1361,9 +1412,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L238"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L240"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L238" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L240" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1374,9 +1425,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L390"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L402"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L390" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L402" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1386,9 +1437,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L179"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L181"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L179" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L181" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1399,9 +1450,21 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L245"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L247"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L245" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L247" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="unmarkAllDirty,ModuleGraph">
+<dt><pre><span class="Keyword">proc</span> <a href="#unmarkAllDirty%2CModuleGraph"><span class="Identifier">unmarkAllDirty</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L574"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L574" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1417,9 +1480,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L225"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L227"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L225" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L227" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1430,9 +1493,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L319"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L321"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L319" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L321" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1443,9 +1506,34 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L286"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L288"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L286" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L288" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="suggestErrorsIter.i,ModuleGraph">
+<dt><pre><span class="Keyword">iterator</span> <a href="#suggestErrorsIter.i%2CModuleGraph"><span class="Identifier">suggestErrorsIter</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">)</span><span class="Other">:</span> <a href="options.html#Suggest"><span class="Identifier">Suggest</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L652"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L652" class="link-seesrc" target="_blank" >Edit</a>
+
+</dd>
+</div>
+<div id="suggestSymbolsIter.i,ModuleGraph">
+<dt><pre><span class="Keyword">iterator</span> <a href="#suggestSymbolsIter.i%2CModuleGraph"><span class="Identifier">suggestSymbolsIter</span></a><span class="Other">(</span><span class="Identifier">g</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">sym</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">,</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+<dd>
+
+
+&nbsp;&nbsp;<a
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L647"
+class="link-seesrc" target="_blank">Source</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L647" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1456,9 +1544,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L248"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L250"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L248" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L250" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1469,9 +1557,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L280"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L282"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L280" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L282" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1486,9 +1574,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L387"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L399"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L387" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L399" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1498,9 +1586,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L388"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L400"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L388" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L400" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1510,9 +1598,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L386"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L398"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L386" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L398" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1522,9 +1610,9 @@ class="link-seesrc" target="_blank">Source</a>
 
 
 &nbsp;&nbsp;<a
-href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L172"
+href="https://github.com/nim-lang/Nim/tree/devel/compiler/modulegraphs.nim#L174"
 class="link-seesrc" target="_blank">Source</a>
-&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L172" class="link-seesrc" target="_blank" >Edit</a>
+&nbsp;&nbsp;<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/modulegraphs.nim#L174" class="link-seesrc" target="_blank" >Edit</a>
 
 </dd>
 </div>
@@ -1538,7 +1626,7 @@ class="link-seesrc" target="_blank">Source</a>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-02-26 00:59:16 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-07-17 01:19:07 UTC</small>
       </div>
     </div>
   </div>

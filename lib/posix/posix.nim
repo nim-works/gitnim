@@ -151,12 +151,20 @@ proc htons*(a1: uint16): uint16 {.importc, header: "<arpa/inet.h>".}
 proc ntohl*(a1: uint32): uint32 {.importc, header: "<arpa/inet.h>".}
 proc ntohs*(a1: uint16): uint16 {.importc, header: "<arpa/inet.h>".}
 
-proc inet_addr*(a1: cstring): InAddrT {.importc, header: "<arpa/inet.h>".}
-proc inet_ntoa*(a1: InAddr): cstring {.importc, header: "<arpa/inet.h>".}
-proc inet_ntop*(a1: cint, a2: pointer, a3: cstring, a4: int32): cstring {.
-  importc:"(char *)$1", header: "<arpa/inet.h>".}
-proc inet_pton*(a1: cint, a2: cstring, a3: pointer): cint {.
-  importc, header: "<arpa/inet.h>".}
+when not defined(zephyr):
+  proc inet_addr*(a1: cstring): InAddrT {.importc, header: "<arpa/inet.h>".}
+  proc inet_ntoa*(a1: InAddr): cstring {.importc, header: "<arpa/inet.h>".}
+
+when defined(zephyr): # this switch is done to keep Nim 1.6 API backward compatible
+  proc inet_ntop*(a1: cint, a2: pointer | ptr InAddr | ptr In6Addr, a3: cstring, a4: int32): cstring {.
+    importc:"(char *)$1", header: "<arpa/inet.h>".}
+  proc inet_pton*(a1: cint, a2: cstring, a3: pointer | ptr InAddr | ptr In6Addr): cint {.
+    importc, header: "<arpa/inet.h>".}
+else:
+  proc inet_ntop*(a1: cint, a2: pointer, a3: cstring, a4: int32): cstring {.
+    importc:"(char *)$1", header: "<arpa/inet.h>".}
+  proc inet_pton*(a1: cint, a2: cstring, a3: pointer): cint {.
+    importc, header: "<arpa/inet.h>".}
 
 var
   in6addr_any* {.importc, header: "<netinet/in.h>".}: In6Addr
@@ -1004,7 +1012,7 @@ proc endhostent*() {.importc, header: "<netdb.h>".}
 proc endnetent*() {.importc, header: "<netdb.h>".}
 proc endprotoent*() {.importc, header: "<netdb.h>".}
 proc endservent*() {.importc, header: "<netdb.h>".}
-proc freeaddrinfo*(a1: ptr AddrInfo) {.importc, header: "<netdb.h>".}
+proc freeAddrInfo*(a1: ptr AddrInfo) {.importc: "freeaddrinfo", header: "<netdb.h>".}
 
 proc gai_strerror*(a1: cint): cstring {.importc:"(char *)$1", header: "<netdb.h>".}
 

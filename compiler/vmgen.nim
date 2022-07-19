@@ -1403,9 +1403,6 @@ proc unneededIndirection(n: PNode): bool =
   n.typ.skipTypes(abstractInstOwned-{tyTypeDesc}).kind == tyRef
 
 proc canElimAddr(n: PNode): PNode =
-  if n[0].typ.skipTypes(abstractInst).kind in {tyObject, tyTuple, tyArray}:
-    # objects are reference types in the VM
-    return n[0]
   case n[0].kind
   of nkObjUpConv, nkObjDownConv, nkChckRange, nkChckRangeF, nkChckRange64:
     var m = n[0][0]
@@ -1497,7 +1494,7 @@ proc checkCanEval(c: PCtx; n: PNode) =
   # proc foo() = var x ...
   let s = n.sym
   if {sfCompileTime, sfGlobal} <= s.flags: return
-  if s.importcCondVar: return
+  if compiletimeFFI in c.config.features and s.importcCondVar: return
   if s.kind in {skVar, skTemp, skLet, skParam, skResult} and
       not s.isOwnedBy(c.prc.sym) and s.owner != c.module and c.mode != emRepl:
     # little hack ahead for bug #12612: assume gensym'ed variables

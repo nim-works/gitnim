@@ -187,9 +187,9 @@
 ##
 ## Known `async` backends include:
 ##
-## * `none` - ``-d:asyncBackend=none`` - disable ``async`` support completely
-## * `asyncdispatch <https://nim-lang.org/docs/asyncdispatch.html> -``-d:asyncBackend=asyncdispatch``
-## * `chronos <https://github.com/status-im/nim-chronos/>` - ``-d:asyncBackend=chronos``
+## * `-d:asyncBackend=none`: disable `async` support completely
+## * `-d:asyncBackend=asyncdispatch`: https://nim-lang.org/docs/asyncdispatch.html
+## * `-d:asyncBackend=chronos`: https://github.com/status-im/nim-chronos/
 ##
 ## ``none`` can be used when a library supports both a synchronous and
 ## asynchronous API, to disable the latter.
@@ -1791,7 +1791,7 @@ template asyncAddrInfoLoop(addrInfo: ptr AddrInfo, fd: untyped,
         curAddrInfo = curAddrInfo.ai_next
 
       if curAddrInfo == nil:
-        freeaddrinfo(addrInfo)
+        freeAddrInfo(addrInfo)
         when shouldCreateFd:
           closeUnusedFds()
         if lastException != nil:
@@ -1807,7 +1807,7 @@ template asyncAddrInfoLoop(addrInfo: ptr AddrInfo, fd: untyped,
           try:
             curFd = createAsyncNativeSocket(domain, sockType, protocol)
           except:
-            freeaddrinfo(addrInfo)
+            freeAddrInfo(addrInfo)
             closeUnusedFds()
             raise getCurrentException()
           when defined(windows):
@@ -1817,7 +1817,7 @@ template asyncAddrInfoLoop(addrInfo: ptr AddrInfo, fd: untyped,
       doConnect(curFd, curAddrInfo).callback = tryNextAddrInfo
       curAddrInfo = curAddrInfo.ai_next
     else:
-      freeaddrinfo(addrInfo)
+      freeAddrInfo(addrInfo)
       when shouldCreateFd:
         closeUnusedFds(ord(domain))
         retFuture.complete(curFd)
@@ -1973,13 +1973,18 @@ proc activeDescriptors*(): int {.inline.} =
 when defined(posix):
   import posix
 
-when defined(linux) or defined(windows) or defined(macosx) or defined(bsd):
+when defined(linux) or defined(windows) or defined(macosx) or defined(bsd) or
+       defined(zephyr) or defined(freertos):
   proc maxDescriptors*(): int {.raises: OSError.} =
     ## Returns the maximum number of active file descriptors for the current
     ## process. This involves a system call. For now `maxDescriptors` is
     ## supported on the following OSes: Windows, Linux, OSX, BSD.
     when defined(windows):
       result = 16_700_000
+    elif defined(zephyr) or defined(freertos):
+      result = FD_MAX
+    elif defined(emscripten):
+      result = 1024
     else:
       var fdLim: RLimit
       if getrlimit(RLIMIT_NOFILE, fdLim) < 0:
