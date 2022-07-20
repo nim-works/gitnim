@@ -211,6 +211,16 @@ elif someVcc and hasThreadSupport:
         importc: "_InterlockedExchangeAdd", header: "<intrin.h>".}
 
 else:
+  type AtomMemModel* = distinct cint
+
+  const
+    ATOMIC_RELAXED = 0.AtomMemModel
+    ATOMIC_CONSUME = 1.AtomMemModel
+    ATOMIC_ACQUIRE = 2.AtomMemModel
+    ATOMIC_RELEASE = 3.AtomMemModel
+    ATOMIC_ACQ_REL = 4.AtomMemModel
+    ATOMIC_SEQ_CST = 5.AtomMemModel
+
   proc addAndFetch*(p: ptr int, val: int): int {.inline.} =
     inc(p[], val)
     result = p[]
