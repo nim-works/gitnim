@@ -215,9 +215,10 @@ else:
     inc(p[], val)
     result = p[]
 
-proc atomicInc*(memLoc: var int, x: int = 1): int =
+proc atomicInc*(memLoc: var int; x: int = 1; order = ATOMIC_RELAXED): int =
+  ## Atomic increment of `memLoc`. Returns the value after the operation.
   when someGcc and hasThreadSupport:
-    result = atomicAddFetch(memLoc.addr, x, ATOMIC_RELAXED)
+    result = atomicAddFetch(memLoc.addr, x, order)
   elif someVcc and hasThreadSupport:
     result = addAndFetch(memLoc.addr, x)
     inc(result, x)
@@ -225,12 +226,13 @@ proc atomicInc*(memLoc: var int, x: int = 1): int =
     inc(memLoc, x)
     result = memLoc
 
-proc atomicDec*(memLoc: var int, x: int = 1): int =
+proc atomicDec*(memLoc: var int; x: int = 1; order = ATOMIC_RELAXED): int =
+  ## Atomic decrement of `memLoc`. Returns the value after the operation.
   when someGcc and hasThreadSupport:
     when declared(atomicSubFetch):
-      result = atomicSubFetch(memLoc.addr, x, ATOMIC_RELAXED)
+      result = atomicSubFetch(memLoc.addr, x, order)
     else:
-      result = atomicAddFetch(memLoc.addr, -x, ATOMIC_RELAXED)
+      result = atomicAddFetch(memLoc.addr, -x, order)
   elif someVcc and hasThreadSupport:
     result = addAndFetch(memLoc.addr, -x)
     dec(result, x)
