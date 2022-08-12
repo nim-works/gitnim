@@ -196,10 +196,10 @@ proc checkConvertible(c: PContext, targetTyp: PType, src: PNode): TConvStatus =
     else:
       discard
 
-proc isCastable(c: PContext; dst, src: PType): bool =
+proc isCastable(c: PContext; dst, src: PType, info: TLineInfo): bool =
   ## Checks whether the source type can be cast to the destination type.
   ## Casting is very unrestrictive; casts are allowed as long as
-  ## castDest.size >= src.size, and typeAllowed(dst, skParam)
+  ## dst.size >= src.size, and typeAllowed(dst, skParam)
   #const
   #  castableTypeKinds = {tyInt, tyPtr, tyRef, tyCstring, tyString,
   #                       tySequence, tyPointer, tyNil, tyOpenArray,
@@ -228,19 +228,21 @@ proc isCastable(c: PContext; dst, src: PType): bool =
     # Just assume the programmer knows what he is doing.
     return true
   if dstSize < 0:
-    result = false
+    return false
   elif srcSize < 0:
-    result = false
+    return false
   elif typeAllowed(dst, skParam, c) != nil:
-    result = false
+    return false
   elif dst.kind == tyProc and dst.callConv == ccClosure:
-    result = src.kind == tyProc and src.callConv == ccClosure
+    return src.kind == tyProc and src.callConv == ccClosure
   else:
     result = (dstSize >= srcSize) or
         (skipTypes(dst, abstractInst).kind in IntegralTypes) or
         (skipTypes(src, abstractInst-{tyTypeDesc}).kind in IntegralTypes)
+    if result and (dstSize > srcSize):
+      message(conf, info, warnCastSizes, "target type is larger than source type")
   if result and src.kind == tyNil:
-    result = dst.size <= conf.target.ptrSize
+    return dst.size <= conf.target.ptrSize
 
 proc isSymChoice(n: PNode): bool {.inline.} =
   result = n.kind in nkSymChoices
@@ -359,7 +361,7 @@ proc semCast(c: PContext, n: PNode): PNode =
   let castedExpr = semExprWithType(c, n[1])
   if tfHasMeta in targetType.flags:
     localError(c.config, n[0].info, "cannot cast to a non concrete type: '$1'" % $targetType)
-  if not isCastable(c, targetType, castedExpr.typ):
+  if not isCastable(c, targetType, castedExpr.typ, n.info):
     let tar = $targetType
     let alt = typeToString(targetType, preferDesc)
     let msg = if tar != alt: tar & "=" & alt else: tar
@@ -645,13 +647,13 @@ proc fixAbstractType(c: PContext, n: PNode) =
         skipTypes(it.typ, abstractVar).kind notin {tyOpenArray, tyVarargs}:
       if skipTypes(it[1].typ, abstractVar).kind in
             {tyNil, tyTuple, tySet} or it[1].isArrayConstr:
-        var s = skipTypes(it.typ, abstractVar)
+        var s = skipTypes(it.typ, abstractVar + tyUserTypeClasses)
         if s.kind != tyUntyped:
           changeType(c, it[1], s, check=true)
         n[i] = it[1]
 
-proc isAssignable(c: PContext, n: PNode; isUnsafeAddr=false): TAssignableResult =
-  result = parampatterns.isAssignable(c.p.owner, n, isUnsafeAddr)
+proc isAssignable(c: PContext, n: PNode): TAssignableResult =
+  result = parampatterns.isAssignable(c.p.owner, n)
 
 proc isUnresolvedSym(s: PSym): bool =
   result = s.kind == skGenericParam
@@ -886,7 +888,8 @@ proc semOverloadedCallAnalyseEffects(c: PContext, n: PNode, nOrig: PNode,
     case callee.kind
     of skMacro, skTemplate: discard
     else:
-      if callee.kind == skIterator and callee.id == c.p.owner.id:
+      if callee.kind == skIterator and callee.id == c.p.owner.id and
+          not isClosureIterator(c.p.owner.typ):
         localError(c.config, n.info, errRecursiveDependencyIteratorX % callee.name.s)
         # error correction, prevents endless for loop elimination in transf.
         # See bug #2051:
@@ -1188,7 +1191,8 @@ proc semSym(c: PContext, n: PNode, sym: PSym, flags: TExprFlags): PNode =
   let s = getGenSym(c, sym)
   case s.kind
   of skConst:
-    markUsed(c, n.info, s)
+    if n.kind != nkDotExpr: # dotExpr is already checked by builtinFieldAccess
+      markUsed(c, n.info, s)
     onUse(n.info, s)
     let typ = skipTypes(s.typ, abstractInst-{tyTypeDesc})
     case typ.kind
@@ -1249,7 +1253,8 @@ proc semSym(c: PContext, n: PNode, sym: PSym, flags: TExprFlags): PNode =
     if s.magic == mNimvm:
       localError(c.config, n.info, "illegal context for 'nimvm' magic")
 
-    markUsed(c, n.info, s)
+    if n.kind != nkDotExpr: # dotExpr is already checked by builtinFieldAccess
+      markUsed(c, n.info, s)
     onUse(n.info, s)
     result = newSymNode(s, n.info)
     # We cannot check for access to outer vars for example because it's still
@@ -1270,7 +1275,8 @@ proc semSym(c: PContext, n: PNode, sym: PSym, flags: TExprFlags): PNode =
       n.typ = s.typ
       return n
   of skType:
-    markUsed(c, n.info, s)
+    if n.kind != nkDotExpr: # dotExpr is already checked by builtinFieldAccess
+      markUsed(c, n.info, s)
     onUse(n.info, s)
     if s.typ.kind == tyStatic and s.typ.base.kind != tyNone and s.typ.n != nil:
       return s.typ.n
@@ -1433,8 +1439,10 @@ proc builtinFieldAccess(c: PContext, n: PNode, flags: TExprFlags): PNode =
         # is the access to a public field or in the same module or in a friend?
         markUsed(c, n[1].info, f)
         onUse(n[1].info, f)
+        let info = n[1].info
         n[0] = makeDeref(n[0])
         n[1] = newSymNode(f) # we now have the correct field
+        n[1].info = info # preserve the original info
         n.typ = f.typ
         if check == nil:
           result = n
@@ -1658,9 +1666,11 @@ proc takeImplicitAddr(c: PContext, n: PNode; isLent: bool): PNode =
     # `proc fun(a: var int): var int = a`
     discard
   else: discard
-  let valid = isAssignable(c, n, isLent)
+  let valid = isAssignable(c, n)
   if valid != arLValue:
-    if valid == arLocalLValue:
+    if valid in {arAddressableConst, arLentValue} and isLent:
+      discard "ok"
+    elif valid == arLocalLValue:
       localError(c.config, n.info, errXStackEscape % renderTree(n, {renderNoComments}))
     else:
       localError(c.config, n.info, errExprHasNoAddress)
@@ -1784,7 +1794,7 @@ proc semAsgn(c: PContext, n: PNode; mode=asgnNormal): PNode =
   if le == nil:
     localError(c.config, a.info, "expression has no type")
   elif (skipTypes(le, {tyGenericInst, tyAlias, tySink}).kind notin {tyVar} and
-        isAssignable(c, a) in {arNone, arLentValue}) or (
+        isAssignable(c, a) in {arNone, arLentValue, arAddressableConst}) or (
       skipTypes(le, abstractVar).kind in {tyOpenArray, tyVarargs} and views notin c.features):
     # Direct assignment to a discriminant is allowed!
     localError(c.config, a.info, errXCannotBeAssignedTo %
@@ -1930,11 +1940,23 @@ proc semYield(c: PContext, n: PNode): PNode =
   elif c.p.owner.typ[0] != nil:
     localError(c.config, n.info, errGenerated, "yield statement must yield a value")
 
+proc considerQuotedIdentOrDot(c: PContext, n: PNode, origin: PNode = nil): PIdent =
+  if n.kind == nkDotExpr:
+    let a = considerQuotedIdentOrDot(c, n[0], origin).s
+    let b = considerQuotedIdentOrDot(c, n[1], origin).s
+    var s = newStringOfCap(a.len + b.len + 1)
+    s.add(a)
+    s.add('.')
+    s.add(b)
+    result = getIdent(c.cache, s)
+  else:
+    result = considerQuotedIdent(c, n, origin)
+
 proc semDefined(c: PContext, n: PNode): PNode =
   checkSonsLen(n, 2, c.config)
   # we replace this node by a 'true' or 'false' node:
   result = newIntNode(nkIntLit, 0)
-  result.intVal = ord isDefined(c.config, considerQuotedIdent(c, n[1], n).s)
+  result.intVal = ord isDefined(c.config, considerQuotedIdentOrDot(c, n[1], n).s)
   result.info = n.info
   result.typ = getSysType(c.graph, n.info, tyBool)
 
@@ -2267,7 +2289,7 @@ proc semMagic(c: PContext, n: PNode, s: PSym, flags: TExprFlags): PNode =
     markUsed(c, n.info, s)
     checkSonsLen(n, 2, c.config)
     result[0] = newSymNode(s, n[0].info)
-    result[1] = semAddrArg(c, n[1], s.name.s == "unsafeAddr")
+    result[1] = semAddrArg(c, n[1])
     result.typ = makePtrType(c, result[1].typ)
   of mTypeOf:
     markUsed(c, n.info, s)
@@ -2579,7 +2601,7 @@ proc semBlock(c: PContext, n: PNode; flags: TExprFlags): PNode =
       labl.owner = c.p.owner
     n[0] = newSymNode(labl, n[0].info)
     suggestSym(c.graph, n[0].info, labl, c.graph.usageSym)
-    styleCheckDef(c.config, labl)
+    styleCheckDef(c, labl)
     onDef(n[0].info, labl)
   n[1] = semExpr(c, n[1], flags)
   n.typ = n[1].typ
@@ -2766,6 +2788,12 @@ proc enumFieldSymChoice(c: PContext, n: PNode, s: PSym): PNode =
         result.add newSymNode(a, info)
         onUse(info, a)
       a = nextOverloadIter(o, c, n)
+
+proc semPragmaStmt(c: PContext; n: PNode) =
+  if c.p.owner.kind == skModule:
+    pragma(c, c.p.owner, n, stmtPragmas+stmtPragmasTopLevel, true)
+  else:
+    pragma(c, c.p.owner, n, stmtPragmas, true)
 
 proc semExpr(c: PContext, n: PNode, flags: TExprFlags = {}): PNode =
   when defined(nimCompilerStacktraceHints):
@@ -3015,7 +3043,7 @@ proc semExpr(c: PContext, n: PNode, flags: TExprFlags = {}): PNode =
   of nkUsingStmt: result = semUsing(c, n)
   of nkAsmStmt: result = semAsm(c, n)
   of nkYieldStmt: result = semYield(c, n)
-  of nkPragma: pragma(c, c.p.owner, n, stmtPragmas, true)
+  of nkPragma: semPragmaStmt(c, n)
   of nkIteratorDef: result = semIterator(c, n)
   of nkProcDef: result = semProc(c, n)
   of nkFuncDef: result = semFunc(c, n)

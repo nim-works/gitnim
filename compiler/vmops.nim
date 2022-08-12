@@ -25,15 +25,18 @@ when declared(math.signbit):
 from std/os import getEnv, existsEnv, delEnv, putEnv, envPairs,
   dirExists, fileExists, walkDir, getAppFilename, raiseOSError, osLastError
 
-from std/md5 import getMD5
 from std/times import cpuTime
 from std/hashes import hash
 from std/osproc import nil
 from system/formatfloat import addFloatRoundtrip, addFloatSprintf
 
 
+when defined(nimPreviewSlimSystem):
+  import std/syncio
+
+
 # There are some useful procs in vmconv.
-import vmconv
+import vmconv, vmmarshal
 
 template mathop(op) {.dirty.} =
   registerCallback(c, "stdlib.math." & astToStr(op), `op Wrapper`)
@@ -48,21 +51,18 @@ template systemop(op) {.dirty.} =
   registerCallback(c, "stdlib.system." & astToStr(op), `op Wrapper`)
 
 template ioop(op) {.dirty.} =
-  registerCallback(c, "stdlib.io." & astToStr(op), `op Wrapper`)
+  registerCallback(c, "stdlib.syncio." & astToStr(op), `op Wrapper`)
 
 template macrosop(op) {.dirty.} =
   registerCallback(c, "stdlib.macros." & astToStr(op), `op Wrapper`)
 
-template md5op(op) {.dirty.} =
-  registerCallback(c, "stdlib.md5." & astToStr(op), `op Wrapper`)
-
-template wrap1f_math(op) {.dirty.} =
+template wrap1fMath(op) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     doAssert a.numArgs == 1
     setResult(a, op(getFloat(a, 0)))
   mathop op
 
-template wrap2f_math(op) {.dirty.} =
+template wrap2fMath(op) {.dirty.} =
   proc `op Wrapper`(a: VmArgs) {.nimcall.} =
     setResult(a, op(getFloat(a, 0), getFloat(a, 1)))
   mathop op
@@ -139,6 +139,7 @@ when defined(nimHasInvariant):
     of backend: result = $conf.backend
     of libPath: result = conf.libpath.string
     of gc: result = $conf.selectedGC
+    of mm: result = $conf.selectedGC
 
   proc querySettingSeqImpl(conf: ConfigRef, switch: BiggestInt): seq[string] =
     template copySeq(field: untyped): untyped =
@@ -155,6 +156,7 @@ when defined(nimHasInvariant):
 proc stackTrace2(c: PCtx, msg: string, n: PNode) =
   stackTrace(c, PStackFrame(prc: c.prc.sym, comesFrom: 0, next: nil), c.exceptionInstr, msg, n.info)
 
+
 proc registerAdditionalOps*(c: PCtx) =
 
   template wrapIterator(fqname: string, iter: untyped) =
@@ -170,40 +172,40 @@ proc registerAdditionalOps*(c: PCtx) =
   proc getProjectPathWrapper(a: VmArgs) =
     setResult a, c.config.projectPath.string
 
-  wrap1f_math(sqrt)
-  wrap1f_math(cbrt)
-  wrap1f_math(ln)
-  wrap1f_math(log10)
-  wrap1f_math(log2)
-  wrap1f_math(exp)
-  wrap1f_math(arccos)
-  wrap1f_math(arcsin)
-  wrap1f_math(arctan)
-  wrap1f_math(arcsinh)
-  wrap1f_math(arccosh)
-  wrap1f_math(arctanh)
-  wrap2f_math(arctan2)
-  wrap1f_math(cos)
-  wrap1f_math(cosh)
-  wrap2f_math(hypot)
-  wrap1f_math(sinh)
-  wrap1f_math(sin)
-  wrap1f_math(tan)
-  wrap1f_math(tanh)
-  wrap2f_math(pow)
-  wrap1f_math(trunc)
-  wrap1f_math(floor)
-  wrap1f_math(ceil)
-  wrap1f_math(erf)
-  wrap1f_math(erfc)
-  wrap1f_math(gamma)
-  wrap1f_math(lgamma)
+  wrap1fMath(sqrt)
+  wrap1fMath(cbrt)
+  wrap1fMath(ln)
+  wrap1fMath(log10)
+  wrap1fMath(log2)
+  wrap1fMath(exp)
+  wrap1fMath(arccos)
+  wrap1fMath(arcsin)
+  wrap1fMath(arctan)
+  wrap1fMath(arcsinh)
+  wrap1fMath(arccosh)
+  wrap1fMath(arctanh)
+  wrap2fMath(arctan2)
+  wrap1fMath(cos)
+  wrap1fMath(cosh)
+  wrap2fMath(hypot)
+  wrap1fMath(sinh)
+  wrap1fMath(sin)
+  wrap1fMath(tan)
+  wrap1fMath(tanh)
+  wrap2fMath(pow)
+  wrap1fMath(trunc)
+  wrap1fMath(floor)
+  wrap1fMath(ceil)
+  wrap1fMath(erf)
+  wrap1fMath(erfc)
+  wrap1fMath(gamma)
+  wrap1fMath(lgamma)
 
   when declared(copySign):
-    wrap2f_math(copySign)
+    wrap2fMath(copySign)
 
   when declared(signbit):
-    wrap1f_math(signbit)
+    wrap1fMath(signbit)
 
   registerCallback c, "stdlib.math.round", proc (a: VmArgs) {.nimcall.} =
     let n = a.numArgs
@@ -211,8 +213,6 @@ proc registerAdditionalOps*(c: PCtx) =
     of 1: setResult(a, round(getFloat(a, 0)))
     of 2: setResult(a, round(getFloat(a, 0), getInt(a, 1).int))
     else: doAssert false, $n
-
-  wrap1s(getMD5, md5op)
 
   proc `mod Wrapper`(a: VmArgs) {.nimcall.} =
     setResult(a, `mod`(getFloat(a, 0), getFloat(a, 1)))
@@ -324,6 +324,8 @@ proc registerAdditionalOps*(c: PCtx) =
     getEffectList(c, a, exceptionEffects)
   registerCallback c, "stdlib.effecttraits.getTagsListImpl", proc (a: VmArgs) =
     getEffectList(c, a, tagEffects)
+  registerCallback c, "stdlib.effecttraits.getForbidsListImpl", proc (a: VmArgs) =
+    getEffectList(c, a, forbiddenEffects)
 
   registerCallback c, "stdlib.effecttraits.isGcSafeImpl", proc (a: VmArgs) =
     let fn = getNode(a, 0)
@@ -349,3 +351,20 @@ proc registerAdditionalOps*(c: PCtx) =
     addFloatSprintf(p.strVal, x)
 
   wrapIterator("stdlib.os.envPairsImplSeq"): envPairs()
+
+  registerCallback c, "stdlib.marshal.toVM", proc(a: VmArgs) =
+    let typ = a.getNode(0).typ
+    case typ.kind
+    of tyInt..tyInt64, tyUInt..tyUInt64:
+      setResult(a, loadAny(a.getString(1), typ, c.cache, c.config, c.idgen).intVal)
+    of tyFloat..tyFloat128:
+      setResult(a, loadAny(a.getString(1), typ, c.cache, c.config, c.idgen).floatVal)
+    else:
+      setResult(a, loadAny(a.getString(1), typ, c.cache, c.config, c.idgen))
+
+  registerCallback c, "stdlib.marshal.loadVM", proc(a: VmArgs) =
+    let typ = a.getNode(0).typ
+    let p = a.getReg(1)
+    var res: string
+    storeAny(res, typ, regToNode(p[]), c.config)
+    setResult(a, res)

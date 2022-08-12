@@ -214,7 +214,7 @@ proc getProtoByName*(name: string): int {.since: (1, 3, 5).} =
     let protoent = posix.getprotobyname(name.cstring)
 
   if protoent == nil:
-    raise newException(OSError, "protocol not found")
+    raise newException(OSError, "protocol not found: " & name)
 
   result = protoent.p_proto.int
 
@@ -633,8 +633,8 @@ when useNimNetLite:
       INET_ADDRSTRLEN = 16
       INET6_ADDRSTRLEN = 46 # it's actually 46 in both cases
 
-  proc sockAddrToStr(sa: ptr Sockaddr): string {.noinit.} =
-    let af_family = sa.sa_family 
+  proc sockAddrToStr(sa: ptr SockAddr): string {.noinit.} =
+    let af_family = sa.sa_family
     var nl, v4Slice: cint
     var si_addr: ptr InAddr
 

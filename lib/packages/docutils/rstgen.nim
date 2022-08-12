@@ -40,7 +40,12 @@
 ##   can be done by simply searching for [footnoteName].
 
 import strutils, os, hashes, strtabs, rstast, rst, highlite, tables, sequtils,
-  algorithm, parseutils, std/strbasics, strscans
+  algorithm, parseutils, std/strbasics
+
+
+when defined(nimPreviewSlimSystem):
+  import std/[assertions, syncio]
+
 
 import ../../std/private/since
 
@@ -826,17 +831,6 @@ proc renderOverline(d: PDoc, n: PRstNode, result: var string) =
                    "\\rstov$4[$5]{$3}$2\n", [$n.level,
         rstnodeToRefname(n).idS, tmp, $chr(n.level - 1 + ord('A')), tocName])
 
-
-proc safeProtocol(linkStr: var string) =
-  var protocol = ""
-  if scanf(linkStr, "$w:", protocol):
-    # if it has a protocol at all, ensure that it's not 'javascript:' or worse:
-    if cmpIgnoreCase(protocol, "http") == 0 or cmpIgnoreCase(protocol, "https") == 0 or
-        cmpIgnoreCase(protocol, "ftp") == 0:
-      discard "it's fine"
-    else:
-      linkStr = ""
-
 proc renderTocEntry(d: PDoc, e: TocEntry, result: var string) =
   dispA(d.target, result,
     "<li><a class=\"reference\" id=\"$1_toc\" href=\"#$1\">$2</a></li>\n",
@@ -901,7 +895,7 @@ proc renderImage(d: PDoc, n: PRstNode, result: var string) =
 
   # support for `:target:` links for images:
   var target = esc(d.target, getFieldValue(n, "target").strip(), escMode=emUrl)
-  safeProtocol(target)
+  discard safeProtocol(target)
 
   if target.len > 0:
     # `htmlOut` needs to be of the following format for link to work for images:
@@ -931,7 +925,8 @@ proc getField1Int(d: PDoc, n: PRstNode, fieldName: string): int =
   let nChars = parseInt(value, number)
   if nChars == 0:
     if value.len == 0:
-      err("field $1 requires an argument" % [fieldName])
+      # use a good default value:
+      result = 1
     else:
       err("field $1 requires an integer, but '$2' was given" %
           [fieldName, value])
@@ -1084,7 +1079,7 @@ proc renderCode(d: PDoc, n: PRstNode, result: var string) =
       blockEnd = "}"
   dispA(d.target, result, blockStart, blockStart, [])
   if params.lang == langNone:
-    if len(params.langStr) > 0:
+    if len(params.langStr) > 0 and params.langStr.toLowerAscii != "none":
       rstMessage(d.filenames, d.msgHandler, n.info, mwUnsupportedLanguage,
                  params.langStr)
     for letter in m.text: escChar(d.target, result, letter, emText)
@@ -1100,10 +1095,6 @@ proc renderContainer(d: PDoc, n: PRstNode, result: var string) =
     dispA(d.target, result, "<div>$1</div>", "$1", [tmp])
   else:
     dispA(d.target, result, "<div class=\"$1\">$2</div>", "$2", [arg, tmp])
-
-proc texColumns(n: PRstNode): string =
-  let nColumns = if n.sons.len > 0: len(n.sons[0]) else: 1
-  result = "L".repeat(nColumns)
 
 proc renderField(d: PDoc, n: PRstNode, result: var string) =
   var b = false
@@ -1204,7 +1195,7 @@ proc renderHyperlink(d: PDoc, text, link: PRstNode, result: var string,
     d.escMode = emUrl
     renderRstToOut(d, link, linkStr)
     d.escMode = mode
-  safeProtocol(linkStr)
+  discard safeProtocol(linkStr)
   var textStr = ""
   renderRstToOut(d, text, textStr)
   let nimDocStr = if nimdoc: " nimdoc" else: ""
@@ -1333,24 +1324,49 @@ proc renderRstToOut(d: PDoc, n: PRstNode, result: var string) =
     renderAux(d, n,
       "<table$2 border=\"1\" class=\"docutils\">$1</table>",
       "\n$2\n\\begin{rsttab}{" &
-        texColumns(n) & "}\n\\hline\n$1\\end{rsttab}", result)
+        "L".repeat(n.colCount) & "}\n\\toprule\n$1" &
+        "\\addlinespace[0.1em]\\bottomrule\n\\end{rsttab}", result)
   of rnTableRow:
     if len(n) >= 1:
-      if d.target == outLatex:
-        #var tmp = ""
-        renderRstToOut(d, n.sons[0], result)
-        for i in countup(1, len(n) - 1):
-          result.add(" & ")
-          renderRstToOut(d, n.sons[i], result)
-        result.add("\\\\\n\\hline\n")
-      else:
+      case d.target
+      of outHtml:
         result.add("<tr>")
         renderAux(d, n, result)
         result.add("</tr>\n")
-  of rnTableDataCell:
-    renderAux(d, n, "<td>$1</td>", "$1", result)
-  of rnTableHeaderCell:
-    renderAux(d, n, "<th>$1</th>", "\\textbf{$1}", result)
+      of outLatex:
+        if n.sons[0].kind == rnTableHeaderCell:
+          result.add "\\rowcolor{gray!15} "
+        var spanLines: seq[(int, int)]
+        var nCell = 0
+        for uCell in 0 .. n.len - 1:
+          renderRstToOut(d, n.sons[uCell], result)
+          if n.sons[uCell].span > 0:
+            spanLines.add (nCell + 1, nCell + n.sons[uCell].span)
+            nCell += n.sons[uCell].span
+          else:
+            nCell += 1
+          if uCell != n.len - 1:
+            result.add(" & ")
+        result.add("\\\\")
+        if n.endsHeader: result.add("\\midrule\n")
+        for (start, stop) in spanLines:
+          result.add("\\cmidrule(lr){$1-$2}" % [$start, $stop])
+        result.add("\n")
+  of rnTableHeaderCell, rnTableDataCell:
+    case d.target
+    of outHtml:
+      let tag = if n.kind == rnTableHeaderCell: "th" else: "td"
+      var spanSpec: string
+      if n.span <= 1: spanSpec = ""
+      else:
+        spanSpec = " colspan=\"" & $n.span & "\" style=\"text-align: center\""
+      renderAux(d, n, "<$1$2>$$1</$1>" % [tag, spanSpec], "", result)
+    of outLatex:
+      let text = if n.kind == rnTableHeaderCell: "\\textbf{$1}" else: "$1"
+      var latexStr: string
+      if n.span <= 1: latexStr = text
+      else: latexStr = "\\multicolumn{" & $n.span & "}{c}{" & text & "}"
+      renderAux(d, n, "", latexStr, result)
   of rnFootnoteGroup:
     renderAux(d, n,
       "<hr class=\"footnote\">" &

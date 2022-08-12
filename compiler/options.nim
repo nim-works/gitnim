@@ -14,12 +14,17 @@ import
 from terminal import isatty
 from times import utc, fromUnix, local, getTime, format, DateTime
 from std/private/globs import nativeToUnixPath
+
+when defined(nimPreviewSlimSystem):
+  import std/[syncio, assertions]
+
+
 const
   hasTinyCBackend* = defined(tinyc)
   useEffectSystem* = true
   useWriteTracking* = false
   hasFFI* = defined(nimHasLibFFI)
-  copyrightYear* = "2021"
+  copyrightYear* = "2022"
 
   nimEnableCovariance* = defined(nimEnableCovariance)
 
@@ -96,6 +101,7 @@ type                          # please make sure we have under 32 options
     optPanics                 # turn panics (sysFatal) into a process termination
     optNimV1Emulation         # emulate Nim v1.0
     optNimV12Emulation        # emulate Nim v1.2
+    optNimV16Emulation        # emulate Nim v1.6
     optSourcemap
     optProfileVM              # enable VM profiler
     optEnableDeepCopy         # ORC specific: enable 'deepcopy' for all types.
@@ -147,6 +153,8 @@ type
     cmdDoc2tex  # convert .nim doc comments to LaTeX
     cmdRst2html # convert a reStructuredText file to HTML
     cmdRst2tex # convert a reStructuredText file to TeX
+    cmdMd2html # convert a Markdown file to HTML
+    cmdMd2tex # convert a Markdown file to TeX
     cmdJsondoc0
     cmdJsondoc
     cmdCtags
@@ -177,14 +185,14 @@ type
     gcMarkAndSweep = "markAndSweep"
     gcHooks = "hooks"
     gcRefc = "refc"
-    gcV2 = "v2"
     gcGo = "go"
     # gcRefc and the GCs that follow it use a write barrier,
     # as far as usesWriteBarrier() is concerned
 
   IdeCmd* = enum
-    ideNone, ideSug, ideCon, ideDef, ideUse, ideDus, ideChk, ideMod,
-    ideHighlight, ideOutline, ideKnown, ideMsg, ideProject
+    ideNone, ideSug, ideCon, ideDef, ideUse, ideDus, ideChk, ideChkFile, ideMod,
+    ideHighlight, ideOutline, ideKnown, ideMsg, ideProject, ideGlobalSymbols,
+    ideRecompile, ideChanged, ideType
 
   Feature* = enum  ## experimental features; DO NOT RENAME THESE!
     implicitDeref,
@@ -801,6 +809,8 @@ proc toGeneratedFile*(conf: ConfigRef; path: AbsoluteFile,
 
 proc completeGeneratedFilePath*(conf: ConfigRef; f: AbsoluteFile,
                                 createSubDir: bool = true): AbsoluteFile =
+  ## Return an absolute path of a generated intermediary file.
+  ## Optionally creates the cache directory if `createSubDir` is `true`.
   let subdir = getNimcacheDir(conf)
   if createSubDir:
     try:
@@ -808,11 +818,6 @@ proc completeGeneratedFilePath*(conf: ConfigRef; f: AbsoluteFile,
     except OSError:
       conf.quitOrRaise "cannot create directory: " & subdir.string
   result = subdir / RelativeFile f.string.splitPath.tail
-  #echo "completeGeneratedFilePath(", f, ") = ", result
-
-proc toRodFile*(conf: ConfigRef; f: AbsoluteFile; ext = RodExt): AbsoluteFile =
-  result = changeFileExt(completeGeneratedFilePath(conf,
-    withPackageName(conf, f)), ext)
 
 proc rawFindFile(conf: ConfigRef; f: RelativeFile; suppressStdlib: bool): AbsoluteFile =
   for it in conf.searchPaths:
@@ -849,7 +854,7 @@ when (NimMajor, NimMinor) < (1, 1) or not declared(isRelativeTo):
     let ret = relativePath(path, base)
     result = path.len > 0 and not ret.startsWith ".."
 
-const stdlibDirs = [
+const stdlibDirs* = [
   "pure", "core", "arch",
   "pure/collections",
   "pure/concurrency",
@@ -991,12 +996,17 @@ proc parseIdeCmd*(s: string): IdeCmd =
   of "use": ideUse
   of "dus": ideDus
   of "chk": ideChk
+  of "chkFile": ideChkFile
   of "mod": ideMod
   of "highlight": ideHighlight
   of "outline": ideOutline
   of "known": ideKnown
   of "msg": ideMsg
   of "project": ideProject
+  of "globalSymbols": ideGlobalSymbols
+  of "recompile": ideRecompile
+  of "changed": ideChanged
+  of "type": ideType
   else: ideNone
 
 proc `$`*(c: IdeCmd): string =
@@ -1007,6 +1017,7 @@ proc `$`*(c: IdeCmd): string =
   of ideUse: "use"
   of ideDus: "dus"
   of ideChk: "chk"
+  of ideChkFile: "chkFile"
   of ideMod: "mod"
   of ideNone: "none"
   of ideHighlight: "highlight"
@@ -1014,6 +1025,10 @@ proc `$`*(c: IdeCmd): string =
   of ideKnown: "known"
   of ideMsg: "msg"
   of ideProject: "project"
+  of ideGlobalSymbols: "globalSymbols"
+  of ideRecompile: "recompile"
+  of ideChanged: "changed"
+  of ideType: "type"
 
 proc floatInt64Align*(conf: ConfigRef): int16 =
   ## Returns either 4 or 8 depending on reasons.

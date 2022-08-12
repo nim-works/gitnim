@@ -14,6 +14,9 @@ import
   wordrecg, ropes, options, strutils, extccomp, math, magicsys, trees,
   types, lookups, lineinfos, pathutils, linter
 
+when defined(nimPreviewSlimSystem):
+  import std/assertions
+
 from ic / ic import addCompilerProc
 
 const
@@ -29,7 +32,7 @@ const
     wCompilerProc, wNonReloadable, wCore, wProcVar, wVarargs, wCompileTime, wMerge,
     wBorrow, wImportCompilerProc, wThread,
     wAsmNoStackFrame, wDiscardable, wNoInit, wCodegenDecl,
-    wGensym, wInject, wRaises, wEffectsOf, wTags, wLocks, wDelegator, wGcSafe,
+    wGensym, wInject, wRaises, wEffectsOf, wTags, wForbids, wLocks, wDelegator, wGcSafe,
     wConstructor, wLiftLocals, wStackTrace, wLineTrace, wNoDestroy,
     wRequires, wEnsures, wEnforceNoRaises}
   converterPragmas* = procPragmas
@@ -42,24 +45,27 @@ const
   iteratorPragmas* = declPragmas + {FirstCallConv..LastCallConv, wNoSideEffect, wSideEffect,
     wMagic, wBorrow,
     wDiscardable, wGensym, wInject, wRaises, wEffectsOf,
-    wTags, wLocks, wGcSafe, wRequires, wEnsures}
+    wTags, wForbids, wLocks, wGcSafe, wRequires, wEnsures}
   exprPragmas* = {wLine, wLocks, wNoRewrite, wGcSafe, wNoSideEffect}
-  stmtPragmas* = {wChecks, wObjChecks, wFieldChecks, wRangeChecks,
-    wBoundChecks, wOverflowChecks, wNilChecks, wStaticBoundchecks,
-    wStyleChecks, wAssertions,
-    wWarnings, wHints,
-    wLineDir, wStackTrace, wLineTrace, wOptimization, wHint, wWarning, wError,
+  stmtPragmas* = {
+    wHint, wWarning, wError,
     wFatal, wDefine, wUndef, wCompile, wLink, wLinksys, wPure, wPush, wPop,
     wPassl, wPassc, wLocalPassc,
     wDeadCodeElimUnused,  # deprecated, always on
     wDeprecated,
-    wFloatChecks, wInfChecks, wNanChecks, wPragma, wEmit, wUnroll,
+    wPragma, wEmit, wUnroll,
     wLinearScanEnd, wPatterns, wTrMacros, wEffects, wNoForward, wReorder, wComputedGoto,
     wExperimental, wThis, wUsed, wInvariant, wAssume, wAssert}
+  stmtPragmasTopLevel* = {wChecks, wObjChecks, wFieldChecks, wRangeChecks,
+    wBoundChecks, wOverflowChecks, wNilChecks, wStaticBoundchecks,
+    wStyleChecks, wAssertions,
+    wWarnings, wHints,
+    wLineDir, wStackTrace, wLineTrace, wOptimization,
+    wFloatChecks, wInfChecks, wNanChecks}
   lambdaPragmas* = {FirstCallConv..LastCallConv,
     wNoSideEffect, wSideEffect, wNoreturn, wNosinks, wDynlib, wHeader,
     wThread, wAsmNoStackFrame,
-    wRaises, wLocks, wTags, wRequires, wEnsures, wEffectsOf,
+    wRaises, wLocks, wTags, wForbids, wRequires, wEnsures, wEffectsOf,
     wGcSafe, wCodegenDecl, wNoInit, wCompileTime}
   typePragmas* = declPragmas + {wMagic, wAcyclic,
     wPure, wHeader, wCompilerProc, wCore, wFinal, wSize, wShallow,
@@ -79,7 +85,7 @@ const
   paramPragmas* = {wNoalias, wInject, wGensym}
   letPragmas* = varPragmas
   procTypePragmas* = {FirstCallConv..LastCallConv, wVarargs, wNoSideEffect,
-                      wThread, wRaises, wEffectsOf, wLocks, wTags, wGcSafe,
+                      wThread, wRaises, wEffectsOf, wLocks, wTags, wForbids, wGcSafe,
                       wRequires, wEnsures}
   forVarPragmas* = {wInject, wGensym}
   allRoutinePragmas* = methodPragmas + iteratorPragmas + lambdaPragmas
@@ -505,7 +511,10 @@ proc processCompile(c: PContext, n: PNode) =
     n[i] = c.semConstExpr(c, n[i])
     case n[i].kind
     of nkStrLit, nkRStrLit, nkTripleStrLit:
-      shallowCopy(result, n[i].strVal)
+      when defined(gcArc) or defined(gcOrc):
+        result = n[i].strVal
+      else:
+        shallowCopy(result, n[i].strVal)
     else:
       localError(c.config, n.info, errStringLiteralExpected)
       result = ""
@@ -635,12 +644,13 @@ proc pragmaLine(c: PContext, n: PNode) =
     n.info = getInfoContext(c.config, -1)
 
 proc processPragma(c: PContext, n: PNode, i: int) =
+  ## Create and add a new custom pragma `{.pragma: name.}` node to the module's context.
   let it = n[i]
   if it.kind notin nkPragmaCallKinds and it.safeLen == 2: invalidPragma(c, n)
   elif it.safeLen != 2 or it[0].kind != nkIdent or it[1].kind != nkIdent:
     invalidPragma(c, n)
 
-  var userPragma = newSym(skTemplate, it[1].ident, nextSymId(c.idgen), nil, it.info, c.config.options)
+  var userPragma = newSym(skTemplate, it[1].ident, nextSymId(c.idgen), c.module, it.info, c.config.options)
   userPragma.ast = newTreeI(nkPragma, n.info, n.sons[i+1..^1])
   strTableAdd(c.userPragmas, userPragma)
 
@@ -650,7 +660,7 @@ proc pragmaRaisesOrTags(c: PContext, n: PNode) =
       x.typ = makeTypeFromExpr(c, x)
     else:
       var t = skipTypes(c.semTypeNode(c, x, nil), skipPtrs)
-      if t.kind != tyObject and not t.isMetaType:
+      if t.kind notin {tyObject, tyOr}:
         localError(c.config, x.info, errGenerated, "invalid type for raises/tags list")
       x.typ = t
 
@@ -813,7 +823,7 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
     elif not isStatement:
       localError(c.config, n.info, "'cast' pragma only allowed in a statement context")
     case whichPragma(key[1])
-    of wRaises, wTags: pragmaRaisesOrTags(c, key[1])
+    of wRaises, wTags, wForbids: pragmaRaisesOrTags(c, key[1])
     else: discard
     return
   elif key.kind notin nkIdentKinds:
@@ -822,8 +832,7 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
   let ident = considerQuotedIdent(c, key)
   var userPragma = strTableGet(c.userPragmas, ident)
   if userPragma != nil:
-    if {optStyleHint, optStyleError} * c.config.globalOptions != {}:
-      styleCheckUse(c.config, key.info, userPragma)
+    styleCheckUse(c, key.info, userPragma)
 
     # number of pragmas increase/decrease with user pragma expansion
     inc c.instCounter
@@ -837,8 +846,7 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
   else:
     let k = whichKeyword(ident)
     if k in validPragmas:
-      if {optStyleHint, optStyleError} * c.config.globalOptions != {}:
-        checkPragmaUse(c.config, key.info, k, ident.s)
+      checkPragmaUse(c.config, key.info, k, ident.s)
       case k
       of wExportc, wExportCpp:
         makeExternExport(c, sym, getOptionalStr(c, it, "$1"), it.info)
@@ -1179,7 +1187,7 @@ proc singlePragma(c: PContext, sym: PSym, n: PNode, i: var int,
         noVal(c, it)
         if sym == nil: invalidPragma(c, it)
       of wLine: pragmaLine(c, it)
-      of wRaises, wTags: pragmaRaisesOrTags(c, it)
+      of wRaises, wTags, wForbids: pragmaRaisesOrTags(c, it)
       of wLocks:
         if sym == nil: pragmaLockStmt(c, it)
         elif sym.typ == nil: invalidPragma(c, it)

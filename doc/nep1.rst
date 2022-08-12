@@ -1,6 +1,6 @@
-============================
-Standard Library Style Guide
-============================
+==========================================================
+Nim Enhancement Proposal #1 - Standard Library Style Guide
+==========================================================
 
 :Author: Clay Sweetser, Dominik Picheta
 :Version: |nimversion|

@@ -11,7 +11,7 @@ const
   gaCode* = " --doc.googleAnalytics:UA-48159761-1"
   # errormax: subsequent errors are probably consequences of 1st one; a simple
   # bug could cause unlimited number of errors otherwise, hard to debug in CI.
-  docDefines = "-d:nimExperimentalAsyncjsThen -d:nimExperimentalLinenoiseExtra"
+  docDefines = "-d:nimExperimentalLinenoiseExtra"
   nimArgs = "--errormax:3 --hint:Conf:off --hint:Path:off --hint:Processing:off --hint:XDeclaredButNotUsed:off --warning:UnusedImport:off -d:boot --putenv:nimversion=$# $#" % [system.NimVersion, docDefines]
   gitUrl = "https://github.com/nim-lang/Nim"
   docHtmlOutput = "doc/html"
@@ -107,18 +107,18 @@ proc nimCompileFold*(desc, input: string, outputDir = "bin", mode = "c", options
   let cmd = findNim().quoteShell() & " " & mode & " -o:" & output & " " & options & " " & input
   execFold(desc, cmd)
 
-proc getRst2html(): seq[string] =
+proc getMd2html(): seq[string] =
   for a in walkDirRecFilter("doc"):
     let path = a.path
-    if a.kind == pcFile and path.splitFile.ext == ".rst" and path.lastPathPart notin
-        ["docs.rst", "nimfix.rst",
-         "docstyle.rst" # docstyle.rst shouldn't be converted to html separately;
-                        # it's included in contributing.rst.
+    if a.kind == pcFile and path.splitFile.ext == ".md" and path.lastPathPart notin
+        ["docs.md", "nimfix.md",
+         "docstyle.md" # docstyle.md shouldn't be converted to html separately;
+                       # it's included in contributing.md.
         ]:
           # maybe we should still show nimfix, could help reviving it
           # `docs` is redundant with `overview`, might as well remove that file?
       result.add path
-  doAssert "doc/manual/var_t_return.rst".unixToNativePath in result # sanity check
+  doAssert "doc/manual/var_t_return.md".unixToNativePath in result # sanity check
 
 const
   rstPdfList = """
@@ -187,7 +187,6 @@ proc getDocList(): seq[string] =
 
   # don't ignore these even though in lib/system (not include files)
   const goodSystem = """
-lib/system/io.nim
 lib/system/nimscript.nim
 lib/system/assertions.nim
 lib/system/iterators.nim
@@ -254,13 +253,13 @@ proc buildDocPackages(nimArgs, destPath: string) =
 
 proc buildDoc(nimArgs, destPath: string) =
   # call nim for the documentation:
-  let rst2html = getRst2html()
+  let rst2html = getMd2html()
   var
     commands = newSeq[string](rst2html.len + len(doc0) + len(doc) + withoutIndex.len)
     i = 0
   let nim = findNim().quoteShell()
   for d in items(rst2html):
-    commands[i] = nim & " rst2html $# --git.url:$# -o:$# --index:on $#" %
+    commands[i] = nim & " md2html $# --git.url:$# -o:$# --index:on $#" %
       [nimArgs, gitUrl,
       destPath / changeFileExt(splitFile(d).name, "html"), d]
     i.inc

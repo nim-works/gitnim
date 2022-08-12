@@ -9,8 +9,6 @@
 
 ## Shared string support for Nim.
 
-{.deprecated.}
-
 type
   UncheckedCharArray = UncheckedArray[char]
 
