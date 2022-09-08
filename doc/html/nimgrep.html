@@ -27,12 +27,13 @@
       <h1 class="title">nimgrep User's manual</h1>
       <div class="row">
   <div class="three columns">
-    <div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-        <input type="checkbox" id="checkbox" />
-        <div class="slider round"></div>
-      </label>
-      &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    <div class="theme-select-wrapper">
+      <label for="theme-select">Theme:&nbsp;</label>
+      <select id="theme-select" onchange="setTheme(this.value)">
+        <option value="auto">🌗 Match OS</option>
+        <option value="dark">🌑 Dark</option>
+        <option value="light">🌕 Light</option>
+      </select>
     </div>
     <div id="global-links">
       <ul class="simple-boot">
@@ -76,7 +77,9 @@
 <p>Nimgrep has particularly good support for Nim's eccentric <em>style insensitivity</em> (see option <tt class="docutils literal"><span class="pre option">-y</span></tt> below). Apart from that it is a generic text manipulation tool.</p>
 
 <h1><a class="toc-backref" id="installation" href="#installation">Installation</a></h1><p>Compile nimgrep with the command:</p>
-<pre class="listing"><span class="program">nim</span> <span class="option">c</span> <span class="option">-d:release</span> <span class="Identifier">tools/nimgrep.nim</span></pre><p>And copy the executable somewhere in your <tt class="docutils literal"><span class="pre">$PATH</span></tt>.</p>
+<p><pre class="listing">
+<span class="program">nim</span> <span class="option">c</span> <span class="option">-d:release</span> <span class="Identifier">tools/nimgrep.nim</span></pre></p>
+<p>And copy the executable somewhere in your <tt class="docutils literal"><span class="pre">$PATH</span></tt>.</p>
 
 <h1><a class="toc-backref" id="command-line-switches" href="#command-line-switches">Command line switches</a></h1>Usage:<ul class="simple"><li>To search:<pre>nimgrep [options] PATTERN [(FILE/DIRECTORY)*/-]</pre>
 </li>
@@ -158,14 +161,23 @@ PATTERN and patterns PAT (see below in other options) are all either Regex or Pe
 </ul>
 
 <h1><a class="toc-backref" id="examples" href="#examples">Examples</a></h1><p>All examples below use default PCRE Regex patterns:</p>
-<ul class="simple"><li>To search recursively in Nim files using style-insensitive identifiers:<pre class="listing"><span class="program">nimgrep</span> <span class="option">--recursive</span> <span class="option">--ext:</span><span class="option">'nim|nims'</span> <span class="option">--ignoreStyle</span>
-<span class="Comment"># short: -r --ext:'nim|nims' -y</span></pre><div class="admonition admonition-info"><span class="admonition-info-text"><b>Note:</b></span>
+<ul class="simple"><li><p>To search recursively in Nim files using style-insensitive identifiers:</p>
+<p><pre class="listing">
+<span class="program">nimgrep</span> <span class="option">--recursive</span> <span class="option">--ext:</span><span class="option">'nim|nims'</span> <span class="option">--ignoreStyle</span>
+<span class="Comment"># short: -r --ext:'nim|nims' -y</span></pre></p>
+<div class="admonition admonition-info"><span class="admonition-info-text"><b>Note:</b></span>
 we used <tt class="docutils literal"><span class="pre option">'</span></tt> quotes to avoid special treatment of <tt class="docutils literal"><span class="pre option">|</span></tt> symbol for shells like Bash</div>
 </li>
-<li>To exclude version control directories (Git, Mercurial=hg, Subversion=svn) from the search:<pre class="listing"><span class="program">nimgrep</span> <span class="option">--excludeDir:</span><span class="option">'^\.git$'</span> <span class="option">--excludeDir:</span><span class="option">'^\.hg$'</span> <span class="option">--excludeDir:</span><span class="option">'^\.svn$'</span>
-<span class="Comment"># short: --ed:'^\.git$' --ed:'^\.hg$' --ed:'^\.svn$'</span></pre></li>
-<li>To search only in paths containing the <tt class="docutils literal"><span class="pre option">tests</span></tt> sub-directory recursively:<pre class="listing"><span class="program">nimgrep</span> <span class="option">--recursive</span> <span class="option">--includeDir:</span><span class="option">'(^|/)tests($|/)'</span>
-<span class="Comment"># short: -r --id:'(^|/)tests($|/)'</span></pre><div class="admonition admonition-warning"><span class="admonition-warning-text"><b>Attention:</b></span>
+<li><p>To exclude version control directories (Git, Mercurial=hg, Subversion=svn) from the search:</p>
+<p><pre class="listing">
+<span class="program">nimgrep</span> <span class="option">--excludeDir:</span><span class="option">'^\.git$'</span> <span class="option">--excludeDir:</span><span class="option">'^\.hg$'</span> <span class="option">--excludeDir:</span><span class="option">'^\.svn$'</span>
+<span class="Comment"># short: --ed:'^\.git$' --ed:'^\.hg$' --ed:'^\.svn$'</span></pre></p>
+</li>
+<li><p>To search only in paths containing the <tt class="docutils literal"><span class="pre option">tests</span></tt> sub-directory recursively:</p>
+<p><pre class="listing">
+<span class="program">nimgrep</span> <span class="option">--recursive</span> <span class="option">--includeDir:</span><span class="option">'(^|/)tests($|/)'</span>
+<span class="Comment"># short: -r --id:'(^|/)tests($|/)'</span></pre></p>
+<div class="admonition admonition-warning"><span class="admonition-warning-text"><b>Attention:</b></span>
 note the subtle difference between <tt class="docutils literal"><span class="pre option">--excludeDir</span></tt> and <tt class="docutils literal"><span class="pre option">--includeDir</span></tt>: the former is applied to relative directory entries and the latter is applied to the whole paths</div>
 </li>
 <li>Nimgrep can search multi-line, e.g. to find files containing <tt class="docutils literal"><span class="pre option">import</span></tt> and then <tt class="docutils literal"><span class="pre option">strutils</span></tt> use pattern <tt class="docutils literal"><span class="pre option">'import(.|\n)*?strutils'</span></tt>.</li>
@@ -178,7 +190,7 @@ note the subtle difference between <tt class="docutils literal"><span class="pre
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-12 01:18:04 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-31 01:33:13 UTC</small>
       </div>
     </div>
   </div>

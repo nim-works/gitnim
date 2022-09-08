@@ -30,8 +30,10 @@
 <h2 id="cycle-collector">Cycle collector</h2><p>The cycle collector can be en-/disabled independently from the other parts of the garbage collector with <tt class="docutils literal"><span class="pre">GC_enableMarkAndSweep</span></tt> and <tt class="docutils literal"><span class="pre">GC_disableMarkAndSweep</span></tt>.</p>
 
 <h2 id="soft-realminustime-support">Soft real-time support</h2><p>To enable real-time support, the symbol <span id="userealtimegc_1">useRealtimeGC</span> needs to be defined via <tt class="docutils literal"><span class="pre option">--define:useRealtimeGC</span></tt> (you can put this into your config file as well). With this switch the garbage collector supports the following operations:</p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">GC_setMaxPause</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">maxPauseInUs</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span>
-<span class="Keyword">proc</span> <span class="Identifier">GC_step</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">us</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">strongAdvice</span> <span class="Operator">=</span> <span class="Identifier">false</span><span class="Punctuation">,</span> <span class="Identifier">stackSize</span> <span class="Operator">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">)</span></pre><p>The unit of the parameters <tt class="docutils literal"><span class="pre">maxPauseInUs</span></tt> and <tt class="docutils literal"><span class="pre">us</span></tt> is microseconds.</p>
+<p><pre class="listing">
+<span class="Keyword">proc</span> <span class="Identifier">GC_setMaxPause</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">maxPauseInUs</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span>
+<span class="Keyword">proc</span> <span class="Identifier">GC_step</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">us</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">strongAdvice</span> <span class="Operator">=</span> <span class="Identifier">false</span><span class="Punctuation">,</span> <span class="Identifier">stackSize</span> <span class="Operator">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">)</span></pre></p>
+<p>The unit of the parameters <tt class="docutils literal"><span class="pre">maxPauseInUs</span></tt> and <tt class="docutils literal"><span class="pre">us</span></tt> is microseconds.</p>
 <p>These two procs are the two modus operandi of the real-time garbage collector:</p>
 <ol class="simple"><li><p>GC_SetMaxPause Mode</p>
 <p>You can call <tt class="docutils literal"><span class="pre">GC_SetMaxPause</span></tt> at program startup and then each triggered garbage collector run tries to not take longer than <tt class="docutils literal"><span class="pre">maxPause</span></tt> time. However, it is possible (and common) that the work is nevertheless not evenly distributed as each call to <tt class="docutils literal"><span class="pre">new</span></tt> can trigger the garbage collector and thus take  <tt class="docutils literal"><span class="pre">maxPause</span></tt> time.</p>
@@ -55,9 +57,13 @@
 
 <h2 id="thread-coordination">Thread coordination</h2><p>When the <tt class="docutils literal"><span class="pre">NimMain()</span></tt> function is called Nim initializes the garbage collector to the current thread, which is usually the main thread of your application. If your C code later spawns a different thread and calls Nim code, the garbage collector will fail to work properly and you will crash.</p>
 <p>As long as you don't use the threadvar emulation Nim uses native thread variables, of which you get a fresh version whenever you create a thread. You can then attach a GC to this thread via</p>
-<pre class="listing"><span class="Identifier">system</span><span class="Operator">.</span><span class="Identifier">setupForeignThreadGc</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>It is <strong>not</strong> safe to disable the garbage collector and enable it after the call from your background thread even if the code you are calling is short lived.</p>
+<p><pre class="listing">
+<span class="Identifier">system</span><span class="Operator">.</span><span class="Identifier">setupForeignThreadGc</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+<p>It is <strong>not</strong> safe to disable the garbage collector and enable it after the call from your background thread even if the code you are calling is short lived.</p>
 <p>Before the thread exits, you should tear down the thread's GC to prevent memory leaks by calling</p>
-<pre class="listing"><span class="Identifier">system</span><span class="Operator">.</span><span class="Identifier">tearDownForeignThreadGc</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
+<p><pre class="listing">
+<span class="Identifier">system</span><span class="Operator">.</span><span class="Identifier">tearDownForeignThreadGc</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+
 <h1 id="keeping-track-of-memory">Keeping track of memory</h1><p>If you need to pass around memory allocated by Nim to C, you can use the procs <tt class="docutils literal"><span class="pre">GC_ref</span></tt> and <tt class="docutils literal"><span class="pre">GC_unref</span></tt> to mark objects as referenced to avoid them being freed by the garbage collector. Other useful procs from <a class="reference external" href="system.html">system</a> you can use to keep track of memory are:</p>
 <ul class="simple"><li><tt class="docutils literal"><span class="pre">getTotalMem()</span></tt> Returns the amount of total memory managed by the garbage collector.</li>
 <li><tt class="docutils literal"><span class="pre">getOccupiedMem()</span></tt> Bytes reserved by the garbage collector and used by objects.</li>
@@ -75,7 +81,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-12 01:18:04 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-31 01:33:13 UTC</small>
       </div>
     </div>
   </div>

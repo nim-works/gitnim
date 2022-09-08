@@ -27,12 +27,13 @@
       <h1 class="title">Nim Manual</h1>
       <div class="row">
   <div class="three columns">
-    <div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-        <input type="checkbox" id="checkbox" />
-        <div class="slider round"></div>
-      </label>
-      &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    <div class="theme-select-wrapper">
+      <label for="theme-select">Theme:&nbsp;</label>
+      <select id="theme-select" onchange="setTheme(this.value)">
+        <option value="auto">🌗 Match OS</option>
+        <option value="dark">🌑 Dark</option>
+        <option value="light">🌕 Light</option>
+      </select>
     </div>
     <div id="global-links">
       <ul class="simple-boot">
@@ -257,6 +258,7 @@
 <li><a class="reference" id="pragmas-linearscanend-pragma_toc" href="#pragmas-linearscanend-pragma">linearScanEnd pragma</a></li>
 <li><a class="reference" id="pragmas-computedgoto-pragma_toc" href="#pragmas-computedgoto-pragma">computedGoto pragma</a></li>
 <li><a class="reference" id="pragmas-immediate-pragma_toc" href="#pragmas-immediate-pragma">immediate pragma</a></li>
+<li><a class="reference" id="pragmas-redefine-pragma_toc" href="#pragmas-redefine-pragma">redefine pragma</a></li>
 <li><a class="reference" id="pragmas-compilation-option-pragmas_toc" href="#pragmas-compilation-option-pragmas">compilation option pragmas</a></li>
 <li><a class="reference" id="pragmas-push-and-pop-pragmas_toc" href="#pragmas-push-and-pop-pragmas">push and pop pragmas</a></li>
 <li><a class="reference" id="pragmas-register-pragma_toc" href="#pragmas-register-pragma">register pragma</a></li>
@@ -675,8 +677,9 @@ CUSTOM_NUMERIC_LIT = (FLOAT_LIT | INT_LIT) '\'' CUSTOM_NUMERIC_SUFFIX
 <span class="Identifier">echo</span><span class="Punctuation">(</span><span class="Operator">$</span><span class="Identifier">foo</span><span class="Punctuation">)</span></pre></p>
 <p>Spacing also determines whether <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">)</span></span></tt> is parsed as an argument list of a call or whether it is parsed as a tuple constructor:</p>
 <p><pre class="listing">
-<span class="Identifier">echo</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">)</span> <span class="Comment"># pass 1 and 2 to echo</span>
-</pre>nim echo (1, 2) # pass the tuple (1, 2) to echo</p>
+<span class="Identifier">echo</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">)</span> <span class="Comment"># pass 1 and 2 to echo</span></pre></p>
+<p><pre class="listing">
+<span class="Identifier">echo</span> <span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">)</span> <span class="Comment"># pass the tuple (1, 2) to echo</span></pre></p>
 
 <h2><a class="toc-backref" id="syntax-dotminuslike-operators" href="#syntax-dotminuslike-operators">Dot-like operators</a></h2><p>Terminal symbol in the grammar: <tt class="docutils literal"><span class="pre"><span class="Identifier">DOTLIKEOP</span></span></tt>.</p>
 <p>Dot-like operators are operators starting with <tt class="docutils literal"><span class="pre"><span class="Operator">.</span></span></tt>, but not with <tt class="docutils literal"><span class="pre"><span class="Operator">..</span></span></tt>, for e.g. <tt class="docutils literal"><span class="pre"><span class="Operator">.?</span></span></tt>; they have the same precedence as <tt class="docutils literal"><span class="pre"><span class="Operator">.</span></span></tt>, so that <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span><span class="Operator">.?</span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">c</span></span></tt> is parsed as <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Operator">.?</span><span class="Identifier">b</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">c</span></span></tt> instead of <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span><span class="Operator">.?</span><span class="Punctuation">(</span><span class="Identifier">b</span><span class="Operator">.</span><span class="Identifier">c</span><span class="Punctuation">)</span></span></tt>.</p>
@@ -1473,15 +1476,22 @@ ord(Direction.west) == 3</pre>
 </ul>
 <p>or equivalent. For signed integers the set's base type is defined to be in the range <tt class="docutils literal"><span class="pre"><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="Identifier">MaxSetElements</span><span class="Operator">-</span><span class="DecNumber">1</span></span></tt> where <tt class="docutils literal"><span class="pre"><span class="Identifier">MaxSetElements</span></span></tt> is currently always 2^16.</p>
 <p>The reason is that sets are implemented as high performance bit vectors. Attempting to declare a set with a larger type will result in an error:</p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">set</span><span class="Punctuation">[</span><span class="Identifier">int64</span><span class="Punctuation">]</span> <span class="Comment"># Error: set is too large</span></pre><p><strong>Note:</strong> Nim also offers <a class="reference external" href="sets.html">hash sets</a> (which you need to import with <tt class="docutils literal"><span class="pre"><span class="Keyword">import</span> <span class="Identifier">sets</span></span></tt>), which have no such restrictions.</p>
+<p><pre class="listing">
+  
+  <span class="Keyword">var</span> <span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">set</span><span class="Punctuation">[</span><span class="Identifier">int64</span><span class="Punctuation">]</span> <span class="Comment"># Error: set is too large; use `std/sets` for ordinal types</span>
+                    <span class="Comment"># with more than 2^16 elements</span>
+</pre></p>
+<p><strong>Note:</strong> Nim also offers <a class="reference external" href="sets.html">hash sets</a> (which you need to import with <tt class="docutils literal"><span class="pre"><span class="Keyword">import</span> <span class="Identifier">sets</span></span></tt>), which have no such restrictions.</p>
 <p>Sets can be constructed via the set constructor: <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Punctuation">}</span></span></tt> is the empty set. The empty set is type compatible with any concrete set type. The constructor can also be used to include elements (and ranges of elements):</p>
-<pre class="listing"><span class="Keyword">type</span>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">CharSet</span> <span class="Operator">=</span> <span class="Identifier">set</span><span class="Punctuation">[</span><span class="Identifier">char</span><span class="Punctuation">]</span>
 <span class="Keyword">var</span>
   <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">CharSet</span>
 <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Operator">..</span><span class="CharLit">'z'</span><span class="Punctuation">,</span> <span class="CharLit">'0'</span><span class="Operator">..</span><span class="CharLit">'9'</span><span class="Punctuation">}</span> <span class="Comment"># This constructs a set that contains the</span>
                          <span class="Comment"># letters from 'a' to 'z' and the digits</span>
-                         <span class="Comment"># from '0' to '9'</span></pre><p>These operations are supported by sets:</p>
+                         <span class="Comment"># from '0' to '9'</span></pre></p>
+<p>These operations are supported by sets:</p>
 <table border="1" class="docutils"><tr><th>operation</th><th>meaning</th></tr>
 <tr><td><tt class="docutils literal"><span class="pre"><span class="Identifier">A</span> <span class="Operator">+</span> <span class="Identifier">B</span></span></tt></td><td>union of two sets</td></tr>
 <tr><td><tt class="docutils literal"><span class="pre"><span class="Identifier">A</span> <span class="Operator">*</span> <span class="Identifier">B</span></span></tt></td><td>intersection of two sets</td></tr>
@@ -1498,7 +1508,8 @@ ord(Direction.west) == 3</pre>
 </table>
 <h3><a class="toc-backref" id="set-type-bit-fields" href="#set-type-bit-fields">Bit fields</a></h3><p>Sets are often used to define a type for the <em>flags</em> of a procedure. This is a cleaner (and type safe) solution than defining integer constants that have to be <tt class="docutils literal"><span class="pre"><span class="Keyword">or</span></span></tt>'ed together.</p>
 <p>Enum, sets and casting can be used together as in:</p>
-<pre class="listing"><span class="Keyword">type</span>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">MyFlag</span><span class="Operator">*</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">size</span><span class="Punctuation">:</span> <span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">cint</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">enum</span>
     <span class="Identifier">A</span>
     <span class="Identifier">B</span>
@@ -1514,7 +1525,8 @@ ord(Direction.west) == 3</pre>
 <span class="Identifier">assert</span> <span class="Identifier">toNum</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="Identifier">D</span><span class="Punctuation">}</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">8</span>
 <span class="Identifier">assert</span> <span class="Identifier">toNum</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="Identifier">A</span><span class="Punctuation">,</span> <span class="Identifier">C</span><span class="Punctuation">}</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="DecNumber">5</span>
 <span class="Identifier">assert</span> <span class="Identifier">toFlags</span><span class="Punctuation">(</span><span class="DecNumber">0</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Punctuation">{</span><span class="Punctuation">}</span>
-<span class="Identifier">assert</span> <span class="Identifier">toFlags</span><span class="Punctuation">(</span><span class="DecNumber">7</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Punctuation">{</span><span class="Identifier">A</span><span class="Punctuation">,</span> <span class="Identifier">B</span><span class="Punctuation">,</span> <span class="Identifier">C</span><span class="Punctuation">}</span></pre><p>Note how the set turns enum values into powers of 2.</p>
+<span class="Identifier">assert</span> <span class="Identifier">toFlags</span><span class="Punctuation">(</span><span class="DecNumber">7</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Punctuation">{</span><span class="Identifier">A</span><span class="Punctuation">,</span> <span class="Identifier">B</span><span class="Punctuation">,</span> <span class="Identifier">C</span><span class="Punctuation">}</span></pre></p>
+<p>Note how the set turns enum values into powers of 2.</p>
 <p>If using enums and sets with C, use distinct cint.</p>
 <p>For interoperability with C see also the <a class="reference external" href="manual.html#implementation-specific-pragmas-bitsize-pragma">bitsize pragma</a>. </p>
 
@@ -1775,7 +1787,7 @@ ord(Direction.west) == 3</pre>
 <li><tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span> <span class="Identifier">A</span></span></tt> is a subtype of <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span> <span class="Identifier">B</span></span></tt></li>
 <li><tt class="docutils literal"><span class="pre"><span class="Keyword">ptr</span> <span class="Identifier">A</span></span></tt> is a subtype of <tt class="docutils literal"><span class="pre"><span class="Keyword">ptr</span> <span class="Identifier">B</span></span></tt>.</li>
 </ul>
-<p><strong>Note</strong>: In later versions of the language the subtype relation might be changed to <em>require</em> the pointer indirection in order to prevent &quot;object slicing&quot;.</p>
+<p><strong>Note</strong>: One of the above pointer-indirections is required for assignment from a subtype to its parent type to prevent &quot;object slicing&quot;.</p>
 
 <h2><a class="toc-backref" id="type-relations-convertible-relation" href="#type-relations-convertible-relation">Convertible relation</a></h2><p>A type <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span></span></tt> is <strong>implicitly</strong> convertible to type <tt class="docutils literal"><span class="pre"><span class="Identifier">b</span></span></tt> iff the following algorithm returns true:</p>
 <p><pre class="listing">
@@ -2709,7 +2721,8 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
     <span class="Keyword">yield</span> <span class="Punctuation">(</span><span class="Identifier">i</span><span class="Punctuation">,</span> <span class="Identifier">a</span><span class="Punctuation">[</span><span class="Identifier">i</span><span class="Punctuation">]</span><span class="Punctuation">)</span></pre></p>
 <p>In the standard library every name of a routine that returns a <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt> type starts with the prefix <tt class="docutils literal"><span class="pre"><span class="Identifier">m</span></span></tt> per convention.</p>
 <p>Memory safety for returning by <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span> <span class="Identifier">T</span></span></tt> is ensured by a simple borrowing rule: If <tt class="docutils literal"><span class="pre"><span class="Identifier">result</span></span></tt> does not refer to a location pointing to the heap (that is in <tt class="docutils literal"><span class="pre"><span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">X</span></span></tt> the <tt class="docutils literal"><span class="pre"><span class="Identifier">X</span></span></tt> involves a <tt class="docutils literal"><span class="pre"><span class="Keyword">ptr</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span></span></tt> access) then it has to be derived from the routine's first parameter:</p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">forward</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span> <span class="Operator">=</span>
+<p><pre class="listing">
+<span class="Keyword">proc</span> <span class="Identifier">forward</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span> <span class="Operator">=</span>
   <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Comment"># ok, derived from the first parameter.</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">p</span><span class="Punctuation">(</span><span class="Identifier">param</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">int</span> <span class="Operator">=</span>
@@ -2718,7 +2731,8 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
   <span class="Comment"># its first argument 'x'.</span>
   <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">forward</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span> <span class="Comment"># Error: location is derived from `x`</span>
                       <span class="Comment"># which is not p's first parameter and lives</span>
-                      <span class="Comment"># on the stack.</span></pre><p>In other words, the lifetime of what <tt class="docutils literal"><span class="pre"><span class="Identifier">result</span></span></tt> points to is attached to the lifetime of the first parameter and that is enough knowledge to verify memory safety at the call site. </p>
+                      <span class="Comment"># on the stack.</span></pre></p>
+<p>In other words, the lifetime of what <tt class="docutils literal"><span class="pre"><span class="Identifier">result</span></span></tt> points to is attached to the lifetime of the first parameter and that is enough knowledge to verify memory safety at the call site. </p>
 
 <h3><a class="toc-backref" id="var-return-type-future-directions" href="#var-return-type-future-directions">Future directions</a></h3><p>Later versions of Nim can be more precise about the borrowing rule with a syntax like:</p>
 <p><pre class="listing">
@@ -3263,7 +3277,8 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 <p>A tag has to be a type name. A <tt class="docutils literal"><span class="pre"><span class="Identifier">tags</span></span></tt> list - like a <tt class="docutils literal"><span class="pre"><span class="Identifier">raises</span></span></tt> list - can also be attached to a proc type. This affects type compatibility.</p>
 <p>The inference for tag tracking is analogous to the inference for exception tracking.</p>
 <p>There is also a way which can be used to forbid certain effects:</p>
-<pre class="listing"><span class="Keyword">type</span> <span class="Identifier">IO</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Comment">## input/output effect</span>
+<p><pre class="listing">
+<span class="Keyword">type</span> <span class="Identifier">IO</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Comment">## input/output effect</span>
 <span class="Keyword">proc</span> <span class="Identifier">readLine</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">tags</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="Identifier">IO</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
 <span class="Keyword">proc</span> <span class="Identifier">echoLine</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">void</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
 
@@ -3271,8 +3286,10 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
   <span class="Comment"># this is OK because it didn't define any tag:</span>
   <span class="Identifier">echoLine</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
   <span class="Comment"># the compiler prevents this:</span>
-  <span class="Keyword">let</span> <span class="Identifier">y</span> <span class="Operator">=</span> <span class="Identifier">readLine</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">forbids</span></span></tt> pragma defines a list of illegal effects - if any statement invokes any of those effects, the compilation will fail. Procedure types with any disallowed effect are the subtypes of equal procedure types without such lists:</p>
-<pre class="listing"><span class="Keyword">type</span> <span class="Identifier">MyEffect</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+  <span class="Keyword">let</span> <span class="Identifier">y</span> <span class="Operator">=</span> <span class="Identifier">readLine</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+<p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">forbids</span></span></tt> pragma defines a list of illegal effects - if any statement invokes any of those effects, the compilation will fail. Procedure types with any disallowed effect are the subtypes of equal procedure types without such lists:</p>
+<p><pre class="listing">
+<span class="Keyword">type</span> <span class="Identifier">MyEffect</span> <span class="Operator">=</span> <span class="Keyword">object</span>
 <span class="Keyword">type</span> <span class="Identifier">ProcType1</span> <span class="Operator">=</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">i</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">void</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">forbids</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="Identifier">MyEffect</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Punctuation">}</span>
 <span class="Keyword">type</span> <span class="Identifier">ProcType2</span> <span class="Operator">=</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">i</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">void</span>
 
@@ -3291,7 +3308,8 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 <span class="Identifier">caller1</span><span class="Punctuation">(</span><span class="Identifier">toBeCalled2</span><span class="Punctuation">)</span>
 <span class="Comment">## these are OK because ProcType2 doesn't have any effect requirement:</span>
 <span class="Identifier">caller2</span><span class="Punctuation">(</span><span class="Identifier">toBeCalled1</span><span class="Punctuation">)</span>
-<span class="Identifier">caller2</span><span class="Punctuation">(</span><span class="Identifier">toBeCalled2</span><span class="Punctuation">)</span></pre><p><tt class="docutils literal"><span class="pre"><span class="Identifier">ProcType2</span></span></tt> is a subtype of <tt class="docutils literal"><span class="pre"><span class="Identifier">ProcType1</span></span></tt>. Unlike with tags, the parent context - the function which calls other functions with forbidden effects - doesn't inherit the forbidden list of effects.</p>
+<span class="Identifier">caller2</span><span class="Punctuation">(</span><span class="Identifier">toBeCalled2</span><span class="Punctuation">)</span></pre></p>
+<p><tt class="docutils literal"><span class="pre"><span class="Identifier">ProcType2</span></span></tt> is a subtype of <tt class="docutils literal"><span class="pre"><span class="Identifier">ProcType1</span></span></tt>. Unlike with tags, the parent context - the function which calls other functions with forbidden effects - doesn't inherit the forbidden list of effects.</p>
 
 <h2><a class="toc-backref" id="effect-system-side-effects" href="#effect-system-side-effects">Side effects</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">noSideEffect</span></span></tt> pragma is used to mark a proc/iterator that can have only side effects through parameters. This means that the proc/iterator only changes locations that are reachable from its parameters and the return value only depends on the parameters. If none of its parameters have the type <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Keyword">ptr</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">cstring</span></span></tt>, or <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span></span></tt>, then no locations are modified.</p>
 <p>In other words, a routine has no side effects if it does not access a threadlocal or global variable and it does not call any routine that has a side effect.</p>
@@ -4080,7 +4098,7 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 <span class="Keyword">iterator</span> <span class="Identifier">split</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
 <span class="Keyword">proc</span> <span class="Identifier">split</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
 
-<span class="Comment"># since an iterator is the preferred interpretation, `y` has the type `string`:</span>
+<span class="Comment"># since an iterator is the preferred interpretation, this has the type `string`:</span>
 <span class="Identifier">assert</span> <span class="Identifier">typeof</span><span class="Punctuation">(</span><span class="StringLit">&quot;a b c&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">)</span> <span class="Keyword">is</span> <span class="Identifier">string</span>
 
 <span class="Identifier">assert</span> <span class="Identifier">typeof</span><span class="Punctuation">(</span><span class="StringLit">&quot;a b c&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">,</span> <span class="Identifier">typeOfProc</span><span class="Punctuation">)</span> <span class="Keyword">is</span> <span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span></pre></p>
@@ -4111,13 +4129,13 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
   <span class="Comment"># added T1 to A's interface symbol table</span>
   <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Operator">+</span> <span class="DecNumber">1</span></pre></p>
 
-<h2><a class="toc-backref" id="modules-import-statement" href="#modules-import-statement">Import statement</a></h2><p>After the <tt class="docutils literal"><span class="pre"><span class="Keyword">import</span></span></tt> statement, a list of module names can follow or a single module name followed by an <tt class="docutils literal"><span class="pre"><span class="Keyword">except</span></span></tt> list to prevent some symbols from being imported:</p>
+<h2><a class="toc-backref" id="modules-import-statement" href="#modules-import-statement">Import statement</a></h2><p>After the <tt class="docutils literal"><span class="pre"><span class="Keyword">import</span></span></tt> keyword, a list of module names can follow or a single module name followed by an <tt class="docutils literal"><span class="pre"><span class="Keyword">except</span></span></tt> list to prevent some symbols from being imported:</p>
 <p><pre class="listing">
 <span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">strutils</span> <span class="Keyword">except</span> <span class="Punctuation">`</span><span class="Operator">%</span><span class="Punctuation">`</span><span class="Punctuation">,</span> <span class="Identifier">toUpperAscii</span>
 
 <span class="Comment"># doesn't work then:</span>
 <span class="Identifier">echo</span> <span class="StringLit">&quot;$1&quot;</span> <span class="Operator">%</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">toUpperAscii</span></pre></p>
-<p>It is not checked that the <tt class="docutils literal"><span class="pre"><span class="Keyword">except</span></span></tt> list is really exported from the module. This feature allows us to compile against an older version of the module that does not export these identifiers.</p>
+<p>It is not checked that the <tt class="docutils literal"><span class="pre"><span class="Keyword">except</span></span></tt> list is really exported from the module. This feature allows us to compile against different versions of the module, even when one version does not export some of these identifiers.</p>
 <p>The <tt class="docutils literal"><span class="pre"><span class="Keyword">import</span></span></tt> statement is only allowed at the top level.</p>
 
 <h2><a class="toc-backref" id="modules-include-statement" href="#modules-include-statement">Include statement</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Keyword">include</span></span></tt> statement does something fundamentally different than importing a module: it merely includes the contents of a file. The <tt class="docutils literal"><span class="pre"><span class="Keyword">include</span></span></tt> statement is useful to split up a large module into several files:</p>
@@ -4134,12 +4152,12 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 
 <span class="Identifier">main</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># =&gt; Hello World!</span></pre></p>
 
-<h2><a class="toc-backref" id="modules-module-names-in-imports" href="#modules-module-names-in-imports">Module names in imports</a></h2><p>A module alias can be introduced via the <tt class="docutils literal"><span class="pre"><span class="Keyword">as</span></span></tt> keyword:</p>
+<h2><a class="toc-backref" id="modules-module-names-in-imports" href="#modules-module-names-in-imports">Module names in imports</a></h2><p>A module alias can be introduced via the <tt class="docutils literal"><span class="pre"><span class="Keyword">as</span></span></tt> keyword, after which the original module name is inaccessible:</p>
 <p><pre class="listing">
 <span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">strutils</span> <span class="Keyword">as</span> <span class="Identifier">su</span><span class="Punctuation">,</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">sequtils</span> <span class="Keyword">as</span> <span class="Identifier">qu</span>
 
 <span class="Identifier">echo</span> <span class="Identifier">su</span><span class="Operator">.</span><span class="Identifier">format</span><span class="Punctuation">(</span><span class="StringLit">&quot;$1&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;lalelu&quot;</span><span class="Punctuation">)</span></pre></p>
-<p>The original module name is then not accessible. The notations <tt class="docutils literal"><span class="pre"><span class="Identifier">path</span><span class="Operator">/</span><span class="Identifier">to</span><span class="Operator">/</span><span class="Identifier">module</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="StringLit">&quot;path/to/module&quot;</span></span></tt> can be used to refer to a module in subdirectories:</p>
+<p>The notations <tt class="docutils literal"><span class="pre"><span class="Identifier">path</span><span class="Operator">/</span><span class="Identifier">to</span><span class="Operator">/</span><span class="Identifier">module</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="StringLit">&quot;path/to/module&quot;</span></span></tt> can be used to refer to a module in subdirectories:</p>
 <p><pre class="listing">
 <span class="Keyword">import</span> <span class="Identifier">lib</span><span class="Operator">/</span><span class="Identifier">pure</span><span class="Operator">/</span><span class="Identifier">os</span><span class="Punctuation">,</span> <span class="StringLit">&quot;lib/pure/times&quot;</span></pre></p>
 <p>Note that the module name is still <tt class="docutils literal"><span class="pre"><span class="Identifier">strutils</span></span></tt> and not <tt class="docutils literal"><span class="pre"><span class="Identifier">lib</span><span class="Operator">/</span><span class="Identifier">pure</span><span class="Operator">/</span><span class="Identifier">strutils</span></span></tt>, thus one <strong>cannot</strong> do:</p>
@@ -4162,7 +4180,7 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 </ol>
 <p>It is recommended and preferred but not currently enforced that all stdlib module imports include the std/ &quot;pseudo directory&quot; as part of the import name.</p>
 
-<h2><a class="toc-backref" id="modules-from-import-statement" href="#modules-from-import-statement">From import statement</a></h2><p>After the <tt class="docutils literal"><span class="pre"><span class="Keyword">from</span></span></tt> statement, a module name followed by an <tt class="docutils literal"><span class="pre"><span class="Keyword">import</span></span></tt> to list the symbols one likes to use without explicit full qualification:</p>
+<h2><a class="toc-backref" id="modules-from-import-statement" href="#modules-from-import-statement">From import statement</a></h2><p>After the <tt class="docutils literal"><span class="pre"><span class="Keyword">from</span></span></tt> keyword, a module name followed by an <tt class="docutils literal"><span class="pre"><span class="Keyword">import</span></span></tt> to list the symbols one likes to use without explicit full qualification:</p>
 <p><pre class="listing">
 <span class="Keyword">from</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">strutils</span> <span class="Keyword">import</span> <span class="Punctuation">`</span><span class="Operator">%</span><span class="Punctuation">`</span>
 
@@ -4374,6 +4392,16 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 
 <h2><a class="toc-backref" id="pragmas-immediate-pragma" href="#pragmas-immediate-pragma">immediate pragma</a></h2><p>The immediate pragma is obsolete. See <a class="reference external" href="#templates-typed-vs-untyped-parameters">Typed vs untyped parameters</a>.</p>
 
+<h2><a class="toc-backref" id="pragmas-redefine-pragma" href="#pragmas-redefine-pragma">redefine pragma</a></h2><p>Redefinition of template symbols with the same signature is allowed. This can be made explicit with the <tt class="docutils literal"><span class="pre"><span class="Identifier">redefine</span></span></tt> pragma:</p>
+<p><pre class="listing">
+<span class="Keyword">template</span> <span class="Identifier">foo</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
+<span class="Identifier">echo</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># 1</span>
+<span class="Keyword">template</span> <span class="Identifier">foo</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">redefine</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="DecNumber">2</span>
+<span class="Identifier">echo</span> <span class="Identifier">foo</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># 2</span>
+<span class="Comment"># warning: implicit redefinition of template</span>
+<span class="Keyword">template</span> <span class="Identifier">foo</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">3</span></pre></p>
+<p>This is mostly intended for macro generated code.</p>
+
 <h2><a class="toc-backref" id="pragmas-compilation-option-pragmas" href="#pragmas-compilation-option-pragmas">compilation option pragmas</a></h2><p>The listed pragmas here can be used to override the code generation options for a proc/method/converter.</p>
 <p>The implementation currently provides the following possible options (various others may be added later).</p>
 <table border="1" class="docutils"><tr><th>pragma</th><th>allowed values</th><th>description</th></tr>
@@ -4426,7 +4454,7 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
   <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="Identifier">pattern</span><span class="Punctuation">)</span></pre></p>
 <p>When used within a generic proc, a separate unique global variable will be created for each instantiation of the proc. The order of initialization of the created global variables within a module is not defined, but all of them will be initialized after any top-level variables in their originating module and before any variable in a module that imports it.</p>
 
-<h2><a class="toc-backref" id="pragmas-disabling-certain-messages" href="#pragmas-disabling-certain-messages">Disabling certain messages</a></h2><p>Nim generates some warnings and hints (&quot;line too long&quot;) that may annoy the user. A mechanism for disabling certain messages is provided: Each hint and warning message contains a symbol in brackets. This is the message's identifier that can be used to enable or disable it:</p>
+<h2><a class="toc-backref" id="pragmas-disabling-certain-messages" href="#pragmas-disabling-certain-messages">Disabling certain messages</a></h2><p>Nim generates some warnings and hints (&quot;line too long&quot;) that may annoy the user. A mechanism for disabling certain messages is provided: Each hint and warning message is associated with a symbol. This is the message's identifier, which can be used to enable or disable the message by putting it in brackets following the pragma:</p>
 <p><pre class="listing">
 <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">hint</span><span class="Punctuation">[</span><span class="Identifier">LineTooLong</span><span class="Punctuation">]</span><span class="Punctuation">:</span> <span class="Identifier">off</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Comment"># turn off the hint about too long lines</span></pre></p>
 <p>This is often better than disabling all warnings at once.</p>
@@ -4898,12 +4926,16 @@ using namespace gui;
 <h1><a class="toc-backref" id="foreign-function-interface" href="#foreign-function-interface">Foreign function interface</a></h1><p>Nim's <span id="ffi_1">FFI</span> (foreign function interface) is extensive and only the parts that scale to other future backends (like the LLVM/JavaScript backends) are documented here.</p>
 
 <h2><a class="toc-backref" id="foreign-function-interface-importc-pragma" href="#foreign-function-interface-importc-pragma">Importc pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">importc</span></span></tt> pragma provides a means to import a proc or a variable from C. The optional argument is a string containing the C identifier. If the argument is missing, the C name is the Nim identifier <em>exactly as spelled</em>:</p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">printf</span><span class="Punctuation">(</span><span class="Identifier">formatstr</span><span class="Punctuation">:</span> <span class="Identifier">cstring</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">header</span><span class="Punctuation">:</span> <span class="StringLit">&quot;&lt;stdio.h&gt;&quot;</span><span class="Punctuation">,</span> <span class="Identifier">importc</span><span class="Punctuation">:</span> <span class="StringLit">&quot;printf&quot;</span><span class="Punctuation">,</span> <span class="Identifier">varargs</span><span class="Operator">.</span><span class="Punctuation">}</span></pre><p>When <tt class="docutils literal"><span class="pre"><span class="Identifier">importc</span></span></tt> is applied to a <tt class="docutils literal"><span class="pre"><span class="Keyword">let</span></span></tt> statement it can omit its value which will then be expected to come from C. This can be used to import a C <tt class="docutils literal"><span class="pre"><span class="Keyword">const</span></span></tt>:</p>
-<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">emit</span><span class="Punctuation">:</span> <span class="StringLit">&quot;const int cconst = 42;&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
+<p><pre class="listing">
+<span class="Keyword">proc</span> <span class="Identifier">printf</span><span class="Punctuation">(</span><span class="Identifier">formatstr</span><span class="Punctuation">:</span> <span class="Identifier">cstring</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">header</span><span class="Punctuation">:</span> <span class="StringLit">&quot;&lt;stdio.h&gt;&quot;</span><span class="Punctuation">,</span> <span class="Identifier">importc</span><span class="Punctuation">:</span> <span class="StringLit">&quot;printf&quot;</span><span class="Punctuation">,</span> <span class="Identifier">varargs</span><span class="Operator">.</span><span class="Punctuation">}</span></pre></p>
+<p>When <tt class="docutils literal"><span class="pre"><span class="Identifier">importc</span></span></tt> is applied to a <tt class="docutils literal"><span class="pre"><span class="Keyword">let</span></span></tt> statement it can omit its value which will then be expected to come from C. This can be used to import a C <tt class="docutils literal"><span class="pre"><span class="Keyword">const</span></span></tt>:</p>
+<p><pre class="listing">
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">emit</span><span class="Punctuation">:</span> <span class="StringLit">&quot;const int cconst = 42;&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
 
 <span class="Keyword">let</span> <span class="Identifier">cconst</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importc</span><span class="Punctuation">,</span> <span class="Identifier">nodecl</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span> <span class="Identifier">cint</span>
 
-<span class="Identifier">assert</span> <span class="Identifier">cconst</span> <span class="Operator">==</span> <span class="DecNumber">42</span></pre><p>Note that this pragma has been abused in the past to also work in the JS backend for JS objects and functions. Other backends do provide the same feature under the same name. Also, when the target language is not set to C, other pragmas are available:</p>
+<span class="Identifier">assert</span> <span class="Identifier">cconst</span> <span class="Operator">==</span> <span class="DecNumber">42</span></pre></p>
+<p>Note that this pragma has been abused in the past to also work in the JS backend for JS objects and functions. Other backends do provide the same feature under the same name. Also, when the target language is not set to C, other pragmas are available:</p>
 <ul class="simple"><li><a class="reference external" href="manual.html#implementation-specific-pragmas-importcpp-pragma">importcpp</a></li>
 <li><a class="reference external" href="manual.html#implementation-specific-pragmas-importobjc-pragma">importobjc</a></li>
 <li><a class="reference external" href="manual.html#implementation-specific-pragmas-importjs-pragma">importjs</a></li>
@@ -4994,7 +5026,7 @@ libtcl8.3.so.0</pre>
 <p>The only way to create a thread is via <tt class="docutils literal"><span class="pre"><span class="Identifier">spawn</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">createThread</span></span></tt>. The invoked proc must not use <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt> parameters nor must any of its parameters contain a <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">closure</span></span></tt> type. This enforces the <em>no heap sharing restriction</em>.</p>
 
 <h2><a class="toc-backref" id="threads-thread-pragma" href="#threads-thread-pragma">Thread pragma</a></h2><p>A proc that is executed as a new thread of execution should be marked by the <tt class="docutils literal"><span class="pre"><span class="Identifier">thread</span></span></tt> pragma for reasons of readability. The compiler checks for violations of the <span id="no-heap-sharing-restriction_1">no heap sharing restriction</span>: This restriction implies that it is invalid to construct a data structure that consists of memory allocated from different (thread-local) heaps.</p>
-<p>A thread proc is passed to <tt class="docutils literal"><span class="pre"><span class="Identifier">createThread</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">spawn</span></span></tt> and invoked indirectly; so the <tt class="docutils literal"><span class="pre"><span class="Identifier">thread</span></span></tt> pragma implies <tt class="docutils literal"><span class="pre"><span class="Identifier">procvar</span></span></tt>.</p>
+<p>A thread proc can be passed to <tt class="docutils literal"><span class="pre"><span class="Identifier">createThread</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">spawn</span></span></tt>.</p>
 
 <h2><a class="toc-backref" id="threads-threadvar-pragma" href="#threads-threadvar-pragma">Threadvar pragma</a></h2><p>A variable can be marked with the <tt class="docutils literal"><span class="pre"><span class="Identifier">threadvar</span></span></tt> pragma, which makes it a <span id="threadminuslocal_1">thread-local</span> variable; Additionally, this implies all the effects of the <tt class="docutils literal"><span class="pre"><span class="Identifier">global</span></span></tt> pragma.</p>
 <p><pre class="listing">
@@ -5088,7 +5120,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-12 01:18:26 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-31 01:33:34 UTC</small>
       </div>
     </div>
   </div>

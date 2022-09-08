@@ -27,12 +27,13 @@
       <h1 class="title">compiler/pragmas</h1>
       <div class="row">
   <div class="three columns">
-    <div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-        <input type="checkbox" id="checkbox" />
-        <div class="slider round"></div>
-      </label>
-      &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    <div class="theme-select-wrapper">
+      <label for="theme-select">Theme:&nbsp;</label>
+      <select id="theme-select" onchange="setTheme(this.value)">
+        <option value="auto">🌗 Match OS</option>
+        <option value="dark">🌑 Dark</option>
+        <option value="light">🌕 Light</option>
+      </select>
     </div>
     <div id="global-links">
       <ul class="simple">
@@ -127,15 +128,15 @@
                wLink, wLinksys, wPure, wPush, wPop, wPassl, wPassc, wLocalPassc,
                wDeadCodeElimUnused, wDeprecated, wPragma, wEmit, wUnroll,
                wLinearScanEnd, wPatterns, wTrMacros, wEffects, wNoForward,
-               wReorder, wComputedGoto, wExperimental, wThis, wUsed, wInvariant,
-               wAssume, wAssert}">stmtPragmas</a></li>
+               wReorder, wComputedGoto, wExperimental, wDoctype, wThis, wUsed,
+               wInvariant, wAssume, wAssert}">stmtPragmas</a></li>
 <li><a class="reference" href="#stmtPragmasTopLevel" title="stmtPragmasTopLevel = {wChecks, wObjChecks, wFieldChecks, wRangeChecks,
                        wBoundChecks, wOverflowChecks, wNilChecks,
                        wStaticBoundchecks, wStyleChecks, wAssertions, wWarnings,
                        wHints, wLineDir, wStackTrace, wLineTrace, wOptimization,
                        wFloatChecks, wInfChecks, wNanChecks}">stmtPragmasTopLevel</a></li>
 <li><a class="reference" href="#templatePragmas" title="templatePragmas = {wDeprecated, wError, wGensym, wInject, wDirty, wDelegator,
-                   wExportNims, wUsed, wPragma}">templatePragmas</a></li>
+                   wExportNims, wUsed, wPragma, wRedefine}">templatePragmas</a></li>
 <li><a class="reference" href="#typePragmas" title="typePragmas = {wMagic, wFinal, wImportCpp..wImportObjC, wImportc..wRequiresInit,
                wNodecl..wPure, wHeader, wGcSafe, wCompilerProc..wCore, wUsed,
                wError, wDeprecated, wSize, wPackage, wBorrow,
@@ -444,8 +445,8 @@
                <span class="DecNumber">wLink</span><span class="Other">,</span> <span class="DecNumber">wLinksys</span><span class="Other">,</span> <span class="DecNumber">wPure</span><span class="Other">,</span> <span class="DecNumber">wPush</span><span class="Other">,</span> <span class="DecNumber">wPop</span><span class="Other">,</span> <span class="DecNumber">wPassl</span><span class="Other">,</span> <span class="DecNumber">wPassc</span><span class="Other">,</span> <span class="DecNumber">wLocalPassc</span><span class="Other">,</span>
                <span class="DecNumber">wDeadCodeElimUnused</span><span class="Other">,</span> <span class="DecNumber">wDeprecated</span><span class="Other">,</span> <span class="DecNumber">wPragma</span><span class="Other">,</span> <span class="DecNumber">wEmit</span><span class="Other">,</span> <span class="DecNumber">wUnroll</span><span class="Other">,</span>
                <span class="DecNumber">wLinearScanEnd</span><span class="Other">,</span> <span class="DecNumber">wPatterns</span><span class="Other">,</span> <span class="DecNumber">wTrMacros</span><span class="Other">,</span> <span class="DecNumber">wEffects</span><span class="Other">,</span> <span class="DecNumber">wNoForward</span><span class="Other">,</span>
-               <span class="DecNumber">wReorder</span><span class="Other">,</span> <span class="DecNumber">wComputedGoto</span><span class="Other">,</span> <span class="DecNumber">wExperimental</span><span class="Other">,</span> <span class="DecNumber">wThis</span><span class="Other">,</span> <span class="DecNumber">wUsed</span><span class="Other">,</span> <span class="DecNumber">wInvariant</span><span class="Other">,</span>
-               <span class="DecNumber">wAssume</span><span class="Other">,</span> <span class="DecNumber">wAssert</span><span class="Other">}</span></pre></dt>
+               <span class="DecNumber">wReorder</span><span class="Other">,</span> <span class="DecNumber">wComputedGoto</span><span class="Other">,</span> <span class="DecNumber">wExperimental</span><span class="Other">,</span> <span class="DecNumber">wDoctype</span><span class="Other">,</span> <span class="DecNumber">wThis</span><span class="Other">,</span> <span class="DecNumber">wUsed</span><span class="Other">,</span>
+               <span class="DecNumber">wInvariant</span><span class="Other">,</span> <span class="DecNumber">wAssume</span><span class="Other">,</span> <span class="DecNumber">wAssert</span><span class="Other">}</span></pre></dt>
   <dd>
     
     
@@ -470,7 +471,7 @@
 </div>
 <div id="templatePragmas">
   <dt><pre><a href="pragmas.html#templatePragmas"><span class="Identifier">templatePragmas</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="DecNumber">wDeprecated</span><span class="Other">,</span> <span class="DecNumber">wError</span><span class="Other">,</span> <span class="DecNumber">wGensym</span><span class="Other">,</span> <span class="DecNumber">wInject</span><span class="Other">,</span> <span class="DecNumber">wDirty</span><span class="Other">,</span> <span class="DecNumber">wDelegator</span><span class="Other">,</span>
-                   <span class="DecNumber">wExportNims</span><span class="Other">,</span> <span class="DecNumber">wUsed</span><span class="Other">,</span> <span class="DecNumber">wPragma</span><span class="Other">}</span></pre></dt>
+                   <span class="DecNumber">wExportNims</span><span class="Other">,</span> <span class="DecNumber">wUsed</span><span class="Other">,</span> <span class="DecNumber">wPragma</span><span class="Other">,</span> <span class="DecNumber">wRedefine</span><span class="Other">}</span></pre></dt>
   <dd>
     
     
@@ -534,8 +535,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/pragmas.nim#L1299" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/pragmas.nim#L1299" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/pragmas.nim#L1295" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/pragmas.nim#L1295" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -567,8 +568,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/pragmas.nim#L1275" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/pragmas.nim#L1275" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/pragmas.nim#L1271" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/pragmas.nim#L1271" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -600,8 +601,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/pragmas.nim#L1317" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/pragmas.nim#L1317" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/pragmas.nim#L1313" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/pragmas.nim#L1313" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -633,8 +634,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/pragmas.nim#L1324" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/pragmas.nim#L1324" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/pragmas.nim#L1320" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/pragmas.nim#L1320" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -666,7 +667,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-12 01:20:13 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-31 01:35:17 UTC</small>
       </div>
     </div>
   </div>

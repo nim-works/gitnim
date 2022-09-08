@@ -27,12 +27,13 @@
       <h1 class="title">Testament</h1>
       <div class="row">
   <div class="three columns">
-    <div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-        <input type="checkbox" id="checkbox" />
-        <div class="slider round"></div>
-      </label>
-      &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    <div class="theme-select-wrapper">
+      <label for="theme-select">Theme:&nbsp;</label>
+      <select id="theme-select" onchange="setTheme(this.value)">
+        <option value="auto">🌗 Match OS</option>
+        <option value="dark">🌑 Dark</option>
+        <option value="light">🌕 Light</option>
+      </select>
     </div>
     <div id="global-links">
       <ul class="simple-boot">
@@ -90,19 +91,28 @@
 <div class="option-list-item odd"><div class="option-list-label"><tt><span class="option">--skipFrom:file</span></tt></div><div class="option-list-description">Read tests to skip from <tt class="docutils literal"><span class="pre">file</span></tt> - one test per line, # comments ignored</div></div>
 </div>
 <h1><a class="toc-backref" id="running-a-single-test" href="#running-a-single-test">Running a single test</a></h1><p>This is a minimal example to understand the basics, not very useful for production, but easy to understand:</p>
-<pre class="listing"><span class="Prompt">$ </span><span class="program">mkdir</span> <span class="option">tests</span>
+<p><pre class="listing">
+<span class="Prompt">$ </span><span class="program">mkdir</span> <span class="option">tests</span>
 <span class="Prompt">$ </span><span class="program">echo</span> <span class="option">&quot;assert 42 == 42&quot;</span> <span class="option">&gt;</span> <span class="Identifier">tests/test0.nim</span>
 <span class="Prompt">$ </span><span class="program">testament</span> <span class="option">run</span> <span class="Identifier">test0.nim</span>
 <span class="ProgramOutput">PASS: tests/test0.nim C                                    ( 0.2 sec)</span>
 <span class="Prompt">$ </span><span class="program">testament</span> <span class="option">r</span> <span class="option">test0</span>
-<span class="ProgramOutput">PASS: tests/test0.nim C                                    ( 0.2 sec)</span></pre>
-<h1><a class="toc-backref" id="running-all-tests-from-a-directory" href="#running-all-tests-from-a-directory">Running all tests from a directory</a></h1><pre class="listing"><span class="Prompt">$ </span><span class="program">testament</span> <span class="option">pattern</span> <span class="option">&quot;tests/*.nim&quot;</span></pre><p>To search for tests deeper in a directory, use</p>
-<pre class="listing"><span class="Prompt">$ </span><span class="program">testament</span> <span class="option">pattern</span> <span class="option">&quot;tests/**/*.nim&quot;</span>    <span class="Comment"># one level deeper</span>
-<span class="Prompt">$ </span><span class="program">testament</span> <span class="option">pattern</span> <span class="option">&quot;tests/**/**/*.nim&quot;</span> <span class="Comment"># two levels deeper</span></pre>
+<span class="ProgramOutput">PASS: tests/test0.nim C                                    ( 0.2 sec)</span></pre></p>
+
+<h1><a class="toc-backref" id="running-all-tests-from-a-directory" href="#running-all-tests-from-a-directory">Running all tests from a directory</a></h1><p><pre class="listing">
+<span class="Prompt">$ </span><span class="program">testament</span> <span class="option">pattern</span> <span class="option">&quot;tests/*.nim&quot;</span></pre></p>
+<p>To search for tests deeper in a directory, use</p>
+<p><pre class="listing">
+<span class="Prompt">$ </span><span class="program">testament</span> <span class="option">pattern</span> <span class="option">&quot;tests/**/*.nim&quot;</span>    <span class="Comment"># one level deeper</span>
+<span class="Prompt">$ </span><span class="program">testament</span> <span class="option">pattern</span> <span class="option">&quot;tests/**/**/*.nim&quot;</span> <span class="Comment"># two levels deeper</span></pre></p>
+
 <h1><a class="toc-backref" id="html-reports" href="#html-reports">HTML Reports</a></h1><p>Generate HTML Reports <tt class="docutils literal"><span class="pre">testresults.html</span></tt> from unittests, you have to run at least 1 test <em>before</em> generating a report:</p>
-<pre class="listing"><span class="Prompt">$ </span><span class="program">testament</span> <span class="option">html</span></pre>
+<p><pre class="listing">
+<span class="Prompt">$ </span><span class="program">testament</span> <span class="option">html</span></pre></p>
+
 <h1><a class="toc-backref" id="writing-unit-tests" href="#writing-unit-tests">Writing Unit tests</a></h1><p>Example &quot;template&quot; <strong>to edit</strong> and write a Testament unittest:</p>
-<pre class="listing"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
+<p><pre class="listing">
+<span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
   
   # What actions to expect completion on.
   # Options:
@@ -188,7 +198,8 @@ string'''
 
 &quot;&quot;&quot;</span>
 <span class="Identifier">assert</span> <span class="Identifier">true</span>
-<span class="Identifier">assert</span> <span class="DecNumber">42</span> <span class="Operator">==</span> <span class="DecNumber">42</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Assert error message&quot;</span></pre><ul class="simple"><li>As you can see the &quot;Spec&quot; is just a <tt class="docutils literal"><span class="pre"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot; &quot;&quot;&quot;</span></span></tt>.</li>
+<span class="Identifier">assert</span> <span class="DecNumber">42</span> <span class="Operator">==</span> <span class="DecNumber">42</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Assert error message&quot;</span></pre></p>
+<ul class="simple"><li>As you can see the &quot;Spec&quot; is just a <tt class="docutils literal"><span class="pre"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot; &quot;&quot;&quot;</span></span></tt>.</li>
 <li>Spec has sane defaults, so you don't need to provide them all, any simple assert will work just fine.</li>
 <li><a class="reference external" href="https://github.com/nim-lang/Nim/blob/devel/testament/specs.nim#L238">This is not the full spec of Testament, check the Testament Spec on GitHub, see parseSpec().</a></li>
 <li><a class="reference external" href="https://github.com/nim-lang/Nim/tree/devel/tests">Nim itself uses Testament, so there are plenty of test examples.</a></li>
@@ -197,15 +208,20 @@ string'''
 </ul>
 
 <h1><a class="toc-backref" id="unit-test-examples" href="#unit-test-examples">Unit test Examples</a></h1><p>Expected to fail:</p>
-<pre class="listing"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
+<p><pre class="listing">
+<span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
   errormsg: &quot;undeclared identifier: 'not_defined'&quot;
 &quot;&quot;&quot;</span>
-<span class="Identifier">assert</span> <span class="Identifier">not_defined</span> <span class="Operator">==</span> <span class="StringLit">&quot;not_defined&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;not_defined is not defined&quot;</span></pre><p>Non-Zero exit code:</p>
-<pre class="listing"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
+<span class="Identifier">assert</span> <span class="Identifier">not_defined</span> <span class="Operator">==</span> <span class="StringLit">&quot;not_defined&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;not_defined is not defined&quot;</span></pre></p>
+<p>Non-Zero exit code:</p>
+<p><pre class="listing">
+<span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
   exitcode: 1
 &quot;&quot;&quot;</span>
-<span class="Identifier">quit</span> <span class="StringLit">&quot;Non-Zero exit code&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">1</span></pre><p>Standard output checking:</p>
-<pre class="listing"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
+<span class="Identifier">quit</span> <span class="StringLit">&quot;Non-Zero exit code&quot;</span><span class="Punctuation">,</span> <span class="DecNumber">1</span></pre></p>
+<p>Standard output checking:</p>
+<p><pre class="listing">
+<span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
   
   output: '''
 0
@@ -217,18 +233,25 @@ string'''
 '''
 
 &quot;&quot;&quot;</span>
-<span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="FloatNumber">0.</span><span class="Operator">.</span><span class="DecNumber">5</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="Identifier">i</span></pre><p>JavaScript tests:</p>
-<pre class="listing"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
+<span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="FloatNumber">0.</span><span class="Operator">.</span><span class="DecNumber">5</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="Identifier">i</span></pre></p>
+<p>JavaScript tests:</p>
+<p><pre class="listing">
+<span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
   targets: &quot;js&quot;
 &quot;&quot;&quot;</span>
 <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">js</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
   <span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">jsconsole</span>
-  <span class="Identifier">console</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="StringLit">&quot;My Frontend Project&quot;</span><span class="Punctuation">)</span></pre><p>Compile-time tests:</p>
-<pre class="listing"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
+  <span class="Identifier">console</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="StringLit">&quot;My Frontend Project&quot;</span><span class="Punctuation">)</span></pre></p>
+<p>Compile-time tests:</p>
+<p><pre class="listing">
+<span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
   action: &quot;compile&quot;
 &quot;&quot;&quot;</span>
-<span class="Keyword">static</span><span class="Punctuation">:</span> <span class="Identifier">assert</span> <span class="DecNumber">9</span> <span class="Operator">==</span> <span class="DecNumber">9</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Compile time assert&quot;</span></pre><p>Tests without Spec:</p>
-<pre class="listing"><span class="Identifier">assert</span> <span class="DecNumber">1</span> <span class="Operator">==</span> <span class="DecNumber">1</span></pre><p>See also:</p>
+<span class="Keyword">static</span><span class="Punctuation">:</span> <span class="Identifier">assert</span> <span class="DecNumber">9</span> <span class="Operator">==</span> <span class="DecNumber">9</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Compile time assert&quot;</span></pre></p>
+<p>Tests without Spec:</p>
+<p><pre class="listing">
+<span class="Identifier">assert</span> <span class="DecNumber">1</span> <span class="Operator">==</span> <span class="DecNumber">1</span></pre></p>
+<p>See also:</p>
 <ul class="simple"><li><a class="reference external" href="unittest.html">Unittest</a></li>
 </ul>
 </p>
@@ -239,7 +262,7 @@ string'''
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-12 01:18:04 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-31 01:33:13 UTC</small>
       </div>
     </div>
   </div>

@@ -27,12 +27,13 @@
       <h1 class="title">std/tables</h1>
       <div class="row">
   <div class="three columns">
-    <div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-        <input type="checkbox" id="checkbox" />
-        <div class="slider round"></div>
-      </label>
-      &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    <div class="theme-select-wrapper">
+      <label for="theme-select">Theme:&nbsp;</label>
+      <select id="theme-select" onchange="setTheme(this.value)">
+        <option value="auto">🌗 Match OS</option>
+        <option value="dark">🌑 Dark</option>
+        <option value="light">🌕 Light</option>
+      </select>
     </div>
     <div id="global-links">
       <ul class="simple-boot">
@@ -188,10 +189,10 @@
 
 </ul>
 <ul class="simple nested-toc-section">hasKeyOrPut
-  <li><a class="reference" href="#hasKeyOrPut%2COrderedTable%5BA%2CB%5D%2CA%2CB" title="hasKeyOrPut[A, B](t: var OrderedTable[A, B]; key: A; val: B): bool">hasKeyOrPut[A, B](t: var OrderedTable[A, B]; key: A; val: B): bool</a></li>
-<li><a class="reference" href="#hasKeyOrPut%2COrderedTableRef%5BA%2CB%5D%2CA%2CB" title="hasKeyOrPut[A, B](t: var OrderedTableRef[A, B]; key: A; val: B): bool">hasKeyOrPut[A, B](t: var OrderedTableRef[A, B]; key: A; val: B): bool</a></li>
+  <li><a class="reference" href="#hasKeyOrPut%2COrderedTableRef%5BA%2CB%5D%2CA%2CB" title="hasKeyOrPut[A, B](t: OrderedTableRef[A, B]; key: A; val: B): bool">hasKeyOrPut[A, B](t: OrderedTableRef[A, B]; key: A; val: B): bool</a></li>
+<li><a class="reference" href="#hasKeyOrPut%2CTableRef%5BA%2CB%5D%2CA%2CB" title="hasKeyOrPut[A, B](t: TableRef[A, B]; key: A; val: B): bool">hasKeyOrPut[A, B](t: TableRef[A, B]; key: A; val: B): bool</a></li>
+<li><a class="reference" href="#hasKeyOrPut%2COrderedTable%5BA%2CB%5D%2CA%2CB" title="hasKeyOrPut[A, B](t: var OrderedTable[A, B]; key: A; val: B): bool">hasKeyOrPut[A, B](t: var OrderedTable[A, B]; key: A; val: B): bool</a></li>
 <li><a class="reference" href="#hasKeyOrPut%2CTable%5BA%2CB%5D%2CA%2CB" title="hasKeyOrPut[A, B](t: var Table[A, B]; key: A; val: B): bool">hasKeyOrPut[A, B](t: var Table[A, B]; key: A; val: B): bool</a></li>
-<li><a class="reference" href="#hasKeyOrPut%2CTableRef%5BA%2CB%5D%2CA%2CB" title="hasKeyOrPut[A, B](t: var TableRef[A, B]; key: A; val: B): bool">hasKeyOrPut[A, B](t: var TableRef[A, B]; key: A; val: B): bool</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">inc
@@ -1780,7 +1781,55 @@ If duplicate keys were added (via the now deprecated <tt class="docutils literal
 
 </div>
 <div id="hasKeyOrPut-procs-all">
-  <div id="hasKeyOrPut,OrderedTable[A,B],A,B">
+  <div id="hasKeyOrPut,OrderedTableRef[A,B],A,B">
+  <dt><pre><span class="Keyword">proc</span> <a href="#hasKeyOrPut%2COrderedTableRef%5BA%2CB%5D%2CA%2CB"><span class="Identifier">hasKeyOrPut</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <a href="tables.html#OrderedTableRef"><span class="Identifier">OrderedTableRef</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <span class="Identifier">A</span><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">B</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a></pre></dt>
+  <dd>
+    
+    <p>Returns true if <tt class="docutils literal"><span class="pre"><span class="Identifier">key</span></span></tt> is in the table, otherwise inserts <tt class="docutils literal"><span class="pre"><span class="Identifier">value</span></span></tt>.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#hasKey,OrderedTableRef[A,B],A">hasKey proc</a></li>
+<li><a class="reference external" href="#[],OrderedTableRef[A,B],A">[] proc</a> for retrieving a value of a key</li>
+<li><a class="reference external" href="#getOrDefault,OrderedTableRef[A,B],A">getOrDefault proc</a> to return a default value (e.g. zero for int) if the key doesn't exist</li>
+<li><a class="reference external" href="#getOrDefault,OrderedTableRef[A,B],A,B">getOrDefault proc</a> to return a custom value if the key doesn't exist</li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">5</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">newOrderedTable</span>
+<span class="Keyword">if</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">hasKeyOrPut</span><span class="Punctuation">(</span><span class="CharLit">'a'</span><span class="Punctuation">,</span> <span class="DecNumber">50</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Identifier">a</span><span class="Punctuation">[</span><span class="CharLit">'a'</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="DecNumber">99</span>
+<span class="Keyword">if</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">hasKeyOrPut</span><span class="Punctuation">(</span><span class="CharLit">'z'</span><span class="Punctuation">,</span> <span class="DecNumber">50</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Identifier">a</span><span class="Punctuation">[</span><span class="CharLit">'z'</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="DecNumber">99</span>
+<span class="Identifier">doAssert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">99</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">,</span> <span class="CharLit">'z'</span><span class="Punctuation">:</span> <span class="DecNumber">50</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">newOrderedTable</span></pre>
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/tables.nim#L1911" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/tables.nim#L1911" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+<div id="hasKeyOrPut,TableRef[A,B],A,B">
+  <dt><pre><span class="Keyword">proc</span> <a href="#hasKeyOrPut%2CTableRef%5BA%2CB%5D%2CA%2CB"><span class="Identifier">hasKeyOrPut</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <a href="tables.html#TableRef"><span class="Identifier">TableRef</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <span class="Identifier">A</span><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">B</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a></pre></dt>
+  <dd>
+    
+    <p>Returns true if <tt class="docutils literal"><span class="pre"><span class="Identifier">key</span></span></tt> is in the table, otherwise inserts <tt class="docutils literal"><span class="pre"><span class="Identifier">value</span></span></tt>.</p>
+<p>See also:</p>
+<ul class="simple"><li><a class="reference external" href="#hasKey,TableRef[A,B],A">hasKey proc</a></li>
+<li><a class="reference external" href="#[],TableRef[A,B],A">[] proc</a> for retrieving a value of a key</li>
+<li><a class="reference external" href="#getOrDefault,TableRef[A,B],A">getOrDefault proc</a> to return a default value (e.g. zero for int) if the key doesn't exist</li>
+<li><a class="reference external" href="#getOrDefault,TableRef[A,B],A,B">getOrDefault proc</a> to return a custom value if the key doesn't exist</li>
+</ul>
+
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">5</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">newTable</span>
+<span class="Keyword">if</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">hasKeyOrPut</span><span class="Punctuation">(</span><span class="CharLit">'a'</span><span class="Punctuation">,</span> <span class="DecNumber">50</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Identifier">a</span><span class="Punctuation">[</span><span class="CharLit">'a'</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="DecNumber">99</span>
+<span class="Keyword">if</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">hasKeyOrPut</span><span class="Punctuation">(</span><span class="CharLit">'z'</span><span class="Punctuation">,</span> <span class="DecNumber">50</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Identifier">a</span><span class="Punctuation">[</span><span class="CharLit">'z'</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="DecNumber">99</span>
+<span class="Identifier">doAssert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">99</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">,</span> <span class="CharLit">'z'</span><span class="Punctuation">:</span> <span class="DecNumber">50</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">newTable</span></pre>
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/tables.nim#L920" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/tables.nim#L920" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+<div id="hasKeyOrPut,OrderedTable[A,B],A,B">
   <dt><pre><span class="Keyword">proc</span> <a href="#hasKeyOrPut%2COrderedTable%5BA%2CB%5D%2CA%2CB"><span class="Identifier">hasKeyOrPut</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="tables.html#OrderedTable"><span class="Identifier">OrderedTable</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <span class="Identifier">A</span><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">B</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a></pre></dt>
   <dd>
     
@@ -1801,30 +1850,6 @@ If duplicate keys were added (via the now deprecated <tt class="docutils literal
 <span class="Identifier">doAssert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">99</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">,</span> <span class="CharLit">'z'</span><span class="Punctuation">:</span> <span class="DecNumber">50</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">toOrderedTable</span></pre>
     <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/tables.nim#L1425" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/tables.nim#L1425" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
-
-  </dd>
-</div>
-<div id="hasKeyOrPut,OrderedTableRef[A,B],A,B">
-  <dt><pre><span class="Keyword">proc</span> <a href="#hasKeyOrPut%2COrderedTableRef%5BA%2CB%5D%2CA%2CB"><span class="Identifier">hasKeyOrPut</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="tables.html#OrderedTableRef"><span class="Identifier">OrderedTableRef</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <span class="Identifier">A</span><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">B</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a></pre></dt>
-  <dd>
-    
-    <p>Returns true if <tt class="docutils literal"><span class="pre"><span class="Identifier">key</span></span></tt> is in the table, otherwise inserts <tt class="docutils literal"><span class="pre"><span class="Identifier">value</span></span></tt>.</p>
-<p>See also:</p>
-<ul class="simple"><li><a class="reference external" href="#hasKey,OrderedTableRef[A,B],A">hasKey proc</a></li>
-<li><a class="reference external" href="#[],OrderedTableRef[A,B],A">[] proc</a> for retrieving a value of a key</li>
-<li><a class="reference external" href="#getOrDefault,OrderedTableRef[A,B],A">getOrDefault proc</a> to return a default value (e.g. zero for int) if the key doesn't exist</li>
-<li><a class="reference external" href="#getOrDefault,OrderedTableRef[A,B],A,B">getOrDefault proc</a> to return a custom value if the key doesn't exist</li>
-</ul>
-
-<p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">5</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">newOrderedTable</span>
-<span class="Keyword">if</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">hasKeyOrPut</span><span class="Punctuation">(</span><span class="CharLit">'a'</span><span class="Punctuation">,</span> <span class="DecNumber">50</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-  <span class="Identifier">a</span><span class="Punctuation">[</span><span class="CharLit">'a'</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="DecNumber">99</span>
-<span class="Keyword">if</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">hasKeyOrPut</span><span class="Punctuation">(</span><span class="CharLit">'z'</span><span class="Punctuation">,</span> <span class="DecNumber">50</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-  <span class="Identifier">a</span><span class="Punctuation">[</span><span class="CharLit">'z'</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="DecNumber">99</span>
-<span class="Identifier">doAssert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">99</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">,</span> <span class="CharLit">'z'</span><span class="Punctuation">:</span> <span class="DecNumber">50</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">newOrderedTable</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/tables.nim#L1911" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/tables.nim#L1911" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1849,30 +1874,6 @@ If duplicate keys were added (via the now deprecated <tt class="docutils literal
 <span class="Identifier">doAssert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">99</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">,</span> <span class="CharLit">'z'</span><span class="Punctuation">:</span> <span class="DecNumber">50</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">toTable</span></pre>
     <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/tables.nim#L383" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/tables.nim#L383" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
-
-  </dd>
-</div>
-<div id="hasKeyOrPut,TableRef[A,B],A,B">
-  <dt><pre><span class="Keyword">proc</span> <a href="#hasKeyOrPut%2CTableRef%5BA%2CB%5D%2CA%2CB"><span class="Identifier">hasKeyOrPut</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">t</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="tables.html#TableRef"><span class="Identifier">TableRef</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">,</span> <span class="Identifier">B</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">:</span> <span class="Identifier">A</span><span class="Other">;</span> <span class="Identifier">val</span><span class="Other">:</span> <span class="Identifier">B</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a></pre></dt>
-  <dd>
-    
-    <p>Returns true if <tt class="docutils literal"><span class="pre"><span class="Identifier">key</span></span></tt> is in the table, otherwise inserts <tt class="docutils literal"><span class="pre"><span class="Identifier">value</span></span></tt>.</p>
-<p>See also:</p>
-<ul class="simple"><li><a class="reference external" href="#hasKey,TableRef[A,B],A">hasKey proc</a></li>
-<li><a class="reference external" href="#[],TableRef[A,B],A">[] proc</a> for retrieving a value of a key</li>
-<li><a class="reference external" href="#getOrDefault,TableRef[A,B],A">getOrDefault proc</a> to return a default value (e.g. zero for int) if the key doesn't exist</li>
-<li><a class="reference external" href="#getOrDefault,TableRef[A,B],A,B">getOrDefault proc</a> to return a custom value if the key doesn't exist</li>
-</ul>
-
-<p><strong class="examples_text">Example:</strong></p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">5</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">newTable</span>
-<span class="Keyword">if</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">hasKeyOrPut</span><span class="Punctuation">(</span><span class="CharLit">'a'</span><span class="Punctuation">,</span> <span class="DecNumber">50</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-  <span class="Identifier">a</span><span class="Punctuation">[</span><span class="CharLit">'a'</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="DecNumber">99</span>
-<span class="Keyword">if</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">hasKeyOrPut</span><span class="Punctuation">(</span><span class="CharLit">'z'</span><span class="Punctuation">,</span> <span class="DecNumber">50</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-  <span class="Identifier">a</span><span class="Punctuation">[</span><span class="CharLit">'z'</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="DecNumber">99</span>
-<span class="Identifier">doAssert</span> <span class="Identifier">a</span> <span class="Operator">==</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Punctuation">:</span> <span class="DecNumber">99</span><span class="Punctuation">,</span> <span class="CharLit">'b'</span><span class="Punctuation">:</span> <span class="DecNumber">9</span><span class="Punctuation">,</span> <span class="CharLit">'z'</span><span class="Punctuation">:</span> <span class="DecNumber">50</span><span class="Punctuation">}</span><span class="Operator">.</span><span class="Identifier">newTable</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/tables.nim#L920" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/tables.nim#L920" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3593,7 +3594,7 @@ This is destructive! Once sorted, you must not modify <tt class="docutils litera
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-12 01:19:40 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-31 01:34:44 UTC</small>
       </div>
     </div>
   </div>

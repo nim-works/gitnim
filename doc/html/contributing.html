@@ -27,12 +27,13 @@
       <h1 class="title">Contributing</h1>
       <div class="row">
   <div class="three columns">
-    <div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-        <input type="checkbox" id="checkbox" />
-        <div class="slider round"></div>
-      </label>
-      &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    <div class="theme-select-wrapper">
+      <label for="theme-select">Theme:&nbsp;</label>
+      <select id="theme-select" onchange="setTheme(this.value)">
+        <option value="auto">🌗 Match OS</option>
+        <option value="dark">🌑 Dark</option>
+        <option value="light">🌕 Light</option>
+      </select>
     </div>
     <div id="global-links">
       <ul class="simple-boot">
@@ -375,83 +376,108 @@
 <li>Within documentation, a period (<tt class="docutils literal"><span class="pre"><span class="Operator">.</span></span></tt>) should follow each sentence (or sentence fragment) in a comment block. The documentation may be limited to one sentence fragment, but if multiple sentences are within the documentation, each sentence after the first should be complete and in present tense.</li>
 <li>Documentation is parsed as a custom ReStructuredText (RST) with partial markdown support.</li>
 <li>In nim sources, prefer single backticks to double backticks since it's simpler and <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">doc</span></span></tt> supports it. Likewise with <tt class="docutils literal"><span class="pre">rst</span></tt> files: <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">rst2html</span></span></tt> will render those as monospace, and adding <tt class="docutils literal"><span class="pre">.. default-role:: code</span></tt> to an <tt class="docutils literal"><span class="pre">rst</span></tt> file will also make those render as monospace when rendered directly in tools such as github.</li>
-<li>(debatable) In nim sources, for links, prefer <tt class="docutils literal"><span class="pre">[link text](link.html)</span></tt> to <tt class="docutils literal"><span class="pre">`link text&lt;link.html&gt;`_</span></tt> since the syntax is simpler and markdown is more common (likewise, <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">rst2html</span></span></tt> also supports it in <tt class="docutils literal"><span class="pre">rst</span></tt> files).</li>
-</ul>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">someproc</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">foo</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+<li><p>(debatable) In nim sources, for links, prefer <tt class="docutils literal"><span class="pre">[link text](link.html)</span></tt> to <tt class="docutils literal"><span class="pre">`link text&lt;link.html&gt;`_</span></tt> since the syntax is simpler and markdown is more common (likewise, <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">rst2html</span></span></tt> also supports it in <tt class="docutils literal"><span class="pre">rst</span></tt> files).</p>
+<p><pre class="listing">
+<span class="Keyword">proc</span> <span class="Identifier">someproc</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">foo</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span>
   <span class="Comment">## Use single backticks for inline code, e.g.: `s` or `someExpr(true)`.</span>
-  <span class="Comment">## Use a backlash to follow with alphanumeric char: `int8`\s are great.</span></pre>
+  <span class="Comment">## Use a backlash to follow with alphanumeric char: `int8`\s are great.</span></pre></p>
+</li>
+</ul>
+
 <h2><a class="toc-backref" id="documentation-style-moduleminuslevel-documentation" href="#documentation-style-moduleminuslevel-documentation">Module-level documentation</a></h2><p>Documentation of a module is placed at the top of the module itself. Each line of documentation begins with double hashes (<tt class="docutils literal"><span class="pre"><span class="Comment">##</span></span></tt>). Sometimes <tt class="docutils literal"><span class="pre"><span class="LongComment">##[ multiline docs containing code ]##</span></span></tt> is preferable, see <tt class="docutils literal"><span class="pre">lib/pure/times.nim</span></tt>. Code samples are encouraged, and should follow the general RST syntax:</p>
-<pre class="listing"><span class="Comment">## The `universe` module computes the answer to life, the universe, and everything.</span>
+<p><pre class="listing">
+<span class="Comment">## The `universe` module computes the answer to life, the universe, and everything.</span>
 <span class="Comment">##</span>
-<span class="Comment">## .. code-block::</span>
-<span class="Comment">##  doAssert computeAnswerString() == 42</span></pre><p>Within this top-level comment, you can indicate the authorship and copyright of the code, which will be featured in the produced documentation.</p>
-<pre class="listing"><span class="Comment">## This is the best module ever. It provides answers to everything!</span>
+<span class="Comment">##   ```</span>
+<span class="Comment">##   doAssert computeAnswerString() == 42</span>
+<span class="Comment">##   ```</span></pre></p>
+<p>Within this top-level comment, you can indicate the authorship and copyright of the code, which will be featured in the produced documentation.</p>
+<p><pre class="listing">
+<span class="Comment">## This is the best module ever. It provides answers to everything!</span>
 <span class="Comment">##</span>
 <span class="Comment">## :Author: Steve McQueen</span>
 <span class="Comment">## :Copyright: 1965</span>
-<span class="Comment">##</span></pre><p>Leave a space between the last line of top-level documentation and the beginning of Nim code (the imports, etc.).</p>
+<span class="Comment">##</span></pre></p>
+<p>Leave a space between the last line of top-level documentation and the beginning of Nim code (the imports, etc.).</p>
 
 <h2><a class="toc-backref" id="documentation-style-procs-templates-macros-converters-and-iterators" href="#documentation-style-procs-templates-macros-converters-and-iterators">Procs, Templates, Macros, Converters, and Iterators</a></h2><p>The documentation of a procedure should begin with a capital letter and should be in present tense. Variables referenced in the documentation should be surrounded by single tick marks:</p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">example1</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+<p><pre class="listing">
+<span class="Keyword">proc</span> <span class="Identifier">example1</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span>
   <span class="Comment">## Prints the value of `x`.</span>
-  <span class="Identifier">echo</span> <span class="Identifier">x</span></pre><p>Whenever an example of usage would be helpful to the user, you should include one within the documentation in RST format as below.</p>
-<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">addThree</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">,</span> <span class="Identifier">z</span><span class="Punctuation">:</span> <span class="Identifier">int8</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span>
+  <span class="Identifier">echo</span> <span class="Identifier">x</span></pre></p>
+<p>Whenever an example of usage would be helpful to the user, you should include one within the documentation in RST format as below.</p>
+<p><pre class="listing">
+<span class="Keyword">proc</span> <span class="Identifier">addThree</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">,</span> <span class="Identifier">z</span><span class="Punctuation">:</span> <span class="Identifier">int8</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span>
   <span class="Comment">## Adds three `int8` values, treating them as unsigned and</span>
   <span class="Comment">## truncating the result.</span>
   <span class="Comment">##</span>
-  <span class="Comment">## .. code-block::</span>
-  <span class="Comment">##  # things that aren't suitable for a `runnableExamples` go in code-block:</span>
-  <span class="Comment">##  echo execCmdEx(&quot;git pull&quot;)</span>
-  <span class="Comment">##  drawOnScreen()</span>
+  <span class="Comment">##   ```</span>
+  <span class="Comment">##   # things that aren't suitable for a `runnableExamples` go in code block:</span>
+  <span class="Comment">##   echo execCmdEx(&quot;git pull&quot;)</span>
+  <span class="Comment">##   drawOnScreen()</span>
+  <span class="Comment">##   ```</span>
   <span class="Identifier">runnableExamples</span><span class="Punctuation">:</span>
-    <span class="Comment"># `runnableExamples` is usually preferred to ``code-block``, when possible.</span>
+    <span class="Comment"># `runnableExamples` is usually preferred to code blocks, when possible.</span>
     <span class="Identifier">doAssert</span> <span class="Identifier">addThree</span><span class="Punctuation">(</span><span class="DecNumber">3</span><span class="Punctuation">,</span> <span class="DecNumber">125</span><span class="Punctuation">,</span> <span class="DecNumber">6</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">-</span><span class="DecNumber">122</span>
-  <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Operator">+%</span> <span class="Identifier">y</span> <span class="Operator">+%</span> <span class="Identifier">z</span></pre><p>The command <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">doc</span></span></tt> will then correctly syntax highlight the Nim code within the documentation.</p>
+  <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">x</span> <span class="Operator">+%</span> <span class="Identifier">y</span> <span class="Operator">+%</span> <span class="Identifier">z</span></pre></p>
+<p>The command <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">doc</span></span></tt> will then correctly syntax highlight the Nim code within the documentation.</p>
 
 <h2><a class="toc-backref" id="documentation-style-types" href="#documentation-style-types">Types</a></h2><p>Exported types should also be documented. This documentation can also contain code samples, but those are better placed with the functions to which they refer.</p>
-<pre class="listing"><span class="Keyword">type</span>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">NamedQueue</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Comment">## Provides a linked data structure with names</span>
                           <span class="Comment">## throughout. It is named for convenience. I'm making</span>
                           <span class="Comment">## this comment long to show how you can, too.</span>
     <span class="Identifier">name</span><span class="Operator">*:</span> <span class="Identifier">string</span> <span class="Comment">## The name of the item</span>
     <span class="Identifier">val</span><span class="Operator">*:</span> <span class="Identifier">T</span> <span class="Comment">## Its value</span>
-    <span class="Identifier">next</span><span class="Operator">*:</span> <span class="Keyword">ref</span> <span class="Identifier">NamedQueue</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Comment">## The next item in the queue</span></pre><p>You have some flexibility when placing the documentation:</p>
-<pre class="listing"><span class="Keyword">type</span>
+    <span class="Identifier">next</span><span class="Operator">*:</span> <span class="Keyword">ref</span> <span class="Identifier">NamedQueue</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Comment">## The next item in the queue</span></pre></p>
+<p>You have some flexibility when placing the documentation:</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">NamedQueue</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Keyword">object</span>
     <span class="Comment">## Provides a linked data structure with names</span>
     <span class="Comment">## throughout. It is named for convenience. I'm making</span>
     <span class="Comment">## this comment long to show how you can, too.</span>
     <span class="Identifier">name</span><span class="Operator">*:</span> <span class="Identifier">string</span> <span class="Comment">## The name of the item</span>
     <span class="Identifier">val</span><span class="Operator">*:</span> <span class="Identifier">T</span> <span class="Comment">## Its value</span>
-    <span class="Identifier">next</span><span class="Operator">*:</span> <span class="Keyword">ref</span> <span class="Identifier">NamedQueue</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Comment">## The next item in the queue</span></pre><p>Make sure to place the documentation beside or within the object.</p>
-<pre class="listing"><span class="Keyword">type</span>
+    <span class="Identifier">next</span><span class="Operator">*:</span> <span class="Keyword">ref</span> <span class="Identifier">NamedQueue</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Comment">## The next item in the queue</span></pre></p>
+<p>Make sure to place the documentation beside or within the object.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Comment">## Bad: this documentation disappears because it annotates the `type` keyword</span>
   <span class="Comment">## above, not `NamedQueue`.</span>
   <span class="Identifier">NamedQueue</span><span class="Operator">*</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Keyword">object</span>
     <span class="Identifier">name</span><span class="Operator">*:</span> <span class="Identifier">string</span> <span class="Comment">## This becomes the main documentation for the object, which</span>
                   <span class="Comment">## is not what we want.</span>
     <span class="Identifier">val</span><span class="Operator">*:</span> <span class="Identifier">T</span> <span class="Comment">## Its value</span>
-    <span class="Identifier">next</span><span class="Operator">*:</span> <span class="Keyword">ref</span> <span class="Identifier">NamedQueue</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Comment">## The next item in the queue</span></pre>
+    <span class="Identifier">next</span><span class="Operator">*:</span> <span class="Keyword">ref</span> <span class="Identifier">NamedQueue</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Comment">## The next item in the queue</span></pre></p>
+
 <h2><a class="toc-backref" id="documentation-style-var-let-and-const" href="#documentation-style-var-let-and-const">Var, Let, and Const</a></h2><p>When declaring module-wide constants and values, documentation is encouraged. The placement of doc comments is similar to the <tt class="docutils literal"><span class="pre"><span class="Keyword">type</span></span></tt> sections.</p>
-<pre class="listing"><span class="Keyword">const</span>
+<p><pre class="listing">
+<span class="Keyword">const</span>
   <span class="Identifier">X</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="DecNumber">42</span> <span class="Comment">## An awesome number.</span>
   <span class="Identifier">SpreadArray</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="Punctuation">[</span>
     <span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span><span class="DecNumber">2</span><span class="Punctuation">,</span><span class="DecNumber">3</span><span class="Punctuation">]</span><span class="Punctuation">,</span>
     <span class="Punctuation">[</span><span class="DecNumber">2</span><span class="Punctuation">,</span><span class="DecNumber">3</span><span class="Punctuation">,</span><span class="DecNumber">1</span><span class="Punctuation">]</span><span class="Punctuation">,</span>
     <span class="Punctuation">[</span><span class="DecNumber">3</span><span class="Punctuation">,</span><span class="DecNumber">1</span><span class="Punctuation">,</span><span class="DecNumber">2</span><span class="Punctuation">]</span><span class="Punctuation">,</span>
-  <span class="Punctuation">]</span> <span class="Comment">## Doc comment for `SpreadArray`.</span></pre><p>Placement of comments in other areas is usually allowed, but will not become part of the documentation output and should therefore be prefaced by a single hash (<tt class="docutils literal"><span class="pre"><span class="Comment">#</span></span></tt>).</p>
-<pre class="listing"><span class="Keyword">const</span>
+  <span class="Punctuation">]</span> <span class="Comment">## Doc comment for `SpreadArray`.</span></pre></p>
+<p>Placement of comments in other areas is usually allowed, but will not become part of the documentation output and should therefore be prefaced by a single hash (<tt class="docutils literal"><span class="pre"><span class="Comment">#</span></span></tt>).</p>
+<p><pre class="listing">
+<span class="Keyword">const</span>
   <span class="Identifier">BadMathVals</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="Punctuation">[</span>
     <span class="FloatNumber">3.14</span><span class="Punctuation">,</span> <span class="Comment"># pi</span>
     <span class="FloatNumber">2.72</span><span class="Punctuation">,</span> <span class="Comment"># e</span>
     <span class="FloatNumber">0.58</span><span class="Punctuation">,</span> <span class="Comment"># gamma</span>
-  <span class="Punctuation">]</span> <span class="Comment">## A bunch of badly rounded values.</span></pre><p>Nim supports Unicode in comments, so the above can be replaced with the following:</p>
-<pre class="listing"><span class="Keyword">const</span>
+  <span class="Punctuation">]</span> <span class="Comment">## A bunch of badly rounded values.</span></pre></p>
+<p>Nim supports Unicode in comments, so the above can be replaced with the following:</p>
+<p><pre class="listing">
+<span class="Keyword">const</span>
   <span class="Identifier">BadMathVals</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="Punctuation">[</span>
     <span class="FloatNumber">3.14</span><span class="Punctuation">,</span> <span class="Comment"># π</span>
     <span class="FloatNumber">2.72</span><span class="Punctuation">,</span> <span class="Comment"># e</span>
     <span class="FloatNumber">0.58</span><span class="Punctuation">,</span> <span class="Comment"># γ</span>
-  <span class="Punctuation">]</span> <span class="Comment">## A bunch of badly rounded values (including π!).</span></pre>
+  <span class="Punctuation">]</span> <span class="Comment">## A bunch of badly rounded values (including π!).</span></pre></p>
+
 <h1><a class="toc-backref" id="evolving-the-stdlib" href="#evolving-the-stdlib">Evolving the stdlib</a></h1><p>As outlined in <a class="reference external" href="https://github.com/nim-lang/RFCs/issues/173">https://github.com/nim-lang/RFCs/issues/173</a> there are a couple of guidelines about what should go into the stdlib, what should be added and what eventually should be removed.</p>
 
 <h2><a class="toc-backref" id="evolving-the-stdlib-what-the-compiler-itself-needs-must-be-part-of-the-stdlib" href="#evolving-the-stdlib-what-the-compiler-itself-needs-must-be-part-of-the-stdlib">What the compiler itself needs must be part of the stdlib</a></h2><p>Maybe in the future the compiler itself can depend on Nimble packages but for the time being, we strive to have zero dependencies in the compiler as the compiler is the root of the bootstrapping process and is also used to build Nimble.</p>
@@ -522,7 +548,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-12 01:17:59 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-31 01:33:08 UTC</small>
       </div>
     </div>
   </div>

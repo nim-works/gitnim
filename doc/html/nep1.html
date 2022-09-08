@@ -27,12 +27,13 @@
       <h1 class="title">Standard Library Style Guide</h1>
       <div class="row">
   <div class="three columns">
-    <div class="theme-switch-wrapper">
-      <label class="theme-switch" for="checkbox">
-        <input type="checkbox" id="checkbox" />
-        <div class="slider round"></div>
-      </label>
-      &nbsp;&nbsp;&nbsp; <em>Dark Mode</em>
+    <div class="theme-select-wrapper">
+      <label for="theme-select">Theme:&nbsp;</label>
+      <select id="theme-select" onchange="setTheme(this.value)">
+        <option value="auto">🌗 Match OS</option>
+        <option value="dark">🌑 Dark</option>
+        <option value="light">🌕 Light</option>
+      </select>
     </div>
     <div id="global-links">
       <ul class="simple-boot">
@@ -58,11 +59,11 @@
 
     <ul class="simple simple-toc" id="toc-list">
   <li><a class="reference" id="introduction_toc" href="#introduction">Introduction</a></li>
-<ul class="simple"><li><a class="reference" id="introduction-spacing-and-whitespace-conventions_toc" href="#introduction-spacing-and-whitespace-conventions">Spacing and Whitespace Conventions</a></li>
-<li><a class="reference" id="introduction-naming-conventions_toc" href="#introduction-naming-conventions">Naming Conventions</a></li>
-<li><a class="reference" id="introduction-coding-conventions_toc" href="#introduction-coding-conventions">Coding Conventions</a></li>
-<li><a class="reference" id="introduction-conventions-for-multiminusline-statements-and-expressions_toc" href="#introduction-conventions-for-multiminusline-statements-and-expressions">Conventions for multi-line statements and expressions</a></li>
-<li><a class="reference" id="introduction-miscellaneous_toc" href="#introduction-miscellaneous">Miscellaneous</a></li>
+<ul class="simple"><li><a class="reference" id="style-guidelines-spacing-and-whitespace-conventions_toc" href="#style-guidelines-spacing-and-whitespace-conventions">Spacing and Whitespace Conventions</a></li>
+<li><a class="reference" id="style-guidelines-naming-conventions_toc" href="#style-guidelines-naming-conventions">Naming Conventions</a></li>
+<li><a class="reference" id="style-guidelines-coding-conventions_toc" href="#style-guidelines-coding-conventions">Coding Conventions</a></li>
+<li><a class="reference" id="style-guidelines-conventions-for-multiminusline-statements-and-expressions_toc" href="#style-guidelines-conventions-for-multiminusline-statements-and-expressions">Conventions for multi-line statements and expressions</a></li>
+<li><a class="reference" id="style-guidelines-miscellaneous_toc" href="#style-guidelines-miscellaneous">Miscellaneous</a></li>
 </ul>
 </ul>
 
@@ -79,10 +80,12 @@
 <h1><a class="toc-backref" id="introduction" href="#introduction">Introduction</a></h1><p>Although Nim supports a variety of code and formatting styles, it is nevertheless beneficial that certain community efforts, such as the standard library, should follow a consistent set of style guidelines when suitable. This enhancement proposal aims to list a series of guidelines that the standard library should follow.</p>
 <p>Note that there can be exceptions to these rules. Nim being as flexible as it is, there will be parts of this style guide that don't make sense in certain contexts. Furthermore, just as <a class="reference external" href="http://legacy.python.org/dev/peps/pep-0008/">Python's style guide</a> changes over time, this style guide will too.</p>
 <p>These rules will only be enforced for contributions to the Nim codebase and official projects, such as the Nim compiler, the standard library, and the various official tools such as C2Nim.</p>
-<h2 id="style-guidelines"><center>Style Guidelines</center></h2>
-<h3><a class="toc-backref" id="introduction-spacing-and-whitespace-conventions" href="#introduction-spacing-and-whitespace-conventions">Spacing and Whitespace Conventions</a></h3><ul class="simple"><li>Lines should be no longer than 80 characters. Limiting the amount of information present on each line makes for more readable code - the reader has smaller chunks to process.</li>
+<h2 id="introduction-style-guidelines"><center>Style Guidelines</center></h2>
+<h3><a class="toc-backref" id="style-guidelines-spacing-and-whitespace-conventions" href="#style-guidelines-spacing-and-whitespace-conventions">Spacing and Whitespace Conventions</a></h3><ul class="simple"><li>Lines should be no longer than 80 characters. Limiting the amount of information present on each line makes for more readable code - the reader has smaller chunks to process.</li>
 <li>Two spaces should be used for indentation of blocks; tabstops are not allowed (the compiler enforces this). Using spaces means that the appearance of code is more consistent across editors. Unlike spaces, tabstop width varies across editors, and not all editors provide means of changing this width.</li>
-<li>Although use of whitespace for stylistic reasons other than the ones endorsed by this guide are allowed, careful thought should be put into such practices. Not all editors support automatic alignment of code sections, and re-aligning long sections of code by hand can quickly become tedious.<pre class="listing"><span class="Comment"># This is bad, as the next time someone comes</span>
+<li><p>Although use of whitespace for stylistic reasons other than the ones endorsed by this guide are allowed, careful thought should be put into such practices. Not all editors support automatic alignment of code sections, and re-aligning long sections of code by hand can quickly become tedious.</p>
+<p><pre class="listing">
+<span class="Comment"># This is bad, as the next time someone comes</span>
 <span class="Comment"># to edit this code block, they</span>
 <span class="Comment"># must re-align all the assignments again:</span>
 <span class="Keyword">type</span>
@@ -91,10 +94,13 @@
   <span class="Operator">...</span> <span class="Comment"># 5 lines later</span>
   <span class="Identifier">CalId</span><span class="Operator">*</span>       <span class="Operator">=</span> <span class="Identifier">int</span>
   <span class="Identifier">LongLong</span><span class="Operator">*</span>    <span class="Operator">=</span> <span class="Identifier">int64</span>
-  <span class="Identifier">LongLongPtr</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="Keyword">ptr</span> <span class="Identifier">LongLong</span></pre></li>
+  <span class="Identifier">LongLongPtr</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="Keyword">ptr</span> <span class="Identifier">LongLong</span></pre></p>
+</li>
 </ul>
 
-<h3><a class="toc-backref" id="introduction-naming-conventions" href="#introduction-naming-conventions">Naming Conventions</a></h3><ul class="simple"><li>Type identifiers should be in PascalCase. All other identifiers should be in camelCase with the exception of constants which <strong>may</strong> use PascalCase but are not required to.<pre class="listing"><span class="Comment"># Constants can start with either a lower case or upper case letter.</span>
+<h3><a class="toc-backref" id="style-guidelines-naming-conventions" href="#style-guidelines-naming-conventions">Naming Conventions</a></h3><ul class="simple"><li><p>Type identifiers should be in PascalCase. All other identifiers should be in camelCase with the exception of constants which <strong>may</strong> use PascalCase but are not required to.</p>
+<p><pre class="listing">
+<span class="Comment"># Constants can start with either a lower case or upper case letter.</span>
 <span class="Keyword">const</span> <span class="Identifier">aConstant</span> <span class="Operator">=</span> <span class="DecNumber">42</span>
 <span class="Keyword">const</span> <span class="Identifier">FooBar</span> <span class="Operator">=</span> <span class="FloatNumber">4.2</span>
 
@@ -102,28 +108,41 @@
 
 <span class="Comment"># Types must start with an uppercase letter.</span>
 <span class="Keyword">type</span>
-  <span class="Identifier">FooBar</span> <span class="Operator">=</span> <span class="Keyword">object</span></pre><p>For constants coming from a C/C++ wrapper, ALL_UPPERCASE are allowed, but ugly. (Why shout CONSTANT? Constants do no harm, variables do!)</p>
+  <span class="Identifier">FooBar</span> <span class="Operator">=</span> <span class="Keyword">object</span></pre></p>
+<p>For constants coming from a C/C++ wrapper, ALL_UPPERCASE are allowed, but ugly. (Why shout CONSTANT? Constants do no harm, variables do!)</p>
 </li>
-<li>When naming types that come in value, pointer, and reference varieties, use a regular name for the variety that is to be used the most, and add a &quot;Obj&quot;, &quot;Ref&quot;, or &quot;Ptr&quot; suffix for the other varieties. If there is no single variety that will be used the most, add the suffixes to the pointer variants only. The same applies to C/C++ wrappers.<pre class="listing"><span class="Keyword">type</span>
+<li><p>When naming types that come in value, pointer, and reference varieties, use a regular name for the variety that is to be used the most, and add a &quot;Obj&quot;, &quot;Ref&quot;, or &quot;Ptr&quot; suffix for the other varieties. If there is no single variety that will be used the most, add the suffixes to the pointer variants only. The same applies to C/C++ wrappers.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">Handle</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Comment"># Will be used most often</span>
     <span class="Identifier">fd</span><span class="Punctuation">:</span> <span class="Identifier">int64</span>
-  <span class="Identifier">HandleRef</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Identifier">Handle</span> <span class="Comment"># Will be used less often</span></pre></li>
-<li>Exception and Error types should have the &quot;Error&quot; or &quot;Defect&quot; suffix.<pre class="listing"><span class="Keyword">type</span>
+  <span class="Identifier">HandleRef</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Identifier">Handle</span> <span class="Comment"># Will be used less often</span></pre></p>
+</li>
+<li><p>Exception and Error types should have the &quot;Error&quot; or &quot;Defect&quot; suffix.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">ValueError</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">CatchableError</span>
   <span class="Identifier">AssertionDefect</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">Defect</span>
-  <span class="Identifier">Foo</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">Exception</span> <span class="Comment"># bad style, try to inherit CatchableError or Defect</span></pre></li>
-<li>Unless marked with the <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">pure</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt> pragma, members of enums should have an identifying prefix, such as an abbreviation of the enum's name.<pre class="listing"><span class="Keyword">type</span>
+  <span class="Identifier">Foo</span> <span class="Operator">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <span class="Identifier">Exception</span> <span class="Comment"># bad style, try to inherit CatchableError or Defect</span></pre></p>
+</li>
+<li><p>Unless marked with the <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">pure</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt> pragma, members of enums should have an identifying prefix, such as an abbreviation of the enum's name.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">PathComponent</span> <span class="Operator">=</span> <span class="Keyword">enum</span>
     <span class="Identifier">pcDir</span>
     <span class="Identifier">pcLinkToDir</span>
     <span class="Identifier">pcFile</span>
-    <span class="Identifier">pcLinkToFile</span></pre></li>
-<li>Non-pure enum values should use camelCase whereas pure enum values should use PascalCase.<pre class="listing"><span class="Keyword">type</span>
+    <span class="Identifier">pcLinkToFile</span></pre></p>
+</li>
+<li><p>Non-pure enum values should use camelCase whereas pure enum values should use PascalCase.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">PathComponent</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">pure</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">enum</span>
     <span class="Identifier">Dir</span>
     <span class="Identifier">LinkToDir</span>
     <span class="Identifier">File</span>
-    <span class="Identifier">LinkToFile</span></pre></li>
+    <span class="Identifier">LinkToFile</span></pre></p>
+</li>
 <li>In the age of HTTP, HTML, FTP, TCP, IP, UTF, WWW it is foolish to pretend these are somewhat special words requiring all uppercase. Instead treat them as what they are: Real words. So it's <tt class="docutils literal"><span class="pre"><span class="Identifier">parseUrl</span></span></tt> rather than <tt class="docutils literal"><span class="pre"><span class="Identifier">parseURL</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">checkHttpHeader</span></span></tt> instead of <tt class="docutils literal"><span class="pre"><span class="Identifier">checkHTTPHeader</span></span></tt> etc.</li>
 <li>Operations like <tt class="docutils literal"><span class="pre"><span class="Identifier">mitems</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">mpairs</span></span></tt> (or the now deprecated <tt class="docutils literal"><span class="pre"><span class="Identifier">mget</span></span></tt>) that allow a <em>mutating view</em> into some data structure should start with an <tt class="docutils literal"><span class="pre"><span class="Identifier">m</span></span></tt>.</li>
 <li>When both in-place mutation and 'returns transformed copy' are available the latter is a past participle of the former:<ul class="simple"><li>reverse and reversed in algorithm</li>
@@ -185,40 +204,56 @@
 <tr><td>identifier</td><td>ident</td><td></td></tr>
 <tr><td>indentation</td><td>indent</td><td></td></tr>
 </table>
-<h3><a class="toc-backref" id="introduction-coding-conventions" href="#introduction-coding-conventions">Coding Conventions</a></h3><ul class="simple"><li>The <tt class="docutils literal"><span class="pre"><span class="Keyword">return</span></span></tt> statement should ideally be used when its control-flow properties are required. Use a procedure's implicit <tt class="docutils literal"><span class="pre"><span class="Identifier">result</span></span></tt> variable whenever possible. This improves readability.<pre class="listing"><span class="Keyword">proc</span> <span class="Identifier">repeat</span><span class="Punctuation">(</span><span class="Identifier">text</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span>
+<h3><a class="toc-backref" id="style-guidelines-coding-conventions" href="#style-guidelines-coding-conventions">Coding Conventions</a></h3><ul class="simple"><li><p>The <tt class="docutils literal"><span class="pre"><span class="Keyword">return</span></span></tt> statement should ideally be used when its control-flow properties are required. Use a procedure's implicit <tt class="docutils literal"><span class="pre"><span class="Identifier">result</span></span></tt> variable whenever possible. This improves readability.</p>
+<p><pre class="listing">
+<span class="Keyword">proc</span> <span class="Identifier">repeat</span><span class="Punctuation">(</span><span class="Identifier">text</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span>
   <span class="Identifier">result</span> <span class="Operator">=</span> <span class="StringLit">&quot;&quot;</span>
   
   <span class="Keyword">for</span> <span class="Identifier">i</span> <span class="Keyword">in</span> <span class="FloatNumber">0.</span><span class="Operator">.</span><span class="Identifier">x</span><span class="Punctuation">:</span>
-    <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Operator">$</span><span class="Identifier">i</span><span class="Punctuation">)</span></pre></li>
+    <span class="Identifier">result</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Operator">$</span><span class="Identifier">i</span><span class="Punctuation">)</span></pre></p>
+</li>
 <li>Use a proc when possible, only using the more powerful facilities of macros, templates, iterators, and converters when necessary.</li>
 <li>Use the <tt class="docutils literal"><span class="pre"><span class="Keyword">let</span></span></tt> statement (not the <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt> statement) when declaring variables that do not change within their scope. Using the <tt class="docutils literal"><span class="pre"><span class="Keyword">let</span></span></tt> statement ensures that variables remain immutable, and gives those who read the code a better idea of the code's purpose.</li>
 </ul>
 
-<h3><a class="toc-backref" id="introduction-conventions-for-multiminusline-statements-and-expressions" href="#introduction-conventions-for-multiminusline-statements-and-expressions">Conventions for multi-line statements and expressions</a></h3><ul class="simple"><li>Tuples which are longer than one line should indent their parameters to align with the parameters above it.<pre class="listing"><span class="Keyword">type</span>
+<h3><a class="toc-backref" id="style-guidelines-conventions-for-multiminusline-statements-and-expressions" href="#style-guidelines-conventions-for-multiminusline-statements-and-expressions">Conventions for multi-line statements and expressions</a></h3><ul class="simple"><li><p>Tuples which are longer than one line should indent their parameters to align with the parameters above it.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">LongTupleA</span> <span class="Operator">=</span> <span class="Keyword">tuple</span><span class="Punctuation">[</span><span class="Identifier">wordyTupleMemberOne</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">wordyTupleMemberTwo</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span>
-                     <span class="Identifier">wordyTupleMemberThree</span><span class="Punctuation">:</span> <span class="Identifier">float</span><span class="Punctuation">]</span></pre></li>
-<li>Similarly, any procedure and procedure type declarations that are longer than one line should do the same thing.<pre class="listing"><span class="Keyword">type</span>
+                     <span class="Identifier">wordyTupleMemberThree</span><span class="Punctuation">:</span> <span class="Identifier">float</span><span class="Punctuation">]</span></pre></p>
+</li>
+<li><p>Similarly, any procedure and procedure type declarations that are longer than one line should do the same thing.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
   <span class="Identifier">EventCallback</span> <span class="Operator">=</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">timeReceived</span><span class="Punctuation">:</span> <span class="Identifier">Time</span><span class="Punctuation">,</span> <span class="Identifier">errorCode</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">event</span><span class="Punctuation">:</span> <span class="Identifier">Event</span><span class="Punctuation">,</span>
                         <span class="Identifier">output</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">string</span><span class="Punctuation">)</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">lotsOfArguments</span><span class="Punctuation">(</span><span class="Identifier">argOne</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">,</span> <span class="Identifier">argTwo</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">argThree</span><span class="Punctuation">:</span> <span class="Identifier">float</span><span class="Punctuation">,</span>
                      <span class="Identifier">argFour</span><span class="Punctuation">:</span> <span class="Keyword">proc</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">argFive</span><span class="Punctuation">:</span> <span class="Identifier">bool</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
-                    <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">heyLookALongPragma</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span></pre></li>
-<li>Multi-line procedure calls should continue on the same column as the opening parenthesis (like multi-line procedure declarations).<pre class="listing"><span class="Identifier">startProcess</span><span class="Punctuation">(</span><span class="Identifier">nimExecutable</span><span class="Punctuation">,</span> <span class="Identifier">currentDirectory</span><span class="Punctuation">,</span> <span class="Identifier">compilerArguments</span>
-             <span class="Identifier">environment</span><span class="Punctuation">,</span> <span class="Identifier">processOptions</span><span class="Punctuation">)</span></pre></li>
+                    <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">heyLookALongPragma</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span></pre></p>
+</li>
+<li><p>Multi-line procedure calls should continue on the same column as the opening parenthesis (like multi-line procedure declarations).</p>
+<p><pre class="listing">
+<span class="Identifier">startProcess</span><span class="Punctuation">(</span><span class="Identifier">nimExecutable</span><span class="Punctuation">,</span> <span class="Identifier">currentDirectory</span><span class="Punctuation">,</span> <span class="Identifier">compilerArguments</span>
+             <span class="Identifier">environment</span><span class="Punctuation">,</span> <span class="Identifier">processOptions</span><span class="Punctuation">)</span></pre></p>
+</li>
 </ul>
 
-<h3><a class="toc-backref" id="introduction-miscellaneous" href="#introduction-miscellaneous">Miscellaneous</a></h3><ul class="simple"><li>Use <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span><span class="Operator">..</span><span class="Identifier">b</span></span></tt> instead of <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span> <span class="Operator">..</span> <span class="Identifier">b</span></span></tt>, except when <tt class="docutils literal"><span class="pre"><span class="Identifier">b</span></span></tt> contains an operator, for example <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span> <span class="Operator">..</span> <span class="Operator">-</span><span class="DecNumber">3</span></span></tt>. Likewise with <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span><span class="Operator">..&lt;</span><span class="Identifier">b</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span><span class="Operator">..^</span><span class="Identifier">b</span></span></tt> and other operators starting with <tt class="docutils literal"><span class="pre"><span class="Operator">..</span></span></tt>.</li>
+<h3><a class="toc-backref" id="style-guidelines-miscellaneous" href="#style-guidelines-miscellaneous">Miscellaneous</a></h3><ul class="simple"><li>Use <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span><span class="Operator">..</span><span class="Identifier">b</span></span></tt> instead of <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span> <span class="Operator">..</span> <span class="Identifier">b</span></span></tt>, except when <tt class="docutils literal"><span class="pre"><span class="Identifier">b</span></span></tt> contains an operator, for example <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span> <span class="Operator">..</span> <span class="Operator">-</span><span class="DecNumber">3</span></span></tt>. Likewise with <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span><span class="Operator">..&lt;</span><span class="Identifier">b</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">a</span><span class="Operator">..^</span><span class="Identifier">b</span></span></tt> and other operators starting with <tt class="docutils literal"><span class="pre"><span class="Operator">..</span></span></tt>.</li>
 <li>Use <tt class="docutils literal"><span class="pre"><span class="Identifier">std</span></span></tt> prefix for standard library modules, namely use <tt class="docutils literal"><span class="pre"><span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">os</span></span></tt> for single module and use <tt class="docutils literal"><span class="pre"><span class="Identifier">std</span><span class="Operator">/</span><span class="Punctuation">[</span><span class="Identifier">os</span><span class="Punctuation">,</span> <span class="Identifier">sysrand</span><span class="Punctuation">,</span> <span class="Identifier">posix</span><span class="Punctuation">]</span></span></tt> for multiple modules.</li>
 <li><p>Prefer multiline triple quote literals to start with a newline; it's semantically identical (it's a feature of triple quote literals) but clearer because it aligns with the next line:</p>
 <p>use this:</p>
-<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="LongStringLit">&quot;&quot;&quot;
+<p><pre class="listing">
+<span class="Keyword">let</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="LongStringLit">&quot;&quot;&quot;
 foo
 bar
-&quot;&quot;&quot;</span></pre><p>instead of:</p>
-<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="LongStringLit">&quot;&quot;&quot;foo
+&quot;&quot;&quot;</span></pre></p>
+<p>instead of:</p>
+<p><pre class="listing">
+<span class="Keyword">let</span> <span class="Identifier">a</span> <span class="Operator">=</span> <span class="LongStringLit">&quot;&quot;&quot;foo
 bar
-&quot;&quot;&quot;</span></pre></li>
+&quot;&quot;&quot;</span></pre></p>
+</li>
 <li>A getter API for a private field <tt class="docutils literal"><span class="pre"><span class="Identifier">foo</span></span></tt> should preferably be named <tt class="docutils literal"><span class="pre"><span class="Identifier">foo</span></span></tt>, not <tt class="docutils literal"><span class="pre"><span class="Identifier">getFoo</span></span></tt>.<dl class="docutils"><dt>A getter-like API should preferably be named <tt class="docutils literal"><span class="pre"><span class="Identifier">getFoo</span></span></tt>, not <tt class="docutils literal"><span class="pre"><span class="Identifier">foo</span></span></tt> if:</dt>
 <dd><ul class="simple"><li>the API has side effects</li>
 <li>or the cost is not <tt class="docutils literal"><span class="pre"><span class="Identifier">O</span><span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">)</span></span></tt></li>
@@ -237,7 +272,7 @@ bar
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-12 01:18:05 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-08-31 01:33:15 UTC</small>
       </div>
     </div>
   </div>
