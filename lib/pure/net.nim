@@ -90,6 +90,9 @@ runnableExamples("-r:off"):
 
 import std/private/since
 
+when defined(nimPreviewSlimSystem):
+  import std/assertions
+
 import nativesockets
 import os, strutils, times, sets, options, std/monotimes
 import ssl_config
@@ -544,6 +547,12 @@ proc fromSockAddr*(sa: Sockaddr_storage | SockAddr | Sockaddr_in | Sockaddr_in6,
 
 when defineSsl:
   # OpenSSL >= 1.1.0 does not need explicit init.
+  when not useOpenssl3:
+    CRYPTO_malloc_init()
+    doAssert SslLibraryInit() == 1
+    SSL_load_error_strings()
+    ERR_load_BIO_strings()
+    OpenSSL_add_all_algorithms()
 
   proc sslHandle*(self: Socket): SslPtr =
     ## Retrieve the ssl pointer of `socket`.
@@ -1016,7 +1025,7 @@ proc bindAddr*(socket: Socket, port = Port(0), address = "") {.
 proc acceptAddr*(server: Socket, client: var owned(Socket), address: var string,
                  flags = {SocketFlag.SafeDisconn},
                  inheritable = defined(nimInheritHandles)) {.
-                 tags: [ReadIOEffect], gcsafe, locks: 0.} =
+                 tags: [ReadIOEffect], gcsafe.} =
   ## Blocks until a connection is being made from a client. When a connection
   ## is made sets `client` to the client socket and `address` to the address
   ## of the connecting client.

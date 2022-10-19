@@ -87,6 +87,14 @@ proc semExprWithType(c: PContext, n: PNode, flags: TExprFlags = {}, expectedType
   result = semExprCheck(c, n, flags, expectedType)
   if result.typ == nil and efInTypeof in flags:
     result.typ = c.voidType
+  elif (result.typ == nil or result.typ.kind == tyNone) and
+      result.kind == nkClosedSymChoice and
+      result[0].sym.kind == skEnumField:
+    # if overloaded enum field could not choose a type from a closed list,
+    # choose the first resolved enum field, i.e. the latest in scope
+    # to mirror old behavior
+    msgSymChoiceUseQualifier(c, result, hintAmbiguousEnum)
+    result = result[0]
   elif result.typ == nil or result.typ == c.enforceVoidContext:
     localError(c.config, n.info, errExprXHasNoType %
                 renderTree(result, {renderNoComments}))
@@ -108,7 +116,7 @@ proc semSymGenericInstantiation(c: PContext, n: PNode, s: PSym): PNode =
   result = symChoice(c, n, s, scClosed)
 
 proc inlineConst(c: PContext, n: PNode, s: PSym): PNode {.inline.} =
-  result = copyTree(s.ast)
+  result = copyTree(s.astdef)
   if result.isNil:
     localError(c.config, n.info, "constant of type '" & typeToString(s.typ) & "' has no value")
     result = newSymNode(s)
@@ -241,7 +249,10 @@ proc isCastable(c: PContext; dst, src: PType, info: TLineInfo): bool =
         (skipTypes(dst, abstractInst).kind in IntegralTypes) or
         (skipTypes(src, abstractInst-{tyTypeDesc}).kind in IntegralTypes)
     if result and (dstSize > srcSize):
-      message(conf, info, warnCastSizes, "target type is larger than source type")
+      var warnMsg = "target type is larger than source type"
+      warnMsg.add("\n  target type: '$1' ($2)" % [$dst, if dstSize == 1: "1 byte" else: $dstSize & " bytes"])
+      warnMsg.add("\n  source type: '$1' ($2)" % [$src, if srcSize == 1: "1 byte" else: $srcSize & " bytes"])
+      message(conf, info, warnCastSizes, warnMsg)
   if result and src.kind == tyNil:
     return dst.size <= conf.target.ptrSize
 
@@ -360,13 +371,12 @@ proc semCast(c: PContext, n: PNode): PNode =
   checkSonsLen(n, 2, c.config)
   let targetType = semTypeNode(c, n[0], nil)
   let castedExpr = semExprWithType(c, n[1])
+  if castedExpr.kind == nkClosedSymChoice:
+    errorUseQualifier(c, n[1].info, castedExpr)
   if tfHasMeta in targetType.flags:
     localError(c.config, n[0].info, "cannot cast to a non concrete type: '$1'" % $targetType)
   if not isCastable(c, targetType, castedExpr.typ, n.info):
-    let tar = $targetType
-    let alt = typeToString(targetType, preferDesc)
-    let msg = if tar != alt: tar & "=" & alt else: tar
-    localError(c.config, n.info, "expression cannot be cast to " & msg)
+    localError(c.config, n.info, "expression cannot be cast to '$1'" % $targetType)
   result = newNodeI(nkCast, n.info)
   result.typ = targetType
   result.add copyTree(n[0])
@@ -918,18 +928,10 @@ proc semOverloadedCallAnalyseEffects(c: PContext, n: PNode, nOrig: PNode,
           rawAddSon(typ, result.typ)
           result.typ = typ
 
-proc semObjConstr(c: PContext, n: PNode, flags: TExprFlags; expectedType: PType = nil): PNode
-
 proc resolveIndirectCall(c: PContext; n, nOrig: PNode;
                          t: PType): TCandidate =
   initCandidate(c, result, t)
   matches(c, n, nOrig, result)
-  if result.state != csMatch:
-    # try to deref the first argument:
-    if implicitDeref in c.features and canDeref(n):
-      n[1] = n[1].tryDeref
-      initCandidate(c, result, t)
-      matches(c, n, nOrig, result)
 
 proc bracketedMacro(n: PNode): PSym =
   if n.len >= 1 and n[0].kind == nkSym:
@@ -971,7 +973,7 @@ proc semIndirectOp(c: PContext, n: PNode, flags: TExprFlags; expectedType: PType
   var prc = n[0]
   if n[0].kind == nkDotExpr:
     checkSonsLen(n[0], 2, c.config)
-    let n0 = semFieldAccess(c, n[0])
+    let n0 = semFieldAccess(c, n[0], {efIsDotCall})
     if n0.kind == nkDotCall:
       # it is a static call!
       result = n0
@@ -1230,7 +1232,7 @@ proc semSym(c: PContext, n: PNode, sym: PSym, flags: TExprFlags): PNode =
       # It is clear that ``[]`` means two totally different things. Thus, we
       # copy `x`'s AST into each context, so that the type fixup phase can
       # deal with two different ``[]``.
-      if s.ast.safeLen == 0: result = inlineConst(c, n, s)
+      if s.astdef.safeLen == 0: result = inlineConst(c, n, s)
       else: result = newSymNode(s, n.info)
     of tyStatic:
       if typ.n != nil:
@@ -1472,8 +1474,9 @@ proc dotTransformation(c: PContext, n: PNode): PNode =
 proc semFieldAccess(c: PContext, n: PNode, flags: TExprFlags): PNode =
   # this is difficult, because the '.' is used in many different contexts
   # in Nim. We first allow types in the semantic checking.
-  result = builtinFieldAccess(c, n, flags)
-  if result == nil:
+  result = builtinFieldAccess(c, n, flags - {efIsDotCall})
+  if result == nil or ((result.typ == nil or result.typ.skipTypes(abstractInst).kind != tyProc) and 
+      efIsDotCall in flags and callOperator notin c.features):
     result = dotTransformation(c, n)
 
 proc buildOverloadedSubscripts(n: PNode, ident: PIdent): PNode =
@@ -2259,7 +2262,7 @@ proc instantiateCreateFlowVarCall(c: PContext; t: PType;
   # codegen would fail:
   if sfCompilerProc in result.flags:
     result.flags.excl {sfCompilerProc, sfExportc, sfImportc}
-    result.loc.r = nil
+    result.loc.r = ""
 
 proc setMs(n: PNode, s: PSym): PNode =
   result = n
@@ -2419,8 +2422,8 @@ proc semWhen(c: PContext, n: PNode, semCheck = true): PNode =
   #   ...
   var whenNimvm = false
   var typ = commonTypeBegin
-  if n.len == 2 and n[0].kind == nkElifBranch and
-      n[1].kind == nkElse:
+  if n.len in 1..2 and n[0].kind == nkElifBranch and (
+      n.len == 1 or n[1].kind == nkElse):
     let exprNode = n[0][0]
     if exprNode.kind == nkIdent:
       whenNimvm = lookUp(c, exprNode).magic == mNimvm
@@ -2458,7 +2461,10 @@ proc semWhen(c: PContext, n: PNode, semCheck = true): PNode =
     else: illFormedAst(n, c.config)
   if result == nil:
     result = newNodeI(nkEmpty, n.info)
-  if whenNimvm: result.typ = typ
+  if whenNimvm:
+    result.typ = typ
+    if n.len == 1:
+      result.add(newTree(nkElse, newNode(nkStmtList)))
 
 proc semSetConstr(c: PContext, n: PNode, expectedType: PType = nil): PNode =
   result = newNodeI(nkCurly, n.info)
@@ -2504,7 +2510,7 @@ proc semSetConstr(c: PContext, n: PNode, expectedType: PType = nil): PNode =
           if expectedElementType == nil:
             expectedElementType = typ
     if not isOrdinalType(typ, allowEnumWithHoles=true):
-      localError(c.config, n.info, errOrdinalTypeExpected)
+      localError(c.config, n.info, errOrdinalTypeExpected % typeToString(typ, preferDesc))
       typ = makeRangeType(c, 0, MaxSetElements-1, n.info)
     elif lengthOrd(c.config, typ) > MaxSetElements:
       typ = makeRangeType(c, 0, MaxSetElements-1, n.info)
@@ -2798,7 +2804,7 @@ proc enumFieldSymChoice(c: PContext, n: PNode, s: PSym): PNode =
   var i = 0
   var a = initOverloadIter(o, c, n)
   while a != nil:
-    if a.kind in OverloadableSyms-{skModule}:
+    if a.kind == skEnumField:
       inc(i)
       if i > 1: break
     a = nextOverloadIter(o, c, n)
@@ -2814,7 +2820,7 @@ proc enumFieldSymChoice(c: PContext, n: PNode, s: PSym): PNode =
     result = newNodeIT(nkClosedSymChoice, info, newTypeS(tyNone, c))
     a = initOverloadIter(o, c, n)
     while a != nil:
-      if a.kind in OverloadableSyms-{skModule}:
+      if a.kind == skEnumField:
         incl(a.flags, sfUsed)
         markOwnerModuleAsUsed(c, a)
         result.add newSymNode(a, info)
@@ -2836,7 +2842,7 @@ proc semExpr(c: PContext, n: PNode, flags: TExprFlags = {}, expectedType: PType 
     defer:
       if isCompilerDebug():
         echo ("<", c.config$n.info, n, ?.result.typ)
-  
+
   template directLiteral(typeKind: TTypeKind) =
     if result.typ == nil:
       if expectedType != nil and (
@@ -2882,10 +2888,7 @@ proc semExpr(c: PContext, n: PNode, flags: TExprFlags = {}, expectedType: PType 
       if optOwnedRefs in c.config.globalOptions:
         result.typ = makeVarType(c, result.typ, tyOwned)
     of skEnumField:
-      if overloadableEnums in c.features:
-        result = enumFieldSymChoice(c, n, s)
-      else:
-        result = semSym(c, n, s, flags)
+      result = enumFieldSymChoice(c, n, s)
     else:
       result = semSym(c, n, s, flags)
     if expectedType != nil and isSymChoice(result):

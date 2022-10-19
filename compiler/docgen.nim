@@ -20,7 +20,6 @@ import
 import packages/docutils/rstast except FileIndex, TLineInfo
 
 from uri import encodeUrl
-from std/private/globs import nativeToUnixPath
 from nodejs import findNodeJs
 
 when defined(nimPreviewSlimSystem):
@@ -304,6 +303,10 @@ proc newDocumentor*(filename: AbsoluteFile; cache: IdentCache; conf: ConfigRef,
                    conf.configVars, filename.string,
                    docgenFindFile, compilerMsgHandler)
 
+  if conf.configVars.hasKey("doc.googleAnalytics") and
+      conf.configVars.hasKey("doc.plausibleAnalytics"):
+    doAssert false, "Either use googleAnalytics or plausibleAnalytics"
+
   if conf.configVars.hasKey("doc.googleAnalytics"):
     result.analytics = """
 <script>
@@ -317,6 +320,10 @@ proc newDocumentor*(filename: AbsoluteFile; cache: IdentCache; conf: ConfigRef,
 
 </script>
     """ % [conf.configVars.getOrDefault"doc.googleAnalytics"]
+  elif conf.configVars.hasKey("doc.plausibleAnalytics"):
+    result.analytics = """
+    <script defer data-domain="$1" src="https://plausible.io/js/plausible.js"></script>
+    """ % [conf.configVars.getOrDefault"doc.plausibleAnalytics"]
   else:
     result.analytics = ""
 
@@ -325,7 +332,7 @@ proc newDocumentor*(filename: AbsoluteFile; cache: IdentCache; conf: ConfigRef,
   result.jEntriesFinal = newJArray()
   initStrTable result.types
   result.onTestSnippet =
-    proc (gen: var RstGenerator; filename, cmd: string; status: int; content: string) =
+    proc (gen: var RstGenerator; filename, cmd: string; status: int; content: string) {.gcsafe.} =
       if conf.docCmd == docCmdSkip: return
       inc(gen.id)
       var d = (ptr TDocumentor)(addr gen)
@@ -393,7 +400,7 @@ proc genRecCommentAux(d: PDoc, n: PNode): PRstNode =
   result = genComment(d, n)
   if result == nil:
     if n.kind in {nkStmtList, nkStmtListExpr, nkTypeDef, nkConstDef,
-                  nkObjectTy, nkRefTy, nkPtrTy, nkAsgn, nkFastAsgn, nkHiddenStdConv}:
+                  nkObjectTy, nkRefTy, nkPtrTy, nkAsgn, nkFastAsgn, nkSinkAsgn, nkHiddenStdConv}:
       # notin {nkEmpty..nkNilLit, nkEnumTy, nkTupleTy}:
       for i in 0..<n.len:
         result = genRecCommentAux(d, n[i])
@@ -1124,6 +1131,8 @@ proc genJsonItem(d: PDoc, n, nameNode: PNode, k: TSymKind): JsonItem =
         for kind in genericParam.sym.typ.sons:
           param["types"].add %($kind)
         result.json["signature"]["genericParams"].add param
+  if optGenIndex in d.conf.globalOptions:
+    genItem(d, n, nameNode, k, kForceExport)
 
 proc setDoctype(d: PDoc, n: PNode) =
   ## Processes `{.doctype.}` pragma changing Markdown/RST parsing options.
@@ -1542,7 +1551,7 @@ proc genSection(d: PDoc, kind: TSymKind, groupedToc = false) =
   else:
     # Just have the link
     d.toc[kind] =  getConfigVar(d.conf, "doc.section.toc_item") % sectionValues
-    
+
 proc relLink(outDir: AbsoluteDir, destFile: AbsoluteFile, linkto: RelativeFile): string =
   $relativeTo(outDir / linkto, destFile.splitFile().dir, '/')
 
@@ -1722,7 +1731,7 @@ proc commandJson*(cache: IdentCache, conf: ConfigRef) =
   if ast == nil: return
   var d = newDocumentor(conf.projectFull, cache, conf, hasToc = true)
   d.onTestSnippet = proc (d: var RstGenerator; filename, cmd: string;
-                          status: int; content: string) =
+                          status: int; content: string) {.gcsafe.} =
     localError(conf, newLineInfo(conf, AbsoluteFile d.filename, -1, -1),
                warnUser, "the ':test:' attribute is not supported by this backend")
   generateJson(d, ast)
@@ -1745,7 +1754,7 @@ proc commandTags*(cache: IdentCache, conf: ConfigRef) =
   if ast == nil: return
   var d = newDocumentor(conf.projectFull, cache, conf, hasToc = true)
   d.onTestSnippet = proc (d: var RstGenerator; filename, cmd: string;
-                          status: int; content: string) =
+                          status: int; content: string) {.gcsafe.} =
     localError(conf, newLineInfo(conf, AbsoluteFile d.filename, -1, -1),
                warnUser, "the ':test:' attribute is not supported by this backend")
   var
@@ -1780,5 +1789,19 @@ proc commandBuildIndex*(conf: ConfigRef, dir: string, outFile = RelativeFile"") 
 
   try:
     writeFile(filename, code)
+  except:
+    rawMessage(conf, errCannotOpenFile, filename.string)
+
+proc commandBuildIndexJson*(conf: ConfigRef, dir: string, outFile = RelativeFile"") =
+  var (modules, symbols, docs) = readIndexDir(dir)
+  let documents = toSeq(keys(Table[IndexEntry, seq[IndexEntry]](docs)))
+  let body = %*({"documents": documents, "modules": modules, "symbols": symbols})
+
+  var outFile = outFile
+  if outFile.isEmpty: outFile = theindexFname.RelativeFile.changeFileExt("")
+  let filename = getOutFile(conf, outFile, JsonExt)
+
+  try:
+    writeFile(filename, $body)
   except:
     rawMessage(conf, errCannotOpenFile, filename.string)

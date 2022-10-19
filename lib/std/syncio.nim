@@ -12,6 +12,8 @@
 include system/inclrtl
 import std/private/since
 import std/formatfloat
+when defined(windows):
+  import std/widestrs
 
 # ----------------- IO Part ------------------------------------------------
 type
@@ -38,6 +40,13 @@ type
 
   FileHandle* = cint ## type that represents an OS file handle; this is
                       ## useful for low-level file access
+
+  FileSeekPos* = enum ## Position relative to which seek should happen.
+                      # The values are ordered so that they match with stdio
+                      # SEEK_SET, SEEK_CUR and SEEK_END respectively.
+    fspSet            ## Seek to absolute value
+    fspCur            ## Seek relative to current position
+    fspEnd            ## Seek relative to end
 
 # text file handling:
 when not defined(nimscript) and not defined(js):
@@ -141,13 +150,6 @@ proc c_fprintf(f: File, frmt: cstring): cint {.
   importc: "fprintf", header: "<stdio.h>", varargs, discardable.}
 proc c_fputc(c: char, f: File): cint {.
   importc: "fputc", header: "<stdio.h>".}
-
-# When running nim in android app, stdout goes nowhere, so echo gets ignored
-# To redirect echo to the android logcat, use -d:androidNDK
-when defined(androidNDK):
-  const ANDROID_LOG_VERBOSE = 2.cint
-  proc android_log_print(prio: cint, tag: cstring, fmt: cstring): cint
-    {.importc: "__android_log_print", header: "<android/log.h>", varargs, discardable.}
 
 template sysFatal(exc, msg) =
   raise newException(exc, msg)
@@ -324,9 +326,7 @@ const
 proc close*(f: File) {.tags: [], gcsafe.} =
   ## Closes the file.
   if not f.isNil:
-    let x = c_fclose(f)
-    if x < 0:
-      checkErr(f)
+    discard c_fclose(f)
 
 proc readChar*(f: File): char {.tags: [ReadIOEffect].} =
   ## Reads a single character from the stream `f`. Should not be used in
@@ -691,7 +691,7 @@ when defined(posix) and not defined(nimscript):
 
 proc open*(f: var File, filename: string,
           mode: FileMode = fmRead,
-          bufSize: int = -1): bool {.tags: [], raises: [IOError], benign.} =
+          bufSize: int = -1): bool {.tags: [], raises: [], benign.} =
   ## Opens a file named `filename` with given `mode`.
   ##
   ## Default mode is readonly. Returns true if the file could be opened.
@@ -792,52 +792,6 @@ proc setStdIoUnbuffered*() {.tags: [], benign.} =
     discard c_setvbuf(stderr, nil, IONBF, 0)
   when declared(stdin):
     discard c_setvbuf(stdin, nil, IONBF, 0)
-
-when declared(stdout):
-  when defined(windows) and compileOption("threads"):
-    proc addSysExitProc(quitProc: proc() {.noconv.}) {.importc: "atexit", header: "<stdlib.h>".}
-
-    const insideRLocksModule = false
-    include "system/syslocks"
-
-
-    var echoLock: SysLock
-    initSysLock echoLock
-    addSysExitProc(proc() {.noconv.} = deinitSys(echoLock))
-
-  const stdOutLock = not defined(windows) and
-                     not defined(android) and
-                     not defined(nintendoswitch) and
-                     not defined(freertos) and
-                     not defined(zephyr) and
-                     hostOS != "any"
-
-  proc echoBinSafe(args: openArray[string]) {.compilerproc.} =
-    when defined(androidNDK):
-      var s = ""
-      for arg in args:
-        s.add arg
-      android_log_print(ANDROID_LOG_VERBOSE, "nim", s)
-    else:
-      # flockfile deadlocks some versions of Android 5.x.x
-      when stdOutLock:
-        proc flockfile(f: File) {.importc, nodecl.}
-        proc funlockfile(f: File) {.importc, nodecl.}
-        flockfile(stdout)
-      when defined(windows) and compileOption("threads"):
-        acquireSys echoLock
-      for s in args:
-        when defined(windows):
-          writeWindows(stdout, s)
-        else:
-          discard c_fwrite(s.cstring, cast[csize_t](s.len), 1, stdout)
-      const linefeed = "\n"
-      discard c_fwrite(linefeed.cstring, linefeed.len, 1, stdout)
-      discard c_fflush(stdout)
-      when stdOutLock:
-        funlockfile(stdout)
-      when defined(windows) and compileOption("threads"):
-        releaseSys echoLock
 
 
 when defined(windows) and not defined(nimscript) and not defined(js):
@@ -962,3 +916,7 @@ iterator lines*(f: File): string {.tags: [ReadIOEffect].} =
         result.lines += 1
   var res = newStringOfCap(80)
   while f.readLine(res): yield res
+
+template `&=`*(f: File, x: typed) =
+  ## An alias for `write`.
+  write(f, x)

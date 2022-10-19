@@ -155,11 +155,11 @@ nkRefTy	ast.html#nkRefTy	TNodeKind.nkRefTy
 nkPtrTy	ast.html#nkPtrTy	TNodeKind.nkPtrTy	
 nkVarTy	ast.html#nkVarTy	TNodeKind.nkVarTy	
 nkConstTy	ast.html#nkConstTy	TNodeKind.nkConstTy	
-nkMutableTy	ast.html#nkMutableTy	TNodeKind.nkMutableTy	
+nkOutTy	ast.html#nkOutTy	TNodeKind.nkOutTy	
 nkDistinctTy	ast.html#nkDistinctTy	TNodeKind.nkDistinctTy	
 nkProcTy	ast.html#nkProcTy	TNodeKind.nkProcTy	
 nkIteratorTy	ast.html#nkIteratorTy	TNodeKind.nkIteratorTy	
-nkSharedTy	ast.html#nkSharedTy	TNodeKind.nkSharedTy	
+nkSinkAsgn	ast.html#nkSinkAsgn	TNodeKind.nkSinkAsgn	
 nkEnumTy	ast.html#nkEnumTy	TNodeKind.nkEnumTy	
 nkEnumFieldDef	ast.html#nkEnumFieldDef	TNodeKind.nkEnumFieldDef	
 nkArgList	ast.html#nkArgList	TNodeKind.nkArgList	
@@ -225,6 +225,7 @@ sfUsedInFinallyOrExcept	ast.html#sfUsedInFinallyOrExcept	TSymFlag.sfUsedInFinall
 sfSingleUsedTemp	ast.html#sfSingleUsedTemp	TSymFlag.sfSingleUsedTemp	
 sfNoalias	ast.html#sfNoalias	TSymFlag.sfNoalias	
 sfEffectsDelayed	ast.html#sfEffectsDelayed	TSymFlag.sfEffectsDelayed	
+sfGeneratedType	ast.html#sfGeneratedType	TSymFlag.sfGeneratedType	
 TSymFlag	ast.html#TSymFlag	ast: TSymFlag	
 TSymFlags	ast.html#TSymFlags	ast: TSymFlags	
 sfNoInit	ast.html#sfNoInit	ast: sfNoInit	
@@ -353,6 +354,7 @@ nfExecuteOnReload	ast.html#nfExecuteOnReload	TNodeFlag.nfExecuteOnReload
 nfLastRead	ast.html#nfLastRead	TNodeFlag.nfLastRead	
 nfFirstWrite	ast.html#nfFirstWrite	TNodeFlag.nfFirstWrite	
 nfHasComment	ast.html#nfHasComment	TNodeFlag.nfHasComment	
+nfUseDefaultField	ast.html#nfUseDefaultField	TNodeFlag.nfUseDefaultField	
 TNodeFlag	ast.html#TNodeFlag	ast: TNodeFlag	
 TNodeFlags	ast.html#TNodeFlags	ast: TNodeFlags	
 tfVarargs	ast.html#tfVarargs	TTypeFlag.tfVarargs	
@@ -400,6 +402,7 @@ tfCompleteStruct	ast.html#tfCompleteStruct	TTypeFlag.tfCompleteStruct
 tfExplicitCallConv	ast.html#tfExplicitCallConv	TTypeFlag.tfExplicitCallConv	
 tfIsConstructor	ast.html#tfIsConstructor	TTypeFlag.tfIsConstructor	
 tfEffectSystemWorkaround	ast.html#tfEffectSystemWorkaround	TTypeFlag.tfEffectSystemWorkaround	
+tfIsOutParam	ast.html#tfIsOutParam	TTypeFlag.tfIsOutParam	
 TTypeFlag	ast.html#TTypeFlag	ast: TTypeFlag	
 TTypeFlags	ast.html#TTypeFlags	ast: TTypeFlags	
 skUnknown	ast.html#skUnknown	TSymKind.skUnknown	
@@ -715,6 +718,7 @@ mGetImplTransf	ast.html#mGetImplTransf	TMagic.mGetImplTransf
 mSymIsInstantiationOf	ast.html#mSymIsInstantiationOf	TMagic.mSymIsInstantiationOf	
 mNodeId	ast.html#mNodeId	TMagic.mNodeId	
 mPrivateAccess	ast.html#mPrivateAccess	TMagic.mPrivateAccess	
+mZeroDefault	ast.html#mZeroDefault	TMagic.mZeroDefault	
 TMagic	ast.html#TMagic	ast: TMagic	
 ctfeWhitelist	ast.html#ctfeWhitelist	ast: ctfeWhitelist	
 generatedMagics	ast.html#generatedMagics	ast: generatedMagics	
@@ -773,7 +777,6 @@ PScope	ast.html#PScope	ast: PScope
 PLib	ast.html#PLib	ast: PLib	
 TSym	ast.html#TSym	ast: TSym	
 TTypeSeq	ast.html#TTypeSeq	ast: TTypeSeq	
-TLockLevel	ast.html#TLockLevel	ast: TLockLevel	
 attachedDestructor	ast.html#attachedDestructor	TTypeAttachedOp.attachedDestructor	
 attachedAsgn	ast.html#attachedAsgn	TTypeAttachedOp.attachedAsgn	
 attachedSink	ast.html#attachedSink	TTypeAttachedOp.attachedSink	
@@ -854,6 +857,9 @@ addAllowNil	ast.html#addAllowNil,Indexable,Indexable	ast: addAllowNil(father, so
 `[]`	ast.html#[].t,Indexable,BackwardsIndex	ast: `[]`(n: Indexable; i: BackwardsIndex): Indexable	
 `[]=`	ast.html#[]=.t,Indexable,BackwardsIndex,Indexable	ast: `[]=`(n: Indexable; i: BackwardsIndex; x: Indexable)	
 getDeclPragma	ast.html#getDeclPragma,PNode	ast: getDeclPragma(n: PNode): PNode	
+extractPragma	ast.html#extractPragma,PSym	ast: extractPragma(s: PSym): PNode	
+skipPragmaExpr	ast.html#skipPragmaExpr,PNode	ast: skipPragmaExpr(n: PNode): PNode	
+setInfoRecursive	ast.html#setInfoRecursive,PNode,TLineInfo	ast: setInfoRecursive(n: PNode; info: TLineInfo)	
 newNode	ast.html#newNode,TNodeKind	ast: newNode(kind: TNodeKind): PNode	
 newNodeI	ast.html#newNodeI,TNodeKind,TLineInfo	ast: newNodeI(kind: TNodeKind; info: TLineInfo): PNode	
 newNodeI	ast.html#newNodeI,TNodeKind,TLineInfo,int	ast: newNodeI(kind: TNodeKind; info: TLineInfo; children: int): PNode	
@@ -891,11 +897,7 @@ newFloatNode	ast.html#newFloatNode,TNodeKind,BiggestFloat	ast: newFloatNode(kind
 newStrNode	ast.html#newStrNode,TNodeKind,string	ast: newStrNode(kind: TNodeKind; strVal: string): PNode	
 newStrNode	ast.html#newStrNode,string,TLineInfo	ast: newStrNode(strVal: string; info: TLineInfo): PNode	
 newProcNode	ast.html#newProcNode,TNodeKind,TLineInfo,PNode,PNode,PNode,PNode,PNode,PNode,PNode	ast: newProcNode(kind: TNodeKind; info: TLineInfo; body: PNode;\n            params, name, pattern, genericParams, pragmas, exceptions: PNode): PNode	
-UnspecifiedLockLevel	ast.html#UnspecifiedLockLevel	ast: UnspecifiedLockLevel	
-MaxLockLevel	ast.html#MaxLockLevel	ast: MaxLockLevel	
-UnknownLockLevel	ast.html#UnknownLockLevel	ast: UnknownLockLevel	
 AttachedOpToStr	ast.html#AttachedOpToStr	ast: AttachedOpToStr	
-`$`	ast.html#$,TLockLevel	ast: `$`(x: TLockLevel): string	
 `$`	ast.html#$,PSym	ast: `$`(s: PSym): string	
 newType	ast.html#newType,TTypeKind,ItemId,PSym	ast: newType(kind: TTypeKind; id: ItemId; owner: PSym): PType	
 newSons	ast.html#newSons,Indexable,int	ast: newSons(father: Indexable; length: int)	
@@ -983,4 +985,5 @@ toHumanStr	ast.html#toHumanStr,TSymKind	ast: toHumanStr(kind: TSymKind): string
 toHumanStr	ast.html#toHumanStr,TTypeKind	ast: toHumanStr(kind: TTypeKind): string	
 skipAddr	ast.html#skipAddr,PNode	ast: skipAddr(n: PNode): PNode	
 isNewStyleConcept	ast.html#isNewStyleConcept,PNode	ast: isNewStyleConcept(n: PNode): bool	
+isOutParam	ast.html#isOutParam,PType	ast: isOutParam(t: PType): bool	
 nodesToIgnoreSet	ast.html#nodesToIgnoreSet	ast: nodesToIgnoreSet	

@@ -37,7 +37,7 @@
 ##
 ## * The same goes for footnotes/citations links: they point to themselves.
 ##   No backreferences are generated since finding all references of a footnote
-##   can be done by simply searching for [footnoteName].
+##   can be done by simply searching for ``[footnoteName]``.
 
 import strutils, os, hashes, strtabs, rstast, rst, highlite, tables, sequtils,
   algorithm, parseutils, std/strbasics
@@ -88,7 +88,7 @@ type
     ## for hyperlinks. See renderIndexTerm proc for details.
     id*: int               ## A counter useful for generating IDs.
     onTestSnippet*: proc (d: var RstGenerator; filename, cmd: string; status: int;
-                          content: string)
+                          content: string) {.gcsafe.}
     escMode*: EscapeMode
     curQuotationDepth: int
 
@@ -153,12 +153,12 @@ proc initRstGenerator*(g: var RstGenerator, target: OutputTarget,
   ##
   ## Example:
   ##
-  ## .. code-block:: nim
-  ##
+  ##   ```nim
   ##   import packages/docutils/rstgen
   ##
   ##   var gen: RstGenerator
   ##   gen.initRstGenerator(outHtml, defaultConfig(), "filename", {})
+  ##   ```
   g.config = config
   g.target = target
   g.tocPart = @[]
@@ -283,19 +283,18 @@ proc dispA(target: OutputTarget, dest: var string,
 proc `or`(x, y: string): string {.inline.} =
   result = if x.len == 0: y else: x
 
-proc renderRstToOut*(d: var RstGenerator, n: PRstNode, result: var string)
+proc renderRstToOut*(d: var RstGenerator, n: PRstNode, result: var string) {.gcsafe.}
   ## Writes into ``result`` the rst ast ``n`` using the ``d`` configuration.
   ##
   ## Before using this proc you need to initialise a ``RstGenerator`` with
   ## ``initRstGenerator`` and parse a rst file with ``rstParse`` from the
   ## `packages/docutils/rst module <rst.html>`_. Example:
-  ##
-  ## .. code-block:: nim
-  ##
+  ##   ```nim
   ##   # ...configure gen and rst vars...
   ##   var generatedHtml = ""
   ##   renderRstToOut(gen, rst, generatedHtml)
   ##   echo generatedHtml
+  ##   ```
 
 proc renderAux(d: PDoc, n: PRstNode, result: var string) =
   for i in countup(0, len(n)-1): renderRstToOut(d, n.sons[i], result)
@@ -417,13 +416,13 @@ proc renderIndexTerm*(d: PDoc, n: PRstNode, result: var string) =
         [id, term])
 
 type
-  IndexEntry = object
-    keyword: string
-    link: string
-    linkTitle: string ## contains a prettier text for the href
-    linkDesc: string ## the title attribute of the final href
+  IndexEntry* = object
+    keyword*: string
+    link*: string
+    linkTitle*: string ## contains a prettier text for the href
+    linkDesc*: string ## the title attribute of the final href
 
-  IndexedDocs = Table[IndexEntry, seq[IndexEntry]] ## \
+  IndexedDocs* = Table[IndexEntry, seq[IndexEntry]] ## \
     ## Contains the index sequences for doc types.
     ##
     ## The key is a *fake* IndexEntry which will contain the title of the
@@ -625,7 +624,7 @@ proc generateModuleJumps(modules: seq[string]): string =
 
   result.add(chunks.join(", ") & ".<br/>")
 
-proc readIndexDir(dir: string):
+proc readIndexDir*(dir: string):
     tuple[modules: seq[string], symbols: seq[IndexEntry], docs: IndexedDocs] =
   ## Walks `dir` reading ``.idx`` files converting them in IndexEntry items.
   ##
@@ -691,8 +690,6 @@ proc readIndexDir(dir: string):
         title.linkTitle = "doc_toc_" & $result.docs.len
         result.docs[title] = fileEntries
 
-  sort(result.modules, system.cmp)
-
 proc mergeIndexes*(dir: string): string =
   ## Merges all index files in `dir` and returns the generated index as HTML.
   ##
@@ -722,6 +719,7 @@ proc mergeIndexes*(dir: string): string =
   ## Returns the merged and sorted indices into a single HTML block which can
   ## be further embedded into nimdoc templates.
   var (modules, symbols, docs) = readIndexDir(dir)
+  sort(modules, system.cmp)
 
   result = ""
   # Generate a quick jump list of documents.
@@ -764,7 +762,7 @@ proc stripTocHtml(s: string): string =
     if last < 0:
       # Abort, since we didn't found a closing angled bracket.
       return
-    result.delete(first, last)
+    result.delete(first..last)
     first = result.find('<', first)
 
 proc renderHeadline(d: PDoc, n: PRstNode, result: var string) =
@@ -1029,7 +1027,7 @@ proc renderCodeLang*(result: var string, lang: SourceLanguage, code: string,
 proc renderNimCode*(result: var string, code: string, target: OutputTarget) =
   renderCodeLang(result, langNim, code, target)
 
-proc renderCode(d: PDoc, n: PRstNode, result: var string) =
+proc renderCode(d: PDoc, n: PRstNode, result: var string) {.gcsafe.} =
   ## Renders a code (code block or inline code), appending it to `result`.
   ##
   ## If the code block uses the ``number-lines`` option, a table will be
@@ -1213,7 +1211,7 @@ proc renderRstToOut(d: PDoc, n: PRstNode, result: var string) =
   of rnBulletItem, rnEnumItem:
     renderAux(d, n, "<li$2>$1</li>\n", "\\item $2$1\n", result)
   of rnEnumList: renderEnumList(d, n, result)
-  of rnDefList:
+  of rnDefList, rnMdDefList:
     renderAux(d, n, "<dl$2 class=\"docutils\">$1</dl>\n",
                     "\\begin{description}\n$2\n$1\\end{description}\n", result)
   of rnDefItem: renderAux(d, n, result)
@@ -1372,7 +1370,9 @@ proc renderRstToOut(d: PDoc, n: PRstNode, result: var string) =
           "</div> &ensp; $1\n</div>\n",
       "\\item[\\textsuperscript{[$3]}]$2 $1\n",
       [body, n.anchor.idS, mark, n.anchor])
-  of rnRef:
+  of rnPandocRef:
+    renderHyperlink(d, text=n.sons[0], link=n.sons[1], result, external=false)
+  of rnRstRef:
     renderHyperlink(d, text=n.sons[0], link=n.sons[0], result, external=false)
   of rnStandaloneHyperlink:
     renderHyperlink(d, text=n.sons[0], link=n.sons[0], result, external=true)
@@ -1591,7 +1591,7 @@ $content
 
 proc rstToHtml*(s: string, options: RstParseOptions,
                 config: StringTableRef,
-                msgHandler: MsgHandler = rst.defaultMsgHandler): string =
+                msgHandler: MsgHandler = rst.defaultMsgHandler): string {.gcsafe.} =
   ## Converts an input rst string into embeddable HTML.
   ##
   ## This convenience proc parses any input string using rst markup (it doesn't
@@ -1601,12 +1601,13 @@ proc rstToHtml*(s: string, options: RstParseOptions,
   ## work. For an explanation of the ``config`` parameter see the
   ## ``initRstGenerator`` proc. Example:
   ##
-  ## .. code-block:: nim
+  ##   ```nim
   ##   import packages/docutils/rstgen, strtabs
   ##
   ##   echo rstToHtml("*Hello* **world**!", {},
   ##     newStringTable(modeStyleInsensitive))
   ##   # --> <em>Hello</em> <strong>world</strong>!
+  ##   ```
   ##
   ## If you need to allow the rst ``include`` directive or tweak the generated
   ## output you have to create your own ``RstGenerator`` with
