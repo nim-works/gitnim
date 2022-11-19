@@ -101,6 +101,7 @@
 <li><a class="reference" id="types-object-construction_toc" href="#types-object-construction">Object construction</a></li>
 <li><a class="reference" id="types-object-variants_toc" href="#types-object-variants">Object variants</a></li>
 <li><a class="reference" id="types-cast-uncheckedassign_toc" href="#types-cast-uncheckedassign">cast uncheckedAssign</a></li>
+<li><a class="reference" id="types-default-values-for-object-fields_toc" href="#types-default-values-for-object-fields">Default values for object fields</a></li>
 <li><a class="reference" id="types-set-type_toc" href="#types-set-type">Set type</a></li>
 <ul class="simple"><li><a class="reference" id="set-type-bit-fields_toc" href="#set-type-bit-fields">Bit fields</a></li>
 </ul><li><a class="reference" id="types-reference-and-pointer-types_toc" href="#types-reference-and-pointer-types">Reference and pointer types</a></li>
@@ -400,6 +401,12 @@ proc p[T](x: T) = discard
   <span class="LongComment">##[Long documentation comment
      here.
   ]##</span></pre></p>
+<p>You can also use the <a class="reference external" href="#statements-and-expressions-discard-statement">discard statement</a> together with <a class="reference external" href="#lexical-analysis-triple-quoted-string-literals">triple quoted string literals</a> to create multiline comments:</p>
+<p><pre class="listing">
+<span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot; You can have any Nim code text commented
+out inside this with no indentation restrictions.
+      yes(&quot;May I ask a pointless question?&quot;) &quot;&quot;&quot;</span></pre></p>
+<p>This was how multiline comments were done before version 0.13.0, and it is used to provide specifications to <a class="reference external" href="testament.html#writing-unitests">testament</a> test framework.</p>
 
 <h2><a class="toc-backref" id="lexical-analysis-identifiers-amp-keywords" href="#lexical-analysis-identifiers-amp-keywords">Identifiers &amp; Keywords</a></h2><p>Identifiers in Nim can be any string of letters, digits and underscores, with the following restrictions:</p>
 <ul class="simple"><li>begins with a letter</li>
@@ -1494,6 +1501,49 @@ stmt = (IND{&gt;} complexOrSimpleStmt^+(IND{=} / ';') DED)
   
   <span class="Comment"># inside the 'cast' section it is allowed to assign to the 't.kind' field directly:</span>
   <span class="Identifier">t</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">=</span> <span class="Identifier">intLit</span></pre></p>
+
+<h2><a class="toc-backref" id="types-default-values-for-object-fields" href="#types-default-values-for-object-fields">Default values for object fields</a></h2><p>Object fields are allowed to have a constant default value. The type of field can be omitted if a default value is given.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
+  <span class="Identifier">Foo</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+    <span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">2</span>
+    <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">float</span> <span class="Operator">=</span> <span class="FloatNumber">3.14</span>
+    <span class="Identifier">c</span> <span class="Operator">=</span> <span class="StringLit">&quot;I can have a default value&quot;</span>
+  
+  <span class="Identifier">Bar</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
+    <span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">2</span>
+    <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">float</span> <span class="Operator">=</span> <span class="FloatNumber">3.14</span>
+    <span class="Identifier">c</span> <span class="Operator">=</span> <span class="StringLit">&quot;I can have a default value&quot;</span></pre></p>
+<p>The explicit initialization uses these defaults which includes an <tt class="docutils literal"><span class="pre"><span class="Keyword">object</span></span></tt> created with an object construction expression or the procedure <tt class="docutils literal"><span class="pre"><span class="Identifier">default</span></span></tt>; a <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span> <span class="Keyword">object</span></span></tt> created with an object construction expression or the procedure <tt class="docutils literal"><span class="pre"><span class="Identifier">new</span></span></tt>; an array or a tuple with a subtype which has a default created with the procedure <tt class="docutils literal"><span class="pre"><span class="Identifier">default</span></span></tt>.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
+  <span class="Identifier">Foo</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+    <span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">2</span>
+    <span class="Identifier">b</span> <span class="Operator">=</span> <span class="FloatNumber">3.0</span>
+  <span class="Identifier">Bar</span> <span class="Operator">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
+    <span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="DecNumber">2</span>
+    <span class="Identifier">b</span> <span class="Operator">=</span> <span class="FloatNumber">3.0</span>
+
+<span class="Keyword">block</span><span class="Punctuation">:</span> <span class="Comment"># created with an object construction expression</span>
+  <span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Identifier">Foo</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Identifier">assert</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">a</span> <span class="Operator">==</span> <span class="DecNumber">2</span> <span class="Keyword">and</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">b</span> <span class="Operator">==</span> <span class="FloatNumber">3.0</span>
+  
+  <span class="Keyword">let</span> <span class="Identifier">y</span> <span class="Operator">=</span> <span class="Identifier">Bar</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Identifier">assert</span> <span class="Identifier">y</span><span class="Operator">.</span><span class="Identifier">a</span> <span class="Operator">==</span> <span class="DecNumber">2</span> <span class="Keyword">and</span> <span class="Identifier">y</span><span class="Operator">.</span><span class="Identifier">b</span> <span class="Operator">==</span> <span class="FloatNumber">3.0</span>
+
+<span class="Keyword">block</span><span class="Punctuation">:</span> <span class="Comment"># created with an object construction expression</span>
+  <span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Identifier">default</span><span class="Punctuation">(</span><span class="Identifier">Foo</span><span class="Punctuation">)</span>
+  <span class="Identifier">assert</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">a</span> <span class="Operator">==</span> <span class="DecNumber">2</span> <span class="Keyword">and</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">b</span> <span class="Operator">==</span> <span class="FloatNumber">3.0</span>
+  
+  <span class="Keyword">let</span> <span class="Identifier">y</span> <span class="Operator">=</span> <span class="Identifier">default</span><span class="Punctuation">(</span><span class="Identifier">array</span><span class="Punctuation">[</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="Identifier">Foo</span><span class="Punctuation">]</span><span class="Punctuation">)</span>
+  <span class="Identifier">assert</span> <span class="Identifier">y</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">a</span> <span class="Operator">==</span> <span class="DecNumber">2</span> <span class="Keyword">and</span> <span class="Identifier">y</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">b</span> <span class="Operator">==</span> <span class="FloatNumber">3.0</span>
+  
+  <span class="Keyword">let</span> <span class="Identifier">z</span> <span class="Operator">=</span> <span class="Identifier">default</span><span class="Punctuation">(</span><span class="Keyword">tuple</span><span class="Punctuation">[</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">Foo</span><span class="Punctuation">]</span><span class="Punctuation">)</span>
+  <span class="Identifier">assert</span> <span class="Identifier">z</span><span class="Operator">.</span><span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">a</span> <span class="Operator">==</span> <span class="DecNumber">2</span> <span class="Keyword">and</span> <span class="Identifier">z</span><span class="Operator">.</span><span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">b</span> <span class="Operator">==</span> <span class="FloatNumber">3.0</span>
+
+<span class="Keyword">block</span><span class="Punctuation">:</span> <span class="Comment"># created with the procedure `new`</span>
+  <span class="Keyword">let</span> <span class="Identifier">y</span> <span class="Operator">=</span> <span class="Identifier">new</span> <span class="Identifier">Bar</span>
+  <span class="Identifier">assert</span> <span class="Identifier">y</span><span class="Operator">.</span><span class="Identifier">a</span> <span class="Operator">==</span> <span class="DecNumber">2</span> <span class="Keyword">and</span> <span class="Identifier">y</span><span class="Operator">.</span><span class="Identifier">b</span> <span class="Operator">==</span> <span class="FloatNumber">3.0</span></pre></p>
 
 <h2><a class="toc-backref" id="types-set-type" href="#types-set-type">Set type</a></h2>The set type models the mathematical notion of a set. The set's basetype can only be an ordinal type of a certain size, namely:<ul class="simple"><li><tt class="docutils literal"><span class="pre"><span class="Identifier">int8</span></span></tt>-<tt class="docutils literal"><span class="pre"><span class="Identifier">int16</span></span></tt></li>
 <li><tt class="docutils literal"><span class="pre"><span class="Identifier">uint8</span></span></tt>/<tt class="docutils literal"><span class="pre"><span class="Identifier">byte</span></span></tt>-<tt class="docutils literal"><span class="pre"><span class="Identifier">uint16</span></span></tt></li>
@@ -5148,7 +5198,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-10-19 01:42:36 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-11-19 01:25:01 UTC</small>
       </div>
     </div>
   </div>

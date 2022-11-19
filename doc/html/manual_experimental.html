@@ -120,7 +120,8 @@
 <ul class="simple"><li><a class="reference" id="strict-definitions-and-nimout-parameters-nimout-parameters_toc" href="#strict-definitions-and-nimout-parameters-nimout-parameters"><tt class="docutils literal"><span class="pre"><span class="Keyword">out</span></span></tt> parameters</a></li>
 <li><a class="reference" id="strict-definitions-and-nimout-parameters-out-parameters-and-exception-handling_toc" href="#strict-definitions-and-nimout-parameters-out-parameters-and-exception-handling">Out parameters and exception handling</a></li>
 <li><a class="reference" id="strict-definitions-and-nimout-parameters-out-parameters-and-inheritance_toc" href="#strict-definitions-and-nimout-parameters-out-parameters-and-inheritance">Out parameters and inheritance</a></li>
-</ul>
+</ul><li><a class="reference" id="strict-case-objects_toc" href="#strict-case-objects">Strict case objects</a></li>
+
 </ul>
 
   </div>
@@ -500,7 +501,7 @@ The aliasing restrictions are currently not enforced by the implementation and n
   <span class="Identifier">m</span><span class="Operator">.</span><span class="Identifier">data</span> <span class="Operator">=</span> <span class="StringLit">&quot;yeah&quot;</span> <span class="Comment"># the mutation is here</span>
   <span class="Comment"># Error: 'mut' can have side effects</span>
   <span class="Comment"># an object reachable from 'n' is potentially mutated</span></pre></p>
-<p>The algorithm behind this analysis is described in the <a class="reference internal" href="#view types algorithm">view types algorithm</a>.</p>
+<p>The algorithm behind this analysis is described in the <a class="reference internal" href="#view-types-algorithm">view types algorithm</a>.</p>
 
 <h1><a class="toc-backref" id="view-types" href="#view-types">View types</a></h1><div class="admonition admonition-info"><span class="admonition-info-text"><b>Tip:</b></span>
 <tt class="docutils literal"><span class="pre option">--experimental:views</span></tt> is more effective with <tt class="docutils literal"><span class="pre option">--experimental:strictFuncs</span></tt>.</div>
@@ -1262,7 +1263,34 @@ Currently exceptions are not propagated between <tt class="docutils literal"><sp
 <span class="Identifier">use</span> <span class="Identifier">v</span><span class="Operator">.</span><span class="Identifier">s</span> <span class="Comment"># the 's' field was never initialized!</span>
 </pre></p>
 <p>However, in the future this could be allowed and provide a better way to write object constructors that take inheritance into account.</p>
-<p><strong>Note</strong>: The implementation of &quot;strict definitions&quot; and &quot;out parameters&quot; is experimental but the concept is solid and it is expected that eventually this mode becomes the default in later versions. </p>
+<p><strong>Note</strong>: The implementation of &quot;strict definitions&quot; and &quot;out parameters&quot; is experimental but the concept is solid and it is expected that eventually this mode becomes the default in later versions.</p>
+
+<h1><a class="toc-backref" id="strict-case-objects" href="#strict-case-objects">Strict case objects</a></h1><p>With <tt class="docutils literal"><span class="pre"><span class="Identifier">experimental</span><span class="Punctuation">:</span> <span class="StringLit">&quot;strictCaseObjects&quot;</span></span></tt> <em>every</em> field access is checked to be valid at compile-time. The field is within a <tt class="docutils literal"><span class="pre"><span class="Keyword">case</span></span></tt> section of an <tt class="docutils literal"><span class="pre"><span class="Keyword">object</span></span></tt>.</p>
+<p><pre class="listing">
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">experimental</span><span class="Punctuation">:</span> <span class="StringLit">&quot;strictCaseObjects&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
+
+<span class="Keyword">type</span>
+  <span class="Identifier">Foo</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+    <span class="Keyword">case</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">bool</span>
+    <span class="Keyword">of</span> <span class="Identifier">false</span><span class="Punctuation">:</span>
+      <span class="Identifier">s</span><span class="Punctuation">:</span> <span class="Identifier">string</span>
+    <span class="Keyword">of</span> <span class="Identifier">true</span><span class="Punctuation">:</span>
+      <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">int</span>
+
+<span class="Keyword">var</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Identifier">Foo</span><span class="Punctuation">(</span><span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">true</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="DecNumber">4</span><span class="Punctuation">)</span>
+<span class="Keyword">case</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">b</span>
+<span class="Keyword">of</span> <span class="Identifier">true</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">x</span> <span class="Comment"># valid</span>
+<span class="Keyword">of</span> <span class="Identifier">false</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="StringLit">&quot;no&quot;</span>
+
+<span class="Keyword">case</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">b</span>
+<span class="Keyword">of</span> <span class="Identifier">false</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="Identifier">x</span><span class="Operator">.</span><span class="Identifier">x</span> <span class="Comment"># error: field access outside of valid case branch: x.x</span>
+<span class="Keyword">of</span> <span class="Identifier">true</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="StringLit">&quot;no&quot;</span>
+</pre></p>
+<p><strong>Note</strong>: The implementation of &quot;strict case objects&quot; is experimental but the concept is solid and it is expected that eventually this mode becomes the default in later versions. </p>
 </p>
     
   </div>
@@ -1271,7 +1299,7 @@ Currently exceptions are not propagated between <tt class="docutils literal"><sp
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-10-19 01:42:39 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-11-19 01:24:53 UTC</small>
       </div>
     </div>
   </div>

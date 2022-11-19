@@ -60,9 +60,13 @@
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
       <li><a class="reference" href="#ConsoleLogger" title="ConsoleLogger = ref object of Logger
-  useStderr*: bool           ## If true, writes to stderr; otherwise, writes to stdout">ConsoleLogger</a></li>
+  useStderr*: bool           ## If true, writes to stderr; otherwise, writes to stdout
+  flushThreshold*: Level     ## Only messages that are at or above this
+                             ## threshold will be flushed immediately">ConsoleLogger</a></li>
 <li><a class="reference" href="#FileLogger" title="FileLogger = ref object of Logger
-  file*: File                ## The wrapped file">FileLogger</a></li>
+  file*: File                ## The wrapped file
+  flushThreshold*: Level     ## Only messages that are at or above this
+                             ## threshold will be flushed immediately">FileLogger</a></li>
 <li><a class="reference" href="#Level" title="Level = enum
   lvlAll,                   ## All levels active
   lvlDebug,                 ## Debug level and above are active
@@ -122,23 +126,29 @@
 </ul>
 <ul class="simple nested-toc-section">newConsoleLogger
   <li><a class="reference" href="#newConsoleLogger" title="newConsoleLogger(levelThreshold = lvlAll; fmtStr = defaultFmtStr;
-                 useStderr = false): ConsoleLogger">newConsoleLogger(levelThreshold = lvlAll; fmtStr = defaultFmtStr;
-                 useStderr = false): ConsoleLogger</a></li>
+                 useStderr = false; flushThreshold = defaultFlushThreshold): ConsoleLogger">newConsoleLogger(levelThreshold = lvlAll; fmtStr = defaultFmtStr;
+                 useStderr = false; flushThreshold = defaultFlushThreshold): ConsoleLogger</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">newFileLogger
-  <li><a class="reference" href="#newFileLogger%2CFile" title="newFileLogger(file: File; levelThreshold = lvlAll; fmtStr = defaultFmtStr): FileLogger">newFileLogger(file: File; levelThreshold = lvlAll; fmtStr = defaultFmtStr): FileLogger</a></li>
+  <li><a class="reference" href="#newFileLogger%2CFile" title="newFileLogger(file: File; levelThreshold = lvlAll; fmtStr = defaultFmtStr;
+              flushThreshold = defaultFlushThreshold): FileLogger">newFileLogger(file: File; levelThreshold = lvlAll; fmtStr = defaultFmtStr;
+              flushThreshold = defaultFlushThreshold): FileLogger</a></li>
 <li><a class="reference" href="#newFileLogger%2CFileMode%2Cint" title="newFileLogger(filename = defaultFilename(); mode: FileMode = fmAppend;
-              levelThreshold = lvlAll; fmtStr = defaultFmtStr; bufSize: int = -1): FileLogger">newFileLogger(filename = defaultFilename(); mode: FileMode = fmAppend;
-              levelThreshold = lvlAll; fmtStr = defaultFmtStr; bufSize: int = -1): FileLogger</a></li>
+              levelThreshold = lvlAll; fmtStr = defaultFmtStr;
+              bufSize: int = -1; flushThreshold = defaultFlushThreshold): FileLogger">newFileLogger(filename = defaultFilename(); mode: FileMode = fmAppend;
+              levelThreshold = lvlAll; fmtStr = defaultFmtStr;
+              bufSize: int = -1; flushThreshold = defaultFlushThreshold): FileLogger</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">newRollingFileLogger
   <li><a class="reference" href="#newRollingFileLogger%2CFileMode%2CPositive%2Cint" title="newRollingFileLogger(filename = defaultFilename(); mode: FileMode = fmReadWrite;
                      levelThreshold = lvlAll; fmtStr = defaultFmtStr;
-                     maxLines: Positive = 1000; bufSize: int = -1): RollingFileLogger">newRollingFileLogger(filename = defaultFilename(); mode: FileMode = fmReadWrite;
+                     maxLines: Positive = 1000; bufSize: int = -1;
+                     flushThreshold = defaultFlushThreshold): RollingFileLogger">newRollingFileLogger(filename = defaultFilename(); mode: FileMode = fmReadWrite;
                      levelThreshold = lvlAll; fmtStr = defaultFmtStr;
-                     maxLines: Positive = 1000; bufSize: int = -1): RollingFileLogger</a></li>
+                     maxLines: Positive = 1000; bufSize: int = -1;
+                     flushThreshold = defaultFlushThreshold): RollingFileLogger</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">setLogFilter
@@ -226,7 +236,7 @@
 <span class="Comment"># Output: INFO a log message</span></pre><p>The <tt class="docutils literal"><span class="pre">INFO</span></tt> within the output is the result of a format string being prepended to the message, and it will differ depending on the message's level. Format strings are <a class="reference external" href="#basic-usage-format-strings">explained in more detail here</a>.</p>
 <p>There are six logging levels: debug, info, notice, warn, error, and fatal. They are described in more detail within the <a class="reference external" href="#Level">Level enum's documentation</a>. A message is logged if its level is at or above both the logger's <tt class="docutils literal"><span class="pre">levelThreshold</span></tt> field and the global log filter. The latter can be changed with the <a class="reference external" href="#setLogFilter,Level">setLogFilter proc</a>.</p>
 <div class="admonition admonition-warning"><span class="admonition-warning-text"><b>Warning:</b></span>
-For loggers that log to a console or to files, only error and fatal messages will cause their output buffers to be flushed immediately. Use the <a class="reference external" href="syncio.html#flushFile,File">flushFile proc</a> to flush the buffer manually if needed.</div>
+For loggers that log to a console or to files, only error and fatal messages will cause their output buffers to be flushed immediately by default. set <tt class="docutils literal"><span class="pre">flushThreshold</span></tt> when creating the logger to change this.</div>
 
 <h2><a class="toc-backref" id="basic-usage-handlers" href="#basic-usage-handlers">Handlers</a></h2><p>When using multiple loggers, calling the log proc for each logger can become repetitive. Instead of doing that, register each logger that will be used with the <a class="reference external" href="#addHandler,Logger">addHandler proc</a>, which is demonstrated in the following example:</p>
 <pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">logging</span>
@@ -275,7 +285,7 @@ For loggers that log to a console or to files, only error and fatal messages wil
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="times.html">times</a>, <a class="reference external" href="os.html">os</a>
+    <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="times.html">times</a>, <a class="reference external" href="os.html">os</a>, <a class="reference external" href="syncio.html">syncio</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -284,6 +294,8 @@ For loggers that log to a console or to files, only error and fatal messages wil
     <div id="ConsoleLogger">
   <dt><pre><a href="logging.html#ConsoleLogger"><span class="Identifier">ConsoleLogger</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="logging.html#Logger"><span class="Identifier">Logger</span></a>
   <span class="Identifier">useStderr</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>           <span class="Comment">## If true, writes to stderr; otherwise, writes to stdout</span>
+  <span class="Identifier">flushThreshold</span><span class="Operator">*</span><span class="Other">:</span> <a href="logging.html#Level"><span class="Identifier">Level</span></a>     <span class="Comment">## Only messages that are at or above this</span>
+                             <span class="Comment">## threshold will be flushed immediately</span>
   </pre></dt>
   <dd>
     
@@ -294,14 +306,16 @@ For loggers that log to a console or to files, only error and fatal messages wil
 <li><a class="reference external" href="#RollingFileLogger">RollingFileLogger</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L221" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L221" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L229" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L229" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="FileLogger">
   <dt><pre><a href="logging.html#FileLogger"><span class="Identifier">FileLogger</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="logging.html#Logger"><span class="Identifier">Logger</span></a>
   <span class="Identifier">file</span><span class="Operator">*</span><span class="Other">:</span> <a href="syncio.html#File"><span class="Identifier">File</span></a>                <span class="Comment">## The wrapped file</span>
+  <span class="Identifier">flushThreshold</span><span class="Operator">*</span><span class="Other">:</span> <a href="logging.html#Level"><span class="Identifier">Level</span></a>     <span class="Comment">## Only messages that are at or above this</span>
+                             <span class="Comment">## threshold will be flushed immediately</span>
   </pre></dt>
   <dd>
     
@@ -313,8 +327,8 @@ For loggers that log to a console or to files, only error and fatal messages wil
 <li><a class="reference external" href="#RollingFileLogger">RollingFileLogger</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L234" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L234" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L244" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L244" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -344,8 +358,8 @@ Enumeration of logging levels.</p>
 <p>It is completely up to the application how to utilize each level.</p>
 <p>Individual loggers have a <tt class="docutils literal"><span class="pre">levelThreshold</span></tt> field that filters out any messages with a level lower than the threshold. There is also a global filter that applies to all log messages, and it can be changed using the <a class="reference external" href="#setLogFilter,Level">setLogFilter proc</a>.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L153" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L153" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L152" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L152" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -366,8 +380,8 @@ Enumeration of logging levels.</p>
 <li><a class="reference external" href="#RollingFileLogger">RollingFileLogger</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L205" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L205" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L213" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L213" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -390,8 +404,8 @@ Enumeration of logging levels.</p>
 <li><a class="reference external" href="#FileLogger">FileLogger</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L247" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L247" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L259" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L259" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -406,8 +420,8 @@ Enumeration of logging levels.</p>
   <dd>
     
     The default format string.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L193" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L193" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L192" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L192" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -417,8 +431,8 @@ Enumeration of logging levels.</p>
   <dd>
     
     Array of strings representing each logging level.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L189" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L189" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L188" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L188" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -431,8 +445,8 @@ A more verbose format string.</p>
 <p>This string can be passed as the <tt class="docutils literal"><span class="pre">frmStr</span></tt> argument to procs that create new loggers, such as the <a class="reference external" href="#newConsoleLogger">newConsoleLogger proc</a>.</p>
 <p>If a different format string is preferred, refer to the <a class="reference external" href="#basic-usage-format-strings">documentation about format strings</a> for more information, including a list of available variables.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L194" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L194" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L193" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L193" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -457,8 +471,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
 <pre class="listing"><span class="Keyword">var</span> <span class="Identifier">logger</span> <span class="Operator">=</span> <span class="Identifier">newConsoleLogger</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Identifier">addHandler</span><span class="Punctuation">(</span><span class="Identifier">logger</span><span class="Punctuation">)</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">logger</span> <span class="Keyword">in</span> <span class="Identifier">getHandlers</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L797" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L797" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L815" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L815" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -472,8 +486,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
     <p>Returns the filename that is used by default when naming log files.</p>
 <p><strong>Note:</strong> This proc is not available for the JavaScript backend.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L448" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L448" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L461" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L461" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -489,8 +503,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
 <ul class="simple"><li><a class="reference external" href="#addHandler,Logger">addHandler proc</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L812" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L812" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L830" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L830" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -506,8 +520,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
 <ul class="simple"><li><a class="reference external" href="#setLogFilter,Level">setLogFilter proc</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L838" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L838" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L856" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L856" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -516,8 +530,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
 <div id="newConsoleLogger-procs-all">
   <div id="newConsoleLogger">
   <dt><pre><span class="Keyword">proc</span> <a href="#newConsoleLogger"><span class="Identifier">newConsoleLogger</span></a><span class="Other">(</span><span class="Identifier">levelThreshold</span> <span class="Other">=</span> <span class="Identifier">lvlAll</span><span class="Other">;</span> <span class="Identifier">fmtStr</span> <span class="Other">=</span> <span class="Identifier">defaultFmtStr</span><span class="Other">;</span>
-                      <span class="Identifier">useStderr</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="logging.html#ConsoleLogger"><span class="Identifier">ConsoleLogger</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+                      <span class="Identifier">useStderr</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">flushThreshold</span> <span class="Other">=</span> <span class="Identifier">defaultFlushThreshold</span><span class="Other">)</span><span class="Other">:</span> <a href="logging.html#ConsoleLogger"><span class="Identifier">ConsoleLogger</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     <p>Creates a new <a class="reference external" href="#ConsoleLogger">ConsoleLogger</a>.</p>
@@ -532,8 +546,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
 <pre class="listing"><span class="Keyword">var</span> <span class="Identifier">normalLog</span> <span class="Operator">=</span> <span class="Identifier">newConsoleLogger</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">formatLog</span> <span class="Operator">=</span> <span class="Identifier">newConsoleLogger</span><span class="Punctuation">(</span><span class="Identifier">fmtStr</span><span class="Operator">=</span><span class="Identifier">verboseFmtStr</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">errorLog</span> <span class="Operator">=</span> <span class="Identifier">newConsoleLogger</span><span class="Punctuation">(</span><span class="Identifier">levelThreshold</span><span class="Operator">=</span><span class="Identifier">lvlError</span><span class="Punctuation">,</span> <span class="Identifier">useStderr</span><span class="Operator">=</span><span class="Identifier">true</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L387" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L387" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L399" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L399" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -541,7 +555,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
 </div>
 <div id="newFileLogger-procs-all">
   <div id="newFileLogger,File">
-  <dt><pre><span class="Keyword">proc</span> <a href="#newFileLogger%2CFile"><span class="Identifier">newFileLogger</span></a><span class="Other">(</span><span class="Identifier">file</span><span class="Other">:</span> <a href="syncio.html#File"><span class="Identifier">File</span></a><span class="Other">;</span> <span class="Identifier">levelThreshold</span> <span class="Other">=</span> <span class="Identifier">lvlAll</span><span class="Other">;</span> <span class="Identifier">fmtStr</span> <span class="Other">=</span> <span class="Identifier">defaultFmtStr</span><span class="Other">)</span><span class="Other">:</span> <a href="logging.html#FileLogger"><span class="Identifier">FileLogger</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#newFileLogger%2CFile"><span class="Identifier">newFileLogger</span></a><span class="Other">(</span><span class="Identifier">file</span><span class="Other">:</span> <a href="syncio.html#File"><span class="Identifier">File</span></a><span class="Other">;</span> <span class="Identifier">levelThreshold</span> <span class="Other">=</span> <span class="Identifier">lvlAll</span><span class="Other">;</span> <span class="Identifier">fmtStr</span> <span class="Other">=</span> <span class="Identifier">defaultFmtStr</span><span class="Other">;</span>
+                   <span class="Identifier">flushThreshold</span> <span class="Other">=</span> <span class="Identifier">defaultFlushThreshold</span><span class="Other">)</span><span class="Other">:</span> <a href="logging.html#FileLogger"><span class="Identifier">FileLogger</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -560,16 +575,16 @@ The list of handlers is a thread-local variable. If the given handler will be us
 <span class="Keyword">var</span> <span class="Identifier">normalLog</span> <span class="Operator">=</span> <span class="Identifier">newFileLogger</span><span class="Punctuation">(</span><span class="Identifier">messages</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">formatLog</span> <span class="Operator">=</span> <span class="Identifier">newFileLogger</span><span class="Punctuation">(</span><span class="Identifier">formatted</span><span class="Punctuation">,</span> <span class="Identifier">fmtStr</span><span class="Operator">=</span><span class="Identifier">verboseFmtStr</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">errorLog</span> <span class="Operator">=</span> <span class="Identifier">newFileLogger</span><span class="Punctuation">(</span><span class="Identifier">errors</span><span class="Punctuation">,</span> <span class="Identifier">levelThreshold</span><span class="Operator">=</span><span class="Identifier">lvlError</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L455" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L455" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L468" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L468" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="newFileLogger,FileMode,int">
   <dt><pre><span class="Keyword">proc</span> <a href="#newFileLogger%2CFileMode%2Cint"><span class="Identifier">newFileLogger</span></a><span class="Other">(</span><span class="Identifier">filename</span> <span class="Other">=</span> <span class="Identifier">defaultFilename</span><span class="Other">(</span><span class="Other">)</span><span class="Other">;</span> <span class="Identifier">mode</span><span class="Other">:</span> <a href="syncio.html#FileMode"><span class="Identifier">FileMode</span></a> <span class="Other">=</span> <span class="Identifier">fmAppend</span><span class="Other">;</span>
                    <span class="Identifier">levelThreshold</span> <span class="Other">=</span> <span class="Identifier">lvlAll</span><span class="Other">;</span> <span class="Identifier">fmtStr</span> <span class="Other">=</span> <span class="Identifier">defaultFmtStr</span><span class="Other">;</span>
-                   <span class="Identifier">bufSize</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span class="Other">=</span> <span class="DecNumber">-1</span><span class="Other">)</span><span class="Other">:</span> <a href="logging.html#FileLogger"><span class="Identifier">FileLogger</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+                   <span class="Identifier">bufSize</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span class="Other">=</span> <span class="DecNumber">-1</span><span class="Other">;</span> <span class="Identifier">flushThreshold</span> <span class="Other">=</span> <span class="Identifier">defaultFlushThreshold</span><span class="Other">)</span><span class="Other">:</span> <a href="logging.html#FileLogger"><span class="Identifier">FileLogger</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     <p>Creates a new <a class="reference external" href="#FileLogger">FileLogger</a> that logs to a file with the given filename.</p>
@@ -588,8 +603,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
 <pre class="listing"><span class="Keyword">var</span> <span class="Identifier">normalLog</span> <span class="Operator">=</span> <span class="Identifier">newFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;messages.log&quot;</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">formatLog</span> <span class="Operator">=</span> <span class="Identifier">newFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;formatted.log&quot;</span><span class="Punctuation">,</span> <span class="Identifier">fmtStr</span><span class="Operator">=</span><span class="Identifier">verboseFmtStr</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">errorLog</span> <span class="Operator">=</span> <span class="Identifier">newFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;errors.log&quot;</span><span class="Punctuation">,</span> <span class="Identifier">levelThreshold</span><span class="Operator">=</span><span class="Identifier">lvlError</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L483" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L483" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L498" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L498" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -600,7 +615,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
   <dt><pre><span class="Keyword">proc</span> <a href="#newRollingFileLogger%2CFileMode%2CPositive%2Cint"><span class="Identifier">newRollingFileLogger</span></a><span class="Other">(</span><span class="Identifier">filename</span> <span class="Other">=</span> <span class="Identifier">defaultFilename</span><span class="Other">(</span><span class="Other">)</span><span class="Other">;</span>
                           <span class="Identifier">mode</span><span class="Other">:</span> <a href="syncio.html#FileMode"><span class="Identifier">FileMode</span></a> <span class="Other">=</span> <span class="Identifier">fmReadWrite</span><span class="Other">;</span> <span class="Identifier">levelThreshold</span> <span class="Other">=</span> <span class="Identifier">lvlAll</span><span class="Other">;</span>
                           <span class="Identifier">fmtStr</span> <span class="Other">=</span> <span class="Identifier">defaultFmtStr</span><span class="Other">;</span> <span class="Identifier">maxLines</span><span class="Other">:</span> <a href="system.html#Positive"><span class="Identifier">Positive</span></a> <span class="Other">=</span> <span class="DecNumber">1000</span><span class="Other">;</span>
-                          <span class="Identifier">bufSize</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span class="Other">=</span> <span class="DecNumber">-1</span><span class="Other">)</span><span class="Other">:</span> <a href="logging.html#RollingFileLogger"><span class="Identifier">RollingFileLogger</span></a> {.
+                          <span class="Identifier">bufSize</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a> <span class="Other">=</span> <span class="DecNumber">-1</span><span class="Other">;</span>
+                          <span class="Identifier">flushThreshold</span> <span class="Other">=</span> <span class="Identifier">defaultFlushThreshold</span><span class="Other">)</span><span class="Other">:</span> <a href="logging.html#RollingFileLogger"><span class="Identifier">RollingFileLogger</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -622,8 +638,8 @@ The list of handlers is a thread-local variable. If the given handler will be us
 <span class="Keyword">var</span> <span class="Identifier">formatLog</span> <span class="Operator">=</span> <span class="Identifier">newRollingFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;formatted.log&quot;</span><span class="Punctuation">,</span> <span class="Identifier">fmtStr</span><span class="Operator">=</span><span class="Identifier">verboseFmtStr</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">shortLog</span> <span class="Operator">=</span> <span class="Identifier">newRollingFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;short.log&quot;</span><span class="Punctuation">,</span> <span class="Identifier">maxLines</span><span class="Operator">=</span><span class="DecNumber">200</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">errorLog</span> <span class="Operator">=</span> <span class="Identifier">newRollingFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;errors.log&quot;</span><span class="Punctuation">,</span> <span class="Identifier">levelThreshold</span><span class="Operator">=</span><span class="Identifier">lvlError</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L538" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L538" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L554" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L554" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -645,8 +661,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Identifier">setLogFilter</span><span class="Punctuation">(</span><span class="Identifier">lvlError</span><span class="Punctuation">)</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">getLogFilter</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">lvlError</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L819" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L819" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L837" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L837" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -672,8 +688,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">substituteLog</span><span class="Punctuation">(</span><span class="Identifier">defaultFmtStr</span><span class="Punctuation">,</span> <span class="Identifier">lvlInfo</span><span class="Punctuation">,</span> <span class="StringLit">&quot;a message&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;INFO a message&quot;</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">substituteLog</span><span class="Punctuation">(</span><span class="StringLit">&quot;$levelid - &quot;</span><span class="Punctuation">,</span> <span class="Identifier">lvlError</span><span class="Punctuation">,</span> <span class="StringLit">&quot;an error&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;E - an error&quot;</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">substituteLog</span><span class="Punctuation">(</span><span class="StringLit">&quot;$levelid&quot;</span><span class="Punctuation">,</span> <span class="Identifier">lvlDebug</span><span class="Punctuation">,</span> <span class="StringLit">&quot;error&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;Derror&quot;</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L270" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L270" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L282" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L282" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -694,7 +710,7 @@ The global log filter is a thread-local variable. If logging is being performed 
     <p>Logs to the console with the given <a class="reference external" href="#ConsoleLogger">ConsoleLogger</a> only.</p>
 <p>This method ignores the list of registered handlers.</p>
 <p>Whether the message is logged depends on both the ConsoleLogger's <tt class="docutils literal"><span class="pre">levelThreshold</span></tt> field and the global log filter set using the <a class="reference external" href="#setLogFilter,Level">setLogFilter proc</a>.</p>
-<p><strong>Note:</strong> Only error and fatal messages will cause the output buffer to be flushed immediately. Use the <a class="reference external" href="syncio.html#flushFile,File">flushFile proc</a> to flush the buffer manually if needed.</p>
+<p><strong>Note:</strong> Only error and fatal messages will cause the output buffer to be flushed immediately by default. Set <tt class="docutils literal"><span class="pre">flushThreshold</span></tt> when creating the logger to change this.</p>
 <p>See also:</p>
 <ul class="simple"><li><a class="reference external" href="#log.e,FileLogger,Level,varargs[string,]">log method</a> for the FileLogger</li>
 <li><a class="reference external" href="#log.e,RollingFileLogger,Level,varargs[string,]">log method</a> for the RollingFileLogger</li>
@@ -704,8 +720,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <pre class="listing"><span class="Keyword">var</span> <span class="Identifier">consoleLog</span> <span class="Operator">=</span> <span class="Identifier">newConsoleLogger</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Identifier">consoleLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlInfo</span><span class="Punctuation">,</span> <span class="StringLit">&quot;this is a message&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">consoleLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlError</span><span class="Punctuation">,</span> <span class="StringLit">&quot;error code is: &quot;</span><span class="Punctuation">,</span> <span class="DecNumber">404</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L341" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L341" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L353" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L353" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -719,7 +735,7 @@ The global log filter is a thread-local variable. If logging is being performed 
 <p>This method ignores the list of registered handlers.</p>
 <p>Whether the message is logged depends on both the FileLogger's <tt class="docutils literal"><span class="pre">levelThreshold</span></tt> field and the global log filter set using the <a class="reference external" href="#setLogFilter,Level">setLogFilter proc</a>.</p>
 <p><strong>Notes:</strong></p>
-<ul class="simple"><li>Only error and fatal messages will cause the output buffer to be flushed immediately. Use the <a class="reference external" href="syncio.html#flushFile,File">flushFile proc</a> to flush the buffer manually if needed.</li>
+<ul class="simple"><li>Only error and fatal messages will cause the output buffer to be flushed immediately by default. Set <tt class="docutils literal"><span class="pre">flushThreshold</span></tt> when creating the logger to change this.</li>
 <li>This method is not available for the JavaScript backend.</li>
 </ul>
 <p>See also:</p>
@@ -731,8 +747,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <pre class="listing"><span class="Keyword">var</span> <span class="Identifier">fileLog</span> <span class="Operator">=</span> <span class="Identifier">newFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;messages.log&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">fileLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlInfo</span><span class="Punctuation">,</span> <span class="StringLit">&quot;this is a message&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">fileLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlError</span><span class="Punctuation">,</span> <span class="StringLit">&quot;error code is: &quot;</span><span class="Punctuation">,</span> <span class="DecNumber">404</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L415" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L415" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L428" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L428" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -749,8 +765,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <li><a class="reference external" href="#log.t,Level,varargs[string,]">log template</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L325" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L325" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L337" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L337" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -764,7 +780,7 @@ The global log filter is a thread-local variable. If logging is being performed 
 <p>This method ignores the list of registered handlers.</p>
 <p>Whether the message is logged depends on both the RollingFileLogger's <tt class="docutils literal"><span class="pre">levelThreshold</span></tt> field and the global log filter set using the <a class="reference external" href="#setLogFilter,Level">setLogFilter proc</a>.</p>
 <p><strong>Notes:</strong></p>
-<ul class="simple"><li>Only error and fatal messages will cause the output buffer to be flushed immediately. Use the <a class="reference external" href="syncio.html#flushFile,File">flushFile proc</a> to flush the buffer manually if needed.</li>
+<ul class="simple"><li>Only error and fatal messages will cause the output buffer to be flushed immediately by default. Set <tt class="docutils literal"><span class="pre">flushThreshold</span></tt> when creating the logger to change this.</li>
 <li>This method is not available for the JavaScript backend.</li>
 </ul>
 <p>See also:</p>
@@ -776,8 +792,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <pre class="listing"><span class="Keyword">var</span> <span class="Identifier">rollingLog</span> <span class="Operator">=</span> <span class="Identifier">newRollingFileLogger</span><span class="Punctuation">(</span><span class="StringLit">&quot;messages.log&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">rollingLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlInfo</span><span class="Punctuation">,</span> <span class="StringLit">&quot;this is a message&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">rollingLog</span><span class="Operator">.</span><span class="Identifier">log</span><span class="Punctuation">(</span><span class="Identifier">lvlError</span><span class="Punctuation">,</span> <span class="StringLit">&quot;error code is: &quot;</span><span class="Punctuation">,</span> <span class="DecNumber">404</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L593" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L593" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L611" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L611" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -806,8 +822,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <li><a class="reference external" href="#notice.t,varargs[string,]">notice template</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L671" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L671" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L689" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L689" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -830,8 +846,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <li><a class="reference external" href="#fatal.t,varargs[string,]">fatal template</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L754" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L754" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L772" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L772" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -854,8 +870,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <li><a class="reference external" href="#error.t,varargs[string,]">error template</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L776" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L776" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L794" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L794" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -878,8 +894,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <li><a class="reference external" href="#notice.t,varargs[string,]">notice template</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L692" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L692" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L710" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L710" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -905,8 +921,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <li><a class="reference external" href="#fatal.t,varargs[string,]">fatal template</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L642" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L642" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L660" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L660" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -929,8 +945,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <li><a class="reference external" href="#info.t,varargs[string,]">info template</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L713" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L713" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L731" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L731" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -953,8 +969,8 @@ The global log filter is a thread-local variable. If logging is being performed 
 <li><a class="reference external" href="#fatal.t,varargs[string,]">fatal template</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L734" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L734" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/logging.nim#L752" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/logging.nim#L752" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -970,7 +986,7 @@ The global log filter is a thread-local variable. If logging is being performed 
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-10-19 01:43:13 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-11-19 01:25:27 UTC</small>
       </div>
     </div>
   </div>

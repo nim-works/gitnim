@@ -1363,7 +1363,7 @@ proc tryReadingTypeField(c: PContext, n: PNode, i: PIdent, ty: PType): PNode =
   else:
     result = tryReadingGenericParam(c, n, i, ty)
 
-proc builtinFieldAccess(c: PContext, n: PNode, flags: TExprFlags): PNode =
+proc builtinFieldAccess(c: PContext; n: PNode; flags: var TExprFlags): PNode =
   ## returns nil if it's not a built-in field access
   checkSonsLen(n, 2, c.config)
   # tests/bind/tbindoverload.nim wants an early exit here, but seems to
@@ -1401,12 +1401,15 @@ proc builtinFieldAccess(c: PContext, n: PNode, flags: TExprFlags): PNode =
       # field access and we leave the compiler to compile a normal call:
       if getCurrOwner(c).kind != skMacro:
         n.typ = makeTypeFromExpr(c, n.copyTree)
+        flags.incl efCannotBeDotCall
         return n
       else:
         return nil
     else:
+      flags.incl efCannotBeDotCall
       return tryReadingTypeField(c, n, i, ty.base)
   elif isTypeExpr(n.sons[0]):
+    flags.incl efCannotBeDotCall
     return tryReadingTypeField(c, n, i, ty)
   elif ty.kind == tyError:
     # a type error doesn't have any builtin fields
@@ -1458,6 +1461,7 @@ proc builtinFieldAccess(c: PContext, n: PNode, flags: TExprFlags): PNode =
   if result == nil:
     let t = n[0].typ.skipTypes(tyDotOpTransparent)
     result = tryReadingGenericParam(c, n, i, t)
+    flags.incl efCannotBeDotCall
 
 proc dotTransformation(c: PContext, n: PNode): PNode =
   if isSymChoice(n[1]):
@@ -1474,9 +1478,11 @@ proc dotTransformation(c: PContext, n: PNode): PNode =
 proc semFieldAccess(c: PContext, n: PNode, flags: TExprFlags): PNode =
   # this is difficult, because the '.' is used in many different contexts
   # in Nim. We first allow types in the semantic checking.
-  result = builtinFieldAccess(c, n, flags - {efIsDotCall})
-  if result == nil or ((result.typ == nil or result.typ.skipTypes(abstractInst).kind != tyProc) and 
-      efIsDotCall in flags and callOperator notin c.features):
+  var f = flags - {efIsDotCall}
+  result = builtinFieldAccess(c, n, f)
+  if result == nil or ((result.typ == nil or result.typ.skipTypes(abstractInst).kind != tyProc) and
+      efIsDotCall in flags and callOperator notin c.features and
+      efCannotBeDotCall notin f):
     result = dotTransformation(c, n)
 
 proc buildOverloadedSubscripts(n: PNode, ident: PIdent): PNode =
@@ -1744,7 +1750,8 @@ proc semAsgn(c: PContext, n: PNode; mode=asgnNormal): PNode =
     # r.f = x
     # --> `f=` (r, x)
     let nOrig = n.copyTree
-    a = builtinFieldAccess(c, a, {efLValue})
+    var flags = {efLValue}
+    a = builtinFieldAccess(c, a, flags)
     if a == nil:
       a = propertyWriteAccess(c, n, nOrig, n[0])
       if a != nil: return a
@@ -2395,12 +2402,16 @@ proc semMagic(c: PContext, n: PNode, s: PSym, flags: TExprFlags; expectedType: P
     markUsed(c, n.info, s)
     result = semSizeof(c, setMs(n, s))
   of mArrToSeq, mOpenArrayToSeq:
-    if n.len == 2 and expectedType != nil and (
+    if expectedType != nil and (
         let expected = expectedType.skipTypes(abstractRange-{tyDistinct});
         expected.kind in {tySequence, tyOpenArray}):
       # seq type inference
       var arrayType = newType(tyOpenArray, nextTypeId(c.idgen), expected.owner)
       arrayType.rawAddSon(expected[0])
+      if n[0].kind == nkSym and sfFromGeneric in n[0].sym.flags:
+        # may have been resolved to `@`[empty] at some point,
+        # reset to `@` to deal with this
+        n[0] = newSymNode(n[0].sym.owner, n[0].info)
       n[1] = semExpr(c, n[1], flags, arrayType)
     result = semDirectOp(c, n, flags, expectedType)
   else:
@@ -3068,7 +3079,8 @@ proc semExpr(c: PContext, n: PNode, flags: TExprFlags = {}, expectedType: PType 
     of paTupleFields: result = semTupleFieldsConstr(c, n, flags, expectedType)
     of paSingle: result = semExpr(c, n[0], flags, expectedType)
   of nkCurly: result = semSetConstr(c, n, expectedType)
-  of nkBracket: result = semArrayConstr(c, n, flags, expectedType)
+  of nkBracket:
+    result = semArrayConstr(c, n, flags, expectedType)
   of nkObjConstr: result = semObjConstr(c, n, flags, expectedType)
   of nkLambdaKinds: result = semProcAux(c, n, skProc, lambdaPragmas, flags)
   of nkDerefExpr: result = semDeref(c, n)

@@ -99,16 +99,16 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/gorgeimpl.nim
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
-    rm -f $nimbleDir/compiler/ic/cbackend.nim
-    rm -f $nimbleDir/compiler/ic/rodfiles.nim
-    rm -f $nimbleDir/compiler/ic/replayer.nim
-    rm -f $nimbleDir/compiler/ic/integrity.nim
     rm -f $nimbleDir/compiler/ic/packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/ic.nim
+    rm -f $nimbleDir/compiler/ic/cbackend.nim
     rm -f $nimbleDir/compiler/ic/dce.nim
+    rm -f $nimbleDir/compiler/ic/integrity.nim
+    rm -f $nimbleDir/compiler/ic/bitabs.nim
     rm -f $nimbleDir/compiler/ic/navigator.nim
     rm -f $nimbleDir/compiler/ic/design.rst
-    rm -f $nimbleDir/compiler/ic/ic.nim
-    rm -f $nimbleDir/compiler/ic/bitabs.nim
+    rm -f $nimbleDir/compiler/ic/replayer.nim
+    rm -f $nimbleDir/compiler/ic/rodfiles.nim
     rm -f $nimbleDir/compiler/idents.nim
     rm -f $nimbleDir/compiler/importer.nim
     rm -f $nimbleDir/compiler/index.nim
@@ -163,9 +163,9 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/pathutils.nim
     rm -f $nimbleDir/compiler/patterns.nim
     rm -f $nimbleDir/compiler/platform.nim
-    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/active.nim
     rm -f $nimbleDir/compiler/plugins/itersgen.nim
+    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/pluginsupport.nim
     rm -f $nimbleDir/compiler/pragmas.nim
     rm -f $nimbleDir/compiler/prefixmatches.nim
@@ -201,7 +201,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/sizealignoffsetimpl.nim
     rm -f $nimbleDir/compiler/sourcemap.nim
     rm -f $nimbleDir/compiler/spawn.nim
-    rm -f $nimbleDir/compiler/strutils2.nim
     rm -f $nimbleDir/compiler/suggest.nim
     rm -f $nimbleDir/compiler/syntaxes.nim
     rm -f $nimbleDir/compiler/tccgen.nim

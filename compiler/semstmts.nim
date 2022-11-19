@@ -36,6 +36,7 @@ const
   errRecursiveDependencyX = "recursive dependency: '$1'"
   errRecursiveDependencyIteratorX = "recursion is not supported in iterators: '$1'"
   errPragmaOnlyInHeaderOfProcX = "pragmas are only allowed in the header of a proc; redefinition of $1"
+  errCannotAssignToGlobal = "cannot assign local to global variable"
 
 proc semDiscard(c: PContext, n: PNode): PNode =
   result = n
@@ -590,6 +591,24 @@ proc msgSymChoiceUseQualifier(c: PContext; n: PNode; note = errGenerated) =
     inc i
   message(c.config, n.info, note, err)
 
+template isLocalVarSym(n: PNode): bool =
+  n.kind == nkSym and 
+    n.sym.kind in {skVar, skLet} and not 
+    ({sfGlobal, sfPure} <= n.sym.flags or
+      sfCompileTime in n.sym.flags)
+  
+proc usesLocalVar(n: PNode): bool =
+  for z in 1 ..< n.len:
+    if n[z].isLocalVarSym:
+      return true
+    elif n[z].kind in nkCallKinds:
+      if usesLocalVar(n[z]):
+        return true
+
+proc globalVarInitCheck(c: PContext, n: PNode) =
+  if n.isLocalVarSym or n.kind in nkCallKinds and usesLocalVar(n):
+    localError(c.config, n.info, errCannotAssignToGlobal)
+
 proc semVarOrLet(c: PContext, n: PNode, symkind: TSymKind): PNode =
   var b: PNode
   result = copyNode(n)
@@ -740,7 +759,8 @@ proc semVarOrLet(c: PContext, n: PNode, symkind: TSymKind): PNode =
         vm.setupCompileTimeVar(c.module, c.idgen, c.graph, x)
       if v.flags * {sfGlobal, sfThread} == {sfGlobal}:
         message(c.config, v.info, hintGlobalVar)
-
+      if {sfGlobal, sfPure} <= v.flags:
+        globalVarInitCheck(c, def)
       suggestSym(c.graph, v.info, v, c.graph.usageSym)
 
 proc semConst(c: PContext, n: PNode): PNode =
@@ -1004,7 +1024,7 @@ proc handleCaseStmtMacro(c: PContext; n: PNode; flags: TExprFlags): PNode =
   toResolve.add n[0]
 
   var errors: CandidateErrors
-  var r = resolveOverloads(c, toResolve, toResolve, {skTemplate, skMacro}, {},
+  var r = resolveOverloads(c, toResolve, toResolve, {skTemplate, skMacro}, {efNoDiagnostics},
                            errors, false)
   if r.state == csMatch:
     var match = r.calleeSym
@@ -1017,7 +1037,11 @@ proc handleCaseStmtMacro(c: PContext; n: PNode; flags: TExprFlags): PNode =
     case match.kind
     of skMacro: result = semMacroExpr(c, toExpand, toExpand, match, flags)
     of skTemplate: result = semTemplateExpr(c, toExpand, match, flags)
-    else: result = nil
+    else: result = errorNode(c, n[0])
+  elif r.state == csNoMatch:
+    result = errorNode(c, n[0])
+  if result.kind == nkEmpty:
+    localError(c.config, n[0].info, errSelectorMustBeOfCertainTypes)
   # this would be the perfectly consistent solution with 'for loop macros',
   # but it kinda sucks for pattern matching as the matcher is not attached to
   # a type then:
@@ -1088,12 +1112,8 @@ proc semCase(c: PContext, n: PNode; flags: TExprFlags; expectedType: PType = nil
   else:
     popCaseContext(c)
     closeScope(c)
-    #if caseStmtMacros in c.features:
-    result = handleCaseStmtMacro(c, n, flags)
-    if result != nil:
-      return result
-    localError(c.config, n[0].info, errSelectorMustBeOfCertainTypes)
-    return
+    return handleCaseStmtMacro(c, n, flags)
+
   for i in 1..<n.len:
     setCaseContextIdx(c, i)
     var x = n[i]
@@ -2130,10 +2150,11 @@ proc semProcAux(c: PContext, n: PNode, kind: TSymKind,
         localError(c.config, n.info, "the overloaded " & s.name.s &
           " operator has to be enabled with {.experimental: \"callOperator\".}")
 
+  if sfBorrow in s.flags and c.config.cmd notin cmdDocLike:
+    result[bodyPos] = c.graph.emptyNode
+
   if n[bodyPos].kind != nkEmpty and sfError notin s.flags:
     # for DLL generation we allow sfImportc to have a body, for use in VM
-    if sfBorrow in s.flags:
-      localError(c.config, n[bodyPos].info, errImplOfXNotAllowed % s.name.s)
     if c.config.ideCmd in {ideSug, ideCon} and s.kind notin {skMacro, skTemplate} and not
         cursorInProc(c.config, n[bodyPos]):
       # speed up nimsuggest
