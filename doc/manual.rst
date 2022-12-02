@@ -6488,6 +6488,19 @@ iterator in which case the overloading resolution takes place:
   write(stdout, x) # not ambiguous: uses the module C's x
 
 
+Packages
+--------
+A collection of modules in a file tree with an ``identifier.nimble`` file in the
+root of the tree is called a Nimble package. A valid package name can only be a
+valid Nim identifier and thus its filename is ``identifier.nimble`` where
+``identifier`` is the desired package name. A module without a ``.nimble`` file
+is assigned the package identifier: `unknown`.
+
+The distinction between packages allows diagnostic compiler messages to be
+scoped to the current project's package vs foreign packages.
+
+
+
 Compiler Messages
 =================
 
@@ -7123,7 +7136,7 @@ The `link` pragma can be used to link an additional file with the project:
   {.link: "myfile.o".}
 
 
-PassC pragma
+passc pragma
 ------------
 The `passc` pragma can be used to pass additional parameters to the C
 compiler like one would using the command-line switch `--passc`:option:\:
@@ -7151,20 +7164,20 @@ the pragma resides in:
   {.localPassc: "-Wall -Werror".} # Passed when compiling A.nim.cpp
 
 
-PassL pragma
+passl pragma
 ------------
-The `passL` pragma can be used to pass additional parameters to the linker
-like one would be using the command-line switch `--passL`:option:\:
+The `passl` pragma can be used to pass additional parameters to the linker
+like one would be using the command-line switch `--passl`:option:\:
 
 .. code-block:: Nim
-  {.passL: "-lSDLmain -lSDL".}
+  {.passl: "-lSDLmain -lSDL".}
 
 Note that one can use `gorge` from the `system module <system.html>`_ to
 embed parameters from an external command that will be executed
 during semantic analysis:
 
 .. code-block:: Nim
-  {.passL: gorge("pkg-config --libs sdl").}
+  {.passl: gorge("pkg-config --libs sdl").}
 
 
 Emit pragma
@@ -7478,7 +7491,7 @@ allows *sloppy* interfacing with libraries written in Objective C:
 .. code-block:: Nim
   # horrible example of how to interface with GNUStep ...
 
-  {.passL: "-lobjc".}
+  {.passl: "-lobjc".}
   {.emit: """
   #include <objc/Object.h>
   @interface Greeter:Object

@@ -282,7 +282,8 @@ window.addEventListener('DOMContentLoaded', main);
 <ul class="simple"><li><a class="reference" id="scope-rules-block-scope_toc" href="#scope-rules-block-scope">Block scope</a></li>
 <li><a class="reference" id="scope-rules-tuple-or-object-scope_toc" href="#scope-rules-tuple-or-object-scope">Tuple or object scope</a></li>
 <li><a class="reference" id="scope-rules-module-scope_toc" href="#scope-rules-module-scope">Module scope</a></li>
-</ul></ul><li><a class="reference" id="compiler-messages_toc" href="#compiler-messages">Compiler Messages</a></li>
+</ul><li><a class="reference" id="modules-packages_toc" href="#modules-packages">Packages</a></li>
+</ul><li><a class="reference" id="compiler-messages_toc" href="#compiler-messages">Compiler Messages</a></li>
 <li><a class="reference" id="pragmas_toc" href="#pragmas">Pragmas</a></li>
 <ul class="simple"><li><a class="reference" id="pragmas-deprecated-pragma_toc" href="#pragmas-deprecated-pragma">deprecated pragma</a></li>
 <li><a class="reference" id="pragmas-compiletime-pragma_toc" href="#pragmas-compiletime-pragma">compileTime pragma</a></li>
@@ -316,9 +317,9 @@ window.addEventListener('DOMContentLoaded', main);
 <li><a class="reference" id="implementation-specific-pragmas-incompletestruct-pragma_toc" href="#implementation-specific-pragmas-incompletestruct-pragma">IncompleteStruct pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-compile-pragma_toc" href="#implementation-specific-pragmas-compile-pragma">Compile pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-link-pragma_toc" href="#implementation-specific-pragmas-link-pragma">Link pragma</a></li>
-<li><a class="reference" id="implementation-specific-pragmas-passc-pragma_toc" href="#implementation-specific-pragmas-passc-pragma">PassC pragma</a></li>
+<li><a class="reference" id="implementation-specific-pragmas-passc-pragma_toc" href="#implementation-specific-pragmas-passc-pragma">passc pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-localpassc-pragma_toc" href="#implementation-specific-pragmas-localpassc-pragma">LocalPassc pragma</a></li>
-<li><a class="reference" id="implementation-specific-pragmas-passl-pragma_toc" href="#implementation-specific-pragmas-passl-pragma">PassL pragma</a></li>
+<li><a class="reference" id="implementation-specific-pragmas-passl-pragma_toc" href="#implementation-specific-pragmas-passl-pragma">passl pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-emit-pragma_toc" href="#implementation-specific-pragmas-emit-pragma">Emit pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-importcpp-pragma_toc" href="#implementation-specific-pragmas-importcpp-pragma">ImportCpp pragma</a></li>
 <ul class="simple"><li><a class="reference" id="importcpp-pragma-namespaces_toc" href="#importcpp-pragma-namespaces">Namespaces</a></li>
@@ -364,7 +365,7 @@ class="link-seesrc" target="_blank">Source</a>
   <div id="tocRoot"></div>
   
   <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Authors:</th><td>Andreas Rumpf, Zahary Karadjov</td></tr>
-<tr><th class="docinfo-name">Version:</th><td>1.6.7</td></tr>
+<tr><th class="docinfo-name">Version:</th><td>1.6.11</td></tr>
 </tbody></table><blockquote><p>&quot;Complexity&quot; seems to be a lot like &quot;energy&quot;: you can transfer it from the end-user to one/some of the other players, but the total amount seems to remain pretty much constant for a given task. -- Ran</p></blockquote>
 
 <h1><a class="toc-backref" id="about-this-document" href="#about-this-document">About this document</a></h1><p><strong>Note</strong>: This document is a draft! Several of Nim's features may need more precise wording. This manual is constantly evolving into a proper specification.</p>
@@ -3610,6 +3611,9 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 
 <span class="Keyword">var</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="DecNumber">4</span>
 <span class="Identifier">write</span><span class="Punctuation">(</span><span class="Identifier">stdout</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">)</span> <span class="Comment"># not ambiguous: uses the module C's x</span></pre>
+<h2><a class="toc-backref" id="modules-packages" href="#modules-packages">Packages</a></h2><p>A collection of modules in a file tree with an <tt class="docutils literal"><span class="pre">identifier.nimble</span></tt> file in the root of the tree is called a Nimble package. A valid package name can only be a valid Nim identifier and thus its filename is <tt class="docutils literal"><span class="pre">identifier.nimble</span></tt> where <tt class="docutils literal"><span class="pre">identifier</span></tt> is the desired package name. A module without a <tt class="docutils literal"><span class="pre">.nimble</span></tt> file is assigned the package identifier: <tt class="docutils literal"><span class="pre"><span class="Identifier">unknown</span></span></tt>.</p>
+<p>The distinction between packages allows diagnostic compiler messages to be scoped to the current project's package vs foreign packages.</p>
+
 <h1><a class="toc-backref" id="compiler-messages" href="#compiler-messages">Compiler Messages</a></h1><p>The Nim compiler emits different kinds of messages: <span id="hint_1">hint</span>, <span id="warning_1">warning</span>, and <span id="error_1">error</span> messages. An <em>error</em> message is emitted if the compiler encounters any static error.</p>
 
 <h1><a class="toc-backref" id="pragmas" href="#pragmas">Pragmas</a></h1><p>Pragmas are Nim's method to give the compiler additional information / commands without introducing a massive number of new keywords. Pragmas are processed on the fly during semantic checking. Pragmas are enclosed in the special <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Operator">.</span><span class="Punctuation">}</span></span></tt> curly brackets. Pragmas are also often used as a first implementation to play with a language feature before a nicer syntax to access the feature becomes available.</p>
@@ -3875,16 +3879,16 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 
 <h2><a class="toc-backref" id="implementation-specific-pragmas-link-pragma" href="#implementation-specific-pragmas-link-pragma">Link pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">link</span></span></tt> pragma can be used to link an additional file with the project:</p>
 <pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">link</span><span class="Punctuation">:</span> <span class="StringLit">&quot;myfile.o&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></pre>
-<h2><a class="toc-backref" id="implementation-specific-pragmas-passc-pragma" href="#implementation-specific-pragmas-passc-pragma">PassC pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">passc</span></span></tt> pragma can be used to pass additional parameters to the C compiler like one would using the command-line switch <tt class="docutils literal"><span class="pre option">--passc</span></tt>:</p>
+<h2><a class="toc-backref" id="implementation-specific-pragmas-passc-pragma" href="#implementation-specific-pragmas-passc-pragma">passc pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">passc</span></span></tt> pragma can be used to pass additional parameters to the C compiler like one would using the command-line switch <tt class="docutils literal"><span class="pre option">--passc</span></tt>:</p>
 <pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">passc</span><span class="Punctuation">:</span> <span class="StringLit">&quot;-Wall -Werror&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></pre><p>Note that one can use <tt class="docutils literal"><span class="pre"><span class="Identifier">gorge</span></span></tt> from the <a class="reference external" href="system.html">system module</a> to embed parameters from an external command that will be executed during semantic analysis:</p>
 <pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">passc</span><span class="Punctuation">:</span> <span class="Identifier">gorge</span><span class="Punctuation">(</span><span class="StringLit">&quot;pkg-config --cflags sdl&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span></pre>
 <h2><a class="toc-backref" id="implementation-specific-pragmas-localpassc-pragma" href="#implementation-specific-pragmas-localpassc-pragma">LocalPassc pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">localPassc</span></span></tt> pragma can be used to pass additional parameters to the C compiler, but only for the C/C++ file that is produced from the Nim module the pragma resides in:</p>
 <pre class="listing"><span class="Comment"># Module A.nim</span>
 <span class="Comment"># Produces: A.nim.cpp</span>
 <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">localPassc</span><span class="Punctuation">:</span> <span class="StringLit">&quot;-Wall -Werror&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Comment"># Passed when compiling A.nim.cpp</span></pre>
-<h2><a class="toc-backref" id="implementation-specific-pragmas-passl-pragma" href="#implementation-specific-pragmas-passl-pragma">PassL pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">passL</span></span></tt> pragma can be used to pass additional parameters to the linker like one would be using the command-line switch <tt class="docutils literal"><span class="pre option">--passL</span></tt>:</p>
-<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">passL</span><span class="Punctuation">:</span> <span class="StringLit">&quot;-lSDLmain -lSDL&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></pre><p>Note that one can use <tt class="docutils literal"><span class="pre"><span class="Identifier">gorge</span></span></tt> from the <a class="reference external" href="system.html">system module</a> to embed parameters from an external command that will be executed during semantic analysis:</p>
-<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">passL</span><span class="Punctuation">:</span> <span class="Identifier">gorge</span><span class="Punctuation">(</span><span class="StringLit">&quot;pkg-config --libs sdl&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span></pre>
+<h2><a class="toc-backref" id="implementation-specific-pragmas-passl-pragma" href="#implementation-specific-pragmas-passl-pragma">passl pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">passl</span></span></tt> pragma can be used to pass additional parameters to the linker like one would be using the command-line switch <tt class="docutils literal"><span class="pre option">--passl</span></tt>:</p>
+<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">passl</span><span class="Punctuation">:</span> <span class="StringLit">&quot;-lSDLmain -lSDL&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></pre><p>Note that one can use <tt class="docutils literal"><span class="pre"><span class="Identifier">gorge</span></span></tt> from the <a class="reference external" href="system.html">system module</a> to embed parameters from an external command that will be executed during semantic analysis:</p>
+<pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">passl</span><span class="Punctuation">:</span> <span class="Identifier">gorge</span><span class="Punctuation">(</span><span class="StringLit">&quot;pkg-config --libs sdl&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span></pre>
 <h2><a class="toc-backref" id="implementation-specific-pragmas-emit-pragma" href="#implementation-specific-pragmas-emit-pragma">Emit pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">emit</span></span></tt> pragma can be used to directly affect the output of the compiler's code generator. The code is then unportable to other code generators/backends. Its usage is highly discouraged! However, it can be extremely useful for interfacing with <span id="cplusplus_1">C++</span> or <span id="objective-c_1">Objective C</span> code.</p>
 <p>Example:</p>
 <pre class="listing"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">emit</span><span class="Punctuation">:</span> <span class="LongStringLit">&quot;&quot;&quot;
@@ -4012,7 +4016,7 @@ using namespace gui;
 <h2><a class="toc-backref" id="implementation-specific-pragmas-importobjc-pragma" href="#implementation-specific-pragmas-importobjc-pragma">ImportObjC pragma</a></h2><p>Similar to the <a class="reference external" href="#foreign-function-interface-importc-pragma">importc pragma for C</a>, the <tt class="docutils literal"><span class="pre"><span class="Identifier">importobjc</span></span></tt> pragma can be used to import <span id="objective-c_2">Objective C</span> methods. The generated code then uses the Objective C method calling syntax: <tt class="docutils literal"><span class="pre">[obj method param1: arg]</span></tt>. In addition with the <tt class="docutils literal"><span class="pre"><span class="Identifier">header</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">emit</span></span></tt> pragmas this allows <em>sloppy</em> interfacing with libraries written in Objective C:</p>
 <pre class="listing"><span class="Comment"># horrible example of how to interface with GNUStep ...</span>
 
-<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">passL</span><span class="Punctuation">:</span> <span class="StringLit">&quot;-lobjc&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">passl</span><span class="Punctuation">:</span> <span class="StringLit">&quot;-lobjc&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
 <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">emit</span><span class="Punctuation">:</span> <span class="LongStringLit">&quot;&quot;&quot;
 #include &lt;objc/Object.h&gt;
 @interface Greeter:Object
@@ -4221,11 +4225,12 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-07-17 01:18:00 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-12-02 01:09:34 UTC</small>
       </div>
     </div>
   </div>
 </div>
-
+    <script defer data-domain="nim-lang.org" src="https://plausible.io/js/plausible.js"></script>
+    
 </body>
 </html>

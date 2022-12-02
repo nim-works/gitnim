@@ -1808,6 +1808,14 @@ when not declared(sysFatal):
 when not defined(nimscript):
   {.push stackTrace: off, profiler: off.}
 
+  proc atomicInc*(memLoc: var int, x: int = 1): int {.inline,
+    discardable, benign.}
+    ## Atomic increment of `memLoc`. Returns the value after the operation.
+
+  proc atomicDec*(memLoc: var int, x: int = 1): int {.inline,
+    discardable, benign.}
+    ## Atomic decrement of `memLoc`. Returns the value after the operation.
+
   include "system/atomics"
 
   {.pop.}
@@ -2030,7 +2038,7 @@ template newException*(exceptn: typedesc, message: string;
 when hostOS == "standalone" and defined(nogc):
   proc nimToCStringConv(s: NimString): cstring {.compilerproc, inline.} =
     if s == nil or s.len == 0: result = cstring""
-    else: result = cstring(addr s.data)
+    else: result = cast[cstring](addr s.data)
 
 proc getTypeInfo*[T](x: T): pointer {.magic: "GetTypeInfo", benign.}
   ## Get type information for `x`.
@@ -2120,7 +2128,7 @@ const
     ## is the minor number of Nim's version.
     ## Odd for devel, even for releases.
 
-  NimPatch* {.intdefine.}: int = 7
+  NimPatch* {.intdefine.}: int = 11
     ## is the patch number of Nim's version.
     ## Odd for devel, even for releases.
 

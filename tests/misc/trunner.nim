@@ -64,7 +64,7 @@ when defined(nimTrunnerFfi):
 hello world stderr
 hi stderr
 """
-    let output = runNimCmdChk("vm/mevalffi.nim", fmt"{opt} --experimental:compiletimeFFI")
+    let output = runNimCmdChk("vm/mevalffi.nim", fmt"{opt} --warnings:off --experimental:compiletimeFFI")
     doAssert output == fmt"""
 {prefix}foo
 foo:100
@@ -215,6 +215,23 @@ sub/mmain.idx""", context
     block: # mak sure --backend works with `nim r`
       let cmd = fmt"{nim} r --backend:{mode} --hints:off --nimcache:{nimcache} {file}"
       check execCmdEx(cmd) == ("ok3\n", 0)
+
+  block: # nim jsondoc # bug #20132
+    let file = testsDir / "misc/mjsondoc.nim"
+    let output = "nimcache_tjsondoc.json"
+    defer: removeFile(output)
+    let (msg, exitCode) = execCmdEx(fmt"{nim} jsondoc -o:{output} {file}")
+    doAssert exitCode == 0, msg
+
+    let data = parseJson(readFile(output))["entries"]
+    doAssert data.len == 4
+    let doSomething = data[0]
+    doAssert doSomething["name"].getStr == "doSomething"
+    doAssert doSomething["type"].getStr == "skProc"
+    doAssert doSomething["line"].getInt == 1
+    doAssert doSomething["col"].getInt == 0
+    doAssert doSomething["code"].getStr == "proc doSomething(x, y: int): int {.raises: [], tags: [].}"
+
 
   block: # further issues with `--backend`
     let file = testsDir / "misc/mbackend.nim"

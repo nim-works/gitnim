@@ -93,7 +93,7 @@ proc c_feof(f: File): cint {.
   importc: "feof", header: "<stdio.h>".}
 
 when not declared(c_fwrite):
-  proc c_fwrite(buf: pointer, size, n: csize_t, f: File): cint {.
+  proc c_fwrite(buf: pointer, size, n: csize_t, f: File): csize_t {.
     importc: "fwrite", header: "<stdio.h>".}
 
 # C routine that is used here:
@@ -461,7 +461,7 @@ proc readLine*(f: File, line: var string): bool {.tags: [ReadIOEffect],
     while true:
       # fixes #9634; this pattern may need to be abstracted as a template if reused;
       # likely other io procs need this for correctness.
-      fgetsSuccess = c_fgets(addr line[pos], sp.cint, f) != nil
+      fgetsSuccess = c_fgets(cast[cstring](addr line[pos]), sp.cint, f) != nil
       if fgetsSuccess: break
       when not defined(nimscript):
         if errno == EINTR:

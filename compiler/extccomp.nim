@@ -12,9 +12,9 @@
 # from a lineinfos file, to provide generalized procedures to compile
 # nim files.
 
-import ropes, platform, condsyms, options, msgs, lineinfos, pathutils
+import ropes, platform, condsyms, options, msgs, lineinfos, pathutils, modulepaths
 
-import std/[os, strutils, osproc, sha1, streams, sequtils, times, strtabs, json, jsonutils, sugar]
+import std/[os, strutils, osproc, sha1, streams, sequtils, times, strtabs, json, jsonutils, sugar, parseutils]
 
 type
   TInfoCCProp* = enum         # properties of the C compiler:
@@ -367,6 +367,7 @@ proc initVars*(conf: ConfigRef) =
 
 proc completeCfilePath*(conf: ConfigRef; cfile: AbsoluteFile,
                         createSubDir: bool = true): AbsoluteFile =
+  ## Generate the absolute file path to the generated modules.
   result = completeGeneratedFilePath(conf, cfile, createSubDir)
 
 proc toObjFile*(conf: ConfigRef; filename: AbsoluteFile): AbsoluteFile =
@@ -377,7 +378,7 @@ proc addFileToCompile*(conf: ConfigRef; cf: Cfile) =
   conf.toCompile.add(cf)
 
 proc addLocalCompileOption*(conf: ConfigRef; option: string; nimfile: AbsoluteFile) =
-  let key = completeCfilePath(conf, withPackageName(conf, nimfile)).string
+  let key = completeCfilePath(conf, mangleModuleName(conf, nimfile).AbsoluteFile).string
   var value = conf.cfileSpecificOptions.getOrDefault(key)
   if strutils.find(value, option, 0) < 0:
     addOpt(value, option)
@@ -515,26 +516,12 @@ proc ccHasSaneOverflow*(conf: ConfigRef): bool =
     result = false # assume an old or crappy GCC
     var exe = getConfigVar(conf, conf.cCompiler, ".exe")
     if exe.len == 0: exe = CC[conf.cCompiler].compilerExe
-    let (s, exitCode) = try: execCmdEx(exe & " --version") except: ("", 1)
+    # NOTE: should we need the full version, use -dumpfullversion
+    let (s, exitCode) = try: execCmdEx(exe & " -dumpversion") except: ("", 1)
     if exitCode == 0:
-      var i = 0
-      var j = 0
-      # the version is the last part of the first line:
-      while i < s.len and s[i] != '\n':
-        if s[i] in {' ', '\t'}: j = i+1
-        inc i
-      if j > 0:
-        var major = 0
-        while j < s.len and s[j] in {'0'..'9'}:
-          major = major * 10 + (ord(s[j]) - ord('0'))
-          inc j
-        if i < s.len and s[j] == '.': inc j
-        while j < s.len and s[j] in {'0'..'9'}:
-          inc j
-        if j+1 < s.len and s[j] == '.' and s[j+1] in {'0'..'9'}:
-          # we found a third version number, chances are high
-          # we really parsed the version:
-          result = major >= 5
+      var major: int
+      discard parseInt(s, major)
+      result = major >= 5
   else:
     result = conf.cCompiler == ccCLang
 
@@ -640,7 +627,7 @@ proc footprint(conf: ConfigRef; cfile: Cfile): SecureHash =
 proc externalFileChanged(conf: ConfigRef; cfile: Cfile): bool =
   if conf.backend == backendJs: return false # pre-existing behavior, but not sure it's good
 
-  let hashFile = toGeneratedFile(conf, conf.withPackageName(cfile.cname), "sha1")
+  let hashFile = toGeneratedFile(conf, conf.mangleModuleName(cfile.cname).AbsoluteFile, "sha1")
   let currentHash = footprint(conf, cfile)
   var f: File
   if open(f, hashFile.string, fmRead):
@@ -848,9 +835,9 @@ proc hcrLinkTargetName(conf: ConfigRef, objFile: string, isMain = false): Absolu
 proc displayProgressCC(conf: ConfigRef, path, compileCmd: string): string =
   if conf.hasHint(hintCC):
     if optListCmd in conf.globalOptions or conf.verbosity > 1:
-      result = MsgKindToStr[hintCC] % (demanglePackageName(path.splitFile.name) & ": " & compileCmd)
+      result = MsgKindToStr[hintCC] % (demangleModuleName(path.splitFile.name) & ": " & compileCmd)
     else:
-      result = MsgKindToStr[hintCC] % demanglePackageName(path.splitFile.name)
+      result = MsgKindToStr[hintCC] % demangleModuleName(path.splitFile.name)
 
 proc callCCompiler*(conf: ConfigRef) =
   var

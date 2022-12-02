@@ -77,23 +77,6 @@ elif defined(nimArcIds):
 
   const traceId = -1
 
-when hasThreadSupport:
-  # atomic reference counting is used when threads are enabled
-  template decrement(cell: Cell; mode: AtomMemModel): untyped =
-    discard atomicDec(cell.rc, rcIncrement, mode)
-  template increment(cell: Cell): untyped =
-    discard atomicInc(cell.rc, rcIncrement, AtomicAcqRel)
-  template count(x: Cell): untyped =
-    atomicLoadN(x.rc.addr, AtomicAcquire) shr rcShift
-else:
-  # faster reference counting is used when threads are disabled
-  template decrement(cell: Cell; mode: AtomMemModel): untyped =
-    dec(cell.rc, rcIncrement)
-  template increment(cell: Cell): untyped =
-    inc(cell.rc, rcIncrement)
-  template count(x: Cell): untyped =
-    x.rc shr rcShift
-
 proc nimNewObj(size, alignment: int): pointer {.compilerRtl.} =
   let hdrSize = align(sizeof(RefHeader), alignment)
   let s = size + hdrSize
@@ -106,7 +89,7 @@ proc nimNewObj(size, alignment: int): pointer {.compilerRtl.} =
     atomicInc gRefId
     if head(result).refId == traceId:
       writeStackTrace()
-      cfprintf(cstderr, "[nimNewObj] %p %ld\n", result, head(result).count)
+      cfprintf(cstderr, "[nimNewObj] %p %ld\n", result, head(result).rc shr rcShift)
   when traceCollector:
     cprintf("[Allocated] %p result: %p\n", result -! sizeof(RefHeader), result)
 
@@ -127,21 +110,21 @@ proc nimNewObjUninit(size, alignment: int): pointer {.compilerRtl.} =
     atomicInc gRefId
     if head(result).refId == traceId:
       writeStackTrace()
-      cfprintf(cstderr, "[nimNewObjUninit] %p %ld\n", result, head(result).count)
+      cfprintf(cstderr, "[nimNewObjUninit] %p %ld\n", result, head(result).rc shr rcShift)
 
   when traceCollector:
     cprintf("[Allocated] %p result: %p\n", result -! sizeof(RefHeader), result)
 
 proc nimDecWeakRef(p: pointer) {.compilerRtl, inl.} =
-  decrement head(p), AtomicAcqRel
+  dec head(p).rc, rcIncrement
 
 proc nimIncRef(p: pointer) {.compilerRtl, inl.} =
   when defined(nimArcDebug):
     if head(p).refId == traceId:
       writeStackTrace()
-      cfprintf(cstderr, "[IncRef] %p %ld\n", p, head(p).count)
+      cfprintf(cstderr, "[IncRef] %p %ld\n", p, head(p).rc shr rcShift)
 
-  increment head(p)
+  inc head(p).rc, rcIncrement
   when traceCollector:
     cprintf("[INCREF] %p\n", head(p))
 
@@ -210,17 +193,17 @@ proc nimDecRefIsLast(p: pointer): bool {.compilerRtl, inl.} =
     when defined(nimArcDebug):
       if cell.refId == traceId:
         writeStackTrace()
-        cfprintf(cstderr, "[DecRef] %p %ld\n", p, cell.count)
+        cfprintf(cstderr, "[DecRef] %p %ld\n", p, cell.rc shr rcShift)
 
-    if cell.count == 0:
+    if (cell.rc and not rcMask) == 0:
       result = true
       when traceCollector:
         cprintf("[ABOUT TO DESTROY] %p\n", cell)
     else:
-      decrement cell, AtomicRelease
+      dec cell.rc, rcIncrement
       # According to Lins it's correct to do nothing else here.
       when traceCollector:
-        cprintf("[DECREF] %p\n", cell)
+        cprintf("[DeCREF] %p\n", cell)
 
 proc GC_unref*[T](x: ref T) =
   ## New runtime only supports this operation for 'ref T'.

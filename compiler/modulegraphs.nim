@@ -12,7 +12,7 @@
 ## or stored in a rod-file.
 
 import intsets, tables, hashes, md5, sequtils
-import ast, astalgo, options, lineinfos,idents, btrees, ropes, msgs, pathutils
+import ast, astalgo, options, lineinfos,idents, btrees, ropes, msgs, pathutils, packages
 import ic / [packed_ast, ic]
 
 type
@@ -50,6 +50,10 @@ type
     concreteTypes*: seq[FullId]
     inst*: PInstantiation
 
+  SymInfoPair* = object
+    sym*: PSym
+    info*: TLineInfo
+
   ModuleGraph* {.acyclic.} = ref object
     ifaces*: seq[Iface]  ## indexed by int32 fileIdx
     packed*: PackedModuleGraph
@@ -64,7 +68,6 @@ type
 
     startupPackedConfig*: PackedConfig
     packageSyms*: TStrTable
-    modulesPerPackage*: Table[ItemId, TStrTable]
     deps*: IntSet # the dependency graph or potentially its transitive closure.
     importDeps*: Table[FileIndex, seq[FileIndex]] # explicit import module dependencies
     suggestMode*: bool # whether we are in nimsuggest mode or not.
@@ -81,7 +84,7 @@ type
     doStopCompile*: proc(): bool {.closure.}
     usageSym*: PSym # for nimsuggest
     owners*: seq[PSym]
-    suggestSymbols*: Table[FileIndex, seq[tuple[sym: PSym, info: TLineInfo]]]
+    suggestSymbols*: Table[FileIndex, seq[SymInfoPair]]
     suggestErrors*: Table[FileIndex, seq[Suggest]]
     methods*: seq[tuple[methods: seq[PSym], dispatcher: PSym]] # needs serialization!
     systemModule*: PSym
@@ -370,34 +373,13 @@ template getPContext(): untyped =
   when c is PContext: c
   else: c.c
 
-when defined(nimfind):
-  template onUse*(info: TLineInfo; s: PSym) =
-    let c = getPContext()
-    if c.graph.onUsage != nil: c.graph.onUsage(c.graph, s, info)
-
-  template onDef*(info: TLineInfo; s: PSym) =
-    let c = getPContext()
-    if c.graph.onDefinition != nil: c.graph.onDefinition(c.graph, s, info)
-
-  template onDefResolveForward*(info: TLineInfo; s: PSym) =
-    let c = getPContext()
-    if c.graph.onDefinitionResolveForward != nil:
-      c.graph.onDefinitionResolveForward(c.graph, s, info)
-
+when defined(nimsuggest):
+  template onUse*(info: TLineInfo; s: PSym) = discard
+  template onDefResolveForward*(info: TLineInfo; s: PSym) = discard
 else:
-  when defined(nimsuggest):
-    template onUse*(info: TLineInfo; s: PSym) = discard
-
-    template onDef*(info: TLineInfo; s: PSym) =
-      let c = getPContext()
-      if c.graph.config.suggestVersion == 3:
-        suggestSym(c.graph, info, s, c.graph.usageSym)
-
-    template onDefResolveForward*(info: TLineInfo; s: PSym) = discard
-  else:
-    template onUse*(info: TLineInfo; s: PSym) = discard
-    template onDef*(info: TLineInfo; s: PSym) = discard
-    template onDefResolveForward*(info: TLineInfo; s: PSym) = discard
+  template onUse*(info: TLineInfo; s: PSym) = discard
+  template onDef*(info: TLineInfo; s: PSym) = discard
+  template onDefResolveForward*(info: TLineInfo; s: PSym) = discard
 
 proc stopCompile*(g: ModuleGraph): bool {.inline.} =
   result = g.doStopCompile != nil and g.doStopCompile()
@@ -455,7 +437,7 @@ proc initModuleGraphFields(result: ModuleGraph) =
   result.importStack = @[]
   result.inclToMod = initTable[FileIndex, FileIndex]()
   result.owners = @[]
-  result.suggestSymbols = initTable[FileIndex, seq[tuple[sym: PSym, info: TLineInfo]]]()
+  result.suggestSymbols = initTable[FileIndex, seq[SymInfoPair]]()
   result.suggestErrors = initTable[FileIndex, seq[Suggest]]()
   result.methods = @[]
   initStrTable(result.compilerprocs)
@@ -644,9 +626,30 @@ proc onProcessing*(graph: ModuleGraph, fileIdx: FileIndex, moduleStatus: string,
     let mode = if isNimscript: "(nims) " else: ""
     rawMessage(conf, hintProcessing, "$#$# $#: $#: $#" % [mode, indent, fromModule2, moduleStatus, path])
 
-iterator suggestSymbolsIter*(g: ModuleGraph): tuple[sym: PSym, info: TLineInfo] =
+proc getPackage*(graph: ModuleGraph; fileIdx: FileIndex): PSym =
+  ## Returns a package symbol for yet to be defined module for fileIdx.
+  ## The package symbol is added to the graph if it doesn't exist.
+  let pkgSym = getPackage(graph.config, graph.cache, fileIdx)
+  # check if the package is already in the graph
+  result = graph.packageSyms.strTableGet(pkgSym.name)
+  if result == nil:
+     # the package isn't in the graph, so create and add it
+    result = pkgSym
+    graph.packageSyms.strTableAdd(pkgSym)
+
+func belongsToStdlib*(graph: ModuleGraph, sym: PSym): bool =
+  ## Check if symbol belongs to the 'stdlib' package.
+  sym.getPackageSymbol.getPackageId == graph.systemModule.getPackageId
+
+proc `==`*(a, b: SymInfoPair): bool =
+  result = a.sym == b.sym and a.info.exactEquals(b.info)
+
+proc fileSymbols*(graph: ModuleGraph, fileIdx: FileIndex): seq[SymInfoPair] =
+  result = graph.suggestSymbols.getOrDefault(fileIdx, @[])
+
+iterator suggestSymbolsIter*(g: ModuleGraph): SymInfoPair =
   for xs in g.suggestSymbols.values:
-    for x in xs.deduplicate:
+    for x in xs:
       yield x
 
 iterator suggestErrorsIter*(g: ModuleGraph): Suggest =
