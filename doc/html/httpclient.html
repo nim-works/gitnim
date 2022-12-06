@@ -79,21 +79,25 @@
   timeout*: int              ## Only used for blocking HttpClient for now.
   proxy: Proxy               ## `nil` or the callback to call when request progress changes.
   when SocketType is Socket:
-    onProgressChanged
+      onProgressChanged*: ProgressChangedProc[void]
+
   else:
-    onProgressChanged
-  when false:
-    sslContext
+      onProgressChanged*: ProgressChangedProc[Future[void]]
+
+  when defined(ssl):
+      sslContext: net.SslContext
+
   contentTotal: BiggestInt
   contentProgress: BiggestInt
   oneSecondProgress: BiggestInt
   lastProgressReport: MonoTime
   when SocketType is AsyncSocket:
-      bodyStream
-      parseBodyFut
+      bodyStream: FutureStream[string]
+      parseBodyFut: Future[void]
 
   else:
-    bodyStream
+      bodyStream: Stream
+
   getBody: bool              ## When `false`, the body is never read in requestAux.">HttpClientBase</a></li>
 <li><a class="reference" href="#HttpRequestError" title="HttpRequestError = object of IOError">HttpRequestError</a></li>
 <li><a class="reference" href="#MultipartData" title="MultipartData = ref object
@@ -498,22 +502,26 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <span class="Identifier">userAgent</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
   <span class="Identifier">timeout</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>              <span class="Comment">## Only used for blocking HttpClient for now.</span>
   <span class="Identifier">proxy</span><span class="Other">:</span> <a href="httpclient.html#Proxy"><span class="Identifier">Proxy</span></a>               <span class="Comment">## `nil` or the callback to call when request progress changes.</span>
-  <span class="Keyword">when</span> <span class="Identifier">SocketType</span> <span class="Identifier">is</span> Socket<span class="Other">:</span>
-    <span class="Identifier">onProgressChanged</span>
+  <span class="Keyword">when</span> <span class="Identifier">SocketType</span> <span class="Keyword">is</span> <span class="Identifier">Socket</span><span class="Other">:</span>
+      <span class="Identifier">onProgressChanged</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">ProgressChangedProc</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span>
+
   <span class="Keyword">else</span><span class="Other">:</span>
-    <span class="Identifier">onProgressChanged</span>
-  <span class="Keyword">when</span> <span class="DecNumber">false</span><span class="Other">:</span>
-    <span class="Identifier">sslContext</span>
+      <span class="Identifier">onProgressChanged</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">ProgressChangedProc</span><span class="Other">[</span><span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span><span class="Other">]</span>
+
+  <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">ssl</span><span class="Other">)</span><span class="Other">:</span>
+      <span class="Identifier">sslContext</span><span class="Other">:</span> <span class="Identifier">net</span><span class="Other">.</span><span class="Identifier">SslContext</span>
+
   <span class="Identifier">contentTotal</span><span class="Other">:</span> <a href="ctypes.html#BiggestInt"><span class="Identifier">BiggestInt</span></a>
   <span class="Identifier">contentProgress</span><span class="Other">:</span> <a href="ctypes.html#BiggestInt"><span class="Identifier">BiggestInt</span></a>
   <span class="Identifier">oneSecondProgress</span><span class="Other">:</span> <a href="ctypes.html#BiggestInt"><span class="Identifier">BiggestInt</span></a>
   <span class="Identifier">lastProgressReport</span><span class="Other">:</span> <a href="monotimes.html#MonoTime"><span class="Identifier">MonoTime</span></a>
-  <span class="Keyword">when</span> <span class="Identifier">SocketType</span> <span class="Identifier">is</span> AsyncSocket<span class="Other">:</span>
-      <span class="Identifier">bodyStream</span>
-      <span class="Identifier">parseBodyFut</span>
+  <span class="Keyword">when</span> <span class="Identifier">SocketType</span> <span class="Keyword">is</span> <span class="Identifier">AsyncSocket</span><span class="Other">:</span>
+      <span class="Identifier">bodyStream</span><span class="Other">:</span> <span class="Identifier">FutureStream</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span>
+      <span class="Identifier">parseBodyFut</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span>
 
   <span class="Keyword">else</span><span class="Other">:</span>
-    <span class="Identifier">bodyStream</span>
+      <span class="Identifier">bodyStream</span><span class="Other">:</span> <span class="Identifier">Stream</span>
+
   <span class="Identifier">getBody</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>              <span class="Comment">## When `false`, the body is never read in requestAux.</span>
   </pre></dt>
   <dd>
@@ -1297,7 +1305,7 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-12-05 01:16:10 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-12-06 01:14:25 UTC</small>
       </div>
     </div>
   </div>

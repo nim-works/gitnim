@@ -587,8 +587,8 @@ proc semVarMacroPragma(c: PContext, a: PNode, n: PNode): PNode =
 
 template isLocalVarSym(n: PNode): bool =
   n.kind == nkSym and 
-    (n.sym.kind in {skVar, skLet} and not 
-    ({sfGlobal, sfPure} <= n.sym.flags or
+    (n.sym.kind in {skVar, skLet} and not
+    ({sfGlobal, sfPure} * n.sym.flags != {} or
       sfCompileTime in n.sym.flags) or
       n.sym.kind in {skProc, skFunc, skIterator} and 
       sfGlobal notin n.sym.flags
@@ -1881,6 +1881,8 @@ proc semOverride(c: PContext, s: PSym, n: PNode) =
     if s.magic == mAsgn: return
     incl(s.flags, sfUsed)
     incl(s.flags, sfOverriden)
+    if name == "=":
+      message(c.config, n.info, warnDeprecated, "Overriding `=` hook is deprecated; Override `=copy` hook instead")
     let t = s.typ
     if t.len == 3 and t[0] == nil and t[1].kind == tyVar:
       var obj = t[1][0]
