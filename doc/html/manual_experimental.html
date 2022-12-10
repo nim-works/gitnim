@@ -84,7 +84,6 @@
 <li><a class="reference" id="strict-not-nil-checking-element-tracking_toc" href="#strict-not-nil-checking-element-tracking">element tracking</a></li>
 <li><a class="reference" id="strict-not-nil-checking-unstructured-control-flow-rules_toc" href="#strict-not-nil-checking-unstructured-control-flow-rules">unstructured control flow rules</a></li>
 <li><a class="reference" id="strict-not-nil-checking-aliasing_toc" href="#strict-not-nil-checking-aliasing">aliasing</a></li>
-<li><a class="reference" id="strict-not-nil-checking-initialization-of-non-nilable-and-nilable-values_toc" href="#strict-not-nil-checking-initialization-of-non-nilable-and-nilable-values">initialization of non nilable and nilable values</a></li>
 <li><a class="reference" id="strict-not-nil-checking-warnings-and-errors_toc" href="#strict-not-nil-checking-warnings-and-errors">warnings and errors</a></li>
 </ul><li><a class="reference" id="aliasing-restrictions-in-parameter-passing_toc" href="#aliasing-restrictions-in-parameter-passing">Aliasing restrictions in parameter passing</a></li>
 <li><a class="reference" id="strict-funcs_toc" href="#strict-funcs">Strict funcs</a></li>
@@ -389,7 +388,7 @@ Dot operators are still experimental and so need to be enabled via <tt class="do
 <p>If a type can include <tt class="docutils literal"><span class="pre"><span class="Keyword">nil</span></span></tt> as a valid value, dereferencing values of the type is checked by the compiler: if a value which might be nil is dereferenced, this produces a warning by default, you can turn this into an error using the compiler options <tt class="docutils literal"><span class="pre option">--warningAsError:strictNotNil</span></tt>.</p>
 <p>If a type is nilable, you should dereference its values only after a <tt class="docutils literal"><span class="pre"><span class="Identifier">isNil</span></span></tt> or equivalent check.</p>
 
-<h2><a class="toc-backref" id="strict-not-nil-checking-local-turn-onslashoff" href="#strict-not-nil-checking-local-turn-onslashoff">local turn on/off</a></h2><p>You can still turn off nil checking on function/module level by using a <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">strictNotNil</span><span class="Punctuation">:</span> <span class="Identifier">off</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt> pragma. Note: test that/TODO for code/manual.</p>
+<h2><a class="toc-backref" id="strict-not-nil-checking-local-turn-onslashoff" href="#strict-not-nil-checking-local-turn-onslashoff">local turn on/off</a></h2><p>You can still turn off nil checking on function/module level by using a <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">strictNotNil</span><span class="Punctuation">:</span> <span class="Identifier">off</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt> pragma.</p>
 
 <h2><a class="toc-backref" id="strict-not-nil-checking-nilability-state" href="#strict-not-nil-checking-nilability-state">nilability state</a></h2><p>Currently, a nilable value can be <tt class="docutils literal"><span class="pre"><span class="Identifier">Safe</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">MaybeNil</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Keyword">Nil</span></span></tt> : we use internally <tt class="docutils literal"><span class="pre"><span class="Identifier">Parent</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">Unreachable</span></span></tt> but this is an implementation detail(a parent layer has the actual nilability).</p>
 <ul class="simple"><li><tt class="docutils literal"><span class="pre"><span class="Identifier">Safe</span></span></tt> means it shouldn't be nil at that point: e.g. after assignment to a non-nil value or <tt class="docutils literal"><span class="pre"><span class="Keyword">not</span> <span class="Identifier">a</span><span class="Operator">.</span><span class="Identifier">isNil</span></span></tt> check</li>
@@ -400,7 +399,6 @@ Dot operators are still experimental and so need to be enabled via <tt class="do
 <p>We show an error for each dereference (<tt class="docutils literal"><span class="pre"><span class="Punctuation">[</span><span class="Punctuation">]</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">.</span><span class="Identifier">field</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Punctuation">[</span><span class="Identifier">index</span><span class="Punctuation">]</span></span></tt> <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span><span class="Punctuation">)</span></span></tt> etc.) which is of a tracked expression which is in <tt class="docutils literal"><span class="pre"><span class="Identifier">MaybeNil</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Keyword">Nil</span></span></tt> state.</p>
 
 <h2><a class="toc-backref" id="strict-not-nil-checking-type-nilability" href="#strict-not-nil-checking-type-nilability">type nilability</a></h2><p>Types are either nilable or non-nilable. When you pass a param or a default value, we use the type : for nilable types we return <tt class="docutils literal"><span class="pre"><span class="Identifier">MaybeNil</span></span></tt> and for non-nilable <tt class="docutils literal"><span class="pre"><span class="Identifier">Safe</span></span></tt>.</p>
-<p>TODO: fix the manual here. (This is not great, as default values for non-nilables and nilables are usually actually <tt class="docutils literal"><span class="pre"><span class="Keyword">nil</span></span></tt> , so we should think a bit more about this section.)</p>
 
 <h2><a class="toc-backref" id="strict-not-nil-checking-params-rules" href="#strict-not-nil-checking-params-rules">params rules</a></h2><p>Param's nilability is detected based on type nilability. We use the type of the argument to detect the nilability.</p>
 
@@ -460,8 +458,6 @@ Dot operators are still experimental and so need to be enabled via <tt class="do
 <p><pre class="listing">
 <span class="Keyword">var</span> <span class="Identifier">left</span> <span class="Operator">=</span> <span class="Identifier">b</span>
 <span class="Identifier">left</span> <span class="Operator">=</span> <span class="Keyword">nil</span> <span class="Comment"># moving out</span></pre></p>
-
-<h2><a class="toc-backref" id="strict-not-nil-checking-initialization-of-non-nilable-and-nilable-values" href="#strict-not-nil-checking-initialization-of-non-nilable-and-nilable-values">initialization of non nilable and nilable values</a></h2><p>TODO</p>
 
 <h2><a class="toc-backref" id="strict-not-nil-checking-warnings-and-errors" href="#strict-not-nil-checking-warnings-and-errors">warnings and errors</a></h2><p>We show an error for each dereference (<tt class="docutils literal"><span class="pre"><span class="Punctuation">[</span><span class="Punctuation">]</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">.</span><span class="Identifier">field</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Punctuation">[</span><span class="Identifier">index</span><span class="Punctuation">]</span></span></tt> <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span><span class="Punctuation">)</span></span></tt> etc.) which is of a tracked expression which is in <tt class="docutils literal"><span class="pre"><span class="Identifier">MaybeNil</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Keyword">Nil</span></span></tt> state.</p>
 <p>We might also show a history of the transitions and the reasons for them that might change the nilability of the expression.</p>
@@ -1309,7 +1305,7 @@ Currently exceptions are not propagated between <tt class="docutils literal"><sp
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-12-07 01:13:45 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-12-09 01:18:58 UTC</small>
       </div>
     </div>
   </div>

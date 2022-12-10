@@ -727,6 +727,7 @@ symbol = '`' (KEYW|IDENT|literal|(operator|'('|')'|'['|']'|'{'|'}'|'=')+)+ '`'
 exprColonEqExpr = expr (':'|'=' expr)?
 exprEqExpr = expr ('=' expr)?
 exprList = expr ^+ comma
+optionalExprList = expr ^* comma
 exprColonEqExprList = exprColonEqExpr (comma exprColonEqExpr)* (comma)?
 qualifiedIdent = symbol ('.' optInd symbol)?
 setOrTableConstr = '{' ((exprColonEqExpr comma)* | ':' ) '}'
@@ -806,7 +807,7 @@ typeDefValue = ((tupleDecl | enumDecl | objectDecl | conceptDecl |
 postExprBlocks = ':' stmt? ( IND{=} doBlock
                            | IND{=} 'of' exprList ':' stmt
                            | IND{=} 'elif' expr ':' stmt
-                           | IND{=} 'except' exprList ':' stmt
+                           | IND{=} 'except' optionalExprList ':' stmt
                            | IND{=} 'finally' ':' stmt
                            | IND{=} 'else' ':' stmt )*
 exprStmt = simpleExpr postExprBlocks?
@@ -845,10 +846,10 @@ caseStmt = 'case' expr ':'? COMMENT?
             (IND{&gt;} ofBranches DED
             | IND{=} ofBranches)
 tryStmt = 'try' colcom stmt &amp;(IND{=}? 'except'|'finally')
-           (IND{=}? 'except' exprList colcom stmt)*
+           (IND{=}? 'except' optionalExprList colcom stmt)*
            (IND{=}? 'finally' colcom stmt)?
 tryExpr = 'try' colcom stmt &amp;(optInd 'except'|'finally')
-           (optInd 'except' exprList colcom stmt)*
+           (optInd 'except' optionalExprList colcom stmt)*
            (optInd 'finally' colcom stmt)?
 blockStmt = 'block' symbol? colcom stmt
 blockExpr = 'block' symbol? colcom stmt
@@ -1589,6 +1590,11 @@ stmt = (IND{&gt;} complexOrSimpleStmt^+(IND{=} / ';') DED)
 <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="CharLit">'a'</span><span class="Operator">..</span><span class="CharLit">'z'</span><span class="Punctuation">,</span> <span class="CharLit">'0'</span><span class="Operator">..</span><span class="CharLit">'9'</span><span class="Punctuation">}</span> <span class="Comment"># This constructs a set that contains the</span>
                          <span class="Comment"># letters from 'a' to 'z' and the digits</span>
                          <span class="Comment"># from '0' to '9'</span></pre></p>
+<p>The module <a class="reference external" href="https://nim-lang.org/docs/setutils.html">`std/setutils`</a> provides a way to initialize a set from an iterable:</p>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">setutils</span>
+
+<span class="Keyword">let</span> <span class="Identifier">uniqueChars</span> <span class="Operator">=</span> <span class="Identifier">myString</span><span class="Operator">.</span><span class="Identifier">toSet</span></pre></p>
 <p>These operations are supported by sets:</p>
 <table border="1" class="docutils"><tr><th>operation</th><th>meaning</th></tr>
 <tr><td><tt class="docutils literal"><span class="pre"><span class="Identifier">A</span> <span class="Operator">+</span> <span class="Identifier">B</span></span></tt></td><td>union of two sets</td></tr>
@@ -5220,7 +5226,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-12-07 01:14:02 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-12-09 01:19:23 UTC</small>
       </div>
     </div>
   </div>
