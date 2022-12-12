@@ -79,6 +79,14 @@ when defined(nimArcDebug):
   var gRefId: int
   var freedCells: CellSet
 
+# atomic reference counting is used when threads are enabled
+template decrement(cell: Cell; mode: AtomMemModel): untyped =
+  discard atomicDec(cell.rc, rcIncrement, mode)
+template increment(cell: Cell): untyped=
+  discard atomicInc(cell.rc, rcIncrement, AtomicAcqRel)
+template count(x: Cell): untyped =
+  atomicLoadN(x.rc.addr, AtomicAcquire) shr rcShift
+
 proc nimNewObj(size: int): pointer {.compilerRtl.} =
   let s = size + sizeof(RefHeader)
   when defined(nimscript):
@@ -120,15 +128,15 @@ proc nimNewObjUninit(size: int): pointer {.compilerRtl.} =
     cprintf("[Allocated] %p result: %p\n", result -! sizeof(RefHeader), result)
 
 proc nimDecWeakRef(p: pointer) {.compilerRtl, inl.} =
-  dec head(p).rc, rcIncrement
+  decrement head(p), AtomicAcqRel
 
 proc nimIncRef(p: pointer) {.compilerRtl, inl.} =
   when defined(nimArcDebug):
     if head(p).refId == traceId:
       writeStackTrace()
-      cfprintf(cstderr, "[IncRef] %p %ld\n", p, head(p).rc shr rcShift)
+      cfprintf(cstderr, "[IncRef] %p %ld\n", p, head(p).count)
 
-  inc head(p).rc, rcIncrement
+  increment head(p)
   when traceCollector:
     cprintf("[INCREF] %p\n", head(p))
 
@@ -191,17 +199,17 @@ proc nimDecRefIsLast(p: pointer): bool {.compilerRtl, inl.} =
     when defined(nimArcDebug):
       if cell.refId == traceId:
         writeStackTrace()
-        cfprintf(cstderr, "[DecRef] %p %ld\n", p, cell.rc shr rcShift)
+        cfprintf(cstderr, "[DecRef] %p %ld\n", p, cell.count)
 
-    if (cell.rc and not rcMask) == 0:
+    if cell.count == 0:
       result = true
       when traceCollector:
         cprintf("[ABOUT TO DESTROY] %p\n", cell)
     else:
-      dec cell.rc, rcIncrement
+      decrement cell, AtomicRelease
       # According to Lins it's correct to do nothing else here.
       when traceCollector:
-        cprintf("[DeCREF] %p\n", cell)
+        cprintf("[DECREF] %p\n", cell)
 
 proc GC_unref*[T](x: ref T) =
   ## New runtime only supports this operation for 'ref T'.

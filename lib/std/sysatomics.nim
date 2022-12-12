@@ -263,10 +263,9 @@ else:
     inc(p[], val)
     result = p[]
 
-
-proc atomicInc*(memLoc: var int, x: int = 1): int {.inline, discardable, raises: [], tags: [].} =
+proc atomicInc*(memLoc: var int; x: int = 1; mem = ATOMIC_SEQ_CST): int {.inline, discardable, raises: [], tags: [].} =
   when someGcc and hasThreadSupport:
-    result = atomicAddFetch(memLoc.addr, x, ATOMIC_SEQ_CST)
+    result = atomicAddFetch(memLoc.addr, x, mem)
   elif someVcc and hasThreadSupport:
     result = addAndFetch(memLoc.addr, x)
     inc(result, x)
@@ -274,12 +273,12 @@ proc atomicInc*(memLoc: var int, x: int = 1): int {.inline, discardable, raises:
     inc(memLoc, x)
     result = memLoc
 
-proc atomicDec*(memLoc: var int, x: int = 1): int {.inline, discardable, raises: [], tags: [].} =
+proc atomicDec*(memLoc: var int; x: int = 1; mem = ATOMIC_SEQ_CST): int {.inline, discardable, raises: [], tags: [].} =
   when someGcc and hasThreadSupport:
     when declared(atomicSubFetch):
-      result = atomicSubFetch(memLoc.addr, x, ATOMIC_SEQ_CST)
+      result = atomicSubFetch(memLoc.addr, x, mem)
     else:
-      result = atomicAddFetch(memLoc.addr, -x, ATOMIC_SEQ_CST)
+      result = atomicAddFetch(memLoc.addr, -x, mem)
   elif someVcc and hasThreadSupport:
     result = addAndFetch(memLoc.addr, -x)
     dec(result, x)
