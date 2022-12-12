@@ -192,6 +192,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/semparallel.nim
     rm -f $nimbleDir/compiler/sempass2.nim
     rm -f $nimbleDir/compiler/semstmts.nim
+    rm -f $nimbleDir/compiler/semstrictfuncs.nim
     rm -f $nimbleDir/compiler/semtempl.nim
     rm -f $nimbleDir/compiler/semtypes.nim
     rm -f $nimbleDir/compiler/semtypinst.nim

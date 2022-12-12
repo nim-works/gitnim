@@ -1052,6 +1052,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 "$nimbleDir/compiler/sempass2.nim"
   cp "compiler/semstmts.nim" "$nimbleDir/compiler/semstmts.nim"
   chmod 644 "$nimbleDir/compiler/semstmts.nim"
+  cp "compiler/semstrictfuncs.nim" "$nimbleDir/compiler/semstrictfuncs.nim"
+  chmod 644 "$nimbleDir/compiler/semstrictfuncs.nim"
   cp "compiler/semtempl.nim" "$nimbleDir/compiler/semtempl.nim"
   chmod 644 "$nimbleDir/compiler/semtempl.nim"
   cp "compiler/semtypes.nim" "$nimbleDir/compiler/semtypes.nim"
