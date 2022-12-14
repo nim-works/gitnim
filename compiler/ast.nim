@@ -712,7 +712,7 @@ type
     mEqIdent, mEqNimrodNode, mSameNodeType, mGetImpl, mNGenSym,
     mNHint, mNWarning, mNError,
     mInstantiationInfo, mGetTypeInfo, mGetTypeInfoV2,
-    mNimvm, mIntDefine, mStrDefine, mBoolDefine, mRunnableExamples,
+    mNimvm, mIntDefine, mStrDefine, mBoolDefine, mGenericDefine, mRunnableExamples,
     mException, mBuiltinType, mSymOwner, mUncheckedArray, mGetImplTransf,
     mSymIsInstantiationOf, mNodeId, mPrivateAccess, mZeroDefault
 
@@ -2046,6 +2046,9 @@ template detailedInfo*(sym: PSym): string =
 
 proc isInlineIterator*(typ: PType): bool {.inline.} =
   typ.kind == tyProc and tfIterator in typ.flags and typ.callConv != ccClosure
+
+proc isIterator*(typ: PType): bool {.inline.} =
+  typ.kind == tyProc and tfIterator in typ.flags
 
 proc isClosureIterator*(typ: PType): bool {.inline.} =
   typ.kind == tyProc and tfIterator in typ.flags and typ.callConv == ccClosure
