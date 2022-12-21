@@ -324,7 +324,7 @@
     <div id="tocRoot"></div>
     
     <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Authors:</th><td>Andreas Rumpf, Zahary Karadjov</td></tr>
-<tr><th class="docinfo-name">Version:</th><td>1.7.3</td></tr>
+<tr><th class="docinfo-name">Version:</th><td>1.9.1</td></tr>
 </tbody></table><blockquote class="markdown-quote"><p>&quot;Complexity&quot; seems to be a lot like &quot;energy&quot;: you can transfer it from the end-user to one/some of the other players, but the total amount seems to remain pretty much constant for a given task. -- Ran</p></blockquote>
 
 <h1><a class="toc-backref" id="about-this-document" href="#about-this-document">About this document</a></h1><p><strong>Note</strong>: This document is a draft! Several of Nim's features may need more precise wording. This manual is constantly evolving into a proper specification.</p>
@@ -3149,12 +3149,11 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
     <span class="Identifier">echo</span> <span class="StringLit">&quot;overflow!&quot;</span>
   <span class="Keyword">except</span> <span class="Identifier">ValueError</span><span class="Punctuation">,</span> <span class="Identifier">IOError</span><span class="Punctuation">:</span>
     <span class="Identifier">echo</span> <span class="StringLit">&quot;catch multiple exceptions!&quot;</span>
-  <span class="Keyword">except</span><span class="Punctuation">:</span>
-    <span class="Identifier">echo</span> <span class="StringLit">&quot;Unknown exception!&quot;</span>
+  <span class="Keyword">except</span> <span class="Identifier">CatchableError</span><span class="Punctuation">:</span>
+    <span class="Identifier">echo</span> <span class="StringLit">&quot;Catchable exception!&quot;</span>
   <span class="Keyword">finally</span><span class="Punctuation">:</span>
     <span class="Identifier">close</span><span class="Punctuation">(</span><span class="Identifier">f</span><span class="Punctuation">)</span></pre></p>
 <p>The statements after the <tt class="docutils literal"><span class="pre"><span class="Keyword">try</span></span></tt> are executed in sequential order unless an exception <tt class="docutils literal"><span class="pre"><span class="Identifier">e</span></span></tt> is raised. If the exception type of <tt class="docutils literal"><span class="pre"><span class="Identifier">e</span></span></tt> matches any listed in an <tt class="docutils literal"><span class="pre"><span class="Keyword">except</span></span></tt> clause, the corresponding statements are executed. The statements following the <tt class="docutils literal"><span class="pre"><span class="Keyword">except</span></span></tt> clauses are called <span id="exception-handlers_1">exception handlers</span>.</p>
-<p>The empty <span id="except_1">except</span> clause is executed if there is an exception that is not listed otherwise. It is similar to an <tt class="docutils literal"><span class="pre"><span class="Keyword">else</span></span></tt> clause in <tt class="docutils literal"><span class="pre"><span class="Keyword">if</span></span></tt> statements.</p>
 <p>If there is a <span id="finally_1">finally</span> clause, it is always executed after the exception handlers.</p>
 <p>The exception is <em>consumed</em> in an exception handler. However, an exception handler may raise another exception. If the exception is not handled, it is propagated through the call stack. This means that often the rest of the procedure - that is not within a <tt class="docutils literal"><span class="pre"><span class="Keyword">finally</span></span></tt> clause - is not executed (if an exception occurs).</p>
 
@@ -3163,11 +3162,12 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 <span class="Keyword">from</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">strutils</span> <span class="Keyword">import</span> <span class="Identifier">parseInt</span>
 
 <span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Keyword">try</span><span class="Punctuation">:</span> <span class="Identifier">parseInt</span><span class="Punctuation">(</span><span class="StringLit">&quot;133a&quot;</span><span class="Punctuation">)</span>
-        <span class="Keyword">except</span><span class="Punctuation">:</span> <span class="Operator">-</span><span class="DecNumber">1</span>
+        <span class="Keyword">except</span> <span class="Identifier">ValueError</span><span class="Punctuation">:</span> <span class="Operator">-</span><span class="DecNumber">1</span>
         <span class="Keyword">finally</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;hi&quot;</span></pre></p>
 <p>To prevent confusing code there is a parsing limitation; if the <tt class="docutils literal"><span class="pre"><span class="Keyword">try</span></span></tt> follows a <tt class="docutils literal"><span class="pre"><span class="Punctuation">(</span></span></tt> it has to be written as a one liner:</p>
 <p><pre class="listing">
-<span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="Keyword">try</span><span class="Punctuation">:</span> <span class="Identifier">parseInt</span><span class="Punctuation">(</span><span class="StringLit">&quot;133a&quot;</span><span class="Punctuation">)</span> <span class="Keyword">except</span><span class="Punctuation">:</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">)</span></pre></p>
+<span class="Keyword">from</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">strutils</span> <span class="Keyword">import</span> <span class="Identifier">parseInt</span>
+<span class="Keyword">let</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="Keyword">try</span><span class="Punctuation">:</span> <span class="Identifier">parseInt</span><span class="Punctuation">(</span><span class="StringLit">&quot;133a&quot;</span><span class="Punctuation">)</span> <span class="Keyword">except</span> <span class="Identifier">ValueError</span><span class="Punctuation">:</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">)</span></pre></p>
 
 <h2><a class="toc-backref" id="exception-handling-except-clauses" href="#exception-handling-except-clauses">Except clauses</a></h2><p>Within an <tt class="docutils literal"><span class="pre"><span class="Keyword">except</span></span></tt> clause it is possible to access the current exception using the following syntax:</p>
 <p><pre class="listing">
@@ -3194,7 +3194,7 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 <p><pre class="listing">
 <span class="Keyword">try</span><span class="Punctuation">:</span>
   <span class="Comment"># ...</span>
-<span class="Keyword">except</span><span class="Punctuation">:</span>
+<span class="Keyword">except</span> <span class="Identifier">CatchableError</span><span class="Punctuation">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">getCurrentExceptionMsg</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
 
 <h2><a class="toc-backref" id="exception-handling-custom-exceptions" href="#exception-handling-custom-exceptions">Custom exceptions</a></h2><p>It is possible to create custom exceptions. A custom exception is a custom type:</p>
@@ -3303,7 +3303,7 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
   <span class="Keyword">try</span><span class="Punctuation">:</span>
     <span class="Identifier">unsafeCall</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
     <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">true</span>
-  <span class="Keyword">except</span><span class="Punctuation">:</span>
+  <span class="Keyword">except</span> <span class="Identifier">CatchableError</span><span class="Punctuation">:</span>
     <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">false</span></pre></p>
 <p>A <tt class="docutils literal"><span class="pre"><span class="Identifier">raises</span></span></tt> list can also be attached to a proc type. This affects type compatibility:</p>
 <p><pre class="listing">
@@ -5233,7 +5233,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2022-12-14 01:20:27 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2022-12-21 01:14:53 UTC</small>
       </div>
     </div>
   </div>
