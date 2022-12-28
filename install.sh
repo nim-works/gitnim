@@ -774,8 +774,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 "$libdir/system/sysstr.nim"
   cp "lib/system/coro_detection.nim" "$libdir/system/coro_detection.nim"
   chmod 644 "$libdir/system/coro_detection.nim"
-  cp "lib/system/arithm.nim" "$libdir/system/arithm.nim"
-  chmod 644 "$libdir/system/arithm.nim"
   cp "lib/system/ansi_c.nim" "$libdir/system/ansi_c.nim"
   chmod 644 "$libdir/system/ansi_c.nim"
   cp "lib/system/stacktraces.nim" "$libdir/system/stacktraces.nim"
