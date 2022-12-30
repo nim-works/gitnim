@@ -694,6 +694,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 "$libdir/system/gc_common.nim"
   cp "lib/system/avltree.nim" "$libdir/system/avltree.nim"
   chmod 644 "$libdir/system/avltree.nim"
+  cp "lib/system/rawquits.nim" "$libdir/system/rawquits.nim"
+  chmod 644 "$libdir/system/rawquits.nim"
   cp "lib/system/indices.nim" "$libdir/system/indices.nim"
   chmod 644 "$libdir/system/indices.nim"
   cp "lib/system/reprjs.nim" "$libdir/system/reprjs.nim"
