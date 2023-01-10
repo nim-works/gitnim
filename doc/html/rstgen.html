@@ -57,13 +57,8 @@
       <li><a class="reference" href="#EscapeMode" title="EscapeMode = enum
   emText, emOption, emUrl">EscapeMode</a></li>
 <li><a class="reference" href="#IndexedDocs" title="IndexedDocs = Table[IndexEntry, seq[IndexEntry]]">IndexedDocs</a></li>
-<li><a class="reference" href="#IndexEntry" title="IndexEntry = object
-  keyword*: string
-  link*: string
-  linkTitle*: string         ## contains a prettier text for the href
-  linkDesc*: string          ## the title attribute of the final href">IndexEntry</a></li>
 <li><a class="reference" href="#MetaEnum" title="MetaEnum = enum
-  metaNone, metaTitle, metaSubtitle, metaAuthor, metaVersion">MetaEnum</a></li>
+  metaNone, metaTitleRaw, metaTitle, metaSubtitle, metaAuthor, metaVersion">MetaEnum</a></li>
 <li><a class="reference" href="#OutputTarget" title="OutputTarget = enum
   outHtml, outLatex">OutputTarget</a></li>
 <li><a class="reference" href="#RstGenerator" title="RstGenerator = object of RootObj
@@ -188,9 +183,13 @@
 
 </ul>
 <ul class="simple nested-toc-section">setIndexTerm
-  <li><a class="reference" href="#setIndexTerm%2CRstGenerator%2Cstring%2Cstring%2Cstring%2Cstring%2Cstring" title="setIndexTerm(d: var RstGenerator; htmlFile, id, term: string;
-             linkTitle, linkDesc = &quot;&quot;)">setIndexTerm(d: var RstGenerator; htmlFile, id, term: string;
-             linkTitle, linkDesc = &quot;&quot;)</a></li>
+  <li><a class="reference" href="#setIndexTerm%2CRstGenerator%2CIndexEntryKind%2Cstring%2Cstring%2Cstring%2Cstring%2Cstring%2Cint" title="setIndexTerm(d: var RstGenerator; k: IndexEntryKind; htmlFile, id, term: string;
+             linkTitle, linkDesc = &quot;&quot;; line = 0)">setIndexTerm(d: var RstGenerator; k: IndexEntryKind; htmlFile, id, term: string;
+             linkTitle, linkDesc = &quot;&quot;; line = 0)</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">traverseForIndex
+  <li><a class="reference" href="#traverseForIndex%2CPDoc%2CPRstNode" title="traverseForIndex(d: PDoc; n: PRstNode)">traverseForIndex(d: PDoc; n: PRstNode)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">writeIndexFile
@@ -223,7 +222,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="os.html">os</a>, <a class="reference external" href="hashes.html">hashes</a>, <a class="reference external" href="strtabs.html">strtabs</a>, <a class="reference external" href="rstast.html">rstast</a>, <a class="reference external" href="rst.html">rst</a>, <a class="reference external" href="highlite.html">highlite</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="sequtils.html">sequtils</a>, <a class="reference external" href="algorithm.html">algorithm</a>, <a class="reference external" href="parseutils.html">parseutils</a>, <a class="reference external" href="strbasics.html">strbasics</a>, <a class="reference external" href="assertions.html">assertions</a>, <a class="reference external" href="syncio.html">syncio</a>, <a class="reference external" href="formatfloat.html">formatfloat</a>, <a class="reference external" href="since.html">since</a>
+    <a class="reference external" href="strutils.html">strutils</a>, <a class="reference external" href="os.html">os</a>, <a class="reference external" href="hashes.html">hashes</a>, <a class="reference external" href="strtabs.html">strtabs</a>, <a class="reference external" href="rstast.html">rstast</a>, <a class="reference external" href="rst.html">rst</a>, <a class="reference external" href="rstidx.html">rstidx</a>, <a class="reference external" href="highlite.html">highlite</a>, <a class="reference external" href="tables.html">tables</a>, <a class="reference external" href="sequtils.html">sequtils</a>, <a class="reference external" href="algorithm.html">algorithm</a>, <a class="reference external" href="parseutils.html">parseutils</a>, <a class="reference external" href="strbasics.html">strbasics</a>, <a class="reference external" href="assertions.html">assertions</a>, <a class="reference external" href="syncio.html">syncio</a>, <a class="reference external" href="formatfloat.html">formatfloat</a>, <a class="reference external" href="since.html">since</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -235,13 +234,13 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L64" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L64" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L65" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L65" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="IndexedDocs">
-  <dt><pre><a href="rstgen.html#IndexedDocs"><span class="Identifier">IndexedDocs</span></a> <span class="Other">=</span> <a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><a href="rstgen.html#IndexEntry"><span class="Identifier">IndexEntry</span></a><span class="Other">,</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="rstgen.html#IndexEntry"><span class="Identifier">IndexEntry</span></a><span class="Other">]</span><span class="Other">]</span></pre></dt>
+  <dt><pre><a href="rstgen.html#IndexedDocs"><span class="Identifier">IndexedDocs</span></a> <span class="Other">=</span> <a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><a href="rstidx.html#IndexEntry"><span class="Identifier">IndexEntry</span></a><span class="Other">,</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="rstidx.html#IndexEntry"><span class="Identifier">IndexEntry</span></a><span class="Other">]</span><span class="Other">]</span></pre></dt>
   <dd>
     
     <p>
@@ -249,34 +248,19 @@ Contains the index sequences for doc types.</p>
 <p>The key is a <em>fake</em> IndexEntry which will contain the title of the document in the <tt class="docutils literal"><span class="pre"><span class="Identifier">keyword</span></span></tt> field and <tt class="docutils literal"><span class="pre"><span class="Identifier">link</span></span></tt> will contain the html filename for the document. <tt class="docutils literal"><span class="pre"><span class="Identifier">linkTitle</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">linkDesc</span></span></tt> will be empty.</p>
 <p>The value indexed by this IndexEntry is a sequence with the real index entries found in the <tt class="docutils literal"><span class="pre">.idx</span></tt> file.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L425" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L425" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
-
-  </dd>
-</div>
-<div id="IndexEntry">
-  <dt><pre><a href="rstgen.html#IndexEntry"><span class="Identifier">IndexEntry</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">keyword</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
-  <span class="Identifier">link</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
-  <span class="Identifier">linkTitle</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>         <span class="Comment">## contains a prettier text for the href</span>
-  <span class="Identifier">linkDesc</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>          <span class="Comment">## the title attribute of the final href</span>
-  </pre></dt>
-  <dd>
-    
-    
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L419" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L419" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L394" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L394" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="MetaEnum">
   <dt><pre><a href="rstgen.html#MetaEnum"><span class="Identifier">MetaEnum</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
-  <span class="Identifier">metaNone</span><span class="Other">,</span> <span class="Identifier">metaTitle</span><span class="Other">,</span> <span class="Identifier">metaSubtitle</span><span class="Other">,</span> <span class="Identifier">metaAuthor</span><span class="Other">,</span> <span class="Identifier">metaVersion</span></pre></dt>
+  <span class="Identifier">metaNone</span><span class="Other">,</span> <span class="Identifier">metaTitleRaw</span><span class="Other">,</span> <span class="Identifier">metaTitle</span><span class="Other">,</span> <span class="Identifier">metaSubtitle</span><span class="Other">,</span> <span class="Identifier">metaAuthor</span><span class="Other">,</span> <span class="Identifier">metaVersion</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L61" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L61" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L62" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L62" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -286,8 +270,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     which document type to generate
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L57" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L57" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L58" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L58" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -322,8 +306,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L68" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L68" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L69" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L69" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -338,8 +322,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L54" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L54" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L55" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L55" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -358,8 +342,8 @@ Contains the index sequences for doc types.</p>
 <p>The returned <tt class="docutils literal"><span class="pre">StringTableRef</span></tt> contains the parameters used by the HTML engine to build the final output. For information on what these parameters are and their purpose, please look up the file <tt class="docutils literal"><span class="pre">config/nimdoc.cfg</span></tt> bundled with the compiler.</p>
 <p>The only difference between the contents of that file and the values provided by this proc is the <tt class="docutils literal"><span class="pre">doc.file</span></tt> variable. The <tt class="docutils literal"><span class="pre">doc.file</span></tt> variable of the configuration file contains HTML to build standalone pages, while this proc returns just the content for procs like <tt class="docutils literal"><span class="pre">rstToHtml</span></tt> to generate the bare minimum HTML.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1524" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1524" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1436" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1436" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -372,8 +356,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     Escapes the HTML.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L251" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L251" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L252" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L252" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -386,8 +370,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L228" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L228" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L229" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L229" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -401,8 +385,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1463" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1463" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1375" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1375" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -431,8 +415,8 @@ Contains the index sequences for doc types.</p>
 <span class="Keyword">var</span> <span class="Identifier">gen</span><span class="Punctuation">:</span> <span class="Identifier">RstGenerator</span>
 <span class="Identifier">gen</span><span class="Operator">.</span><span class="Identifier">initRstGenerator</span><span class="Punctuation">(</span><span class="Identifier">outHtml</span><span class="Punctuation">,</span> <span class="Identifier">defaultConfig</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="StringLit">&quot;filename&quot;</span><span class="Punctuation">,</span> <span class="Punctuation">{</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre></p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L115" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L115" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L116" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L116" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -450,8 +434,8 @@ Contains the index sequences for doc types.</p>
 <p>To differentiate between a documentation and API file a convention is used: indices which contain one entry without the HTML hash character (#) will be considered <tt class="docutils literal"><span class="pre"><span class="Identifier">documentation</span></span></tt>, since this hash-less entry is the explicit title of the document.  Indices without this explicit entry will be considered <tt class="docutils literal"><span class="pre"><span class="Identifier">generated</span> <span class="Identifier">API</span></span></tt> extracted out of a source <tt class="docutils literal"><span class="pre">.nim</span></tt> file.</p>
 <p>Returns the merged and sorted indices into a single HTML block which can be further embedded into nimdoc templates.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L693" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L693" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L615" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L615" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -464,8 +448,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L239" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L239" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L240" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L240" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -477,8 +461,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L106" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L106" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L107" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L107" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -487,16 +471,17 @@ Contains the index sequences for doc types.</p>
 <div id="readIndexDir-procs-all">
   <div id="readIndexDir,string">
   <dt><pre><span class="Keyword">proc</span> <a href="#readIndexDir%2Cstring"><span class="Identifier">readIndexDir</span></a><span class="Other">(</span><span class="Identifier">dir</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">modules</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span><span class="Other">,</span>
-                                      <span class="Identifier">symbols</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="rstgen.html#IndexEntry"><span class="Identifier">IndexEntry</span></a><span class="Other">]</span><span class="Other">,</span>
+                                      <span class="Identifier">symbols</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="rstidx.html#IndexEntry"><span class="Identifier">IndexEntry</span></a><span class="Other">]</span><span class="Other">,</span>
                                       <span class="Identifier">docs</span><span class="Other">:</span> <a href="rstgen.html#IndexedDocs"><span class="Identifier">IndexedDocs</span></a><span class="Other">]</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     <p>Walks <tt class="docutils literal"><span class="pre"><span class="Identifier">dir</span></span></tt> reading <tt class="docutils literal"><span class="pre">.idx</span></tt> files converting them in IndexEntry items.</p>
 <p>Returns the list of found module names, the list of free symbol entries and the different documentation indexes. The list of modules is sorted. See the documentation of <tt class="docutils literal"><span class="pre">mergeIndexes</span></tt> for details.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L627" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L627" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L577" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L577" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -510,8 +495,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1011" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1011" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L910" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L910" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -526,8 +511,8 @@ Contains the index sequences for doc types.</p>
     <p>Renders the string decorated within `foobar`:idx: markers.</p>
 <p>Additionally adds the enclosed text to the index as a term. Since we are interested in different instances of the same term to have different entries, a table is used to keep track of the amount of times a term has previously appeared to give a different identifier value for each.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L398" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L398" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L372" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L372" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -540,8 +525,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1027" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1027" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L926" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L926" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -561,8 +546,8 @@ Contains the index sequences for doc types.</p>
 <span class="Identifier">renderRstToOut</span><span class="Punctuation">(</span><span class="Identifier">gen</span><span class="Punctuation">,</span> <span class="Identifier">rst</span><span class="Punctuation">,</span> <span class="Identifier">generatedHtml</span><span class="Punctuation">)</span>
 <span class="Identifier">echo</span> <span class="Identifier">generatedHtml</span></pre></p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1200" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1200" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1111" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1111" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -576,8 +561,8 @@ Contains the index sequences for doc types.</p>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L824" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L824" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L723" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L723" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -587,7 +572,7 @@ Contains the index sequences for doc types.</p>
   <div id="rstToHtml,string,RstParseOptions,StringTableRef,MsgHandler">
   <dt><pre><span class="Keyword">proc</span> <a href="#rstToHtml%2Cstring%2CRstParseOptions%2CStringTableRef%2CMsgHandler"><span class="Identifier">rstToHtml</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">options</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="strtabs.html#StringTableRef"><span class="Identifier">StringTableRef</span></a><span class="Other">;</span>
                <span class="Identifier">msgHandler</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a> <span class="Other">=</span> <span class="Identifier">rst</span><span class="Other">.</span><span class="Identifier">defaultMsgHandler</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -601,8 +586,8 @@ Contains the index sequences for doc types.</p>
 <span class="Comment"># --&gt; &lt;em&gt;Hello&lt;/em&gt; &lt;strong&gt;world&lt;/strong&gt;!</span></pre></p>
 <p>If you need to allow the rst <tt class="docutils literal"><span class="pre">include</span></tt> directive or tweak the generated output you have to create your own <tt class="docutils literal"><span class="pre">RstGenerator</span></tt> with <tt class="docutils literal"><span class="pre">initRstGenerator</span></tt> and related procs.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1592" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1592" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1504" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1504" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -611,24 +596,25 @@ Contains the index sequences for doc types.</p>
 <div id="rstToLatex-procs-all">
   <div id="rstToLatex,string,RstParseOptions">
   <dt><pre><span class="Keyword">proc</span> <a href="#rstToLatex%2Cstring%2CRstParseOptions"><span class="Identifier">rstToLatex</span></a><span class="Other">(</span><span class="Identifier">rstSource</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">options</span><span class="Other">:</span> <a href="rst.html#RstParseOptions"><span class="Identifier">RstParseOptions</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span>
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Convenience proc for <tt class="docutils literal"><span class="pre"><span class="Identifier">renderRstToOut</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">initRstGenerator</span></span></tt>.
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Identifier">doAssert</span> <span class="Identifier">rstToLatex</span><span class="Punctuation">(</span><span class="StringLit">&quot;*Hello* **world**&quot;</span><span class="Punctuation">,</span> <span class="Punctuation">{</span><span class="Punctuation">}</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="LongStringLit">&quot;&quot;&quot;\emph{Hello} \textbf{world}&quot;&quot;&quot;</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1632" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1632" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1546" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1546" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 
 </div>
 <div id="setIndexTerm-procs-all">
-  <div id="setIndexTerm,RstGenerator,string,string,string,string,string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#setIndexTerm%2CRstGenerator%2Cstring%2Cstring%2Cstring%2Cstring%2Cstring"><span class="Identifier">setIndexTerm</span></a><span class="Other">(</span><span class="Identifier">d</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">htmlFile</span><span class="Other">,</span> <span class="Identifier">id</span><span class="Other">,</span> <span class="Identifier">term</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span>
-                  <span class="Identifier">linkTitle</span><span class="Other">,</span> <span class="Identifier">linkDesc</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="setIndexTerm,RstGenerator,IndexEntryKind,string,string,string,string,string,int">
+  <dt><pre><span class="Keyword">proc</span> <a href="#setIndexTerm%2CRstGenerator%2CIndexEntryKind%2Cstring%2Cstring%2Cstring%2Cstring%2Cstring%2Cint"><span class="Identifier">setIndexTerm</span></a><span class="Other">(</span><span class="Identifier">d</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">k</span><span class="Other">:</span> <a href="rstidx.html#IndexEntryKind"><span class="Identifier">IndexEntryKind</span></a><span class="Other">;</span>
+                  <span class="Identifier">htmlFile</span><span class="Other">,</span> <span class="Identifier">id</span><span class="Other">,</span> <span class="Identifier">term</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">linkTitle</span><span class="Other">,</span> <span class="Identifier">linkDesc</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">line</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">)</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     <p>Adds a <tt class="docutils literal"><span class="pre"><span class="Identifier">term</span></span></tt> to the index using the specified hyperlink identifier.</p>
@@ -637,8 +623,22 @@ Contains the index sequences for doc types.</p>
 <p>If <tt class="docutils literal"><span class="pre"><span class="Identifier">linkTitle</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">linkDesc</span></span></tt> are not the empty string, two additional columns with their contents will be added.</p>
 <p>The index won't be written to disk unless you call <a class="reference external" href="#writeIndexFile,RstGenerator,string">writeIndexFile()</a>. The purpose of the index is documented in the <a class="reference external" href="docgen.html#related-options-index-switch">docgen tools guide</a>.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L347" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L347" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L325" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L325" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+
+</div>
+<div id="traverseForIndex-procs-all">
+  <div id="traverseForIndex,PDoc,PRstNode">
+  <dt><pre><span class="Keyword">proc</span> <a href="#traverseForIndex%2CPDoc%2CPRstNode"><span class="Identifier">traverseForIndex</span></a><span class="Other">(</span><span class="Identifier">d</span><span class="Other">:</span> <span class="Identifier">PDoc</span><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    A version of <a class="reference internal nimdoc" title="proc renderRstToOut(d: var RstGenerator; n: PRstNode; result: var string)" href="#renderRstToOut,RstGenerator,PRstNode,string">renderRstToOut</a> that only fills entries for <tt class="docutils literal"><span class="pre">.idx</span></tt> files.
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L1099" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L1099" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -653,8 +653,8 @@ Contains the index sequences for doc types.</p>
     <p>Writes the current index buffer to the specified output file.</p>
 <p>You previously need to add entries to the index with the <a class="reference external" href="#setIndexTerm,RstGenerator,string,string,string,string,string">setIndexTerm()</a> proc. If the index is empty the file won't be created.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L185" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L185" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/packages/docutils/rstgen.nim#L186" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/packages/docutils/rstgen.nim#L186" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -670,7 +670,7 @@ Contains the index sequences for doc types.</p>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-02 01:14:03 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-10 01:18:36 UTC</small>
       </div>
     </div>
   </div>

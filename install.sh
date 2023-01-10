@@ -136,6 +136,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 "$libdir/packages/docutils/rstgen.nim"
   cp "lib/packages/docutils/rstast.nim" "$libdir/packages/docutils/rstast.nim"
   chmod 644 "$libdir/packages/docutils/rstast.nim"
+  cp "lib/packages/docutils/rstidx.nim" "$libdir/packages/docutils/rstidx.nim"
+  chmod 644 "$libdir/packages/docutils/rstidx.nim"
   cp "lib/nimrtl.nim.cfg" "$libdir/nimrtl.nim.cfg"
   chmod 644 "$libdir/nimrtl.nim.cfg"
   cp "lib/deprecated/pure/oswalkdir.nim" "$libdir/deprecated/pure/oswalkdir.nim"
