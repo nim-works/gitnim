@@ -168,6 +168,10 @@
 <span class="Comment"># Option: foo</span>
 <span class="Comment"># Option and value: bar, 20</span>
 <span class="Comment"># Argument: file.txt</span></pre><p>The <a class="reference external" href="#getopt.i,OptParser">getopt iterator</a>, which is provided for convenience, can be used to iterate through all command line options as well.</p>
+<p>To set a default value for a variable assigned through <tt class="docutils literal"><span class="pre"><span class="Identifier">getopt</span></span></tt> and accept arguments from the cmd line. Assign the default value to a variable before parsing. Then set the variable to the new value while parsing.</p>
+<p>Here is an example: .. code-block:: import std/parseopt</p>
+<p>var varName: string = &quot;defaultValue&quot;</p>
+<p>for kind, key, val in getopt(): case kind of cmdArgument: discard of cmdLongOption, cmdShortOption: case key: of &quot;varName&quot;: # --varName:&lt;value&gt; in the console when executing varName = val # do input sanitization in production systems of cmdEnd: discard</p>
 
 <h1><a class="toc-backref" id="nimshortnoval-and-nimlongnoval" href="#nimshortnoval-and-nimlongnoval"><tt class="docutils literal"><span class="pre"><span class="Identifier">shortNoVal</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">longNoVal</span></span></tt></a></h1><p>The optional <tt class="docutils literal"><span class="pre"><span class="Identifier">shortNoVal</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">longNoVal</span></span></tt> parameters present in <a class="reference external" href="#initOptParser,string,set[char],seq[string]">initOptParser</a> are for specifying which short and long options do not accept values.</p>
 <p>When <tt class="docutils literal"><span class="pre"><span class="Identifier">shortNoVal</span></span></tt> is non-empty, users are not required to separate short options and their values with a ':' or '=' since the parser knows which options accept values and which ones do not. This behavior also applies for long options if <tt class="docutils literal"><span class="pre"><span class="Identifier">longNoVal</span></span></tt> is non-empty. For short options, <tt class="docutils literal"><span class="pre"><span class="Operator">-</span><span class="Identifier">j4</span></span></tt> becomes supported syntax, and for long options, <tt class="docutils literal"><span class="pre"><span class="Operator">--</span><span class="Identifier">foo</span> <span class="Identifier">bar</span></span></tt> becomes supported. This is in addition to the <a class="reference external" href="#supported-syntax">previously mentioned syntax</a>. Users can still separate options and their values with ':' or '=', but that becomes optional.</p>
@@ -234,8 +238,8 @@
   <dd>
     
     The detected command line token.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L157" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L157" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L178" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L178" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -259,8 +263,8 @@
 Implementation of the command line parser.</p>
 <p>To initialize it, use the <a class="reference external" href="#initOptParser,string,set[char],seq[string]">initOptParser proc</a>.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L162" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L162" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L183" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L183" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -288,8 +292,8 @@ Implementation of the command line parser.</p>
     <span class="Keyword">break</span>
   <span class="Keyword">else</span><span class="Punctuation">:</span> <span class="Keyword">continue</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">cmdLineRest</span> <span class="Operator">==</span> <span class="StringLit">&quot;foo.txt bar.txt&quot;</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L364" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L364" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L387" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L387" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -306,6 +310,7 @@ Implementation of the command line parser.</p>
     <p>Initializes the command line parser.</p>
 <p>If <tt class="docutils literal"><span class="pre"><span class="Identifier">cmdline</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span></span></tt>, the real command line as provided by the <tt class="docutils literal"><span class="pre"><span class="Identifier">os</span></span></tt> module is retrieved instead if it is available. If the command line is not available, a <tt class="docutils literal"><span class="pre"><span class="Identifier">ValueError</span></span></tt> will be raised.</p>
 <p><tt class="docutils literal"><span class="pre"><span class="Identifier">shortNoVal</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">longNoVal</span></span></tt> are used to specify which options do not take values. See the <a class="reference external" href="#nimshortnoval-and-nimlongnoval">documentation about these parameters</a> for more information on how this affects parsing.</p>
+<p>This does not provide a way of passing default values to arguments.</p>
 <p>See also:</p>
 <ul class="simple"><li><a class="reference external" href="#getopt.i,OptParser">getopt iterator</a></li>
 </ul>
@@ -315,8 +320,8 @@ Implementation of the command line parser.</p>
 <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">initOptParser</span><span class="Punctuation">(</span><span class="StringLit">&quot;--left --debug:3 -l -r:2&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">initOptParser</span><span class="Punctuation">(</span><span class="StringLit">&quot;--left --debug:3 -l -r:2&quot;</span><span class="Punctuation">,</span>
                   <span class="Identifier">shortNoVal</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="CharLit">'l'</span><span class="Punctuation">}</span><span class="Punctuation">,</span> <span class="Identifier">longNoVal</span> <span class="Operator">=</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;left&quot;</span><span class="Punctuation">]</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L199" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L199" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L220" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L220" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -338,8 +343,8 @@ Implementation of the command line parser.</p>
 <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">initOptParser</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;--left&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;--debug:3&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;-l&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;-r:2&quot;</span><span class="Punctuation">]</span><span class="Punctuation">)</span>
 <span class="Identifier">p</span> <span class="Operator">=</span> <span class="Identifier">initOptParser</span><span class="Punctuation">(</span><span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;--left&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;--debug:3&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;-l&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;-r:2&quot;</span><span class="Punctuation">]</span><span class="Punctuation">,</span>
                   <span class="Identifier">shortNoVal</span> <span class="Operator">=</span> <span class="Punctuation">{</span><span class="CharLit">'l'</span><span class="Punctuation">}</span><span class="Punctuation">,</span> <span class="Identifier">longNoVal</span> <span class="Operator">=</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;left&quot;</span><span class="Punctuation">]</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L223" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L223" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L246" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L246" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -364,8 +369,8 @@ Implementation of the command line parser.</p>
 <span class="Identifier">doAssert</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">==</span> <span class="Identifier">cmdArgument</span> <span class="Keyword">and</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">key</span> <span class="Operator">==</span> <span class="StringLit">&quot;file.txt&quot;</span>
 <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">next</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">kind</span> <span class="Operator">==</span> <span class="Identifier">cmdEnd</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L293" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L293" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L316" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L316" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -389,8 +394,8 @@ Implementation of the command line parser.</p>
     <span class="Keyword">break</span>
   <span class="Keyword">else</span><span class="Punctuation">:</span> <span class="Keyword">continue</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">p</span><span class="Operator">.</span><span class="Identifier">remainingArgs</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;foo.txt&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;bar.txt&quot;</span><span class="Punctuation">]</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L382" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L382" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L405" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L405" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -412,7 +417,7 @@ Implementation of the command line parser.</p>
     <p>Convenience iterator for iterating over command line arguments.</p>
 <p>This creates a new <a class="reference external" href="#OptParser">OptParser</a>. If no command line arguments are provided, the real command line as provided by the <tt class="docutils literal"><span class="pre"><span class="Identifier">os</span></span></tt> module is retrieved instead.</p>
 <p><tt class="docutils literal"><span class="pre"><span class="Identifier">shortNoVal</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">longNoVal</span></span></tt> are used to specify which options do not take values. See the <a class="reference external" href="#nimshortnoval-and-nimlongnoval">documentation about these parameters</a> for more information on how this affects parsing.</p>
-<p>There is no need to check for <tt class="docutils literal"><span class="pre"><span class="Identifier">cmdEnd</span></span></tt> while iterating.</p>
+<p>There is no need to check for <tt class="docutils literal"><span class="pre"><span class="Identifier">cmdEnd</span></span></tt> while iterating. If using <tt class="docutils literal"><span class="pre"><span class="Identifier">getopt</span></span></tt> with case switching, checking for <tt class="docutils literal"><span class="pre"><span class="Identifier">cmdEnd</span></span></tt> is required.</p>
 <p>See also:</p>
 <ul class="simple"><li><a class="reference external" href="#initOptParser,seq[string],set[char],seq[string]">initOptParser proc</a></li>
 </ul>
@@ -436,8 +441,8 @@ Implementation of the command line parser.</p>
 <span class="Keyword">if</span> <span class="Identifier">filename</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">:</span>
   <span class="Comment"># no filename has been written, so we show the help</span>
   <span class="Identifier">writeHelp</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L440" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L440" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L464" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L464" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -447,7 +452,7 @@ Implementation of the command line parser.</p>
   <dd>
     
     <p>Convenience iterator for iterating over the given <a class="reference external" href="#OptParser">OptParser</a>.</p>
-<p>There is no need to check for <tt class="docutils literal"><span class="pre"><span class="Identifier">cmdEnd</span></span></tt> while iterating.</p>
+<p>There is no need to check for <tt class="docutils literal"><span class="pre"><span class="Identifier">cmdEnd</span></span></tt> while iterating. If using <tt class="docutils literal"><span class="pre"><span class="Identifier">getopt</span></span></tt> with case switching, checking for <tt class="docutils literal"><span class="pre"><span class="Identifier">cmdEnd</span></span></tt> is required.</p>
 <p>See also:</p>
 <ul class="simple"><li><a class="reference external" href="#initOptParser,string,set[char],seq[string]">initOptParser proc</a></li>
 </ul>
@@ -471,8 +476,8 @@ Implementation of the command line parser.</p>
 <span class="Keyword">if</span> <span class="Identifier">filename</span> <span class="Operator">==</span> <span class="StringLit">&quot;&quot;</span><span class="Punctuation">:</span>
   <span class="Comment"># no filename has been given, so we show the help</span>
   <span class="Identifier">writeHelp</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L401" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L401" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/parseopt.nim#L424" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/parseopt.nim#L424" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -488,7 +493,7 @@ Implementation of the command line parser.</p>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-10 01:18:16 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-15 01:19:25 UTC</small>
       </div>
     </div>
   </div>
