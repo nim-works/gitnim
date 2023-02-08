@@ -56,26 +56,14 @@
     <ul class="simple simple-toc-section">
       <li><a class="reference" href="#LoadedModule" title="LoadedModule = object
   status*: ModuleStatus
-  symsInit, typesInit, loadedButAliveSetChanged*: bool
   fromDisk*: PackedModule
-  syms: seq[PSym]
-  types: seq[PType]
-  module*: PSym
-  iface, ifaceHidden: Table[PIdent, seq[PackedItemId]]">LoadedModule</a></li>
+  module*: PSym">LoadedModule</a></li>
 <li><a class="reference" href="#ModuleBackendFlag" title="ModuleBackendFlag = enum
   HasDatInitProc, HasModuleInitProc">ModuleBackendFlag</a></li>
 <li><a class="reference" href="#ModuleStatus" title="ModuleStatus = enum
   undefined, storing, loading, loaded, outdated, stored">ModuleStatus</a></li>
-<li><a class="reference" href="#PackedConfig" title="PackedConfig = object
-  backend: TBackend
-  selectedGC: TGCMode
-  cCompiler: TSystemCC
-  options: TOptions
-  globalOptions: TGlobalOptions">PackedConfig</a></li>
+<li><a class="reference" href="#PackedConfig" title="PackedConfig = object">PackedConfig</a></li>
 <li><a class="reference" href="#PackedDecoder" title="PackedDecoder = object
-  lastModule: int
-  lastLit: LitId
-  lastFile: FileIndex
   config*: ConfigRef
   cache*: IdentCache">PackedDecoder</a></li>
 <li><a class="reference" href="#PackedEncoder" title="PackedEncoder = object
@@ -89,10 +77,7 @@
   symMarker*: IntSet
   config*: ConfigRef">PackedEncoder</a></li>
 <li><a class="reference" href="#PackedModule" title="PackedModule = object
-  definedSymbols: string
-  moduleFlags: TSymFlags
   includes*: seq[(LitId, string)]
-  imports: seq[LitId]
   toReplay*: PackedTree
   topLevel*: PackedTree
   bodies*: PackedTree
@@ -111,13 +96,9 @@
   syms*: seq[PackedSym]
   types*: seq[PackedType]
   strings*: BiTable[string]
-  numbers*: BiTable[BiggestInt]
-  cfg: PackedConfig">PackedModule</a></li>
+  numbers*: BiTable[BiggestInt]">PackedModule</a></li>
 <li><a class="reference" href="#PackedModuleGraph" title="PackedModuleGraph = seq[LoadedModule]">PackedModuleGraph</a></li>
-<li><a class="reference" href="#RodIter" title="RodIter = object
-  decoder: PackedDecoder
-  values: seq[PackedItemId]
-  i, module: int">RodIter</a></li>
+<li><a class="reference" href="#RodIter" title="RodIter = object">RodIter</a></li>
 
     </ul>
   </details>
@@ -394,12 +375,8 @@
     <div id="LoadedModule">
   <dt><pre><a href="ic.html#LoadedModule"><span class="Identifier">LoadedModule</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">status</span><span class="Operator">*</span><span class="Other">:</span> <a href="ic.html#ModuleStatus"><span class="Identifier">ModuleStatus</span></a>
-  <span class="Identifier">symsInit</span><span class="Other">,</span> <span class="Identifier">typesInit</span><span class="Other">,</span> <span class="Identifier">loadedButAliveSetChanged</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">fromDisk</span><span class="Operator">*</span><span class="Other">:</span> <a href="ic.html#PackedModule"><span class="Identifier">PackedModule</span></a>
-  <span class="Identifier">syms</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="../ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span>
-  <span class="Identifier">types</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="../ast.html#PType"><span class="Identifier">PType</span></a><span class="Other">]</span>
   <span class="Identifier">module</span><span class="Operator">*</span><span class="Other">:</span> <a href="../ast.html#PSym"><span class="Identifier">PSym</span></a>
-  <span class="Identifier">iface</span><span class="Other">,</span> <span class="Identifier">ifaceHidden</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><a href="../idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">]</span><span class="Other">]</span>
 </pre></dt>
   <dd>
     
@@ -433,12 +410,7 @@
 </div>
 <div id="PackedConfig">
   <dt><pre><a href="ic.html#PackedConfig"><span class="Identifier">PackedConfig</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">backend</span><span class="Other">:</span> <a href="../options.html#TBackend"><span class="Identifier">TBackend</span></a>
-  <span class="Identifier">selectedGC</span><span class="Other">:</span> <a href="../options.html#TGCMode"><span class="Identifier">TGCMode</span></a>
-  <span class="Identifier">cCompiler</span><span class="Other">:</span> <a href="../options.html#TSystemCC"><span class="Identifier">TSystemCC</span></a>
-  <span class="Identifier">options</span><span class="Other">:</span> <a href="../options.html#TOptions"><span class="Identifier">TOptions</span></a>
-  <span class="Identifier">globalOptions</span><span class="Other">:</span> <a href="../options.html#TGlobalOptions"><span class="Identifier">TGlobalOptions</span></a>
-</pre></dt>
+  </pre></dt>
   <dd>
     
     
@@ -449,9 +421,6 @@
 </div>
 <div id="PackedDecoder">
   <dt><pre><a href="ic.html#PackedDecoder"><span class="Identifier">PackedDecoder</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">lastModule</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">lastLit</span><span class="Other">:</span> <a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a>
-  <span class="Identifier">lastFile</span><span class="Other">:</span> <a href="../lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a>
   <span class="Identifier">config</span><span class="Operator">*</span><span class="Other">:</span> <a href="../options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a>
   <span class="Identifier">cache</span><span class="Operator">*</span><span class="Other">:</span> <a href="../idents.html#IdentCache"><span class="Identifier">IdentCache</span></a>
 </pre></dt>
@@ -485,10 +454,7 @@
 </div>
 <div id="PackedModule">
   <dt><pre><a href="ic.html#PackedModule"><span class="Identifier">PackedModule</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">definedSymbols</span><span class="Other">:</span> <span class="Identifier">string</span>
-  <span class="Identifier">moduleFlags</span><span class="Other">:</span> <a href="../ast.html#TSymFlags"><span class="Identifier">TSymFlags</span></a>
   <span class="Identifier">includes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Other">(</span><a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">]</span>
-  <span class="Identifier">imports</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="bitabs.html#LitId"><span class="Identifier">LitId</span></a><span class="Other">]</span>
   <span class="Identifier">toReplay</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a>
   <span class="Identifier">topLevel</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a>
   <span class="Identifier">bodies</span><span class="Operator">*</span><span class="Other">:</span> <a href="packed_ast.html#PackedTree"><span class="Identifier">PackedTree</span></a>
@@ -508,7 +474,6 @@
   <span class="Identifier">types</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#PackedType"><span class="Identifier">PackedType</span></a><span class="Other">]</span>
   <span class="Identifier">strings</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#BiTable"><span class="Identifier">BiTable</span></a><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span>
   <span class="Identifier">numbers</span><span class="Operator">*</span><span class="Other">:</span> <a href="bitabs.html#BiTable"><span class="Identifier">BiTable</span></a><span class="Other">[</span><span class="Identifier">BiggestInt</span><span class="Other">]</span>
-  <span class="Identifier">cfg</span><span class="Other">:</span> <a href="ic.html#PackedConfig"><span class="Identifier">PackedConfig</span></a>
 </pre></dt>
   <dd>
     
@@ -530,10 +495,7 @@
 </div>
 <div id="RodIter">
   <dt><pre><a href="ic.html#RodIter"><span class="Identifier">RodIter</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">decoder</span><span class="Other">:</span> <a href="ic.html#PackedDecoder"><span class="Identifier">PackedDecoder</span></a>
-  <span class="Identifier">values</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="packed_ast.html#PackedItemId"><span class="Identifier">PackedItemId</span></a><span class="Other">]</span>
-  <span class="Identifier">i</span><span class="Other">,</span> <span class="Identifier">module</span><span class="Other">:</span> <span class="Identifier">int</span>
-</pre></dt>
+  </pre></dt>
   <dd>
     
     
@@ -1258,7 +1220,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-30 01:13:05 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-02-08 01:19:06 UTC</small>
       </div>
     </div>
   </div>

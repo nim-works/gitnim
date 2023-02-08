@@ -60,15 +60,7 @@
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
       <li><a class="reference" href="#Certificate" title="Certificate = string">Certificate</a></li>
-<li><a class="reference" href="#IpAddress" title="IpAddress = object
-  case family*: IpAddressFamily ## the type of the IP address (IPv4 or IPv6)
-  of IpAddressFamily.IPv6:
-      address_v6*: array[0 .. 15, uint8] ## Contains the IP address in bytes in
-                                         ## case of IPv6
-    
-  of IpAddressFamily.IPv4:
-      address_v4*: array[0 .. 3, uint8] ## Contains the IP address in bytes in
-                                        ## case of IPv4">IpAddress</a></li>
+<li><a class="reference" href="#IpAddress" title="IpAddress = object">IpAddress</a></li>
 <li><a class="reference" href="#IpAddressFamily" title="IpAddressFamily {.pure.} = enum
   IPv6,                     ## IPv6 address
   IPv4                       ## IPv4 address">IpAddressFamily</a></li>
@@ -80,32 +72,12 @@
 <li><a class="reference" href="#Socket" title="Socket = ref SocketImpl">Socket</a></li>
 <li><a class="reference" href="#SocketFlag" title="SocketFlag {.pure.} = enum
   Peek, SafeDisconn          ## Ensures disconnection exceptions (ECONNRESET, EPIPE etc) are not thrown.">SocketFlag</a></li>
-<li><a class="reference" href="#SocketImpl" title="SocketImpl = object
-  fd: SocketHandle
-  isBuffered: bool
-  buffer: array[0 .. BufferSize, char]
-  currPos: int
-  bufLen: int
-  when defineSsl:
-      isSsl: bool
-      sslHandle: SslPtr
-      sslContext: SslContext
-      sslNoHandshake: bool
-      sslHasPeekChar: bool
-      sslPeekChar: char
-      sslNoShutdown: bool
-
-  lastError: OSErrorCode     ## stores the last error on this socket
-  domain: Domain
-  sockType: SockType
-  protocol: Protocol">SocketImpl</a></li>
+<li><a class="reference" href="#SocketImpl" title="SocketImpl = object">SocketImpl</a></li>
 <li><a class="reference" href="#SslAcceptResult" title="SslAcceptResult = enum
   AcceptNoClient = 0, AcceptNoHandshake, AcceptSuccess">SslAcceptResult</a></li>
 <li><a class="reference" href="#SslClientGetPskFunc" title="SslClientGetPskFunc = proc (hint: string): tuple[identity: string, psk: string]">SslClientGetPskFunc</a></li>
 <li><a class="reference" href="#SslContext" title="SslContext = ref object
-  context*: SslCtx
-  referencedData: HashSet[int]
-  extraInternal: SslContextExtraInternal">SslContext</a></li>
+  context*: SslCtx">SslContext</a></li>
 <li><a class="reference" href="#SslCVerifyMode" title="SslCVerifyMode = enum
   CVerifyNone, CVerifyPeer, CVerifyPeerUseEnvVars">SslCVerifyMode</a></li>
 <li><a class="reference" href="#SslError" title="SslError = object of CatchableError">SslError</a></li>
@@ -282,9 +254,9 @@
 <ul class="simple nested-toc-section">newContext
   <li><a class="reference" href="#newContext%2Cstring%2Cstring%2Cstring%2Cstring" title="newContext(protVersion = protSSLv23; verifyMode = CVerifyPeer; certFile = &quot;&quot;;
            keyFile = &quot;&quot;; cipherList = CiphersIntermediate; caDir = &quot;&quot;;
-           caFile = &quot;&quot;): SslContext">newContext(protVersion = protSSLv23; verifyMode = CVerifyPeer; certFile = &quot;&quot;;
+           caFile = &quot;&quot;; ciphersuites = CiphersModern): SslContext">newContext(protVersion = protSSLv23; verifyMode = CVerifyPeer; certFile = &quot;&quot;;
            keyFile = &quot;&quot;; cipherList = CiphersIntermediate; caDir = &quot;&quot;;
-           caFile = &quot;&quot;): SslContext</a></li>
+           caFile = &quot;&quot;; ciphersuites = CiphersModern): SslContext</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">newSocket
@@ -512,15 +484,6 @@
 </div>
 <div id="IpAddress">
   <dt><pre><a href="net.html#IpAddress"><span class="Identifier">IpAddress</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Keyword">case</span> <span class="Identifier">family</span><span class="Operator">*</span><span class="Other">:</span> <a href="net.html#IpAddressFamily"><span class="Identifier">IpAddressFamily</span></a> <span class="Comment">## the type of the IP address (IPv4 or IPv6)</span>
-  <span class="Keyword">of</span> <span class="Identifier">IpAddressFamily</span><span class="Other">.</span><span class="Identifier">IPv6</span><span class="Other">:</span>
-      <span class="Identifier">address_v6</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">15</span><span class="Other">,</span> <a href="system.html#uint8"><span class="Identifier">uint8</span></a><span class="Other">]</span> <span class="Comment">## Contains the IP address in bytes in</span>
-                                         <span class="Comment">## case of IPv6</span>
-    
-  <span class="Keyword">of</span> <span class="Identifier">IpAddressFamily</span><span class="Other">.</span><span class="Identifier">IPv4</span><span class="Other">:</span>
-      <span class="Identifier">address_v4</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">3</span><span class="Other">,</span> <a href="system.html#uint8"><span class="Identifier">uint8</span></a><span class="Other">]</span> <span class="Comment">## Contains the IP address in bytes in</span>
-                                        <span class="Comment">## case of IPv4</span>
-    
   </pre></dt>
   <dd>
     
@@ -588,25 +551,7 @@
 </div>
 <div id="SocketImpl">
   <dt><pre><a href="net.html#SocketImpl"><span class="Identifier">SocketImpl</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">fd</span><span class="Other">:</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a>
-  <span class="Identifier">isBuffered</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>
-  <span class="Identifier">buffer</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="Identifier">BufferSize</span><span class="Other">,</span> <a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span>
-  <span class="Identifier">currPos</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>
-  <span class="Identifier">bufLen</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>
-  <span class="Keyword">when</span> <span class="Identifier">defineSsl</span><span class="Other">:</span>
-      <span class="Identifier">isSsl</span><span class="Other">:</span> <span class="Identifier">bool</span>
-      <span class="Identifier">sslHandle</span><span class="Other">:</span> <span class="Identifier">SslPtr</span>
-      <span class="Identifier">sslContext</span><span class="Other">:</span> <span class="Identifier">SslContext</span>
-      <span class="Identifier">sslNoHandshake</span><span class="Other">:</span> <span class="Identifier">bool</span>
-      <span class="Identifier">sslHasPeekChar</span><span class="Other">:</span> <span class="Identifier">bool</span>
-      <span class="Identifier">sslPeekChar</span><span class="Other">:</span> <span class="Identifier">char</span>
-      <span class="Identifier">sslNoShutdown</span><span class="Other">:</span> <span class="Identifier">bool</span>
-
-  <span class="Identifier">lastError</span><span class="Other">:</span> <a href="oserrors.html#OSErrorCode"><span class="Identifier">OSErrorCode</span></a>     <span class="Comment">## stores the last error on this socket</span>
-  <span class="Identifier">domain</span><span class="Other">:</span> <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a>
-  <span class="Identifier">sockType</span><span class="Other">:</span> <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a>
-  <span class="Identifier">protocol</span><span class="Other">:</span> <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a>
-</pre></dt>
+  </pre></dt>
   <dd>
     
     socket type
@@ -639,8 +584,6 @@
 <div id="SslContext">
   <dt><pre><a href="net.html#SslContext"><span class="Identifier">SslContext</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
   <span class="Identifier">context</span><span class="Operator">*</span><span class="Other">:</span> <a href="openssl.html#SslCtx"><span class="Identifier">SslCtx</span></a>
-  <span class="Identifier">referencedData</span><span class="Other">:</span> <a href="sets.html#HashSet"><span class="Identifier">HashSet</span></a><span class="Other">[</span><a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span>
-  <span class="Identifier">extraInternal</span><span class="Other">:</span> <span class="Identifier">SslContextExtraInternal</span>
 </pre></dt>
   <dd>
     
@@ -1269,7 +1212,7 @@
   <div id="newContext,string,string,string,string">
   <dt><pre><span class="Keyword">proc</span> <a href="#newContext%2Cstring%2Cstring%2Cstring%2Cstring"><span class="Identifier">newContext</span></a><span class="Other">(</span><span class="Identifier">protVersion</span> <span class="Other">=</span> <span class="Identifier">protSSLv23</span><span class="Other">;</span> <span class="Identifier">verifyMode</span> <span class="Other">=</span> <span class="Identifier">CVerifyPeer</span><span class="Other">;</span>
                 <span class="Identifier">certFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">keyFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">cipherList</span> <span class="Other">=</span> <span class="Identifier">CiphersIntermediate</span><span class="Other">;</span>
-                <span class="Identifier">caDir</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">caFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a> {.
+                <span class="Identifier">caDir</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">caFile</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">ciphersuites</span> <span class="Other">=</span> <span class="Identifier">CiphersModern</span><span class="Other">)</span><span class="Other">:</span> <a href="net.html#SslContext"><span class="Identifier">SslContext</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">SslError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -1865,7 +1808,7 @@ Only the <tt class="docutils literal"><span class="pre"><span class="Identifier"
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-30 01:12:18 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-02-08 01:18:18 UTC</small>
       </div>
     </div>
   </div>

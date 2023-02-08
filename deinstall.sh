@@ -132,7 +132,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/magicsys.nim
     rm -f $nimbleDir/compiler/main.nim
     rm -f $nimbleDir/compiler/mapping.txt
-    rm -f $nimbleDir/compiler/md5_old.nim
     rm -f $nimbleDir/compiler/modulegraphs.nim
     rm -f $nimbleDir/compiler/modulepaths.nim
     rm -f $nimbleDir/compiler/modules.nim

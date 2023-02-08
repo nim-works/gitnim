@@ -65,9 +65,7 @@
 <li><a class="reference" href="#ref" title="ref[T] {.magic: Pointer.}">`ref`</a></li>
 <li><a class="reference" href="#static" title="static[T] {.magic: &quot;Static&quot;.}">`static`</a></li>
 <li><a class="reference" href="#type" title="type[T] {.magic: &quot;Type&quot;.}">`type`</a></li>
-<li><a class="reference" href="#AllocStats" title="AllocStats = object
-  allocCount: int
-  deallocCount: int">AllocStats</a></li>
+<li><a class="reference" href="#AllocStats" title="AllocStats = object">AllocStats</a></li>
 <li><a class="reference" href="#any" title="any {.deprecated: &quot;Deprecated since v1.5; Use auto instead.&quot;.} = distinct auto">any</a></li>
 <li><a class="reference" href="#array" title="array[I; T] {.magic: &quot;Array&quot;.}">array</a></li>
 <li><a class="reference" href="#auto" title="auto {.magic: Expr.}">auto</a></li>
@@ -85,23 +83,12 @@
   parent*: ref Exception     ## Parent exception (can be used as a stack).
   name*: cstring             ## The exception's name is its Nim identifier.
                              ## This field is filled automatically in the
-                             ## `raise` statement.
-  msg* {.exportc: &quot;message&quot;.}: string ## The exception's message. Not
-                                      ## providing an exception message
-                                      ## is bad style.
-  when defined(js):
-      trace*: string
-
-  else:
-      trace*: seq[StackTraceEntry]
-
-  up: ref Exception">Exception</a></li>
+                             ## `raise` statement.">Exception</a></li>
 <li><a class="reference" href="#float" title="float {.magic: Float.}">float</a></li>
 <li><a class="reference" href="#float32" title="float32 {.magic: Float32.}">float32</a></li>
 <li><a class="reference" href="#float64" title="float64 {.magic: Float.}">float64</a></li>
 <li><a class="reference" href="#ForeignCell" title="ForeignCell = object
-  data*: pointer
-  owner: ptr GcHeap">ForeignCell</a></li>
+  data*: pointer">ForeignCell</a></li>
 <li><a class="reference" href="#ForLoopStmt" title="ForLoopStmt {.compilerproc.} = object">ForLoopStmt</a></li>
 <li><a class="reference" href="#GC_Strategy" title="GC_Strategy = enum
   gcThroughput,             ## optimize for throughput
@@ -147,18 +134,7 @@
 <li><a class="reference" href="#StackTraceEntry" title="StackTraceEntry = object
   procname*: cstring         ## Name of the proc that is currently executing.
   line*: int                 ## Line number of the proc that is currently executing.
-  filename*: cstring         ## Filename of the proc that is currently executing.
-  when NimStackTraceMsgs:
-      frameMsg*: string ## When a stacktrace is generated in a given frame and
-                        ## rendered at a later time, we should ensure the stacktrace
-                        ## data isn't invalidated; any pointer into PFrame is
-                        ## subject to being invalidated so shouldn't be stored.
-    
-  when defined(nimStackTraceOverride):
-      programCounter*: uint ## Program counter - will be used to get the rest of the info,
-                            ## when `$` is called on this type. We can't use
-                            ## &quot;cuintptr_t&quot; in here.
-      procnameStr*, filenameStr*: string ## GC-ed alternatives to &quot;procname&quot; and &quot;filename&quot;">StackTraceEntry</a></li>
+  filename*: cstring         ## Filename of the proc that is currently executing.">StackTraceEntry</a></li>
 <li><a class="reference" href="#string" title="string {.magic: String.}">string</a></li>
 <li><a class="reference" href="#TFrame" title="TFrame {.importc, nodecl, final.} = object
   prev*: PFrame              ## Previous frame; used for chaining the call stack.
@@ -166,9 +142,7 @@
   line*: int                 ## Line number of the proc that is currently executing.
   filename*: cstring         ## Filename of the proc that is currently executing.
   len*: int16                ## Length of the inspectable slots.
-  calldepth*: int16          ## Used for max call depth checking.
-  when NimStackTraceMsgs:
-      frameMsgLen*: int      ## end position in frameMsgBuf for this frame.">TFrame</a></li>
+  calldepth*: int16          ## Used for max call depth checking.">TFrame</a></li>
 <li><a class="reference" href="#typed" title="typed {.magic: Stmt.}">typed</a></li>
 <li><a class="reference" href="#typedesc" title="typedesc {.magic: TypeDesc.}">typedesc</a></li>
 <li><a class="reference" href="#TypeOfMode" title="TypeOfMode = enum
@@ -1713,9 +1687,7 @@
   <dl class="item">
     <div id="AllocStats">
   <dt><pre><a href="system.html#AllocStats"><span class="Identifier">AllocStats</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">allocCount</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>
-  <span class="Identifier">deallocCount</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>
-</pre></dt>
+  </pre></dt>
   <dd>
     
     
@@ -1847,17 +1819,7 @@ Abstract base class for all exceptions that Nim's runtime raises but that are st
   <span class="Identifier">name</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a>             <span class="Comment">## The exception's name is its Nim identifier.</span>
                              <span class="Comment">## This field is filled automatically in the</span>
                              <span class="Comment">## `raise` statement.</span>
-  <span class="Identifier">msg</span><span class="Operator">*</span> {.<span class="Identifier">exportc</span><span class="Other">:</span> <span class="StringLit">&quot;message&quot;</span>.}<span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Comment">## The exception's message. Not</span>
-                                      <span class="Comment">## providing an exception message</span>
-                                      <span class="Comment">## is bad style.</span>
-  <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">js</span><span class="Other">)</span><span class="Other">:</span>
-      <span class="Identifier">trace</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
-
-  <span class="Keyword">else</span><span class="Other">:</span>
-      <span class="Identifier">trace</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">StackTraceEntry</span><span class="Other">]</span>
-
-  <span class="Identifier">up</span><span class="Other">:</span> <span class="Keyword">ref</span> <a href="system.html#Exception"><span class="Identifier">Exception</span></a>
-</pre></dt>
+  </pre></dt>
   <dd>
     
     <p>
@@ -1902,7 +1864,6 @@ Base exception class.</p>
 <div id="ForeignCell">
   <dt><pre><a href="system.html#ForeignCell"><span class="Identifier">ForeignCell</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">data</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a>
-  <span class="Identifier">owner</span><span class="Other">:</span> <span class="Keyword">ptr</span> <span class="Identifier">GcHeap</span>
 </pre></dt>
   <dd>
     
@@ -2284,18 +2245,6 @@ Base effect class.</p>
   <span class="Identifier">procname</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a>         <span class="Comment">## Name of the proc that is currently executing.</span>
   <span class="Identifier">line</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                 <span class="Comment">## Line number of the proc that is currently executing.</span>
   <span class="Identifier">filename</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a>         <span class="Comment">## Filename of the proc that is currently executing.</span>
-  <span class="Keyword">when</span> <span class="Identifier">NimStackTraceMsgs</span><span class="Other">:</span>
-      <span class="Identifier">frameMsg</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Comment">## When a stacktrace is generated in a given frame and</span>
-                        <span class="Comment">## rendered at a later time, we should ensure the stacktrace</span>
-                        <span class="Comment">## data isn't invalidated; any pointer into PFrame is</span>
-                        <span class="Comment">## subject to being invalidated so shouldn't be stored.</span>
-    
-  <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimStackTraceOverride</span><span class="Other">)</span><span class="Other">:</span>
-      <span class="Identifier">programCounter</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint</span> <span class="Comment">## Program counter - will be used to get the rest of the info,</span>
-                            <span class="Comment">## when `$` is called on this type. We can't use</span>
-                            <span class="Comment">## &quot;cuintptr_t&quot; in here.</span>
-      <span class="Identifier">procnameStr</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">filenameStr</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Comment">## GC-ed alternatives to &quot;procname&quot; and &quot;filename&quot;</span>
-    
   </pre></dt>
   <dd>
     
@@ -2335,9 +2284,6 @@ Base effect class.</p>
   <span class="Identifier">filename</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a>         <span class="Comment">## Filename of the proc that is currently executing.</span>
   <span class="Identifier">len</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int16"><span class="Identifier">int16</span></a>                <span class="Comment">## Length of the inspectable slots.</span>
   <span class="Identifier">calldepth</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int16"><span class="Identifier">int16</span></a>          <span class="Comment">## Used for max call depth checking.</span>
-  <span class="Keyword">when</span> <span class="Identifier">NimStackTraceMsgs</span><span class="Other">:</span>
-      <span class="Identifier">frameMsgLen</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>      <span class="Comment">## end position in frameMsgBuf for this frame.</span>
-    
   </pre></dt>
   <dd>
     
@@ -10998,7 +10944,7 @@ Only use this if you know what you are doing.</div>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-30 01:11:54 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-02-08 01:17:54 UTC</small>
       </div>
     </div>
   </div>

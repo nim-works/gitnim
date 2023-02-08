@@ -62,8 +62,6 @@
   converters*: seq[LazySym]
   patterns*: seq[LazySym]
   pureEnums*: seq[LazySym]
-  interf: TStrTable
-  interfHidden: TStrTable
   uniqueName*: Rope">Iface</a></li>
 <li><a class="reference" href="#LazyInstantiation" title="LazyInstantiation = object
   module*: int
@@ -91,7 +89,6 @@
   deps*: IntSet
   importDeps*: Table[FileIndex, seq[FileIndex]]
   suggestMode*: bool
-  invalidTransitiveClosure: bool
   inclToMod*: Table[FileIndex, FileIndex]
   importStack*: seq[FileIndex]
   backend*: RootRef
@@ -130,12 +127,7 @@
       nimcall.}
   idgen*: IdGenerator
   operators*: Operators">ModuleGraph</a></li>
-<li><a class="reference" href="#ModuleIter" title="ModuleIter = object
-  fromRod: bool
-  modIndex: int
-  ti: TIdentIter
-  rodIt: RodIter
-  importHidden: bool">ModuleIter</a></li>
+<li><a class="reference" href="#ModuleIter" title="ModuleIter = object">ModuleIter</a></li>
 <li><a class="reference" href="#Operators" title="Operators = object
   opNot*, opContains*, opLe*, opLt*, opAnd*, opOr*, opIsNil*, opEq*: PSym
   opAdd*, opSub*, opMul*, opDiv*, opLen*: PSym">Operators</a></li>
@@ -452,7 +444,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="md5_old.html">md5_old</a>, <a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="astalgo.html">astalgo</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="idents.html">idents</a>, <a class="reference external" href="btrees.html">btrees</a>, <a class="reference external" href="ropes.html">ropes</a>, <a class="reference external" href="msgs.html">msgs</a>, <a class="reference external" href="pathutils.html">pathutils</a>, <a class="reference external" href="packages.html">packages</a>, <a class="reference external" href="ic/packed_ast.html">ic/packed_ast</a>, <a class="reference external" href="ic/ic.html">ic/ic</a>
+    <a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="astalgo.html">astalgo</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="idents.html">idents</a>, <a class="reference external" href="btrees.html">btrees</a>, <a class="reference external" href="ropes.html">ropes</a>, <a class="reference external" href="msgs.html">msgs</a>, <a class="reference external" href="pathutils.html">pathutils</a>, <a class="reference external" href="packages.html">packages</a>, <a class="reference external" href="ic/packed_ast.html">ic/packed_ast</a>, <a class="reference external" href="ic/ic.html">ic/ic</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -477,8 +469,6 @@
   <span class="Identifier">converters</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="modulegraphs.html#LazySym"><span class="Identifier">LazySym</span></a><span class="Other">]</span>
   <span class="Identifier">patterns</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="modulegraphs.html#LazySym"><span class="Identifier">LazySym</span></a><span class="Other">]</span>
   <span class="Identifier">pureEnums</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="modulegraphs.html#LazySym"><span class="Identifier">LazySym</span></a><span class="Other">]</span>
-  <span class="Identifier">interf</span><span class="Other">:</span> <a href="ast.html#TStrTable"><span class="Identifier">TStrTable</span></a>
-  <span class="Identifier">interfHidden</span><span class="Other">:</span> <a href="ast.html#TStrTable"><span class="Identifier">TStrTable</span></a>
   <span class="Identifier">uniqueName</span><span class="Operator">*</span><span class="Other">:</span> <a href="ropes.html#Rope"><span class="Identifier">Rope</span></a>
 </pre></dt>
   <dd>
@@ -546,7 +536,6 @@
   <span class="Identifier">deps</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">IntSet</span>
   <span class="Identifier">importDeps</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">]</span><span class="Other">]</span>
   <span class="Identifier">suggestMode</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
-  <span class="Identifier">invalidTransitiveClosure</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">inclToMod</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Table</span><span class="Other">[</span><a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">,</span> <a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">]</span>
   <span class="Identifier">importStack</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a><span class="Other">]</span>
   <span class="Identifier">backend</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">RootRef</span>
@@ -596,12 +585,7 @@
 </div>
 <div id="ModuleIter">
   <dt><pre><a href="modulegraphs.html#ModuleIter"><span class="Identifier">ModuleIter</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">fromRod</span><span class="Other">:</span> <span class="Identifier">bool</span>
-  <span class="Identifier">modIndex</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">ti</span><span class="Other">:</span> <a href="astalgo.html#TIdentIter"><span class="Identifier">TIdentIter</span></a>
-  <span class="Identifier">rodIt</span><span class="Other">:</span> <a href="ic/ic.html#RodIter"><span class="Identifier">RodIter</span></a>
-  <span class="Identifier">importHidden</span><span class="Other">:</span> <span class="Identifier">bool</span>
-</pre></dt>
+  </pre></dt>
   <dd>
     
     
@@ -634,7 +618,7 @@
   </dd>
 </div>
 <div id="SigHash">
-  <dt><pre><a href="modulegraphs.html#SigHash"><span class="Identifier">SigHash</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <a href="md5_old.html#MD5Digest"><span class="Identifier">MD5Digest</span></a></pre></dt>
+  <dt><pre><a href="modulegraphs.html#SigHash"><span class="Identifier">SigHash</span></a> <span class="Other">=</span> <span class="Keyword">distinct</span> <span class="Identifier">MD5Digest</span></pre></dt>
   <dd>
     
     
@@ -1636,7 +1620,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-30 01:13:05 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-02-08 01:19:06 UTC</small>
       </div>
     </div>
   </div>

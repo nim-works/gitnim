@@ -57,7 +57,7 @@
       <li><a class="reference" href="#TRenderFlag" title="TRenderFlag = enum
   renderNone, renderNoBody, renderNoComments, renderDocComments,
   renderNoPragmas, renderIds, renderNoProcDefs, renderSyms,
-  renderRunnableExamples, renderIr, renderExpandUsing">TRenderFlag</a></li>
+  renderRunnableExamples, renderIr, renderNonExportedFields, renderExpandUsing">TRenderFlag</a></li>
 <li><a class="reference" href="#TRenderFlags" title="TRenderFlags = set[TRenderFlag]">TRenderFlags</a></li>
 <li><a class="reference" href="#TRenderTok" title="TRenderTok = object
   kind*: TokType
@@ -67,24 +67,15 @@
 <li><a class="reference" href="#TSrcGen" title="TSrcGen = object
   indent*: int
   lineLen*: int
-  col: int
   pos*: int
   idx*: int
   tokens*: TRenderTokSeq
   buf*: string
   pendingNL*: int
-  pendingWhitespace: int
   comStack*: seq[PNode]
   flags*: TRenderFlags
-  inGenericParams: bool
-  checkAnon: bool
-  inPragma: int
-  when defined(nimpretty):
-      pendingNewlineCount: int
-
   fid*: FileIndex
-  config*: ConfigRef
-  mangler: seq[PSym]">TSrcGen</a></li>
+  config*: ConfigRef">TSrcGen</a></li>
 
     </ul>
   </details>
@@ -159,7 +150,7 @@
   <dt><pre><a href="renderer.html#TRenderFlag"><span class="Identifier">TRenderFlag</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">renderNone</span><span class="Other">,</span> <span class="Identifier">renderNoBody</span><span class="Other">,</span> <span class="Identifier">renderNoComments</span><span class="Other">,</span> <span class="Identifier">renderDocComments</span><span class="Other">,</span>
   <span class="Identifier">renderNoPragmas</span><span class="Other">,</span> <span class="Identifier">renderIds</span><span class="Other">,</span> <span class="Identifier">renderNoProcDefs</span><span class="Other">,</span> <span class="Identifier">renderSyms</span><span class="Other">,</span>
-  <span class="Identifier">renderRunnableExamples</span><span class="Other">,</span> <span class="Identifier">renderIr</span><span class="Other">,</span> <span class="Identifier">renderExpandUsing</span></pre></dt>
+  <span class="Identifier">renderRunnableExamples</span><span class="Other">,</span> <span class="Identifier">renderIr</span><span class="Other">,</span> <span class="Identifier">renderNonExportedFields</span><span class="Other">,</span> <span class="Identifier">renderExpandUsing</span></pre></dt>
   <dd>
     
     
@@ -173,8 +164,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L27" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L27" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L28" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L28" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -187,8 +178,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L28" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L28" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L29" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L29" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -197,8 +188,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L33" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L33" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L34" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L34" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -206,30 +197,21 @@
   <dt><pre><a href="renderer.html#TSrcGen"><span class="Identifier">TSrcGen</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">indent</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">lineLen</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">col</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">pos</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">idx</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">tokens</span><span class="Operator">*</span><span class="Other">:</span> <a href="renderer.html#TRenderTokSeq"><span class="Identifier">TRenderTokSeq</span></a>
   <span class="Identifier">buf</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
   <span class="Identifier">pendingNL</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">pendingWhitespace</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">comStack</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">]</span>
   <span class="Identifier">flags</span><span class="Operator">*</span><span class="Other">:</span> <a href="renderer.html#TRenderFlags"><span class="Identifier">TRenderFlags</span></a>
-  <span class="Identifier">inGenericParams</span><span class="Other">:</span> <span class="Identifier">bool</span>
-  <span class="Identifier">checkAnon</span><span class="Other">:</span> <span class="Identifier">bool</span>
-  <span class="Identifier">inPragma</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">nimpretty</span><span class="Other">)</span><span class="Other">:</span>
-      <span class="Identifier">pendingNewlineCount</span><span class="Other">:</span> <span class="Identifier">int</span>
-
   <span class="Identifier">fid</span><span class="Operator">*</span><span class="Other">:</span> <a href="lineinfos.html#FileIndex"><span class="Identifier">FileIndex</span></a>
   <span class="Identifier">config</span><span class="Operator">*</span><span class="Other">:</span> <a href="options.html#ConfigRef"><span class="Identifier">ConfigRef</span></a>
-  <span class="Identifier">mangler</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">]</span>
 </pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L34" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L34" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L35" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L35" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -246,8 +228,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1782" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1782" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1785" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1785" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -260,8 +242,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L970" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L970" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L971" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L971" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -274,8 +256,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1811" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1811" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1814" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1814" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -287,8 +269,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1821" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1821" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1824" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1824" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -301,8 +283,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1807" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1807" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1810" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1810" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -314,8 +296,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L70" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L70" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L71" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L71" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -330,8 +312,8 @@
     <p>Returns the definition name of the symbol.</p>
 <p>If noQuotes is false the symbol may be returned in backticks. This will happen if the name happens to be a keyword or the first character is not part of the SymStartChars set.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L75" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L75" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L76" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L76" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -347,8 +329,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1784" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1784" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1787" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1787" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -361,8 +343,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1769" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1769" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/renderer.nim#L1772" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/renderer.nim#L1772" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -378,7 +360,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-30 01:13:04 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-02-08 01:19:05 UTC</small>
       </div>
     </div>
   </div>

@@ -934,8 +934,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 "$nimbleDir/compiler/main.nim"
   cp "compiler/mapping.txt" "$nimbleDir/compiler/mapping.txt"
   chmod 644 "$nimbleDir/compiler/mapping.txt"
-  cp "compiler/md5_old.nim" "$nimbleDir/compiler/md5_old.nim"
-  chmod 644 "$nimbleDir/compiler/md5_old.nim"
   cp "compiler/modulegraphs.nim" "$nimbleDir/compiler/modulegraphs.nim"
   chmod 644 "$nimbleDir/compiler/modulegraphs.nim"
   cp "compiler/modulepaths.nim" "$nimbleDir/compiler/modulepaths.nim"

@@ -68,7 +68,6 @@
   listingCounter*: int
   tocPart*: seq[PRstNode]
   hasToc*: bool
-  theIndex: string
   findFile*: FindFileHandler
   msgHandler*: MsgHandler
   outDir*: string            ## output directory, initialized by docgen.nim
@@ -76,17 +75,10 @@
   filenames*: RstFileTable
   filename*: string          ## source Nim or Rst file
   meta*: array[MetaEnum, string]
-  currentSection: string ## \
-                         ## Stores the empty string or the last headline/overline found in the rst
-                         ## document, so it can be used as a prettier name for term index generation.
-  seenIndexTerms: Table[string, int] ## \
-                                     ## Keeps count of same text index terms to generate different identifiers
-                                     ## for hyperlinks. See renderIndexTerm proc for details.
   id*: int                   ## A counter useful for generating IDs.
   onTestSnippet*: proc (d: var RstGenerator; filename, cmd: string; status: int;
                         content: string) {.gcsafe.}
-  escMode*: EscapeMode
-  curQuotationDepth: int">RstGenerator</a></li>
+  escMode*: EscapeMode">RstGenerator</a></li>
 
     </ul>
   </details>
@@ -283,7 +275,6 @@ Contains the index sequences for doc types.</p>
   <span class="Identifier">listingCounter</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>
   <span class="Identifier">tocPart</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#seq"><span class="Identifier">seq</span></a><span class="Other">[</span><a href="rstast.html#PRstNode"><span class="Identifier">PRstNode</span></a><span class="Other">]</span>
   <span class="Identifier">hasToc</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#bool"><span class="Identifier">bool</span></a>
-  <span class="Identifier">theIndex</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
   <span class="Identifier">findFile</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#FindFileHandler"><span class="Identifier">FindFileHandler</span></a>
   <span class="Identifier">msgHandler</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#MsgHandler"><span class="Identifier">MsgHandler</span></a>
   <span class="Identifier">outDir</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>            <span class="Comment">## output directory, initialized by docgen.nim</span>
@@ -291,17 +282,10 @@ Contains the index sequences for doc types.</p>
   <span class="Identifier">filenames</span><span class="Operator">*</span><span class="Other">:</span> <a href="rst.html#RstFileTable"><span class="Identifier">RstFileTable</span></a>
   <span class="Identifier">filename</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>          <span class="Comment">## source Nim or Rst file</span>
   <span class="Identifier">meta</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="Identifier">MetaEnum</span><span class="Other">,</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span>
-  <span class="Identifier">currentSection</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a> <span class="Comment">## \</span>
-                         <span class="Comment">## Stores the empty string or the last headline/overline found in the rst</span>
-                         <span class="Comment">## document, so it can be used as a prettier name for term index generation.</span>
-  <span class="Identifier">seenIndexTerms</span><span class="Other">:</span> <a href="tables.html#Table"><span class="Identifier">Table</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">,</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">]</span> <span class="Comment">## \</span>
-                                     <span class="Comment">## Keeps count of same text index terms to generate different identifiers</span>
-                                     <span class="Comment">## for hyperlinks. See renderIndexTerm proc for details.</span>
   <span class="Identifier">id</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                   <span class="Comment">## A counter useful for generating IDs.</span>
   <span class="Identifier">onTestSnippet</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">d</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="rstgen.html#RstGenerator"><span class="Identifier">RstGenerator</span></a><span class="Other">;</span> <span class="Identifier">filename</span><span class="Other">,</span> <span class="Identifier">cmd</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">;</span> <span class="Identifier">status</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a><span class="Other">;</span>
                         <span class="Identifier">content</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span></span>.}
   <span class="Identifier">escMode</span><span class="Operator">*</span><span class="Other">:</span> <a href="rstgen.html#EscapeMode"><span class="Identifier">EscapeMode</span></a>
-  <span class="Identifier">curQuotationDepth</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>
 </pre></dt>
   <dd>
     
@@ -670,7 +654,7 @@ Contains the index sequences for doc types.</p>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-30 01:12:56 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-02-08 01:18:57 UTC</small>
       </div>
     </div>
   </div>

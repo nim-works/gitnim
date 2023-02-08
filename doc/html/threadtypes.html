@@ -51,39 +51,14 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#CpuSet" title="CpuSet {.importc: &quot;cpu_set_t&quot;, header: &quot;#define _GNU_SOURCE\n#include &lt;sched.h&gt;&quot;.} = object
-  when defined(linux) and defined(amd64):
-      abi: array[1024 div (8 * sizeof(culong)), culong]">CpuSet</a></li>
-<li><a class="reference" href="#GcThread" title="GcThread {.pure, inheritable.} = object
-  when emulatedThreadVars:
-      tls*: ThreadLocalStorage
-
-  else:
-      nil
-
-  when hasSharedHeap:
-      next*, prev*: PGcThread
-      stackBottom*, stackTop*: pointer
-      stackSize*: int
-
-  else:
-      nil">GcThread</a></li>
+      <li><a class="reference" href="#CpuSet" title="CpuSet {.importc: &quot;cpu_set_t&quot;, header: &quot;#define _GNU_SOURCE\n#include &lt;sched.h&gt;&quot;.} = object">CpuSet</a></li>
+<li><a class="reference" href="#GcThread" title="GcThread {.pure, inheritable.} = object">GcThread</a></li>
 <li><a class="reference" href="#PGcThread" title="PGcThread = ptr GcThread">PGcThread</a></li>
-<li><a class="reference" href="#Pthread_attr" title="Pthread_attr {.importc: &quot;pthread_attr_t&quot;, header: &quot;&lt;sys/types.h&gt;&quot;.} = object
-  abi: array[56 div 8, clong]">Pthread_attr</a></li>
+<li><a class="reference" href="#Pthread_attr" title="Pthread_attr {.importc: &quot;pthread_attr_t&quot;, header: &quot;&lt;sys/types.h&gt;&quot;.} = object">Pthread_attr</a></li>
 <li><a class="reference" href="#SysThread" title="SysThread {.importc: &quot;pthread_t&quot;, header: &quot;&lt;sys/types.h&gt;&quot;.} = distinct culong">SysThread</a></li>
 <li><a class="reference" href="#Thread" title="Thread[TArg] = object
   core*: PGcThread
-  sys*: SysThread
-  when TArg is void:
-      dataFn*: proc () {.nimcall, gcsafe.}
-
-  else:
-      dataFn*: proc (m: TArg) {.nimcall, gcsafe.}
-      data*: TArg
-
-  when hasAllocStack:
-      rawStack*: pointer">Thread</a></li>
+  sys*: SysThread">Thread</a></li>
 <li><a class="reference" href="#ThreadLocalStorage" title="ThreadLocalStorage = array[0 .. (nimTlsSize div 8), float]">ThreadLocalStorage</a></li>
 <li><a class="reference" href="#Timespec" title="Timespec {.importc: &quot;struct timespec&quot;, header: &quot;&lt;time.h&gt;&quot;.} = object
   tv_sec*: Time
@@ -174,9 +149,6 @@
   <dl class="item">
     <div id="CpuSet">
   <dt><pre><a href="threadtypes.html#CpuSet"><span class="Identifier">CpuSet</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;cpu_set_t&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;#define _GNU_SOURCE\n#include &lt;sched.h&gt;&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">linux</span><span class="Other">)</span> <span class="Keyword">and</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">amd64</span><span class="Other">)</span><span class="Other">:</span>
-      <span class="Identifier">abi</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="DecNumber">1024</span> <span class="Keyword">div</span> <span class="Other">(</span><span class="DecNumber">8</span> <span class="Operator">*</span> <span class="Identifier">sizeof</span><span class="Other">(</span><span class="Identifier">culong</span><span class="Other">)</span><span class="Other">)</span><span class="Other">,</span> <span class="Identifier">culong</span><span class="Other">]</span>
-
   </pre></dt>
   <dd>
     
@@ -188,20 +160,6 @@
 </div>
 <div id="GcThread">
   <dt><pre><a href="threadtypes.html#GcThread"><span class="Identifier">GcThread</span></a> {.<span class="Identifier">pure</span><span class="Other">,</span> <span class="Identifier">inheritable</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Keyword">when</span> <span class="Identifier">emulatedThreadVars</span><span class="Other">:</span>
-      <span class="Identifier">tls</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">ThreadLocalStorage</span>
-
-  <span class="Keyword">else</span><span class="Other">:</span>
-      <span class="Keyword">nil</span>
-
-  <span class="Keyword">when</span> <span class="Identifier">hasSharedHeap</span><span class="Other">:</span>
-      <span class="Identifier">next</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">prev</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">PGcThread</span>
-      <span class="Identifier">stackBottom</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">stackTop</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">pointer</span>
-      <span class="Identifier">stackSize</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-
-  <span class="Keyword">else</span><span class="Other">:</span>
-      <span class="Keyword">nil</span>
-
   </pre></dt>
   <dd>
     
@@ -223,8 +181,7 @@
 </div>
 <div id="Pthread_attr">
   <dt><pre><a href="threadtypes.html#Pthread_attr"><span class="Identifier">Pthread_attr</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;pthread_attr_t&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;&lt;sys/types.h&gt;&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">abi</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">56</span> <span class="Keyword">div</span> <span class="DecNumber">8</span><span class="Other">,</span> <a href="ctypes.html#clong"><span class="Identifier">clong</span></a><span class="Other">]</span>
-</pre></dt>
+  </pre></dt>
   <dd>
     
     
@@ -247,17 +204,7 @@
   <dt><pre><a href="threadtypes.html#Thread"><span class="Identifier">Thread</span></a><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">core</span><span class="Operator">*</span><span class="Other">:</span> <a href="threadtypes.html#PGcThread"><span class="Identifier">PGcThread</span></a>
   <span class="Identifier">sys</span><span class="Operator">*</span><span class="Other">:</span> <a href="threadtypes.html#SysThread"><span class="Identifier">SysThread</span></a>
-  <span class="Keyword">when</span> <span class="Identifier">TArg</span> <span class="Keyword">is</span> <span class="Identifier">void</span><span class="Other">:</span>
-      <span class="Identifier">dataFn</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span> {.<span class="Identifier">nimcall</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span></span>.}
-
-  <span class="Keyword">else</span><span class="Other">:</span>
-      <span class="Identifier">dataFn</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">m</span><span class="Other">:</span> <span class="Identifier">TArg</span><span class="Other">)</span> {.<span class="Identifier">nimcall</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span></span>.}
-      <span class="Identifier">data</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">TArg</span>
-
-  <span class="Keyword">when</span> <span class="Identifier">hasAllocStack</span><span class="Other">:</span>
-      <span class="Identifier">rawStack</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">pointer</span>
-
-  </pre></dt>
+</pre></dt>
   <dd>
     
     
@@ -516,7 +463,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-01-30 01:12:51 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-02-08 01:18:52 UTC</small>
       </div>
     </div>
   </div>
