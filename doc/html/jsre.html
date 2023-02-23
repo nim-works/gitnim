@@ -105,7 +105,10 @@
 
 </ul>
 <ul class="simple nested-toc-section">replace
-  <li><a class="reference" href="#replace%2Ccstring%2CRegExp%2Ccstring" title="replace(pattern: cstring; self: RegExp; replacement: cstring): cstring">replace(pattern: cstring; self: RegExp; replacement: cstring): cstring</a></li>
+  <li><a class="reference" href="#replace%2Ccstring%2CRegExp%2Cproc%28varargs%5Bcstring%5D%29" title="replace(pattern: cstring; self: RegExp;
+        cb: proc (args: varargs[cstring]): cstring): cstring">replace(pattern: cstring; self: RegExp;
+        cb: proc (args: varargs[cstring]): cstring): cstring</a></li>
+<li><a class="reference" href="#replace%2Ccstring%2CRegExp%2Ccstring" title="replace(pattern: cstring; self: RegExp; replacement: cstring): cstring">replace(pattern: cstring; self: RegExp; replacement: cstring): cstring</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">split
@@ -154,6 +157,8 @@
 <span class="Identifier">assert</span> <span class="StringLit">&quot;do1ne&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">(</span><span class="Identifier">jsregex</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;do&quot;</span><span class="Operator">.</span><span class="Identifier">cstring</span><span class="Punctuation">,</span> <span class="StringLit">&quot;ne&quot;</span><span class="Operator">.</span><span class="Identifier">cstring</span><span class="Punctuation">]</span>
 <span class="Identifier">jsregex</span><span class="Operator">.</span><span class="Identifier">compile</span><span class="Punctuation">(</span><span class="RawData">r&quot;[lw]&quot;</span><span class="Punctuation">,</span> <span class="RawData">r&quot;i&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;hello world&quot;</span><span class="Operator">.</span><span class="Identifier">replace</span><span class="Punctuation">(</span><span class="Identifier">jsregex</span><span class="Punctuation">,</span><span class="StringLit">&quot;X&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;heXlo world&quot;</span>
+<span class="Identifier">jsregex</span><span class="Operator">.</span><span class="Identifier">compile</span><span class="Punctuation">(</span><span class="RawData">r&quot;([a-z])\1*&quot;</span><span class="Punctuation">,</span> <span class="RawData">r&quot;g&quot;</span><span class="Punctuation">)</span>
+<span class="Identifier">assert</span> <span class="StringLit">&quot;abbcccdddd&quot;</span><span class="Operator">.</span><span class="Identifier">replace</span><span class="Punctuation">(</span><span class="Identifier">jsregex</span><span class="Punctuation">,</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">m</span><span class="Punctuation">:</span> <span class="Identifier">varargs</span><span class="Punctuation">[</span><span class="Identifier">cstring</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">cstring</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="Operator">$</span><span class="Identifier">m</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span> <span class="Operator">&amp;</span> <span class="Operator">$</span><span class="Punctuation">(</span><span class="Identifier">m</span><span class="Operator">.</span><span class="Identifier">len</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">cstring</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;a1b2c3d4&quot;</span>
 <span class="Keyword">let</span> <span class="Identifier">digitsRegex</span><span class="Punctuation">:</span> <span class="Identifier">RegExp</span> <span class="Operator">=</span> <span class="Identifier">newRegExp</span><span class="Punctuation">(</span><span class="RawData">r&quot;\d&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;foo&quot;</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="Identifier">digitsRegex</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="Punctuation">]</span></pre></p>
     <div class="section" id="7">
@@ -197,8 +202,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L49" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L49" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L52" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L52" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -230,8 +235,8 @@
 <span class="Identifier">assert</span> <span class="Identifier">jsregex</span> <span class="Keyword">in</span> <span class="RawData">r&quot;abc&quot;</span>
 <span class="Identifier">assert</span> <span class="Identifier">jsregex</span> <span class="Keyword">notin</span> <span class="RawData">r&quot;abcd&quot;</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;xabc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span> <span class="Identifier">jsregex</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L51" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L51" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L54" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L54" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -247,8 +252,8 @@
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">jsregex</span><span class="Punctuation">:</span> <span class="Identifier">RegExp</span> <span class="Operator">=</span> <span class="Identifier">newRegExp</span><span class="Punctuation">(</span><span class="RawData">r&quot;bcd&quot;</span><span class="Punctuation">,</span> <span class="RawData">r&quot;i&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;abcd&quot;</span><span class="Operator">.</span><span class="Identifier">endsWith</span> <span class="Identifier">jsregex</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L67" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L67" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L70" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L70" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -261,8 +266,8 @@
   <dd>
     
     Executes a search for a match in its string parameter.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L43" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L43" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L46" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L46" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -275,8 +280,8 @@
   <dd>
     
     Returns an array of matches of a RegExp against given string
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L40" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L40" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L43" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L43" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -308,7 +313,19 @@
 
 </div>
 <div id="replace-procs-all">
-  <div id="replace,cstring,RegExp,cstring">
+  <div id="replace,cstring,RegExp,proc(varargs[cstring])">
+  <dt><pre><span class="Keyword">func</span> <a href="#replace%2Ccstring%2CRegExp%2Cproc%28varargs%5Bcstring%5D%29"><span class="Identifier">replace</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a><span class="Other">;</span> <span class="Identifier">self</span><span class="Other">:</span> <a href="jsre.html#RegExp"><span class="Identifier">RegExp</span></a><span class="Other">;</span>
+             <span class="Identifier">cb</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">args</span><span class="Other">:</span> <a href="system.html#varargs"><span class="Identifier">varargs</span></a><span class="Other">[</span><a href="system.html#cstring"><span class="Identifier">cstring</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a> {.<span class="Identifier">importcpp</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns a new string with some or all matches of a pattern replaced by given callback function
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L37" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L37" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+<div id="replace,cstring,RegExp,cstring">
   <dt><pre><span class="Keyword">func</span> <a href="#replace%2Ccstring%2CRegExp%2Ccstring"><span class="Identifier">replace</span></a><span class="Other">(</span><span class="Identifier">pattern</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a><span class="Other">;</span> <span class="Identifier">self</span><span class="Other">:</span> <a href="jsre.html#RegExp"><span class="Identifier">RegExp</span></a><span class="Other">;</span> <span class="Identifier">replacement</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a><span class="Other">)</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a> {.
     <span class="Identifier">importjs</span><span class="Other">:</span> <span class="StringLit">&quot;#.replace(#, #)&quot;</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -328,8 +345,8 @@
   <dd>
     
     Divides a string into an ordered list of substrings and returns the array
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L37" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L37" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L40" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L40" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -345,8 +362,8 @@
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">jsregex</span><span class="Punctuation">:</span> <span class="Identifier">RegExp</span> <span class="Operator">=</span> <span class="Identifier">newRegExp</span><span class="Punctuation">(</span><span class="RawData">r&quot;abc&quot;</span><span class="Punctuation">,</span> <span class="RawData">r&quot;i&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;abcd&quot;</span><span class="Operator">.</span><span class="Identifier">startsWith</span> <span class="Identifier">jsregex</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L60" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L60" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L63" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L63" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -359,8 +376,8 @@
   <dd>
     
     Returns a string representing the RegExp object.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L46" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L46" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/js/jsre.nim#L49" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/js/jsre.nim#L49" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -376,7 +393,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-02-08 01:18:54 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-02-22 01:16:22 UTC</small>
       </div>
     </div>
   </div>
