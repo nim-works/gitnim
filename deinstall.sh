@@ -63,6 +63,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/ast.nim
     rm -f $nimbleDir/compiler/astalgo.nim
     rm -f $nimbleDir/compiler/astmsgs.nim
+    rm -f $nimbleDir/compiler/backendpragmas.nim
     rm -f $nimbleDir/compiler/bitsets.nim
     rm -f $nimbleDir/compiler/btrees.nim
     rm -f $nimbleDir/compiler/ccgcalls.nim

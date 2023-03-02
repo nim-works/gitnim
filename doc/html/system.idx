@@ -434,6 +434,7 @@ nim	new	system.html#new,typedesc	proc new(t: typedesc): auto		795
 nim	disarm	system.html#disarm.t,typed	template disarm(x: typed)		809
 nim	`of`	system.html#of,T,typedesc[S]	proc `of`[T, S](x: T; y: typedesc[S]): bool		816
 nim	cmp	system.html#cmp,T,T	proc cmp[T](x, y: T): int		842
+nim	cmp	system.html#cmp,string,string	proc cmp(x, y: string): int		860
 nim	`@`	system.html#@,sinkarray[IDX,T]	proc `@`[IDX, T](a: sink array[IDX, T]): seq[T]		866
 nim	default	system.html#default,typedesc[T]	proc default[T](__33555998: typedesc[T]): T		882
 nim	reset	system.html#reset,T	proc reset[T](obj: var T)		901
@@ -478,6 +479,21 @@ nim	abs	system.html#abs,int16	proc abs(x: int16): int16		1316
 nim	abs	system.html#abs,int32	proc abs(x: int32): int32		1318
 nim	abs	system.html#abs,int64	proc abs(x: int64): int64		1320
 nim	swap	system.html#swap,T,T	proc swap[T](a, b: var T)		1343
+nim	zeroMem	system.html#zeroMem,pointer,Natural	proc zeroMem(p: pointer; size: Natural)		2
+nim	copyMem	system.html#copyMem,pointer,pointer,Natural	proc copyMem(dest, source: pointer; size: Natural)		9
+nim	moveMem	system.html#moveMem,pointer,pointer,Natural	proc moveMem(dest, source: pointer; size: Natural)		17
+nim	equalMem	system.html#equalMem,pointer,pointer,Natural	proc equalMem(a, b: pointer; size: Natural): bool		27
+nim	cmpMem	system.html#cmpMem,pointer,pointer,Natural	proc cmpMem(a, b: pointer; size: Natural): int		36
+nim	allocImpl	system.html#allocImpl,Natural	proc allocImpl(size: Natural): pointer		51
+nim	alloc0Impl	system.html#alloc0Impl,Natural	proc alloc0Impl(size: Natural): pointer		52
+nim	deallocImpl	system.html#deallocImpl,pointer	proc deallocImpl(p: pointer)		53
+nim	reallocImpl	system.html#reallocImpl,pointer,Natural	proc reallocImpl(p: pointer; newSize: Natural): pointer		54
+nim	realloc0Impl	system.html#realloc0Impl,pointer,Natural,Natural	proc realloc0Impl(p: pointer; oldSize, newSize: Natural): pointer		55
+nim	allocSharedImpl	system.html#allocSharedImpl,Natural	proc allocSharedImpl(size: Natural): pointer		57
+nim	allocShared0Impl	system.html#allocShared0Impl,Natural	proc allocShared0Impl(size: Natural): pointer		58
+nim	deallocSharedImpl	system.html#deallocSharedImpl,pointer	proc deallocSharedImpl(p: pointer)		59
+nim	reallocSharedImpl	system.html#reallocSharedImpl,pointer,Natural	proc reallocSharedImpl(p: pointer; newSize: Natural): pointer		60
+nim	reallocShared0Impl	system.html#reallocShared0Impl,pointer,Natural,Natural	proc reallocShared0Impl(p: pointer; oldSize, newSize: Natural): pointer		61
 nim	AllocStats	system.html#AllocStats	object AllocStats		67
 nim	`-`	system.html#-,AllocStats,AllocStats	proc `-`(a, b: AllocStats): AllocStats		71
 nim	dumpAllocstats	system.html#dumpAllocstats.t,untyped	template dumpAllocstats(code: untyped)		75
@@ -499,6 +515,12 @@ nim	reallocShared0	system.html#reallocShared0.t,pointer,Natural,Natural	template
 nim	resizeShared	system.html#resizeShared,ptr.T,Natural	proc resizeShared[T](p: ptr T; newSize: Natural): ptr T		288
 nim	deallocShared	system.html#deallocShared,pointer	proc deallocShared(p: pointer)		299
 nim	freeShared	system.html#freeShared,ptr.T	proc freeShared[T](p: ptr T)		310
+nim	getOccupiedMem	system.html#getOccupiedMem	proc getOccupiedMem(): int		406
+nim	getFreeMem	system.html#getFreeMem	proc getFreeMem(): int		409
+nim	getTotalMem	system.html#getTotalMem	proc getTotalMem(): int		413
+nim	getOccupiedSharedMem	system.html#getOccupiedSharedMem	proc getOccupiedSharedMem(): int		437
+nim	getFreeSharedMem	system.html#getFreeSharedMem	proc getFreeSharedMem(): int		442
+nim	getTotalSharedMem	system.html#getTotalSharedMem	proc getTotalSharedMem(): int		447
 nim	`|`	system.html#|,typedesc,typedesc	proc `|`(a, b: typedesc): typedesc		1381
 nim	countdown	system.html#countdown.i,T,T,Positive	iterator countdown[T](a, b: T; step: Positive = 1): T		6
 nim	countup	system.html#countup.i,T,T,Positive	iterator countup[T](a, b: T; step: Positive = 1): T		43
@@ -525,6 +547,7 @@ nim	`&`	system.html#&,seq[T],seq[T]	proc `&`[T](x, y: seq[T]): seq[T]		1470
 nim	`&`	system.html#&,seq[T],T	proc `&`[T](x: seq[T]; y: T): seq[T]		1486
 nim	`&`	system.html#&,T,seq[T]	proc `&`[T](x: T; y: seq[T]): seq[T]		1501
 nim	instantiationInfo	system.html#instantiationInfo,int	proc instantiationInfo(index = -1; fullPaths = false): tuple[filename: string,\n    line: int, column: int]		1514
+nim	writeStackTrace	system.html#writeStackTrace	proc writeStackTrace()		1585
 nim	newException	system.html#newException.t,typedesc,string,ref.Exception	template newException(exceptn: typedesc; message: string;\n             parentException: ref Exception = nil): untyped		1597
 nim	find	system.html#find,T,S	proc find[T, S](a: T; item: S): int		1611
 nim	contains	system.html#contains,openArray[T],T	proc contains[T](a: openArray[T]; item: T): bool		1620
@@ -537,12 +560,19 @@ nim	gcResponsiveness	system.html#gcResponsiveness	GC_Strategy.gcResponsiveness		
 nim	gcOptimizeTime	system.html#gcOptimizeTime	GC_Strategy.gcOptimizeTime		10
 nim	gcOptimizeSpace	system.html#gcOptimizeSpace	GC_Strategy.gcOptimizeSpace		10
 nim	GC_Strategy	system.html#GC_Strategy	enum GC_Strategy		10
+nim	GC_disable	system.html#GC_disable	proc GC_disable()		17
+nim	GC_enable	system.html#GC_enable	proc GC_enable()		25
+nim	GC_fullCollect	system.html#GC_fullCollect	proc GC_fullCollect()		28
+nim	GC_enableMarkAndSweep	system.html#GC_enableMarkAndSweep	proc GC_enableMarkAndSweep()		32
+nim	GC_disableMarkAndSweep	system.html#GC_disableMarkAndSweep	proc GC_disableMarkAndSweep()		33
+nim	GC_getStatistics	system.html#GC_getStatistics	proc GC_getStatistics(): string		40
 nim	GC_ref	system.html#GC_ref,ref.T	proc GC_ref[T](x: ref T)		44
 nim	GC_ref	system.html#GC_ref,seq[T]	proc GC_ref[T](x: seq[T])		45
 nim	GC_ref	system.html#GC_ref,string	proc GC_ref(x: string)		46
 nim	GC_unref	system.html#GC_unref,ref.T	proc GC_unref[T](x: ref T)		52
 nim	GC_unref	system.html#GC_unref,seq[T]	proc GC_unref[T](x: seq[T])		53
 nim	GC_unref	system.html#GC_unref,string	proc GC_unref(x: string)		54
+nim	nimGC_setStackBottom	system.html#nimGC_setStackBottom,pointer	proc nimGC_setStackBottom(theStackBottom: pointer)		57
 nim	globalRaiseHook	system.html#globalRaiseHook	var globalRaiseHook		1694
 nim	localRaiseHook	system.html#localRaiseHook	var localRaiseHook		1703
 nim	outOfMemHook	system.html#outOfMemHook	var outOfMemHook		1713
@@ -558,12 +588,6 @@ nim	likely	system.html#likely.t,bool	template likely(val: bool): bool		1828
 nim	unlikely	system.html#unlikely.t,bool	template unlikely(val: bool): bool		1852
 nim	delete	system.html#delete,seq[T],Natural	proc delete[T](x: var seq[T]; i: Natural)		1884
 nim	NimVersion	system.html#NimVersion	const NimVersion		1921
-nim	zeroMem	system.html#zeroMem,pointer,Natural	proc zeroMem(p: pointer; size: Natural)		1961
-nim	copyMem	system.html#copyMem,pointer,pointer,Natural	proc copyMem(dest, source: pointer; size: Natural)		1965
-nim	moveMem	system.html#moveMem,pointer,pointer,Natural	proc moveMem(dest, source: pointer; size: Natural)		1969
-nim	equalMem	system.html#equalMem,pointer,pointer,Natural	proc equalMem(a, b: pointer; size: Natural): bool		1973
-nim	cmpMem	system.html#cmpMem,pointer,pointer,Natural	proc cmpMem(a, b: pointer; size: Natural): int		1975
-nim	cmp	system.html#cmp,string,string	proc cmp(x, y: string): int		1979
 nim	cstringArrayToSeq	system.html#cstringArrayToSeq,cstringArray,Natural	proc cstringArrayToSeq(a: cstringArray; len: Natural): seq[string]		1992
 nim	cstringArrayToSeq	system.html#cstringArrayToSeq,cstringArray	proc cstringArrayToSeq(a: cstringArray): seq[string]		1998
 nim	allocCStringArray	system.html#allocCStringArray,openArray[string]	proc allocCStringArray(a: openArray[string]): cstringArray		2007
@@ -586,46 +610,22 @@ nim	setGcFrame	system.html#setGcFrame,GcFrame	proc setGcFrame(s: GcFrame)		119
 nim	pushGcFrame	system.html#pushGcFrame,GcFrame	proc pushGcFrame(s: GcFrame)		120
 nim	stackTraceAvailable	system.html#stackTraceAvailable	proc stackTraceAvailable(): bool		348
 nim	onUnhandledException	system.html#onUnhandledException	var onUnhandledException		350
-nim	writeStackTrace	system.html#writeStackTrace	proc writeStackTrace()		506
 nim	getStackTraceEntries	system.html#getStackTraceEntries,ref.Exception	proc getStackTraceEntries(e: ref Exception): lent seq[StackTraceEntry]		527
 nim	getStackTraceEntries	system.html#getStackTraceEntries	proc getStackTraceEntries(): seq[StackTraceEntry]		532
 nim	formatErrorIndexBound	system.html#formatErrorIndexBound.t,T,T,T	template formatErrorIndexBound[T](i, a, b: T): string		4
 nim	formatErrorIndexBound	system.html#formatErrorIndexBound.t,T,T	template formatErrorIndexBound[T](i, n: T): string		11
 nim	formatFieldDefect	system.html#formatFieldDefect.t,,	template formatFieldDefect(f, discVal): string		14
 nim	iterToProc	system.html#iterToProc,typed,typedesc,untyped	proc iterToProc(iter: typed; envType: typedesc; procName: untyped)		429
-nim	allocImpl	system.html#allocImpl,Natural	proc allocImpl(size: Natural): pointer		1118
-nim	alloc0Impl	system.html#alloc0Impl,Natural	proc alloc0Impl(size: Natural): pointer		1121
-nim	deallocImpl	system.html#deallocImpl,pointer	proc deallocImpl(p: pointer)		1124
-nim	reallocImpl	system.html#reallocImpl,pointer,Natural	proc reallocImpl(p: pointer; newSize: Natural): pointer		1127
-nim	realloc0Impl	system.html#realloc0Impl,pointer,Natural,Natural	proc realloc0Impl(p: pointer; oldSize, newSize: Natural): pointer		1130
-nim	getFreeMem	system.html#getFreeMem	proc getFreeMem(): int		1151
-nim	getTotalMem	system.html#getTotalMem	proc getTotalMem(): int		1155
-nim	getOccupiedMem	system.html#getOccupiedMem	proc getOccupiedMem(): int		1158
 nim	getMaxMem	system.html#getMaxMem	proc getMaxMem(): int		1161
-nim	allocSharedImpl	system.html#allocSharedImpl,Natural	proc allocSharedImpl(size: Natural): pointer		1169
-nim	allocShared0Impl	system.html#allocShared0Impl,Natural	proc allocShared0Impl(size: Natural): pointer		1177
-nim	deallocSharedImpl	system.html#deallocSharedImpl,pointer	proc deallocSharedImpl(p: pointer)		1181
-nim	reallocSharedImpl	system.html#reallocSharedImpl,pointer,Natural	proc reallocSharedImpl(p: pointer; newSize: Natural): pointer		1189
-nim	reallocShared0Impl	system.html#reallocShared0Impl,pointer,Natural,Natural	proc reallocShared0Impl(p: pointer; oldSize, newSize: Natural): pointer		1197
-nim	getFreeSharedMem	system.html#getFreeSharedMem	proc getFreeSharedMem(): int		1222
-nim	getTotalSharedMem	system.html#getTotalSharedMem	proc getTotalSharedMem(): int		1225
-nim	getOccupiedSharedMem	system.html#getOccupiedSharedMem	proc getOccupiedSharedMem(): int		1228
 nim	ForeignCell	system.html#ForeignCell	object ForeignCell		11
 nim	protect	system.html#protect,pointer	proc protect(x: pointer): ForeignCell		15
 nim	dispose	system.html#dispose,ForeignCell	proc dispose(x: ForeignCell)		96
 nim	isNotForeign	system.html#isNotForeign,ForeignCell	proc isNotForeign(x: ForeignCell): bool		106
 nim	setupForeignThreadGc	system.html#setupForeignThreadGc	proc setupForeignThreadGc()		163
 nim	tearDownForeignThreadGc	system.html#tearDownForeignThreadGc	proc tearDownForeignThreadGc()		173
-nim	nimGC_setStackBottom	system.html#nimGC_setStackBottom,pointer	proc nimGC_setStackBottom(theStackBottom: pointer)		280
 nim	deallocHeap	system.html#deallocHeap	proc deallocHeap(runFinalizers = true; allowGcAfterwards = true)		434
 nim	gcInvariant	system.html#gcInvariant	proc gcInvariant()		437
 nim	GC_collectZct	system.html#GC_collectZct	proc GC_collectZct()		821
-nim	GC_disable	system.html#GC_disable	proc GC_disable()		863
-nim	GC_enable	system.html#GC_enable	proc GC_enable()		865
-nim	GC_enableMarkAndSweep	system.html#GC_enableMarkAndSweep	proc GC_enableMarkAndSweep()		875
-nim	GC_disableMarkAndSweep	system.html#GC_disableMarkAndSweep	proc GC_disableMarkAndSweep()		878
-nim	GC_fullCollect	system.html#GC_fullCollect	proc GC_fullCollect()		882
-nim	GC_getStatistics	system.html#GC_getStatistics	proc GC_getStatistics(): string		888
 nim	reprDiscriminant	system.html#reprDiscriminant,int,PNimType	proc reprDiscriminant(e: int; typ: PNimType): string		11
 nim	getCurrentException	system.html#getCurrentException	proc getCurrentException(): ref Exception		2154
 nim	getCurrentExceptionMsg	system.html#getCurrentExceptionMsg	proc getCurrentExceptionMsg(): string		2163

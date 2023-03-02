@@ -796,6 +796,8 @@ if [ $# -eq 1 ] ; then
   chmod 644 "$nimbleDir/compiler/astalgo.nim"
   cp "compiler/astmsgs.nim" "$nimbleDir/compiler/astmsgs.nim"
   chmod 644 "$nimbleDir/compiler/astmsgs.nim"
+  cp "compiler/backendpragmas.nim" "$nimbleDir/compiler/backendpragmas.nim"
+  chmod 644 "$nimbleDir/compiler/backendpragmas.nim"
   cp "compiler/bitsets.nim" "$nimbleDir/compiler/bitsets.nim"
   chmod 644 "$nimbleDir/compiler/bitsets.nim"
   cp "compiler/btrees.nim" "$nimbleDir/compiler/btrees.nim"
