@@ -52,9 +52,20 @@
 </li>
 <li>
   <details open>
-    <summary><a class="reference reference-toplevel" href="#10" id="60">Consts</a></summary>
+    <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#JSgenPass" title="JSgenPass = (myOpen, myProcess, myClose, false)">JSgenPass</a></li>
+      <ul class="simple nested-toc-section">finalJSCodeGen
+  <li><a class="reference" href="#finalJSCodeGen%2CModuleGraph%2CPPassContext%2CPNode" title="finalJSCodeGen(graph: ModuleGraph; b: PPassContext; n: PNode): PNode">finalJSCodeGen(graph: ModuleGraph; b: PPassContext; n: PNode): PNode</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">processJSCodeGen
+  <li><a class="reference" href="#processJSCodeGen%2CPPassContext%2CPNode" title="processJSCodeGen(b: PPassContext; n: PNode): PNode">processJSCodeGen(b: PPassContext; n: PNode): PNode</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">setupJSgen
+  <li><a class="reference" href="#setupJSgen%2CModuleGraph%2CPSym%2CIdGenerator" title="setupJSgen(graph: ModuleGraph; s: PSym; idgen: IdGenerator): PPassContext">setupJSgen(graph: ModuleGraph; s: PSym; idgen: IdGenerator): PPassContext</a></li>
+
+</ul>
 
     </ul>
   </details>
@@ -85,21 +96,57 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="trees.html">trees</a>, <a class="reference external" href="magicsys.html">magicsys</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="nversion.html">nversion</a>, <a class="reference external" href="msgs.html">msgs</a>, <a class="reference external" href="idents.html">idents</a>, <a class="reference external" href="types.html">types</a>, <a class="reference external" href="ropes.html">ropes</a>, <a class="reference external" href="passes.html">passes</a>, <a class="reference external" href="ccgutils.html">ccgutils</a>, <a class="reference external" href="wordrecg.html">wordrecg</a>, <a class="reference external" href="renderer.html">renderer</a>, <a class="reference external" href="cgmeth.html">cgmeth</a>, <a class="reference external" href="lowerings.html">lowerings</a>, <a class="reference external" href="sighashes.html">sighashes</a>, <a class="reference external" href="modulegraphs.html">modulegraphs</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="rodutils.html">rodutils</a>, <a class="reference external" href="transf.html">transf</a>, <a class="reference external" href="injectdestructors.html">injectdestructors</a>, <a class="reference external" href="sourcemap.html">sourcemap</a>, <a class="reference external" href="astmsgs.html">astmsgs</a>, <a class="reference external" href="backendpragmas.html">backendpragmas</a>
+    <a class="reference external" href="ast.html">ast</a>, <a class="reference external" href="trees.html">trees</a>, <a class="reference external" href="magicsys.html">magicsys</a>, <a class="reference external" href="options.html">options</a>, <a class="reference external" href="nversion.html">nversion</a>, <a class="reference external" href="msgs.html">msgs</a>, <a class="reference external" href="idents.html">idents</a>, <a class="reference external" href="types.html">types</a>, <a class="reference external" href="ropes.html">ropes</a>, <a class="reference external" href="ccgutils.html">ccgutils</a>, <a class="reference external" href="wordrecg.html">wordrecg</a>, <a class="reference external" href="renderer.html">renderer</a>, <a class="reference external" href="cgmeth.html">cgmeth</a>, <a class="reference external" href="lowerings.html">lowerings</a>, <a class="reference external" href="sighashes.html">sighashes</a>, <a class="reference external" href="modulegraphs.html">modulegraphs</a>, <a class="reference external" href="lineinfos.html">lineinfos</a>, <a class="reference external" href="rodutils.html">rodutils</a>, <a class="reference external" href="transf.html">transf</a>, <a class="reference external" href="injectdestructors.html">injectdestructors</a>, <a class="reference external" href="sourcemap.html">sourcemap</a>, <a class="reference external" href="astmsgs.html">astmsgs</a>, <a class="reference external" href="backendpragmas.html">backendpragmas</a>, <a class="reference external" href="pipelineutils.html">pipelineutils</a>
   </dl>
 </div>
-<div class="section" id="10">
-  <h1><a class="toc-backref" href="#10">Consts</a></h1>
+<div class="section" id="12">
+  <h1><a class="toc-backref" href="#12">Procs</a></h1>
   <dl class="item">
-    <div id="JSgenPass">
-  <dt><pre><a href="jsgen.html#JSgenPass"><span class="Identifier">JSgenPass</span></a> <span class="Other">=</span> <span class="Other">(</span><span class="Identifier">myOpen</span><span class="Other">,</span> <span class="Identifier">myProcess</span><span class="Other">,</span> <span class="Identifier">myClose</span><span class="Other">,</span> <span class="DecNumber">false</span><span class="Other">)</span></pre></dt>
+    <div id="finalJSCodeGen-procs-all">
+  <div id="finalJSCodeGen,ModuleGraph,PPassContext,PNode">
+  <dt><pre><span class="Keyword">proc</span> <a href="#finalJSCodeGen%2CModuleGraph%2CPPassContext%2CPNode"><span class="Identifier">finalJSCodeGen</span></a><span class="Other">(</span><span class="Identifier">graph</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">b</span><span class="Other">:</span> <a href="modulegraphs.html#PPassContext"><span class="Identifier">PPassContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span>
+    <span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">WriteDirEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Finalize JS code generation of a Nim module. Param <tt class="docutils literal"><span class="pre"><span class="Identifier">n</span></span></tt> may contain nodes returned from the last module close call.
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/jsgen.nim#L2876" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/jsgen.nim#L2876" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+
+</div>
+<div id="processJSCodeGen-procs-all">
+  <div id="processJSCodeGen,PPassContext,PNode">
+  <dt><pre><span class="Keyword">proc</span> <a href="#processJSCodeGen%2CPPassContext%2CPNode"><span class="Identifier">processJSCodeGen</span></a><span class="Other">(</span><span class="Identifier">b</span><span class="Other">:</span> <a href="modulegraphs.html#PPassContext"><span class="Identifier">PPassContext</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span>
+    <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">KeyError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ERecoverableError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span>
+    <span class="Identifier">TimeEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Generate JS code for a node.
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/jsgen.nim#L2837" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/jsgen.nim#L2837" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+
+</div>
+<div id="setupJSgen-procs-all">
+  <div id="setupJSgen,ModuleGraph,PSym,IdGenerator">
+  <dt><pre><span class="Keyword">proc</span> <a href="#setupJSgen%2CModuleGraph%2CPSym%2CIdGenerator"><span class="Identifier">setupJSgen</span></a><span class="Other">(</span><span class="Identifier">graph</span><span class="Other">:</span> <a href="modulegraphs.html#ModuleGraph"><span class="Identifier">ModuleGraph</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">idgen</span><span class="Other">:</span> <a href="ast.html#IdGenerator"><span class="Identifier">IdGenerator</span></a><span class="Other">)</span><span class="Other">:</span> <a href="modulegraphs.html#PPassContext"><span class="Identifier">PPassContext</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/jsgen.nim#L2912" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/jsgen.nim#L2912" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/jsgen.nim#L2911" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/jsgen.nim#L2911" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
+</div>
+
 </div>
 
   </dl>
@@ -113,8 +160,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/jsgen.nim#L112" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/jsgen.nim#L112" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/jsgen.nim#L114" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/jsgen.nim#L114" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -130,7 +177,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-03-02 01:23:14 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-03-08 01:19:31 UTC</small>
       </div>
     </div>
   </div>

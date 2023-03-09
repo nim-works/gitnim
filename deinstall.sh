@@ -162,6 +162,8 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/passes.nim
     rm -f $nimbleDir/compiler/pathutils.nim
     rm -f $nimbleDir/compiler/patterns.nim
+    rm -f $nimbleDir/compiler/pipelines.nim
+    rm -f $nimbleDir/compiler/pipelineutils.nim
     rm -f $nimbleDir/compiler/platform.nim
     rm -f $nimbleDir/compiler/plugins/itersgen.nim
     rm -f $nimbleDir/compiler/plugins/locals.nim

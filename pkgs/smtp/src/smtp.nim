@@ -305,7 +305,7 @@ proc sendMail*(smtp: Smtp | AsyncSmtp, fromAddr: string,
     await smtp.checkReply("250")
 
   # Send the message
-  await smtp.debugSend("DATA " & "\c\L")
+  await smtp.debugSend("DATA" & "\c\L")
   await smtp.checkReply("354")
   await smtp.sock.send(msg & "\c\L")
   await smtp.debugSend(".\c\L")
