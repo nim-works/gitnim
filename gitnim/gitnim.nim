@@ -207,7 +207,7 @@ proc parseModules(): seq[Module] =
           let splat = split line[1..^1]
           result.add Module(status: status, name: splat[1], sha: splat[0])
           continue
-        except:
+        except CatchableError:
           discard
         warn "weird `git submodule` output: " & line
     # don't trust git here; it's important that the result is sorted
