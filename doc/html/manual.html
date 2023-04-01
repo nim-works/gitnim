@@ -130,6 +130,7 @@
 <li><a class="reference" id="statements-and-expressions-void-context_toc" href="#statements-and-expressions-void-context">Void context</a></li>
 <li><a class="reference" id="statements-and-expressions-var-statement_toc" href="#statements-and-expressions-var-statement">Var statement</a></li>
 <li><a class="reference" id="statements-and-expressions-let-statement_toc" href="#statements-and-expressions-let-statement">Let statement</a></li>
+<li><a class="reference" id="statements-and-expressions-special-identifier-nim-underscore_toc" href="#statements-and-expressions-special-identifier-nim-underscore">Special identifier <tt class="docutils literal"><span class="pre"><span class="Identifier">_</span></span></tt> (underscore)</a></li>
 <li><a class="reference" id="statements-and-expressions-tuple-unpacking_toc" href="#statements-and-expressions-tuple-unpacking">Tuple unpacking</a></li>
 <li><a class="reference" id="statements-and-expressions-const-section_toc" href="#statements-and-expressions-const-section">Const section</a></li>
 <li><a class="reference" id="statements-and-expressions-static-statementslashexpression_toc" href="#statements-and-expressions-static-statementslashexpression">Static statement/expression</a></li>
@@ -324,7 +325,7 @@
     <div id="tocRoot"></div>
     
     <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Authors:</th><td>Andreas Rumpf, Zahary Karadjov</td></tr>
-<tr><th class="docinfo-name">Version:</th><td>1.9.1</td></tr>
+<tr><th class="docinfo-name">Version:</th><td>1.9.3</td></tr>
 </tbody></table><blockquote class="markdown-quote"><p>&quot;Complexity&quot; seems to be a lot like &quot;energy&quot;: you can transfer it from the end-user to one/some of the other players, but the total amount seems to remain pretty much constant for a given task. -- Ran</p></blockquote>
 
 <h1><a class="toc-backref" id="about-this-document" href="#about-this-document">About this document</a></h1><p><strong>Note</strong>: This document is a draft! Several of Nim's features may need more precise wording. This manual is constantly evolving into a proper specification.</p>
@@ -884,7 +885,8 @@ conceptDecl = 'concept' conceptParam ^* ',' (pragma)? ('of' typeDesc ^* ',')?
               &amp;IND{&gt;} stmt
 typeDef = identVisDot genericParamList? pragma '=' optInd typeDefValue
             indAndComment?
-varTuple = '(' optInd identWithPragma ^+ comma optPar ')' '=' optInd expr
+varTupleLhs = '(' optInd (identWithPragma / varTupleLhs) ^+ comma optPar ')'
+varTuple = varTupleLhs '=' optInd expr
 colonBody = colcom stmt postExprBlocks?
 variable = (varTuple / identColonEquals) colonBody? indAndComment
 constant = (varTuple / identWithPragma) (colon typeDesc)? '=' optInd expr indAndComment
@@ -2207,11 +2209,36 @@ stmt = (IND{&gt;} complexOrSimpleStmt^+(IND{=} / ';') DED)
 <p>For let variables, the same pragmas are available as for ordinary variables.</p>
 <p>As <tt class="docutils literal"><span class="pre"><span class="Keyword">let</span></span></tt> statements are immutable after creation they need to define a value when they are declared. The only exception to this is if the <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importc</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt> pragma (or any of the other <tt class="docutils literal"><span class="pre"><span class="Identifier">importX</span></span></tt> pragmas) is applied, in this case the value is expected to come from native code, typically a C/C++ <tt class="docutils literal"><span class="pre"><span class="Keyword">const</span></span></tt>.</p>
 
-<h2><a class="toc-backref" id="statements-and-expressions-tuple-unpacking" href="#statements-and-expressions-tuple-unpacking">Tuple unpacking</a></h2><p>In a <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Keyword">let</span></span></tt> statement tuple unpacking can be performed. The special identifier <tt class="docutils literal"><span class="pre"><span class="Identifier">_</span></span></tt> can be used to ignore some parts of the tuple:</p>
+<h2><a class="toc-backref" id="statements-and-expressions-special-identifier-nim-underscore" href="#statements-and-expressions-special-identifier-nim-underscore">Special identifier <tt class="docutils literal"><span class="pre"><span class="Identifier">_</span></span></tt> (underscore)</a></h2><p>The identifier <tt class="docutils literal"><span class="pre"><span class="Identifier">_</span></span></tt> has a special meaning in declarations. Any definition with the name <tt class="docutils literal"><span class="pre"><span class="Identifier">_</span></span></tt> will not be added to scope, meaning the definition is evaluated, but cannot be used. As a result the name <tt class="docutils literal"><span class="pre"><span class="Identifier">_</span></span></tt> can be indefinitely redefined.</p>
+<p><pre class="listing">
+<span class="Keyword">let</span> <span class="Identifier">_</span> <span class="Operator">=</span> <span class="DecNumber">123</span>
+<span class="Identifier">echo</span> <span class="Identifier">_</span> <span class="Comment"># error</span>
+<span class="Keyword">let</span> <span class="Identifier">_</span> <span class="Operator">=</span> <span class="DecNumber">456</span> <span class="Comment"># compiles</span></pre></p>
+
+<h2><a class="toc-backref" id="statements-and-expressions-tuple-unpacking" href="#statements-and-expressions-tuple-unpacking">Tuple unpacking</a></h2><p>In a <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Keyword">let</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Keyword">const</span></span></tt> statement tuple unpacking can be performed. The special identifier <tt class="docutils literal"><span class="pre"><span class="Identifier">_</span></span></tt> can be used to ignore some parts of the tuple:</p>
 <p><pre class="listing">
 <span class="Keyword">proc</span> <span class="Identifier">returnsTuple</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="DecNumber">4</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span>
 
 <span class="Keyword">let</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">_</span><span class="Punctuation">,</span> <span class="Identifier">z</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Identifier">returnsTuple</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+<p>This is treated as syntax sugar for roughly the following:</p>
+<p><pre class="listing">
+<span class="Keyword">let</span>
+  <span class="Identifier">tmpTuple</span> <span class="Operator">=</span> <span class="Identifier">returnsTuple</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+  <span class="Identifier">x</span> <span class="Operator">=</span> <span class="Identifier">tmpTuple</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span>
+  <span class="Identifier">z</span> <span class="Operator">=</span> <span class="Identifier">tmpTuple</span><span class="Punctuation">[</span><span class="DecNumber">2</span><span class="Punctuation">]</span></pre></p>
+<p>For <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Keyword">let</span></span></tt> statements, if the value expression is a tuple literal, each expression is directly expanded into an assignment without the use of a temporary variable.</p>
+<p><pre class="listing">
+<span class="Keyword">let</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">,</span> <span class="Identifier">z</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="DecNumber">1</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span>
+<span class="Comment"># becomes</span>
+<span class="Keyword">let</span>
+  <span class="Identifier">x</span> <span class="Operator">=</span> <span class="DecNumber">1</span>
+  <span class="Identifier">y</span> <span class="Operator">=</span> <span class="DecNumber">2</span>
+  <span class="Identifier">z</span> <span class="Operator">=</span> <span class="DecNumber">3</span></pre></p>
+<p>Tuple unpacking can also be nested:</p>
+<p><pre class="listing">
+<span class="Keyword">proc</span> <span class="Identifier">returnsNestedTuple</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="DecNumber">4</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="DecNumber">5</span><span class="Punctuation">,</span> <span class="DecNumber">7</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="DecNumber">2</span><span class="Punctuation">,</span> <span class="DecNumber">3</span><span class="Punctuation">)</span>
+
+<span class="Keyword">let</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Punctuation">(</span><span class="Identifier">_</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">_</span><span class="Punctuation">,</span> <span class="Identifier">z</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Identifier">returnsNestedTuple</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
 
 <h2><a class="toc-backref" id="statements-and-expressions-const-section" href="#statements-and-expressions-const-section">Const section</a></h2><p>A const section declares constants whose values are constant expressions:</p>
 <p><pre class="listing">
@@ -5233,7 +5260,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-03-21 01:15:21 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-04-01 01:22:01 UTC</small>
       </div>
     </div>
   </div>
