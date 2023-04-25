@@ -293,7 +293,7 @@ nim	`==`	system.html#==,bool,bool	proc `==`(x, y: bool): bool		27
 nim	`==`	system.html#==,set[T],set[T]	proc `==`[T](x, y: set[T]): bool		29
 nim	`==`	system.html#==,ref.T,ref.T	proc `==`[T](x, y: ref T): bool		34
 nim	`==`	system.html#==,ptr.T,ptr.T	proc `==`[T](x, y: ptr T): bool		36
-nim	`==`	system.html#==,T,T	proc `==`[T: proc](x, y: T): bool		38
+nim	`==`	system.html#==,T,T	proc `==`[T: proc | iterator](x, y: T): bool		38
 nim	`<=`	system.html#<=,Enum,Enum	proc `<=`[Enum: enum](x, y: Enum): bool		41
 nim	`<=`	system.html#<=,string,string	proc `<=`(x, y: string): bool		42
 nim	`<=`	system.html#<=,char,char	proc `<=`(x, y: char): bool		54
@@ -541,7 +541,7 @@ nim	isNil	system.html#isNil,ref.T	proc isNil[T](x: ref T): bool		1403
 nim	isNil	system.html#isNil,ptr.T	proc isNil[T](x: ptr T): bool		1405
 nim	isNil	system.html#isNil,pointer	proc isNil(x: pointer): bool		1406
 nim	isNil	system.html#isNil,cstring	proc isNil(x: cstring): bool		1407
-nim	isNil	system.html#isNil,T	proc isNil[T: proc](x: T): bool		1408
+nim	isNil	system.html#isNil,T	proc isNil[T: proc | iterator {.closure.}](x: T): bool		1408
 nim	`@`	system.html#@,openArray[T]	proc `@`[T](a: openArray[T]): seq[T]		1415
 nim	`&`	system.html#&,seq[T],seq[T]	proc `&`[T](x, y: seq[T]): seq[T]		1479
 nim	`&`	system.html#&,seq[T],T	proc `&`[T](x: seq[T]; y: T): seq[T]		1495
@@ -630,11 +630,11 @@ nim	reprDiscriminant	system.html#reprDiscriminant,int,PNimType	proc reprDiscrimi
 nim	getCurrentException	system.html#getCurrentException	proc getCurrentException(): ref Exception		2163
 nim	getCurrentExceptionMsg	system.html#getCurrentExceptionMsg	proc getCurrentExceptionMsg(): string		2172
 nim	setCurrentException	system.html#setCurrentException,ref.Exception	proc setCurrentException(exc: ref Exception)		2177
-nim	rawProc	system.html#rawProc,T	proc rawProc[T: proc](x: T): pointer		2191
-nim	rawEnv	system.html#rawEnv,T	proc rawEnv[T: proc](x: T): pointer		2207
-nim	finished	system.html#finished,T	proc finished[T: proc](x: T): bool		2216
-nim	quit	system.html#quit,int	proc quit(errorcode: int = QuitSuccess)		2237
-nim	quit	system.html#quit,string	proc quit(errormsg: string; errorcode = QuitFailure)		2290
+nim	rawProc	system.html#rawProc,T	proc rawProc[T: proc {.closure.} | iterator {.closure.}](x: T): pointer		2191
+nim	rawEnv	system.html#rawEnv,T	proc rawEnv[T: proc {.closure.} | iterator {.closure.}](x: T): pointer		2204
+nim	finished	system.html#finished,T	proc finished[T: iterator {.closure.}](x: T): bool		2210
+nim	quit	system.html#quit,int	proc quit(errorcode: int = QuitSuccess)		2228
+nim	quit	system.html#quit,string	proc quit(errormsg: string; errorcode = QuitFailure)		2281
 nim	BackwardsIndex	system.html#BackwardsIndex	type BackwardsIndex		5
 nim	`^`	system.html#^.t,int	template `^`(x: int): BackwardsIndex		9
 nim	`[]`	system.html#[],openArray[T],BackwardsIndex	proc `[]`[T](s: openArray[T]; i: BackwardsIndex): T		22
@@ -656,38 +656,38 @@ nim	`[]`	system.html#[],array[Idx,T],HSlice[U: Ordinal,V: Ordinal]	proc `[]`[Idx
 nim	`[]=`	system.html#[]=,array[Idx,T],HSlice[U: Ordinal,V: Ordinal],openArray[T]	proc `[]=`[Idx, T; U, V: Ordinal](a: var array[Idx, T]; x: HSlice[U, V];\n                             b: openArray[T])		118
 nim	`[]`	system.html#[],openArray[T],HSlice[U: Ordinal,V: Ordinal]	proc `[]`[T; U, V: Ordinal](s: openArray[T]; x: HSlice[U, V]): seq[T]		132
 nim	`[]=`	system.html#[]=,seq[T],HSlice[U: Ordinal,V: Ordinal],openArray[T]	proc `[]=`[T; U, V: Ordinal](s: var seq[T]; x: HSlice[U, V]; b: openArray[T])		144
-nim	`&=`	system.html#&=,string,string	proc `&=`(x: var string; y: string)		2307
-nim	`&=`	system.html#&=.t,typed,typed	template `&=`(x, y: typed)		2314
-nim	rangeCheck	system.html#rangeCheck.t	template rangeCheck(cond)		2321
-nim	shallow	system.html#shallow,seq[T]	proc shallow[T](s: var seq[T])		2330
-nim	shallow	system.html#shallow,string	proc shallow(s: var string)		2341
-nim	NimNode	system.html#NimNode	type NimNode		2358
-nim	ForLoopStmt	system.html#ForLoopStmt	object ForLoopStmt		2362
-nim	varargsLen	system.html#varargsLen.m,varargs[untyped]	macro varargsLen(x: varargs[untyped]): int		2366
-nim	insert	system.html#insert,string,string	proc insert(x: var string; item: string; i = 0.Natural)		2376
-nim	addEscapedChar	system.html#addEscapedChar,string,char	proc addEscapedChar(s: var string; c: char)		2399
-nim	addQuoted	system.html#addQuoted,string,T	proc addQuoted[T](s: var string; x: T)		2441
-nim	locals	system.html#locals	proc locals(): RootObj		2490
-nim	deepCopy	system.html#deepCopy,T,T	proc deepCopy[T](x: var T; y: T)		2519
-nim	deepCopy	system.html#deepCopy,T	proc deepCopy[T](y: T): T		2529
-nim	procCall	system.html#procCall,untyped	proc procCall(x: untyped)		2535
-nim	`==`	system.html#==,cstring,cstring	proc `==`(x, y: cstring): bool		2545
-nim	closureScope	system.html#closureScope.t,untyped	template closureScope(body: untyped): untyped		2554
-nim	once	system.html#once.t,untyped	template once(body: untyped): untyped		2581
-nim	substr	system.html#substr,openArray[char]	proc substr(s: openArray[char]): string		2598
-nim	substr	system.html#substr,string,int,int	proc substr(s: string; first, last: int): string		2610
-nim	substr	system.html#substr,string,int	proc substr(s: string; first = 0): string		2631
-nim	toOpenArray	system.html#toOpenArray,ptr.UncheckedArray[T],int,int	proc toOpenArray[T](x: ptr UncheckedArray[T]; first, last: int): openArray[T]		2638
-nim	toOpenArray	system.html#toOpenArray,cstring,int,int	proc toOpenArray(x: cstring; first, last: int): openArray[char]		2640
-nim	toOpenArrayByte	system.html#toOpenArrayByte,cstring,int,int	proc toOpenArrayByte(x: cstring; first, last: int): openArray[byte]		2642
-nim	toOpenArray	system.html#toOpenArray,seq[T],int,int	proc toOpenArray[T](x: seq[T]; first, last: int): openArray[T]		2645
-nim	toOpenArray	system.html#toOpenArray,openArray[T],int,int	proc toOpenArray[T](x: openArray[T]; first, last: int): openArray[T]		2647
-nim	toOpenArray	system.html#toOpenArray,array[I,T],I,I	proc toOpenArray[I, T](x: array[I, T]; first, last: I): openArray[T]		2649
-nim	toOpenArray	system.html#toOpenArray,string,int,int	proc toOpenArray(x: string; first, last: int): openArray[char]		2651
-nim	toOpenArrayByte	system.html#toOpenArrayByte,string,int,int	proc toOpenArrayByte(x: string; first, last: int): openArray[byte]		2654
-nim	toOpenArrayByte	system.html#toOpenArrayByte,openArray[char],int,int	proc toOpenArrayByte(x: openArray[char]; first, last: int): openArray[byte]		2656
-nim	toOpenArrayByte	system.html#toOpenArrayByte,seq[char],int,int	proc toOpenArrayByte(x: seq[char]; first, last: int): openArray[byte]		2658
-nim	prepareMutation	system.html#prepareMutation,string	proc prepareMutation(s: var string)		2767
+nim	`&=`	system.html#&=,string,string	proc `&=`(x: var string; y: string)		2298
+nim	`&=`	system.html#&=.t,typed,typed	template `&=`(x, y: typed)		2305
+nim	rangeCheck	system.html#rangeCheck.t	template rangeCheck(cond)		2312
+nim	shallow	system.html#shallow,seq[T]	proc shallow[T](s: var seq[T])		2321
+nim	shallow	system.html#shallow,string	proc shallow(s: var string)		2332
+nim	NimNode	system.html#NimNode	type NimNode		2349
+nim	ForLoopStmt	system.html#ForLoopStmt	object ForLoopStmt		2353
+nim	varargsLen	system.html#varargsLen.m,varargs[untyped]	macro varargsLen(x: varargs[untyped]): int		2357
+nim	insert	system.html#insert,string,string	proc insert(x: var string; item: string; i = 0.Natural)		2367
+nim	addEscapedChar	system.html#addEscapedChar,string,char	proc addEscapedChar(s: var string; c: char)		2390
+nim	addQuoted	system.html#addQuoted,string,T	proc addQuoted[T](s: var string; x: T)		2432
+nim	locals	system.html#locals	proc locals(): RootObj		2481
+nim	deepCopy	system.html#deepCopy,T,T	proc deepCopy[T](x: var T; y: T)		2510
+nim	deepCopy	system.html#deepCopy,T	proc deepCopy[T](y: T): T		2520
+nim	procCall	system.html#procCall,untyped	proc procCall(x: untyped)		2526
+nim	`==`	system.html#==,cstring,cstring	proc `==`(x, y: cstring): bool		2536
+nim	closureScope	system.html#closureScope.t,untyped	template closureScope(body: untyped): untyped		2545
+nim	once	system.html#once.t,untyped	template once(body: untyped): untyped		2572
+nim	substr	system.html#substr,openArray[char]	proc substr(s: openArray[char]): string		2589
+nim	substr	system.html#substr,string,int,int	proc substr(s: string; first, last: int): string		2601
+nim	substr	system.html#substr,string,int	proc substr(s: string; first = 0): string		2622
+nim	toOpenArray	system.html#toOpenArray,ptr.UncheckedArray[T],int,int	proc toOpenArray[T](x: ptr UncheckedArray[T]; first, last: int): openArray[T]		2629
+nim	toOpenArray	system.html#toOpenArray,cstring,int,int	proc toOpenArray(x: cstring; first, last: int): openArray[char]		2631
+nim	toOpenArrayByte	system.html#toOpenArrayByte,cstring,int,int	proc toOpenArrayByte(x: cstring; first, last: int): openArray[byte]		2633
+nim	toOpenArray	system.html#toOpenArray,seq[T],int,int	proc toOpenArray[T](x: seq[T]; first, last: int): openArray[T]		2636
+nim	toOpenArray	system.html#toOpenArray,openArray[T],int,int	proc toOpenArray[T](x: openArray[T]; first, last: int): openArray[T]		2638
+nim	toOpenArray	system.html#toOpenArray,array[I,T],I,I	proc toOpenArray[I, T](x: array[I, T]; first, last: I): openArray[T]		2640
+nim	toOpenArray	system.html#toOpenArray,string,int,int	proc toOpenArray(x: string; first, last: int): openArray[char]		2642
+nim	toOpenArrayByte	system.html#toOpenArrayByte,string,int,int	proc toOpenArrayByte(x: string; first, last: int): openArray[byte]		2645
+nim	toOpenArrayByte	system.html#toOpenArrayByte,openArray[char],int,int	proc toOpenArrayByte(x: openArray[char]; first, last: int): openArray[byte]		2647
+nim	toOpenArrayByte	system.html#toOpenArrayByte,seq[char],int,int	proc toOpenArrayByte(x: seq[char]; first, last: int): openArray[byte]		2649
+nim	prepareMutation	system.html#prepareMutation,string	proc prepareMutation(s: var string)		2758
 heading	System module	system.html#system-module	 System module		0
 heading	Strings and characters	system.html#system-module-strings-and-characters	  Strings and characters		0
 heading	Seqs	system.html#system-module-seqs	  Seqs		0
@@ -721,12 +721,12 @@ idx	destructor	system.html#destructor_1	Misc		0
 idx	OpenMP	system.html#openmp_1	Misc		0
 idx	OpenMP	system.html#openmp_2	Misc		0
 idx	roof	system.html#roof_1	Misc		0
-nimgrp	quit	system.html#quit-procs-all	proc		2237
-nimgrp	deepcopy	system.html#deepCopy-procs-all	proc		2519
+nimgrp	quit	system.html#quit-procs-all	proc		2228
+nimgrp	deepcopy	system.html#deepCopy-procs-all	proc		2510
 nimgrp	*	system.html#*-procs-all	proc		89
 nimgrp	-=	system.html#-=-procs-all	proc		303
 nimgrp	cstringarraytoseq	system.html#cstringArrayToSeq-procs-all	proc		2001
-nimgrp	toopenarraybyte	system.html#toOpenArrayByte-procs-all	proc		2642
+nimgrp	toopenarraybyte	system.html#toOpenArrayByte-procs-all	proc		2633
 nimgrp	<=	system.html#<=-procs-all	proc		41
 nimgrp	[]=	system.html#[]=-procs-all	proc		337
 nimgrp	/	system.html#/-procs-all	proc		318
@@ -734,12 +734,12 @@ nimgrp	div	system.html#div-procs-all	proc		96
 nimgrp	Gcunref	system.html#GC_unref-procs-all	proc		52
 nimgrp	insert	system.html#insert-procs-all	proc		1189
 nimgrp	@	system.html#@-procs-all	proc		866
-nimgrp	shallow	system.html#shallow-procs-all	proc		2330
+nimgrp	shallow	system.html#shallow-procs-all	proc		2321
 nimgrp	newseq	system.html#newSeq-procs-all	proc		560
 nimgrp	shr	system.html#shr-procs-all	proc		135
 nimgrp	/%	system.html#/%-procs-all	proc		385
 nimgrp	compileoption	system.html#compileOption-procs-all	proc		116
-nimgrp	substr	system.html#substr-procs-all	proc		2598
+nimgrp	substr	system.html#substr-procs-all	proc		2589
 nimgrp	&	system.html#&-procs-all	proc		948
 nimgrp	<%	system.html#<%-procs-all	proc		188
 nimgrp	contains	system.html#contains-procs-all	proc		70
@@ -755,7 +755,7 @@ nimgrp	..	system.html#..-procs-all	proc		368
 nimgrp	len	system.html#len-procs-all	proc		631
 nimgrp	low	system.html#low-procs-all	proc		247
 nimgrp	add	system.html#add-procs-all	proc		976
-nimgrp	toopenarray	system.html#toOpenArray-procs-all	proc		2638
+nimgrp	toopenarray	system.html#toOpenArray-procs-all	proc		2629
 nimgrp	-	system.html#--procs-all	proc		56
 nimgrp	*%	system.html#*%-procs-all	proc		374
 nimgrp	ashr	system.html#ashr-procs-all	proc		171

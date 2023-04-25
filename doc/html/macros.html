@@ -1580,7 +1580,7 @@
 </table><p>Take special care when declaring types as <tt class="docutils literal"><span class="pre">proc</span></tt>. The behavior is similar to <tt class="docutils literal"><span class="pre">Procedure declaration</span></tt>, below, but does not treat <tt class="docutils literal"><span class="pre">nnkGenericParams</span></tt>. Generic parameters are treated in the type, not the <tt class="docutils literal"><span class="pre">proc</span></tt> itself.</p>
 <p>Concrete syntax:</p>
 <p><pre class="listing">
-<span class="Keyword">type</span> <span class="Identifier">MyProc</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Keyword">proc</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">T</span><span class="Punctuation">)</span></pre></p>
+<span class="Keyword">type</span> <span class="Identifier">MyProc</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Keyword">proc</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">T</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">nimcall</span><span class="Operator">.</span><span class="Punctuation">}</span></pre></p>
 <p>AST:</p>
 <p><pre class="listing">
 <span class="Comment"># ...</span>
@@ -1592,10 +1592,32 @@
   <span class="Identifier">nnkProcTy</span><span class="Punctuation">(</span> <span class="Comment"># behaves like a procedure declaration from here on</span>
     <span class="Identifier">nnkFormalParams</span><span class="Punctuation">(</span>
       <span class="Comment"># ...</span>
-    <span class="Punctuation">)</span>
+    <span class="Punctuation">)</span><span class="Punctuation">,</span>
+    <span class="Identifier">nnkPragma</span><span class="Punctuation">(</span><span class="Identifier">nnkIdent</span><span class="Punctuation">(</span><span class="StringLit">&quot;nimcall&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
   <span class="Punctuation">)</span>
 <span class="Punctuation">)</span></pre></p>
 <p>The same syntax applies to <tt class="docutils literal"><span class="pre">iterator</span></tt> (with <tt class="docutils literal"><span class="pre">nnkIteratorTy</span></tt>), but <em>does not</em> apply to <tt class="docutils literal"><span class="pre">converter</span></tt> or <tt class="docutils literal"><span class="pre">template</span></tt>.</p>
+<p>Type class versions of these nodes generally share the same node kind but without any child nodes. The <tt class="docutils literal"><span class="pre">tuple</span></tt> type class is represented by <tt class="docutils literal"><span class="pre">nnkTupleClassTy</span></tt>, while a <tt class="docutils literal"><span class="pre">proc</span></tt> or <tt class="docutils literal"><span class="pre">iterator</span></tt> type class with pragmas has an <tt class="docutils literal"><span class="pre">nnkEmpty</span></tt> node in place of the <tt class="docutils literal"><span class="pre">nnkFormalParams</span></tt> node of a concrete <tt class="docutils literal"><span class="pre">proc</span></tt> or <tt class="docutils literal"><span class="pre">iterator</span></tt> type node.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span> <span class="Identifier">TypeClass</span> <span class="Operator">=</span> <span class="Keyword">proc</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">nimcall</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">|</span> <span class="Keyword">ref</span> <span class="Operator">|</span> <span class="Keyword">tuple</span></pre></p>
+<p>AST:</p>
+<p><pre class="listing">
+<span class="Identifier">nnkTypeDef</span><span class="Punctuation">(</span>
+  <span class="Identifier">nnkIdent</span><span class="Punctuation">(</span><span class="StringLit">&quot;TypeClass&quot;</span><span class="Punctuation">)</span><span class="Punctuation">,</span>
+  <span class="Identifier">nnkEmpty</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">,</span>
+  <span class="Identifier">nnkInfix</span><span class="Punctuation">(</span>
+    <span class="Identifier">nnkIdent</span><span class="Punctuation">(</span><span class="StringLit">&quot;|&quot;</span><span class="Punctuation">)</span><span class="Punctuation">,</span>
+    <span class="Identifier">nnkProcTy</span><span class="Punctuation">(</span>
+      <span class="Identifier">nnkEmpty</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">,</span>
+      <span class="Identifier">nnkPragma</span><span class="Punctuation">(</span><span class="Identifier">nnkIdent</span><span class="Punctuation">(</span><span class="StringLit">&quot;nimcall&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span>
+    <span class="Punctuation">)</span><span class="Punctuation">,</span>
+    <span class="Identifier">nnkInfix</span><span class="Punctuation">(</span>
+      <span class="Identifier">nnkIdent</span><span class="Punctuation">(</span><span class="StringLit">&quot;|&quot;</span><span class="Punctuation">)</span><span class="Punctuation">,</span>
+      <span class="Identifier">nnkRefTy</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">,</span>
+      <span class="Identifier">nnkTupleClassTy</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+    <span class="Punctuation">)</span>
+  <span class="Punctuation">)</span>
+<span class="Punctuation">)</span></pre></p>
 
 <h2><a class="toc-backref" id="statements-mixin-statement" href="#statements-mixin-statement">Mixin statement</a></h2><p>Concrete syntax:</p>
 <p><pre class="listing">
@@ -4561,7 +4583,7 @@ object
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-04-05 01:20:29 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-04-24 01:24:23 UTC</small>
       </div>
     </div>
   </div>
