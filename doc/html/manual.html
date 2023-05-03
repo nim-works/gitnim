@@ -4376,6 +4376,23 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 
 <span class="Keyword">var</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="DecNumber">4</span>
 <span class="Identifier">write</span><span class="Punctuation">(</span><span class="Identifier">stdout</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">)</span> <span class="Comment"># not ambiguous: uses the module C's x</span></pre></p>
+<p>Modules can share their name, however, when trying to qualify a identifier with the module name the compiler will fail with ambiguous identifier error. One can qualify the identifier by aliasing the module.</p>
+<p><pre class="listing">
+<span class="Comment"># Module A/C</span>
+<span class="Keyword">proc</span> <span class="Identifier">fb</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;fizz&quot;</span></pre></p>
+<p><pre class="listing">
+<span class="Comment"># Module B/C</span>
+<span class="Keyword">proc</span> <span class="Identifier">fb</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;buzz&quot;</span></pre></p>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">A</span><span class="Operator">/</span><span class="Identifier">C</span>
+<span class="Keyword">import</span> <span class="Identifier">B</span><span class="Operator">/</span><span class="Identifier">C</span>
+
+<span class="Identifier">C</span><span class="Operator">.</span><span class="Identifier">fb</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># Error: ambiguous identifier: 'fb'</span></pre></p>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">A</span><span class="Operator">/</span><span class="Identifier">C</span> <span class="Keyword">as</span> <span class="Identifier">fizz</span>
+<span class="Keyword">import</span> <span class="Identifier">B</span><span class="Operator">/</span><span class="Identifier">C</span>
+
+<span class="Identifier">fizz</span><span class="Operator">.</span><span class="Identifier">fb</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># Works</span></pre></p>
 
 <h2><a class="toc-backref" id="modules-packages" href="#modules-packages">Packages</a></h2><p>A collection of modules in a file tree with an <tt class="docutils literal"><span class="pre">identifier.nimble</span></tt> file in the root of the tree is called a Nimble package. A valid package name can only be a valid Nim identifier and thus its filename is <tt class="docutils literal"><span class="pre">identifier.nimble</span></tt> where <tt class="docutils literal"><span class="pre">identifier</span></tt> is the desired package name. A module without a <tt class="docutils literal"><span class="pre">.nimble</span></tt> file is assigned the package identifier: <tt class="docutils literal"><span class="pre"><span class="Identifier">unknown</span></span></tt>.</p>
 <p>The distinction between packages allows diagnostic compiler messages to be scoped to the current project's package vs foreign packages.</p>
@@ -5266,7 +5283,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-04-24 01:24:13 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-02 01:20:29 UTC</small>
       </div>
     </div>
   </div>

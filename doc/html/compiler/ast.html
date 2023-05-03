@@ -59,7 +59,8 @@
   module*: int32
   symId*: int32
   typeId*: int32
-  sealed*: bool">IdGenerator</a></li>
+  sealed*: bool
+  disambTable*: CountTable[PIdent]">IdGenerator</a></li>
 <li><a class="reference" href="#ItemId" title="ItemId = object
   module*: int32
   item*: int32">ItemId</a></li>
@@ -235,7 +236,8 @@
   ast*: PNode
   options*: TOptions
   position*: int
-  offset*: int
+  offset*: int32
+  disamb*: int32
   loc*: TLoc
   annex*: PLib
   constraint*: PNode">TSym</a></li>
@@ -525,7 +527,7 @@
 
 </ul>
 <ul class="simple nested-toc-section">copySym
-  <li><a class="reference" href="#copySym%2CPSym%2CItemId" title="copySym(s: PSym; id: ItemId): PSym">copySym(s: PSym; id: ItemId): PSym</a></li>
+  <li><a class="reference" href="#copySym%2CPSym%2CIdGenerator" title="copySym(s: PSym; idgen: IdGenerator): PSym">copySym(s: PSym; idgen: IdGenerator): PSym</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">copyTree
@@ -541,9 +543,9 @@
 
 </ul>
 <ul class="simple nested-toc-section">createModuleAlias
-  <li><a class="reference" href="#createModuleAlias%2CPSym%2CItemId%2CPIdent%2CTLineInfo%2CTOptions" title="createModuleAlias(s: PSym; id: ItemId; newIdent: PIdent; info: TLineInfo;
-                  options: TOptions): PSym">createModuleAlias(s: PSym; id: ItemId; newIdent: PIdent; info: TLineInfo;
-                  options: TOptions): PSym</a></li>
+  <li><a class="reference" href="#createModuleAlias%2CPSym%2CIdGenerator%2CPIdent%2CTLineInfo%2CTOptions" title="createModuleAlias(s: PSym; idgen: IdGenerator; newIdent: PIdent;
+                  info: TLineInfo; options: TOptions): PSym">createModuleAlias(s: PSym; idgen: IdGenerator; newIdent: PIdent;
+                  info: TLineInfo; options: TOptions): PSym</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">delSon
@@ -612,6 +614,10 @@
 </ul>
 <ul class="simple nested-toc-section">hasSubnodeWith
   <li><a class="reference" href="#hasSubnodeWith%2CPNode%2CTNodeKind" title="hasSubnodeWith(n: PNode; kind: TNodeKind): bool">hasSubnodeWith(n: PNode; kind: TNodeKind): bool</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">idGeneratorForPackage
+  <li><a class="reference" href="#idGeneratorForPackage%2Cint32" title="idGeneratorForPackage(nextIdWillBe: int32): IdGenerator">idGeneratorForPackage(nextIdWillBe: int32): IdGenerator</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">idGeneratorFromModule
@@ -803,8 +809,8 @@
 
 </ul>
 <ul class="simple nested-toc-section">newSym
-  <li><a class="reference" href="#newSym%2CTSymKind%2CPIdent%2CItemId%2CPSym%2CTLineInfo%2CTOptions" title="newSym(symKind: TSymKind; name: PIdent; id: ItemId; owner: PSym;
-       info: TLineInfo; options: TOptions = {}): PSym">newSym(symKind: TSymKind; name: PIdent; id: ItemId; owner: PSym;
+  <li><a class="reference" href="#newSym%2CTSymKind%2CPIdent%2CIdGenerator%2CPSym%2CTLineInfo%2CTOptions" title="newSym(symKind: TSymKind; name: PIdent; idgen: IdGenerator; owner: PSym;
+       info: TLineInfo; options: TOptions = {}): PSym">newSym(symKind: TSymKind; name: PIdent; idgen: IdGenerator; owner: PSym;
        info: TLineInfo; options: TOptions = {}): PSym</a></li>
 
 </ul>
@@ -1072,12 +1078,13 @@
   <span class="Identifier">symId</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
   <span class="Identifier">typeId</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
   <span class="Identifier">sealed</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
+  <span class="Identifier">disambTable</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">CountTable</span><span class="Other">[</span><a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">]</span>
 </pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1141" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1141" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1143" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1143" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1186,8 +1193,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L992" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L992" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L994" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L994" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1196,8 +1203,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L996" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L996" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L998" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L998" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1209,8 +1216,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L997" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L997" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L999" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L999" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1234,8 +1241,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L983" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L983" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L985" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L985" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1244,8 +1251,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L987" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L987" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L989" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L989" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1257,8 +1264,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L988" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L988" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L990" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L990" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1268,8 +1275,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1017" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1017" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1019" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1019" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1509,8 +1516,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1001" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1001" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1003" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1003" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1519,8 +1526,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1006" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1006" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1008" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1008" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1542,8 +1549,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1007" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1007" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1009" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1009" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1552,8 +1559,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1012" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1012" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1014" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1014" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1565,8 +1572,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1013" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1013" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1015" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1015" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1577,8 +1584,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L978" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L978" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L980" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L980" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1587,8 +1594,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L981" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L981" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L983" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L983" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1642,7 +1649,8 @@
   <span class="Identifier">ast</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
   <span class="Identifier">options</span><span class="Operator">*</span><span class="Other">:</span> <a href="options.html#TOptions"><span class="Identifier">TOptions</span></a>
   <span class="Identifier">position</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">offset</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">offset</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
+  <span class="Identifier">disamb</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int32</span>
   <span class="Identifier">loc</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#TLoc"><span class="Identifier">TLoc</span></a>
   <span class="Identifier">annex</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PLib"><span class="Identifier">PLib</span></a>
   <span class="Identifier">constraint</span><span class="Operator">*</span><span class="Other">:</span> <a href="ast.html#PNode"><span class="Identifier">PNode</span></a>
@@ -1729,8 +1737,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L947" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L947" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L949" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L949" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1741,8 +1749,8 @@
   <dd>
     
     as usual, order is important here
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L939" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L939" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L941" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L941" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1811,8 +1819,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L937" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L937" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L939" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L939" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1838,8 +1846,8 @@
   <dd>
     
     convenience switch for trying out things
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1177" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1177" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1183" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1183" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1877,8 +1885,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1507" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1507" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1517" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1517" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1887,8 +1895,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1093" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1093" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1095" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1095" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1897,8 +1905,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1111" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1111" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1113" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1113" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1911,8 +1919,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1067" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1067" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1069" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1069" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1921,8 +1929,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1076" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1076" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1078" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1078" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1956,8 +1964,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1108" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1108" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1110" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1110" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1966,8 +1974,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1122" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1122" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1124" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1124" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1976,8 +1984,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1095" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1095" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1097" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1097" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2057,8 +2065,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1089" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1089" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1091" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1091" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2067,8 +2075,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1060" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1060" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1062" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1062" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2077,8 +2085,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1399" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1399" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1409" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1409" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2088,8 +2096,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1074" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1074" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1076" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1076" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2098,8 +2106,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1092" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1092" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1094" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1094" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2108,8 +2116,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1087" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1087" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1089" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1089" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2118,8 +2126,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1097" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1097" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1099" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1099" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2128,8 +2136,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1078" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1078" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1080" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1080" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2139,8 +2147,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1099" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1099" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1101" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1101" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2159,8 +2167,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1106" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1106" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1108" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1108" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2169,8 +2177,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1101" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1101" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1103" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1103" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2179,8 +2187,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1107" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1107" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1109" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1109" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2199,8 +2207,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1105" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1105" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1107" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1107" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2209,8 +2217,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1104" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1104" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1106" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1106" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2219,8 +2227,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1114" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1114" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1116" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1116" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2229,8 +2237,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1113" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1113" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1115" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1115" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2264,8 +2272,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2129" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2129" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2139" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2139" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2275,8 +2283,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1057" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1057" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1059" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1059" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2285,8 +2293,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1148" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1148" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1151" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1151" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2295,8 +2303,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1090" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1090" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1092" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1092" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2305,8 +2313,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1088" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1088" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1090" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1090" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2319,8 +2327,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1081" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1081" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1083" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1083" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2339,8 +2347,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1091" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1091" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1093" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1093" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2349,8 +2357,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1110" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1110" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1112" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1112" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2359,8 +2367,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1080" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1080" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1082" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1082" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2379,8 +2387,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1094" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1094" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1096" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1096" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2389,8 +2397,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1109" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1109" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1111" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1111" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2560,8 +2568,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1116" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1116" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1118" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1118" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2571,8 +2579,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1117" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1117" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1119" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1119" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2581,8 +2589,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1400" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1400" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1410" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1410" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2593,8 +2601,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1063" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1063" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1065" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1065" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2732,8 +2740,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1510" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1510" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1520" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1520" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2768,8 +2776,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1200" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1200" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1206" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1206" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2781,8 +2789,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1204" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1204" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1210" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1210" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2794,8 +2802,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2076" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2076" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2086" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2086" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2807,8 +2815,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1673" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1673" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1683" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1683" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2820,8 +2828,8 @@
   <dd>
     
     The compiler will use this internally to add nodes that will be appended to the module after the sem pass
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1388" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1388" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1398" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1398" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2833,8 +2841,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1536" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1536" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1546" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1546" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2846,8 +2854,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1355" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1355" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1365" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1365" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2859,8 +2867,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2090" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2090" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2100" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2100" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2872,8 +2880,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2084" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2084" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2094" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2094" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2885,8 +2893,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1032" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1032" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1034" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1034" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2898,8 +2906,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1037" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1037" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1039" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1039" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2912,8 +2920,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1803" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1803" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1813" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1813" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2926,8 +2934,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1407" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1407" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1417" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1417" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2939,8 +2947,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1681" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1681" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1691" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1691" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2953,8 +2961,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1412" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1412" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1422" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1422" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2967,21 +2975,22 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1402" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1402" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1412" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1412" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 
 </div>
 <div id="copySym-procs-all">
-  <div id="copySym,PSym,ItemId">
-  <dt><pre><span class="Keyword">proc</span> <a href="#copySym%2CPSym%2CItemId"><span class="Identifier">copySym</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">id</span><span class="Other">:</span> <a href="ast.html#ItemId"><span class="Identifier">ItemId</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="copySym,PSym,IdGenerator">
+  <dt><pre><span class="Keyword">proc</span> <a href="#copySym%2CPSym%2CIdGenerator"><span class="Identifier">copySym</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">idgen</span><span class="Other">:</span> <a href="ast.html#IdGenerator"><span class="Identifier">IdGenerator</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1562" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1562" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1572" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1572" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -2993,8 +3002,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1775" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1775" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1785" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1785" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3007,8 +3016,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1782" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1782" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1792" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1792" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3021,23 +3030,23 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1554" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1554" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1564" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1564" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 
 </div>
 <div id="createModuleAlias-procs-all">
-  <div id="createModuleAlias,PSym,ItemId,PIdent,TLineInfo,TOptions">
-  <dt><pre><span class="Keyword">proc</span> <a href="#createModuleAlias%2CPSym%2CItemId%2CPIdent%2CTLineInfo%2CTOptions"><span class="Identifier">createModuleAlias</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">id</span><span class="Other">:</span> <a href="ast.html#ItemId"><span class="Identifier">ItemId</span></a><span class="Other">;</span> <span class="Identifier">newIdent</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">;</span>
-                       <span class="Identifier">options</span><span class="Other">:</span> <a href="options.html#TOptions"><span class="Identifier">TOptions</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="createModuleAlias,PSym,IdGenerator,PIdent,TLineInfo,TOptions">
+  <dt><pre><span class="Keyword">proc</span> <a href="#createModuleAlias%2CPSym%2CIdGenerator%2CPIdent%2CTLineInfo%2CTOptions"><span class="Identifier">createModuleAlias</span></a><span class="Other">(</span><span class="Identifier">s</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span> <span class="Identifier">idgen</span><span class="Other">:</span> <a href="ast.html#IdGenerator"><span class="Identifier">IdGenerator</span></a><span class="Other">;</span> <span class="Identifier">newIdent</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span>
+                       <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">;</span> <span class="Identifier">options</span><span class="Other">:</span> <a href="options.html#TOptions"><span class="Identifier">TOptions</span></a><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1578" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1578" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1588" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1588" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3049,8 +3058,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1676" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1676" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1686" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1686" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3062,8 +3071,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1182" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1182" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1188" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1188" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3075,8 +3084,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1559" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1559" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1569" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1569" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3088,8 +3097,8 @@
   <dd>
     
     gets the pragma node of routine/type/var/let/const symbol <tt class="docutils literal"><span class="pre"><span class="Identifier">s</span></span></tt>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1244" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1244" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1250" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1250" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3101,8 +3110,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2019" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2019" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2029" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2029" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3114,8 +3123,8 @@
   <dd>
     
     return the <tt class="docutils literal"><span class="pre"><span class="Identifier">nkPragma</span></span></tt> node for declaration <tt class="docutils literal"><span class="pre"><span class="Identifier">n</span></span></tt>, or <tt class="docutils literal"><span class="pre"><span class="Keyword">nil</span></span></tt> if no pragma was found. Currently only supports routineDefs + {nkTypeDef}.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1213" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1213" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1219" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1219" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3128,8 +3137,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1840" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1840" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1850" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1850" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3142,8 +3151,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1820" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1820" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1830" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1830" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3160,8 +3169,8 @@
 </div>
 
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1833" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1833" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1843" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1843" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3173,8 +3182,8 @@
   <dd>
     
     Returns underlying <tt class="docutils literal"><span class="pre"><span class="Identifier">PIdent</span></span></tt> for <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Identifier">nkSym</span><span class="Punctuation">,</span> <span class="Identifier">nkIdent</span><span class="Punctuation">}</span></span></tt>, or <tt class="docutils literal"><span class="pre"><span class="Keyword">nil</span></span></tt>.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1124" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1124" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1126" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1126" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3187,8 +3196,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1851" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1851" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1861" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1861" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3201,8 +3210,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1863" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1863" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1873" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1873" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3227,8 +3236,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1795" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1795" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1805" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1805" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3240,8 +3249,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1925" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1925" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1935" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1935" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3254,8 +3263,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1789" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1789" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1799" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1799" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3268,8 +3277,22 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1811" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1811" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1821" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1821" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+
+  </dd>
+</div>
+
+</div>
+<div id="idGeneratorForPackage-procs-all">
+  <div id="idGeneratorForPackage,int32">
+  <dt><pre><span class="Keyword">proc</span> <a href="#idGeneratorForPackage%2Cint32"><span class="Identifier">idGeneratorForPackage</span></a><span class="Other">(</span><span class="Identifier">nextIdWillBe</span><span class="Other">:</span> <span class="Identifier">int32</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#IdGenerator"><span class="Identifier">IdGenerator</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1157" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1157" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3282,8 +3305,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1150" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1150" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1153" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1153" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3295,8 +3318,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1614" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1614" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1624" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1624" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3308,8 +3331,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1597" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1597" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1607" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1607" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3321,8 +3344,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1618" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1618" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1628" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1628" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3334,8 +3357,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1610" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1610" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1620" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1620" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3347,8 +3370,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1590" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1590" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1600" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1600" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3360,8 +3383,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1934" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1934" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1944" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1944" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3373,8 +3396,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1179" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1179" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1185" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1185" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3386,8 +3409,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2058" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2058" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2068" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2068" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3400,8 +3423,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2055" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2055" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2065" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2065" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3414,8 +3437,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1916" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1916" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1926" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1926" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3427,8 +3450,8 @@
   <dd>
     
     'void' and 'typed' types are often equivalent to 'nil' these days:
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1937" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1937" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1947" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1947" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3440,8 +3463,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1637" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1637" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1647" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1647" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3453,8 +3476,8 @@
   <dd>
     
     used to judge whether a node is generic params.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1873" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1873" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1883" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1883" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3467,8 +3490,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1877" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1877" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1887" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1887" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3483,8 +3506,8 @@
 <li>either generic definition or instance</li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1886" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1886" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1896" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1896" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3497,8 +3520,8 @@
   <dd>
     
     determines if this symbol represents a generic routine the unusual name is so it doesn't collide and eventually replaces <tt class="docutils literal"><span class="pre"><span class="Identifier">isGenericRoutine</span></span></tt>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1880" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1880" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1890" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1890" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3511,8 +3534,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2000" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2000" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2010" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2010" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3524,8 +3547,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2011" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2011" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2021" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2021" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3538,8 +3561,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2049" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2049" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2059" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2059" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3551,8 +3574,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2052" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2052" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2062" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2062" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3564,8 +3587,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1362" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1362" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1372" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1372" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3578,8 +3601,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2122" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2122" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2132" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2132" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3591,8 +3614,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2126" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2126" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2136" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2136" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3604,8 +3627,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1913" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1913" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1923" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1923" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3617,8 +3640,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1920" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1920" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1930" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1930" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3630,8 +3653,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2061" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2061" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2071" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2071" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3643,8 +3666,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2064" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2064" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2074" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2074" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3656,8 +3679,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1367" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1367" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1377" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1377" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3669,8 +3692,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1449" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1449" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1459" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1459" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3682,8 +3705,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1186" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1186" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1192" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1192" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3696,8 +3719,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1375" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1375" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1385" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1385" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3707,8 +3730,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1370" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1370" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1380" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1380" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3720,8 +3743,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1941" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1941" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1951" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1951" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3734,8 +3757,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1486" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1486" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1496" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1496" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3748,8 +3771,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1424" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1424" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1434" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1434" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3761,8 +3784,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1601" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1601" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1611" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1611" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3775,8 +3798,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1441" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1441" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1451" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1451" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3786,8 +3809,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1445" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1445" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1455" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1455" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3800,8 +3823,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1459" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1459" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1469" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1469" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3811,8 +3834,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1482" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1482" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1492" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1492" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3824,8 +3847,8 @@
   <dd>
     
     new node with unknown line info, no type, and no children
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1291" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1291" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1297" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1297" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3838,8 +3861,8 @@
   <dd>
     
     new node with line info, no type, and no children
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1296" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1296" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1302" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1302" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3849,8 +3872,8 @@
   <dd>
     
     new node with line info, type, and children
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1301" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1301" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1307" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1307" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3863,8 +3886,8 @@
   <dd>
     
     new node with line info, type, and no children
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1308" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1308" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1314" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1314" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3878,8 +3901,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1498" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1498" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1508" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1508" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3892,8 +3915,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2067" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2067" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2077" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2077" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3905,8 +3928,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1533" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1533" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1543" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1543" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3919,8 +3942,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1490" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1490" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1500" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1500" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3930,8 +3953,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1494" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1494" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1504" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1504" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3943,23 +3966,23 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1594" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1594" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1604" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1604" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 
 </div>
 <div id="newSym-procs-all">
-  <div id="newSym,TSymKind,PIdent,ItemId,PSym,TLineInfo,TOptions">
-  <dt><pre><span class="Keyword">proc</span> <a href="#newSym%2CTSymKind%2CPIdent%2CItemId%2CPSym%2CTLineInfo%2CTOptions"><span class="Identifier">newSym</span></a><span class="Other">(</span><span class="Identifier">symKind</span><span class="Other">:</span> <a href="ast.html#TSymKind"><span class="Identifier">TSymKind</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">id</span><span class="Other">:</span> <a href="ast.html#ItemId"><span class="Identifier">ItemId</span></a><span class="Other">;</span> <span class="Identifier">owner</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span>
+  <div id="newSym,TSymKind,PIdent,IdGenerator,PSym,TLineInfo,TOptions">
+  <dt><pre><span class="Keyword">proc</span> <a href="#newSym%2CTSymKind%2CPIdent%2CIdGenerator%2CPSym%2CTLineInfo%2CTOptions"><span class="Identifier">newSym</span></a><span class="Other">(</span><span class="Identifier">symKind</span><span class="Other">:</span> <a href="ast.html#TSymKind"><span class="Identifier">TSymKind</span></a><span class="Other">;</span> <span class="Identifier">name</span><span class="Other">:</span> <a href="idents.html#PIdent"><span class="Identifier">PIdent</span></a><span class="Other">;</span> <span class="Identifier">idgen</span><span class="Other">:</span> <a href="ast.html#IdGenerator"><span class="Identifier">IdGenerator</span></a><span class="Other">;</span> <span class="Identifier">owner</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a><span class="Other">;</span>
             <span class="Identifier">info</span><span class="Other">:</span> <a href="lineinfos.html#TLineInfo"><span class="Identifier">TLineInfo</span></a><span class="Other">;</span> <span class="Identifier">options</span><span class="Other">:</span> <a href="options.html#TOptions"><span class="Identifier">TOptions</span></a> <span class="Other">=</span> <span class="Other">{</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <a href="ast.html#PSym"><span class="Identifier">PSym</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1344" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1344" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1350" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1350" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3971,8 +3994,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1429" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1429" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1439" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1439" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3982,8 +4005,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1435" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1435" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1445" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1445" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -3996,8 +4019,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1314" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1314" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1320" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1320" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4010,8 +4033,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1320" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1320" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1326" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1326" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4025,8 +4048,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1326" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1326" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1332" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1332" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4039,8 +4062,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1516" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1516" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1526" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1526" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4053,8 +4076,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1154" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1154" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1160" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1160" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4067,8 +4090,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1159" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1159" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1165" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1165" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4080,8 +4103,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1909" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1909" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1919" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1919" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4094,8 +4117,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1641" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1641" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1651" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1651" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4108,8 +4131,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1666" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1666" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1676" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1676" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4122,8 +4145,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1670" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1670" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1680" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1680" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4135,8 +4158,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1604" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1604" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1614" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1614" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4148,8 +4171,8 @@
   <dd>
     
     works for array-like objects (strings passed as openArray in VM).
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1194" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1194" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1200" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1200" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4161,8 +4184,8 @@
   <dd>
     
     works even for leaves.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1189" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1189" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1195" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1195" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4175,8 +4198,8 @@
   <dd>
     
     set line info recursively
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1263" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1263" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1269" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1269" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4188,8 +4211,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1030" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1030" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1032" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1032" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4201,8 +4224,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1770" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1770" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1780" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1780" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4214,8 +4237,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2119" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2119" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2129" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2129" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4227,8 +4250,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2014" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2014" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2024" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2024" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4240,8 +4263,8 @@
   <dd>
     
     Generic instantiations are owned by their originating generic symbol. This proc skips such owners and goes straight to the owner of the generic itself (the module or the enclosing proc).
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1900" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1900" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1910" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1910" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4253,8 +4276,8 @@
   <dd>
     
     if pragma expr, give the node the pragmas are applied to, otherwise give node itself
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1255" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1255" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1261" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1261" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4266,8 +4289,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1948" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1948" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1958" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1958" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4280,8 +4303,8 @@
   <dd>
     
     Used throughout the compiler code to test whether a type tree contains or doesn't contain a specific type/types - it is often the case that only the last child nodes of a type tree need to be searched. This is a really hot path within the compiler!
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1451" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1451" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1461" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1461" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4291,8 +4314,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1622" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1622" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1632" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1632" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4305,8 +4328,8 @@
   <dd>
     
     same as skipTypes but handles 'nil'
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1630" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1630" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1640" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1640" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4318,8 +4341,8 @@
   <dd>
     
     strips leading <tt class="docutils literal"><span class="pre"><span class="Identifier">sk</span></span></tt>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2111" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2111" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2121" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2121" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4328,8 +4351,8 @@
   <dd>
     
     strips leading <tt class="docutils literal"><span class="pre"><span class="Identifier">tk</span></span></tt>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2115" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2115" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2125" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2125" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4341,8 +4364,8 @@
   <dd>
     
     If <tt class="docutils literal"><span class="pre">typ</span></tt> is a tyRef then its immediate son is returned (which in many cases should be a <tt class="docutils literal"><span class="pre">tyObject</span></tt>). Otherwise <tt class="docutils literal"><span class="pre">typ</span></tt> is simply returned as-is.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1972" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1972" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1982" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1982" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4355,8 +4378,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1980" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1980" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1990" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1990" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4369,8 +4392,8 @@
   <dd>
     
     If <tt class="docutils literal"><span class="pre">typ</span></tt> is a tyObject then it is converted into a <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span> <span class="Operator">&lt;</span><span class="Identifier">typ</span><span class="Operator">&gt;</span></span></tt> and returned. Otherwise <tt class="docutils literal"><span class="pre">typ</span></tt> is simply returned as-is.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1964" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1964" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1974" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1974" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4383,8 +4406,8 @@
   <dd>
     
     If <tt class="docutils literal"><span class="pre">typ</span></tt> is not a tyVar then it is converted into a <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span> <span class="Operator">&lt;</span><span class="Identifier">typ</span><span class="Operator">&gt;</span></span></tt> and returned. Otherwise <tt class="docutils literal"><span class="pre">typ</span></tt> is simply returned as-is.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1956" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1956" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1966" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1966" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4396,8 +4419,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1736" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1736" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1746" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1746" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4410,8 +4433,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1714" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1714" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1724" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1724" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4424,8 +4447,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1718" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1718" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1728" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1728" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4437,8 +4460,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1722" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1722" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1732" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1732" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4451,8 +4474,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1739" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1739" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1749" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1749" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4465,8 +4488,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1710" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1710" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1720" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1720" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4478,8 +4501,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1744" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1744" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1754" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1754" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4492,8 +4515,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1420" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1420" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1430" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1430" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4511,8 +4534,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1928" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1928" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1938" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1938" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4525,8 +4548,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1931" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1931" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1941" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1941" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4544,8 +4567,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1210" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1210" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1216" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1216" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4554,8 +4577,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1207" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1207" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1213" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1213" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4567,8 +4590,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1211" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1211" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1217" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1217" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4577,8 +4600,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1208" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1208" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1214" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1214" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4590,8 +4613,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2046" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2046" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2056" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2056" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4603,8 +4626,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1380" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1380" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1390" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1390" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4616,8 +4639,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1384" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1384" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1394" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1394" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4629,8 +4652,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2038" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2038" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2048" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2048" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4642,8 +4665,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1136" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1136" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1138" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1138" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4655,8 +4678,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2040" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2040" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2050" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2050" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4668,8 +4691,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1332" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1332" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1338" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1338" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4681,8 +4704,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1725" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1725" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L1735" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L1735" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4694,8 +4717,8 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2043" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2043" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/compiler/ast.nim#L2053" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/compiler/ast.nim#L2053" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -4717,7 +4740,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-04-24 01:25:54 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-02 01:21:48 UTC</small>
       </div>
     </div>
   </div>
