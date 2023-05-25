@@ -393,7 +393,7 @@ proc addToVarSection(c: PContext; result: var PNode; orig, identDefs: PNode) =
     result.add identDefs
 
 proc isDiscardUnderscore(v: PSym): bool =
-  if v.name.s == "_":
+  if v.name.id == ord(wUnderscore):
     v.flags.incl(sfGenSym)
     result = true
 
@@ -563,7 +563,7 @@ proc semVarMacroPragma(c: PContext, a: PNode, n: PNode): PNode =
         return result
 
 template isLocalSym(sym: PSym): bool =
-  sym.kind in {skVar, skLet} and not
+  sym.kind in {skVar, skLet, skParam} and not
     ({sfGlobal, sfPure} * sym.flags != {} or
       sfCompileTime in sym.flags) or
       sym.kind in {skProc, skFunc, skIterator} and
@@ -613,7 +613,7 @@ proc makeVarTupleSection(c: PContext, n, a, def: PNode, typ: PType, symkind: TSy
   result = newNodeI(n.kind, a.info)
   for j in 0..<a.len-2:
     let name = a[j]
-    if useTemp and name.kind == nkIdent and name.ident.s == "_":
+    if useTemp and name.kind == nkIdent and name.ident.id == ord(wUnderscore):
       # skip _ assignments if we are using a temp as they are already evaluated
       continue
     if name.kind == nkVarTuple:
@@ -1815,9 +1815,12 @@ proc whereToBindTypeHook(c: PContext; t: PType): PType =
 proc bindTypeHook(c: PContext; s: PSym; n: PNode; op: TTypeAttachedOp) =
   let t = s.typ
   var noError = false
-  let cond = if op in {attachedDestructor, attachedWasMoved}:
+  let cond = case op
+             of {attachedDestructor, attachedWasMoved}:
                t.len == 2 and t[0] == nil and t[1].kind == tyVar
-             elif op == attachedTrace:
+             of attachedDup:
+               t.len == 2 and t[0] != nil
+             of attachedTrace:
                t.len == 3 and t[0] == nil and t[1].kind == tyVar and t[2].kind == tyPointer
              else:
                t.len >= 2 and t[0] == nil
@@ -1843,9 +1846,13 @@ proc bindTypeHook(c: PContext; s: PSym; n: PNode; op: TTypeAttachedOp) =
         localError(c.config, n.info, errGenerated,
           "type bound operation `" & s.name.s & "` can be defined only in the same module with its type (" & obj.typeToString() & ")")
   if not noError and sfSystemModule notin s.owner.flags:
-    if op == attachedTrace:
+    case op
+    of attachedTrace:
       localError(c.config, n.info, errGenerated,
         "signature for '=trace' must be proc[T: object](x: var T; env: pointer)")
+    of attachedDup:
+      localError(c.config, n.info, errGenerated,
+        "signature for '=dup' must be proc[T: object](x: var T): T")
     else:
       localError(c.config, n.info, errGenerated,
         "signature for '" & s.name.s & "' must be proc[T: object](x: var T)")
@@ -1938,6 +1945,9 @@ proc semOverride(c: PContext, s: PSym, n: PNode) =
   of "=wasmoved":
     if s.magic != mWasMoved:
       bindTypeHook(c, s, n, attachedWasMoved)
+  of "=dup":
+    if s.magic != mDup:
+      bindTypeHook(c, s, n, attachedDup)
   else:
     if sfOverriden in s.flags:
       localError(c.config, n.info, errGenerated,
@@ -2178,6 +2188,25 @@ proc semProcAux(c: PContext, n: PNode, kind: TSymKind,
 
   if sfBorrow in s.flags and c.config.cmd notin cmdDocLike:
     result[bodyPos] = c.graph.emptyNode
+  
+  if sfVirtual in s.flags:
+    if c.config.backend == backendCpp:
+      for son in s.typ.sons:
+        if son!=nil and son.isMetaType:
+          localError(c.config, n.info, "virtual unsupported for generic routine")
+
+      var typ = s.typ.sons[1]
+      if typ.kind == tyPtr:
+        typ = typ[0]
+      if typ.kind != tyObject:
+        localError(c.config, n.info, "virtual must be a non ref object type")
+      if typ.owner.id == s.owner.id and c.module.id == s.owner.id:
+        c.graph.virtualProcsPerType.mgetOrPut(typ.itemId, @[]).add s
+      else:
+        localError(c.config, n.info, 
+          "virtual procs must be defined in the same scope as the type they are virtual for and it must be a top level scope")
+    else:
+      localError(c.config, n.info, "virtual procs are only supported in C++")
 
   if n[bodyPos].kind != nkEmpty and sfError notin s.flags:
     # for DLL generation we allow sfImportc to have a body, for use in VM

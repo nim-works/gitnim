@@ -267,6 +267,7 @@
 <li><a class="reference" id="pragmas-experimental-pragma_toc" href="#pragmas-experimental-pragma">experimental pragma</a></li>
 </ul><li><a class="reference" id="implementation-specific-pragmas_toc" href="#implementation-specific-pragmas">Implementation Specific Pragmas</a></li>
 <ul class="simple"><li><a class="reference" id="implementation-specific-pragmas-bitsize-pragma_toc" href="#implementation-specific-pragmas-bitsize-pragma">Bitsize pragma</a></li>
+<li><a class="reference" id="implementation-specific-pragmas-size-pragma_toc" href="#implementation-specific-pragmas-size-pragma">size pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-align-pragma_toc" href="#implementation-specific-pragmas-align-pragma">Align pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-noalias-pragma_toc" href="#implementation-specific-pragmas-noalias-pragma">Noalias pragma</a></li>
 <li><a class="reference" id="implementation-specific-pragmas-volatile-pragma_toc" href="#implementation-specific-pragmas-volatile-pragma">Volatile pragma</a></li>
@@ -2780,7 +2781,7 @@ stmt = (IND{&gt;} complexOrSimpleStmt^+(IND{=} / ';') DED)
   <span class="Identifier">doAssert</span> <span class="Identifier">witness</span> <span class="Operator">==</span> <span class="DecNumber">2</span>
 <span class="Comment"># will still be called upon exiting scope</span>
 <span class="Identifier">doAssert</span> <span class="Identifier">witness</span> <span class="Operator">==</span> <span class="DecNumber">3</span></pre></p>
-<p>Type bound operators are: <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">destroy</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">copy</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">sink</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">trace</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">deepcopy</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">wasMoved</span></span></tt>.</p>
+<p>Type bound operators are: <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">destroy</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">copy</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">sink</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">trace</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">deepcopy</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">wasMoved</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Operator">=</span><span class="Identifier">dup</span></span></tt>.</p>
 <p>These operations can be <em>overridden</em> instead of <em>overloaded</em>. This means that the implementation is automatically lifted to structured types. For instance, if the type <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span></span></tt> has an overridden assignment operator <tt class="docutils literal"><span class="pre"><span class="Operator">=</span></span></tt>, this operator is also used for assignments of the type <tt class="docutils literal"><span class="pre"><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">T</span><span class="Punctuation">]</span></span></tt>.</p>
 <p>Since these operations are bound to a type, they have to be bound to a nominal type for reasons of simplicity of implementation; this means an overridden <tt class="docutils literal"><span class="pre"><span class="Identifier">deepCopy</span></span></tt> for <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span> <span class="Identifier">T</span></span></tt> is really bound to <tt class="docutils literal"><span class="pre"><span class="Identifier">T</span></span></tt> and not to <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span> <span class="Identifier">T</span></span></tt>. This also means that one cannot override <tt class="docutils literal"><span class="pre"><span class="Identifier">deepCopy</span></span></tt> for both <tt class="docutils literal"><span class="pre"><span class="Keyword">ptr</span> <span class="Identifier">T</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span> <span class="Identifier">T</span></span></tt> at the same time, instead a distinct or object helper type has to be used for one pointer type.</p>
 <p>For more details on some of those procs, see <a class="reference external" href="destructors.html#lifetimeminustracking-hooks">Lifetime-tracking hooks</a>.</p>
@@ -4376,7 +4377,7 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 
 <span class="Keyword">var</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="DecNumber">4</span>
 <span class="Identifier">write</span><span class="Punctuation">(</span><span class="Identifier">stdout</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">)</span> <span class="Comment"># not ambiguous: uses the module C's x</span></pre></p>
-<p>Modules can share their name, however, when trying to qualify a identifier with the module name the compiler will fail with ambiguous identifier error. One can qualify the identifier by aliasing the module.</p>
+<p>Modules can share their name, however, when trying to qualify an identifier with the module name the compiler will fail with ambiguous identifier error. One can qualify the identifier by aliasing the module.</p>
 <p><pre class="listing">
 <span class="Comment"># Module A/C</span>
 <span class="Keyword">proc</span> <span class="Identifier">fb</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="Identifier">echo</span> <span class="StringLit">&quot;fizz&quot;</span></pre></p>
@@ -4594,7 +4595,7 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
 <span class="Keyword">template</span> <span class="Identifier">example</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span> <span class="StringLit">&quot;https://nim-lang.org&quot;</span>
 <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">pop</span><span class="Operator">.</span><span class="Punctuation">}</span>
 
-<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">push</span> <span class="Identifier">deprecated</span><span class="Punctuation">,</span> <span class="Identifier">hint</span><span class="Punctuation">[</span><span class="Identifier">LineTooLong</span><span class="Punctuation">]</span><span class="Punctuation">:</span> <span class="Identifier">off</span><span class="Punctuation">,</span> <span class="Identifier">used</span><span class="Punctuation">,</span> <span class="Identifier">stackTrace</span><span class="Punctuation">:</span> <span class="Identifier">off</span><span class="Operator">.</span><span class="Punctuation">}</span>
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">push</span> <span class="Identifier">deprecated</span><span class="Punctuation">,</span> <span class="Identifier">used</span><span class="Punctuation">,</span> <span class="Identifier">stackTrace</span><span class="Punctuation">:</span> <span class="Identifier">off</span><span class="Operator">.</span><span class="Punctuation">}</span>
 <span class="Keyword">proc</span> <span class="Identifier">sample</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">bool</span> <span class="Operator">=</span> <span class="Identifier">true</span>
 <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">pop</span><span class="Operator">.</span><span class="Punctuation">}</span></pre></p>
 <p>For third party pragmas, it depends on its implementation but uses the same syntax.</p>
@@ -4609,9 +4610,9 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
   <span class="Identifier">result</span> <span class="Operator">=</span> <span class="Identifier">s</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="Identifier">pattern</span><span class="Punctuation">)</span></pre></p>
 <p>When used within a generic proc, a separate unique global variable will be created for each instantiation of the proc. The order of initialization of the created global variables within a module is not defined, but all of them will be initialized after any top-level variables in their originating module and before any variable in a module that imports it.</p>
 
-<h2><a class="toc-backref" id="pragmas-disabling-certain-messages" href="#pragmas-disabling-certain-messages">Disabling certain messages</a></h2><p>Nim generates some warnings and hints (&quot;line too long&quot;) that may annoy the user. A mechanism for disabling certain messages is provided: Each hint and warning message is associated with a symbol. This is the message's identifier, which can be used to enable or disable the message by putting it in brackets following the pragma:</p>
+<h2><a class="toc-backref" id="pragmas-disabling-certain-messages" href="#pragmas-disabling-certain-messages">Disabling certain messages</a></h2><p>Nim generates some warnings and hints that may annoy the user. A mechanism for disabling certain messages is provided: Each hint and warning message is associated with a symbol. This is the message's identifier, which can be used to enable or disable the message by putting it in brackets following the pragma:</p>
 <p><pre class="listing">
-<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">hint</span><span class="Punctuation">[</span><span class="Identifier">LineTooLong</span><span class="Punctuation">]</span><span class="Punctuation">:</span> <span class="Identifier">off</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Comment"># turn off the hint about too long lines</span></pre></p>
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">hint</span><span class="Punctuation">[</span><span class="Identifier">XDeclaredButNotUsed</span><span class="Punctuation">]</span><span class="Punctuation">:</span> <span class="Identifier">off</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Comment"># Turn off the hint about declared but not used symbols.</span></pre></p>
 <p>This is often better than disabling all warnings at once.</p>
 
 <h2><a class="toc-backref" id="pragmas-used-pragma" href="#pragmas-used-pragma">used pragma</a></h2><p>Nim produces a warning for symbols that are not exported and not used either. The <tt class="docutils literal"><span class="pre"><span class="Identifier">used</span></span></tt> pragma can be attached to a symbol to suppress this warning. This is particularly useful when the symbol was generated by a macro:</p>
@@ -4677,6 +4678,25 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
   <span class="Keyword">unsigned</span> <span class="Keyword">int</span> <span class="Identifier">flag</span><span class="Punctuation">:</span><span class="DecNumber">1</span><span class="Punctuation">;</span>
 <span class="Punctuation">}</span><span class="Punctuation">;</span></pre></p>
 
+<h2><a class="toc-backref" id="implementation-specific-pragmas-size-pragma" href="#implementation-specific-pragmas-size-pragma">size pragma</a></h2><p>Nim automatically determines the size of an enum. But when wrapping a C enum type, it needs to be of a specific size. The <tt class="docutils literal"><span class="pre"><span class="Identifier">size</span> <span class="Identifier">pragma</span></span></tt> allows specifying the size of the enum type.</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
+  <span class="Identifier">EventType</span><span class="Operator">*</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">size</span><span class="Punctuation">:</span> <span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">uint32</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">enum</span>
+    <span class="Identifier">QuitEvent</span><span class="Punctuation">,</span>
+    <span class="Identifier">AppTerminating</span><span class="Punctuation">,</span>
+    <span class="Identifier">AppLowMemory</span>
+
+<span class="Identifier">doAssert</span> <span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">EventType</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">uint32</span><span class="Punctuation">)</span></pre></p>
+<p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">size</span> <span class="Identifier">pragma</span></span></tt> can also specify the size of an <tt class="docutils literal"><span class="pre"><span class="Identifier">importc</span></span></tt> incomplete object type so that one can get the size of it at compile time even if it was declared without fields.</p>
+<p><pre class="listing">
+  <span class="Keyword">type</span>
+    <span class="Identifier">AtomicFlag</span><span class="Operator">*</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importc</span><span class="Punctuation">:</span> <span class="StringLit">&quot;atomic_flag&quot;</span><span class="Punctuation">,</span> <span class="Identifier">header</span><span class="Punctuation">:</span> <span class="StringLit">&quot;&lt;stdatomic.h&gt;&quot;</span><span class="Punctuation">,</span> <span class="Identifier">size</span><span class="Punctuation">:</span> <span class="FloatNumber">1.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+  
+  <span class="Keyword">static</span><span class="Punctuation">:</span>
+    <span class="Comment"># if AtomicFlag didn't have the size pragma, this code would result in a compile time error.</span>
+    <span class="Identifier">echo</span> <span class="Identifier">sizeof</span><span class="Punctuation">(</span><span class="Identifier">AtomicFlag</span><span class="Punctuation">)</span></pre></p>
+<p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">size</span> <span class="Identifier">pragma</span></span></tt> accepts only the values 1, 2, 4 or 8.</p>
+
 <h2><a class="toc-backref" id="implementation-specific-pragmas-align-pragma" href="#implementation-specific-pragmas-align-pragma">Align pragma</a></h2><p>The <span id="align_1">align</span> pragma is for variables and object field members. It modifies the alignment requirement of the entity being declared. The argument must be a constant power of 2. Valid non-zero alignments that are weaker than other align pragmas on the same declaration are ignored. Alignments that are weaker than the alignment requirement of the type are ignored.</p>
 <p><pre class="listing">
 <span class="Keyword">type</span>
@@ -4727,8 +4747,12 @@ is, shallowCopy, getAst, astToStr, spawn, procCall</pre>
          <span class="Identifier">pure</span><span class="Punctuation">,</span> <span class="Identifier">incompleteStruct</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">object</span></pre></p>
 
 <h2><a class="toc-backref" id="implementation-specific-pragmas-compile-pragma" href="#implementation-specific-pragmas-compile-pragma">Compile pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">compile</span></span></tt> pragma can be used to compile and link a C/C++ source file with the project:</p>
+<p>This pragma can take three forms. The first is a simple file input:</p>
 <p><pre class="listing">
 <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">compile</span><span class="Punctuation">:</span> <span class="StringLit">&quot;myfile.cpp&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></pre></p>
+<p>The second form is a tuple where the second arg is the output name strutils formatter:</p>
+<p><pre class="listing">
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">compile</span><span class="Punctuation">:</span> <span class="Punctuation">(</span><span class="StringLit">&quot;file.c&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;$1.o&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Punctuation">}</span></pre></p>
 <p><strong>Note</strong>: Nim computes a SHA1 checksum and only recompiles the file if it has changed. One can use the <tt class="docutils literal"><span class="pre option">-f</span></tt> command-line option to force the recompilation of the file.</p>
 <p>Since 1.4 the <tt class="docutils literal"><span class="pre"><span class="Identifier">compile</span></span></tt> pragma is also available with this syntax:</p>
 <p><pre class="listing">
@@ -4963,7 +4987,7 @@ using namespace gui;
 <span class="Identifier">g</span><span class="Operator">.</span><span class="Identifier">free</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
 <p>The compiler needs to be told to generate Objective C (command <tt class="docutils literal"><span class="pre option">objc</span></tt>) for this to work. The conditional symbol <tt class="docutils literal"><span class="pre">objc</span></tt> is defined when the compiler emits Objective C code.</p>
 
-<h2><a class="toc-backref" id="implementation-specific-pragmas-codegendecl-pragma" href="#implementation-specific-pragmas-codegendecl-pragma">CodegenDecl pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">codegenDecl</span></span></tt> pragma can be used to directly influence Nim's code generator. It receives a format string that determines how the variable or proc is declared in the generated code.</p>
+<h2><a class="toc-backref" id="implementation-specific-pragmas-codegendecl-pragma" href="#implementation-specific-pragmas-codegendecl-pragma">CodegenDecl pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">codegenDecl</span></span></tt> pragma can be used to directly influence Nim's code generator. It receives a format string that determines how the variable, proc or object type is declared in the generated code.</p>
 <p>For variables, $1 in the format string represents the type of the variable, $2 is the name of the variable, and each appearance of $# represents $1/$2 respectively according to its position.</p>
 <p>The following Nim code:</p>
 <p><pre class="listing">
@@ -4980,6 +5004,22 @@ using namespace gui;
 <p>will generate this code:</p>
 <p><pre class="listing">
 <span class="Identifier">__interrupt</span> <span class="Keyword">void</span> <span class="Identifier">myinterrupt</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+<p>For object types, the $1 represents the name of the object type, $2 is the list of fields and $3 is the base type.</p>
+<p><pre class="listing">
+
+<span class="Keyword">const</span> <span class="Identifier">strTemplate</span> <span class="Operator">=</span> <span class="LongStringLit">&quot;&quot;&quot;
+  struct $1 {
+    $2
+  };
+&quot;&quot;&quot;</span>
+<span class="Keyword">type</span> <span class="Identifier">Foo</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">codegenDecl</span><span class="Punctuation">:</span><span class="Identifier">strTemplate</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">int</span></pre></p>
+<p>will generate this code:</p>
+<p><pre class="listing">
+<span class="Keyword">struct</span> <span class="Identifier">Foo</span> <span class="Punctuation">{</span>
+  <span class="Identifier">NI</span> <span class="Identifier">a</span><span class="Punctuation">;</span>
+  <span class="Identifier">NI</span> <span class="Identifier">b</span><span class="Punctuation">;</span>
+<span class="Punctuation">}</span><span class="Punctuation">;</span></pre></p>
 
 <h2><a class="toc-backref" id="implementation-specific-pragmas-nimcppnonpod-pragma" href="#implementation-specific-pragmas-nimcppnonpod-pragma"><tt class="docutils literal"><span class="pre"><span class="Identifier">cppNonPod</span></span></tt> pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">cppNonPod</span></span></tt> pragma should be used for non-POD <tt class="docutils literal"><span class="pre"><span class="Identifier">importcpp</span></span></tt> types so that they work properly (in particular regarding constructor and destructor) for <tt class="docutils literal"><span class="pre"><span class="Identifier">threadvar</span></span></tt> variables. This requires <tt class="docutils literal"><span class="pre option">--tlsEmulation:off</span></tt>.</p>
 <p><pre class="listing">
@@ -5008,7 +5048,7 @@ using namespace gui;
 <p><pre class="listing">
 <span class="program">nim</span> <span class="option">c</span> <span class="Identifier">-d:package.FooBar=42</span> <span class="Identifier">foobar.nim</span></pre></p>
 <p>This helps disambiguate define names in different packages.</p>
-<p>See also the <a class="reference external" href="manual_experimental.html#generic-define-pragma">generic `define` pragma</a> for a version of these pragmas that detects the type of the define based on the constant value.</p>
+<p>See also the <a class="reference external" href="manual_experimental.html#generic-nimdefine-pragma">generic `define` pragma</a> for a version of these pragmas that detects the type of the define based on the constant value.</p>
 
 <h1><a class="toc-backref" id="userminusdefined-pragmas" href="#userminusdefined-pragmas">User-defined pragmas</a></h1>
 <h2><a class="toc-backref" id="userminusdefined-pragmas-pragma-pragma" href="#userminusdefined-pragmas-pragma-pragma">pragma pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">pragma</span></span></tt> pragma can be used to declare user-defined pragmas. This is useful because Nim's templates and macros do not affect pragmas. User-defined pragmas are in a different module-wide scope than all other symbols. They cannot be imported from a module.</p>
@@ -5125,14 +5165,14 @@ using namespace gui;
   <span class="Identifier">echo</span> <span class="Identifier">s</span></pre></p>
 <p>In the example, the external name of <tt class="docutils literal"><span class="pre"><span class="Identifier">p</span></span></tt> is set to <tt class="docutils literal"><span class="pre"><span class="Identifier">prefixp</span></span></tt>. Only <tt class="docutils literal"><span class="pre">$1</span></tt> is available and a literal dollar sign must be written as <tt class="docutils literal"><span class="pre">$$</span></tt>.</p>
 
-<h2><a class="toc-backref" id="foreign-function-interface-bycopy-pragma" href="#foreign-function-interface-bycopy-pragma">Bycopy pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">bycopy</span></span></tt> pragma can be applied to an object or tuple type and instructs the compiler to pass the type by value to procs:</p>
+<h2><a class="toc-backref" id="foreign-function-interface-bycopy-pragma" href="#foreign-function-interface-bycopy-pragma">Bycopy pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">bycopy</span></span></tt> pragma can be applied to an object or tuple type or a proc param. It instructs the compiler to pass the type by value to procs:</p>
 <p><pre class="listing">
 <span class="Keyword">type</span>
   <span class="Identifier">Vector</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">bycopy</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">object</span>
     <span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">,</span> <span class="Identifier">z</span><span class="Punctuation">:</span> <span class="Identifier">float</span></pre></p>
-<p>The Nim compiler automatically determines whether a parameter is passed by value or by reference based on the parameter type's size. If a parameter must be passed by value or by reference, (such as when interfacing with a C library) use the bycopy or byref pragmas.</p>
+<p>The Nim compiler automatically determines whether a parameter is passed by value or by reference based on the parameter type's size. If a parameter must be passed by value or by reference, (such as when interfacing with a C library) use the bycopy or byref pragmas. Notice params marked as <tt class="docutils literal"><span class="pre"><span class="Identifier">byref</span></span></tt> takes precedence over types marked as <tt class="docutils literal"><span class="pre"><span class="Identifier">bycopy</span></span></tt>.</p>
 
-<h2><a class="toc-backref" id="foreign-function-interface-byref-pragma" href="#foreign-function-interface-byref-pragma">Byref pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">byref</span></span></tt> pragma can be applied to an object or tuple type and instructs the compiler to pass the type by reference (hidden pointer) to procs.</p>
+<h2><a class="toc-backref" id="foreign-function-interface-byref-pragma" href="#foreign-function-interface-byref-pragma">Byref pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">byref</span></span></tt> pragma can be applied to an object or tuple type or a proc param. When applied to a type it instructs the compiler to pass the type by reference (hidden pointer) to procs. When applied to a param it will take precedence, even if the the type was marked as <tt class="docutils literal"><span class="pre"><span class="Identifier">bycopy</span></span></tt>. When using the Cpp backend, params marked as byref will translate to cpp references <tt class="docutils literal"><span class="pre"><span class="Operator">&amp;</span></span></tt>.</p>
 
 <h2><a class="toc-backref" id="foreign-function-interface-varargs-pragma" href="#foreign-function-interface-varargs-pragma">Varargs pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">varargs</span></span></tt> pragma can be applied to procedures only (and procedure types). It tells Nim that the proc can take a variable number of parameters after the last specified parameter. Nim string values will be converted to C strings automatically:</p>
 <p><pre class="listing">
@@ -5186,7 +5226,7 @@ libtcl8.3.so.0</pre>
 <p>This is only useful if the program is compiled as a dynamic library via the <tt class="docutils literal"><span class="pre option">--app:lib</span></tt> command-line option.</p>
 
 <h1><a class="toc-backref" id="threads" href="#threads">Threads</a></h1><p>The <tt class="docutils literal"><span class="pre option">--threads:on</span></tt> command-line switch is enabled by default. The <a class="reference external" href="typedthreads.html">typedthreads module</a> module then contains several threading primitives. See <a class="reference external" href="manual_experimental.html#parallel-amp-spawn">spawn</a> for further details.</p>
-<p>The only way to create a thread is via <tt class="docutils literal"><span class="pre"><span class="Identifier">spawn</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">createThread</span></span></tt>. The invoked proc must not use <tt class="docutils literal"><span class="pre"><span class="Keyword">var</span></span></tt> parameters nor must any of its parameters contain a <tt class="docutils literal"><span class="pre"><span class="Keyword">ref</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">closure</span></span></tt> type. This enforces the <em>no heap sharing restriction</em>.</p>
+<p>The only ways to create a thread is via <tt class="docutils literal"><span class="pre"><span class="Identifier">spawn</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">createThread</span></span></tt>.</p>
 
 <h2><a class="toc-backref" id="threads-thread-pragma" href="#threads-thread-pragma">Thread pragma</a></h2><p>A proc that is executed as a new thread of execution should be marked by the <tt class="docutils literal"><span class="pre"><span class="Identifier">thread</span></span></tt> pragma for reasons of readability. The compiler checks for violations of the <span id="no-heap-sharing-restriction_1">no heap sharing restriction</span>: This restriction implies that it is invalid to construct a data structure that consists of memory allocated from different (thread-local) heaps.</p>
 <p>A thread proc can be passed to <tt class="docutils literal"><span class="pre"><span class="Identifier">createThread</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">spawn</span></span></tt>.</p>
@@ -5242,7 +5282,7 @@ libtcl8.3.so.0</pre>
     <span class="Identifier">x</span>
 
 <span class="Identifier">echo</span> <span class="Identifier">atomicRead</span><span class="Punctuation">(</span><span class="Identifier">atomicCounter</span><span class="Punctuation">)</span></pre></p>
-<p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">locks</span></span></tt> pragma takes a list of lock expressions <tt class="docutils literal"><span class="pre"><span class="Identifier">locks</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">,</span> <span class="Operator">...</span><span class="Punctuation">]</span></span></tt> in order to support <em>multi lock</em> statements. Why these are essential is explained in the <a class="reference external" href="manual_experimental.md#lock-levels">lock levels</a> section of experimental manual.</p>
+<p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">locks</span></span></tt> pragma takes a list of lock expressions <tt class="docutils literal"><span class="pre"><span class="Identifier">locks</span><span class="Punctuation">:</span> <span class="Punctuation">[</span><span class="Identifier">a</span><span class="Punctuation">,</span> <span class="Identifier">b</span><span class="Punctuation">,</span> <span class="Operator">...</span><span class="Punctuation">]</span></span></tt> in order to support <em>multi lock</em> statements. Why these are essential is explained in the <a class="reference external" href="manual_experimental.md#lock-levels">lock levels</a> section of the experimental manual.</p>
 
 <h3><a class="toc-backref" id="guards-and-locks-sections-protecting-general-locations" href="#guards-and-locks-sections-protecting-general-locations">Protecting general locations</a></h3><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">guard</span></span></tt> annotation can also be used to protect fields within an object. The guard then needs to be another field within the same object or a global variable.</p>
 <p>Since objects can reside on the heap or on the stack, this greatly enhances the expressiveness of the language:</p>
@@ -5283,7 +5323,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-02 01:20:29 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-25 01:19:12 UTC</small>
       </div>
     </div>
   </div>

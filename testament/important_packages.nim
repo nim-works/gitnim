@@ -43,13 +43,14 @@ pkg "awk"
 pkg "bigints"
 pkg "binaryheap", "nim c -r binaryheap.nim"
 pkg "BipBuffer"
-pkg "blscurve", allowFailure = true # pending https://github.com/status-im/nim-blscurve/issues/39
+pkg "blscurve", allowFailure = true
 pkg "bncurve"
 pkg "brainfuck", "nim c -d:release -r tests/compile.nim"
 pkg "bump", "nim c --gc:arc --path:. -r tests/tbump.nim", "https://github.com/disruptek/bump", allowFailure = true
 pkg "c2nim", "nim c testsuite/tester.nim"
 pkg "cascade"
 pkg "cello", url = "https://github.com/nim-lang/cello", useHead = true
+pkg "checksums"
 pkg "chroma"
 pkg "chronicles", "nim c -o:chr -r chronicles.nim", url = "https://github.com/nim-lang/nim-chronicles"
 pkg "chronos", "nim c -r -d:release tests/testall"
@@ -57,7 +58,7 @@ pkg "cligen", "nim c --path:. -r cligen.nim"
 pkg "combparser", "nimble test --gc:orc"
 pkg "compactdict"
 pkg "comprehension", "nimble test", "https://github.com/alehander92/comprehension"
-pkg "criterion", allowFailure = true # pending https://github.com/disruptek/criterion/issues/3 (wrongly closed)
+pkg "criterion", allowFailure = true # needs testing binary
 pkg "datamancer"
 pkg "dashing", "nim c tests/functional.nim"
 pkg "delaunay"
@@ -83,7 +84,7 @@ pkg "iterutils"
 pkg "jstin"
 pkg "karax", "nim c -r tests/tester.nim"
 pkg "kdtree", "nimble test -d:nimLegacyRandomInitRand", "https://github.com/jblindsay/kdtree"
-pkg "loopfusion", url = "https://github.com/nim-lang/loop-fusion"
+pkg "loopfusion"
 pkg "lockfreequeues"
 pkg "macroutils"
 pkg "manu"
@@ -92,7 +93,8 @@ pkg "measuremancer", "nimble testDeps; nimble -y test"
 pkg "memo"
 pkg "msgpack4nim", "nim c -r tests/test_spec.nim"
 pkg "nake", "nim c nakefile.nim"
-pkg "neo", "nim c -d:blas=openblas --mm:refc tests/all.nim"
+pkg "neo", "nim c -d:blas=openblas --mm:refc tests/all.nim", "https://github.com/metagn/neo"
+# remove custom url when https://github.com/andreaferretti/neo/pull/53 is merged
 pkg "nesm", "nimble tests", "https://github.com/nim-lang/NESM", useHead = true
 pkg "netty"
 pkg "nico", allowFailure = true
@@ -103,7 +105,6 @@ pkg "NimData", "nim c -o:nimdataa src/nimdata.nim"
 pkg "nimes", "nim c src/nimes.nim"
 pkg "nimfp", "nim c -o:nfp -r src/fp.nim"
 pkg "nimgame2", "nim c --mm:refc nimgame2/nimgame.nim"
-  # XXX Doesn't work with deprecated 'randomize', will create a PR.
 pkg "nimgen", "nim c -o:nimgenn -r src/nimgen/runcfg.nim"
 pkg "nimib"
 pkg "nimlsp"
@@ -170,5 +171,5 @@ pkg "winim", "nim c winim.nim"
 pkg "with"
 pkg "ws", allowFailure = true
 pkg "yaml", "nim c -r test/tserialization.nim"
-pkg "zero_functional", "nim c -r -d:nimNoLentIterators test.nim"
+pkg "zero_functional", "nim c -r test.nim"
 pkg "zippy"

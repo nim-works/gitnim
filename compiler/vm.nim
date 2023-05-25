@@ -20,7 +20,7 @@ import
 
 when defined(nimPreviewSlimSystem):
   import std/formatfloat
-
+import astalgo
 import ast except getstr
 from semfold import leValueConv, ordinalValToString
 from evaltempl import evalTemplate
@@ -121,7 +121,7 @@ template decodeBx(k: untyped) {.dirty.} =
   ensureKind(k)
 
 template move(a, b: untyped) {.dirty.} =
-  when defined(gcArc) or defined(gcOrc):
+  when defined(gcArc) or defined(gcOrc) or defined(gcAtomicArc):
     a = move b
   else:
     system.shallowCopy(a, b)
@@ -550,7 +550,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
   # Used to keep track of where the execution is resumed.
   var savedPC = -1
   var savedFrame: PStackFrame
-  when defined(gcArc) or defined(gcOrc):
+  when defined(gcArc) or defined(gcOrc) or defined(gcAtomicArc):
     template updateRegsAlias = discard
     template regs: untyped = tos.slots
   else:
@@ -843,6 +843,12 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
         stackTrace(c, tos, pc, errNilAccess & " " & $("kind", src.kind, "typ", typeToString(src.typ), "rc", rc))
       of nkObjConstr:
         let n = src[rc + 1].skipColon
+        regs[ra].node = n
+      of nkTupleConstr:
+        let n = if src.typ != nil and tfTriggersCompileTime in src.typ.flags:
+            src[rc]
+          else:
+            src[rc].skipColon
         regs[ra].node = n
       else:
         let n = src[rc]
