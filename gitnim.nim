@@ -164,8 +164,11 @@ proc maybeStripColor(args: openArray[string]): seq[string] =
 
 proc git(args: openArray[string]; options = capture): string {.discardable.} =
   ## run git with some arguments
-  let also = maybeStripColor args
-  let ran = run("git", also, options = options)
+  var colorize = "--color" in args and not stdout.isAtty
+  let args = filterIt args: it != "--color"
+  if not run("git", @["config", "--local", "color.ui", $colorize]).ok:
+    warn "toggling color with git config failed"
+  var ran = run("git", args, options = options)
   if ran.ok:
     result = ran.output
   else:
@@ -207,7 +210,7 @@ proc parseModules(): seq[Module] =
           let splat = split line[1..^1]
           result.add Module(status: status, name: splat[1], sha: splat[0])
           continue
-        except:
+        except CatchableError:
           discard
         warn "weird `git submodule` output: " & line
     # don't trust git here; it's important that the result is sorted
@@ -318,7 +321,8 @@ proc parseBranches(input: string): Table[string, string] =
   var sha, path: string   # store the sha as a string because lazy
   for line in input.splitLines(keepEol = false):
     when true:
-      (sha, path) = line.split(' ', maxsplit = 1)
+      let splat = line.split(' ', maxsplit = 1)
+      let (sha, path) = (splat[0], splat[1])
       if path == "":
         crash "unable to parse git output\n" & line
     else:
@@ -345,10 +349,7 @@ proc currentBranch(): string =
 proc nim(args: string; options = capture): string =
   ## run nim with some arguments
   withinNimDirectory:
-    when defined(windows):
-      let nim = "bin" / "nim.exe"
-    else:
-      let nim = "bin" / "nim"
+    let nim = "bin" / "nim"
     if not nim.fileExists:
       crash "unable to find nim and unwilling to search your path"
     else:
