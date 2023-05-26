@@ -164,8 +164,11 @@ proc maybeStripColor(args: openArray[string]): seq[string] =
 
 proc git(args: openArray[string]; options = capture): string {.discardable.} =
   ## run git with some arguments
-  let also = maybeStripColor args
-  let ran = run("git", also, options = options)
+  var colorize = "--color" in args and not stdout.isAtty
+  let args = filterIt args: it != "--color"
+  if not run("git", @["config", "--local", "color.ui", $colorize]).ok:
+    warn "toggling color with git config failed"
+  var ran = run("git", args, options = options)
   if ran.ok:
     result = ran.output
   else:
