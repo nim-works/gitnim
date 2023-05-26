@@ -318,7 +318,8 @@ proc parseBranches(input: string): Table[string, string] =
   var sha, path: string   # store the sha as a string because lazy
   for line in input.splitLines(keepEol = false):
     when true:
-      (sha, path) = line.split(' ', maxsplit = 1)
+      let splat = line.split(' ', maxsplit = 1)
+      let (sha, path) = (splat[0], splat[1])
       if path == "":
         crash "unable to parse git output\n" & line
     else:
