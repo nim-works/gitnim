@@ -262,8 +262,6 @@ if [ $# -eq 1 ] ; then
   chmod 644 "$libdir/system/seqs_v2.nim"
   cp "lib/system/repr.nim" "$libdir/system/repr.nim"
   chmod 644 "$libdir/system/repr.nim"
-  cp "lib/system/gc2.nim" "$libdir/system/gc2.nim"
-  chmod 644 "$libdir/system/gc2.nim"
   cp "lib/system/strmantle.nim" "$libdir/system/strmantle.nim"
   chmod 644 "$libdir/system/strmantle.nim"
   cp "lib/nimhcr.nim" "$libdir/nimhcr.nim"
