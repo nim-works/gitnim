@@ -12,10 +12,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.1.1">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js"></script>
+<script type="text/javascript" src="dochack.js?v=2.1.1"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -43,7 +43,7 @@
     </div>
     <div id="searchInputDiv">
       Search: <input type="search" id="searchInput"
-        onkeyup="search()" />
+        oninput="search()" />
     </div>
     <div class="search-groupby">
   Group by:
@@ -87,7 +87,7 @@
     <div id="tocRoot"></div>
     
     <p class="module-desc"><table class="docinfo" frame="void" rules="none"><col class="docinfo-name" /><col class="docinfo-content" /><tbody valign="top"><tr><th class="docinfo-name">Author:</th><td>Erik O'Leary</td></tr>
-<tr><th class="docinfo-name">Version:</th><td>1.9.3</td></tr>
+<tr><th class="docinfo-name">Version:</th><td>2.1.1</td></tr>
 </tbody></table>
 <h1><a class="toc-backref" id="introduction" href="#introduction">Introduction</a></h1><p>This document describes the <span id="documentation-generation-tools_1">documentation generation tools</span> built into the <a class="reference external" href="nimc.html">Nim compiler</a>, which can generate HTML, Latex and JSON output from input <tt class="docutils literal"><span class="pre">.nim</span></tt> files and projects. The output documentation will include the module dependencies (<tt class="docutils literal"><span class="pre"><span class="Keyword">import</span></span></tt>), any top-level documentation comments (<tt class="docutils literal"><span class="pre"><span class="Comment">##</span></span></tt>), and exported symbols (<tt class="docutils literal"><span class="pre"><span class="Operator">*</span></span></tt>), including procedures, types, and variables.</p>
 <table border="1" class="docutils"><tr><th>command</th><th>output format</th></tr>
@@ -168,7 +168,7 @@ Make sure that you don't have files with same base name like <tt class="docutils
 <h2><a class="toc-backref" id="document-types-example-of-nim-file-input" href="#document-types-example-of-nim-file-input">Example of Nim file input</a></h2><p>The following examples will generate documentation for this sample <em>Nim</em> module, aptly named <tt class="docutils literal"><span class="pre">doc/docgen_sample.nim</span></tt>:</p>
 <p><pre class="listing"><span class="Comment">## This module is a sample.</span>
 
-<span class="Keyword">import</span> <span class="Identifier">strutils</span>
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">strutils</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">helloWorld</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">times</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span>
   <span class="Comment">## Takes an integer and outputs</span>
@@ -257,8 +257,8 @@ proc helloWorld(times: int) {.raises: [], tags: [].}
 
 Ref. [proc f] or [f]        Ref. `proc f`_ or just f_ for a one-word case</pre>
 
-<h2><a class="toc-backref" id="simple-documentation-links-nim-local-referencing" href="#simple-documentation-links-nim-local-referencing">Nim local referencing</a></h2><p>You can reference Nim identifiers from Nim documentation comments inside their <tt class="docutils literal"><span class="pre">.nim</span></tt> file (or inside a <tt class="docutils literal"><span class="pre">.rst</span></tt> file included from a <tt class="docutils literal"><span class="pre">.nim</span></tt>). This pertains to any exported symbol like <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Keyword">const</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Keyword">iterator</span></span></tt>, etc. Link text is either one word or a group of words enclosed by delimiters (brackets <tt class="docutils literal"><span class="pre">[...]</span></tt> for Markdown or backticks <tt class="docutils literal"><span class="pre"><span class="Punctuation">`</span><span class="Operator">...</span><span class="Punctuation">`</span><span class="Identifier">_</span></span></tt> for RST). Link text will be displayed <em>as is</em> while <em>link target</em> will be set to the anchor [*] of Nim symbol that corresponds to link text.</p>
-<p>[*] anchors' format is described in <a class="reference internal" href="#html-anchor-generation">HTML anchor generation</a> section below.</p>
+<h2><a class="toc-backref" id="simple-documentation-links-nim-local-referencing" href="#simple-documentation-links-nim-local-referencing">Nim local referencing</a></h2><p>You can reference Nim identifiers from Nim documentation comments inside their <tt class="docutils literal"><span class="pre">.nim</span></tt> file (or inside a <tt class="docutils literal"><span class="pre">.rst</span></tt> file included from a <tt class="docutils literal"><span class="pre">.nim</span></tt>). This pertains to any exported symbol like <tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Keyword">const</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Keyword">iterator</span></span></tt>, etc. Link text is either one word or a group of words enclosed by delimiters (brackets <tt class="docutils literal"><span class="pre">[...]</span></tt> for Markdown or backticks <tt class="docutils literal"><span class="pre"><span class="Punctuation">`</span><span class="Operator">...</span><span class="Punctuation">`</span><span class="Identifier">_</span></span></tt> for RST). Link text will be displayed <em>as is</em> while <em>link target</em> will be set to the anchor <sup><strong><a class="reference internal" href="#footnote-1">[1]</a></strong></sup> of Nim symbol that corresponds to link text.</p>
+<p><sup><strong><a class="reference internal" href="#footnote-1">[1]</a></strong></sup> anchors' format is described in <a class="reference internal" href="#html-anchor-generation">HTML anchor generation</a> section below.</p>
 <p>If you have a constant:</p>
 <p><pre class="listing">
 <span class="Keyword">const</span> <span class="Identifier">pi</span><span class="Operator">*</span> <span class="Operator">=</span> <span class="FloatNumber">3.14</span></pre></p>
@@ -397,7 +397,7 @@ look into <tt class="docutils literal"><span class="pre">OUTDIR</span></tt> to u
 <p>As the <strong>original</strong> project's directory structure is replicated in <tt class="docutils literal"><span class="pre"><span class="Identifier">OUTDIR</span></span></tt>, all passed paths are related to this structure also.</p>
 <p>E.g. if a module <tt class="docutils literal"><span class="pre">path1/module.nim</span></tt> does <tt class="docutils literal"><span class="pre">.. importdoc:: path2/another.nim</span></tt> then docgen tries to load file <tt class="docutils literal"><span class="pre">OUTDIR/path1/path2/another.idx</span></tt>.</p>
 <div class="admonition admonition-info"><span class="admonition-info-text"><b>Note:</b></span>
-<p>markup documents are just placed into the specified directory <tt class="docutils literal"><span class="pre option">OUTDIR</span></tt> by default (i.e. they are <strong>not</strong> affected by <tt class="docutils literal"><span class="pre option">--project</span></tt>), so if you have <tt class="docutils literal"><span class="pre">PROJECT/doc/manual.md</span></tt> document and want to use complex hirearchy (with <tt class="docutils literal"><span class="pre">doc/</span></tt>), compile it with <tt class="docutils literal"><span class="pre option">--docroot</span></tt>:</p>
+<p>markup documents are just placed into the specified directory <tt class="docutils literal"><span class="pre option">OUTDIR</span></tt> by default (i.e. they are <strong>not</strong> affected by <tt class="docutils literal"><span class="pre option">--project</span></tt>), so if you have <tt class="docutils literal"><span class="pre">PROJECT/doc/manual.md</span></tt> document and want to use complex hierarchy (with <tt class="docutils literal"><span class="pre">doc/</span></tt>), compile it with <tt class="docutils literal"><span class="pre option">--docroot</span></tt>:</p>
 <p><pre class="listing">
 <span class="Comment"># 1st stage</span>
 <span class="program">nim</span> <span class="option">md2html</span> <span class="option">--outdir:OUTDIR</span> <span class="Identifier">--docroot:/absolute/path/to/PROJECT</span> <span class="Identifier">\</span>
@@ -427,7 +427,7 @@ Again, the same <tt class="docutils literal"><span class="pre option">--outdir:O
 <span class="program">nim</span> <span class="option">doc</span> <span class="option">--index:on</span> <span class="Identifier">filename.nim</span></pre></p>
 <p>This will generate an index of all the exported symbols in the input Nim module, and put it into a neighboring file with the extension of <tt class="docutils literal"><span class="pre">.idx</span></tt>. The index file is line-oriented (newlines have to be escaped). Each line represents a tab-separated record of several columns, the first two mandatory, the rest optional. See the <a class="reference internal" href="#index-idx-file-format">Index (idx) file format</a> section for details.</p>
 <div class="admonition admonition-info"><span class="admonition-info-text"><b>Note:</b></span>
-<tt class="docutils literal"><span class="pre option">--index</span></tt> switch only affects creation of <tt class="docutils literal"><span class="pre">.idx</span></tt> index files, while user-searchable Index HTML file is created by <tt class="docutils literal"><span class="pre option">buildIndex</span></tt> commmand.</div>
+<tt class="docutils literal"><span class="pre option">--index</span></tt> switch only affects creation of <tt class="docutils literal"><span class="pre">.idx</span></tt> index files, while user-searchable Index HTML file is created by <tt class="docutils literal"><span class="pre option">buildIndex</span></tt> command.</div>
 
 <h2><a class="toc-backref" id="related-options-buildindex-command" href="#related-options-buildindex-command">Buildindex command</a></h2><p>Once index files have been generated for one or more modules, the Nim compiler command <tt class="docutils literal"><span class="pre"><span class="program">nim</span> <span class="option">buildIndex</span> <span class="option">directory</span></span></tt> can be run to go over all the index files in the specified directory to generate a <a class="reference external" href="theindex.html">theindex.html</a> file:</p>
 <p><pre class="listing">
@@ -495,7 +495,7 @@ Again, the same <tt class="docutils literal"><span class="pre option">--outdir:O
 
 <h1><a class="toc-backref" id="additional-resources" href="#additional-resources">Additional resources</a></h1><ul class="simple"><li><a class="reference external" href="nimc.html#compiler-usage-commandminusline-switches">Nim Compiler User Guide</a></li>
 <li>already mentioned documentation for <a class="reference external" href="markdown_rst.html">Markdown and RST markup languages</a>, which also contains the list of implemented features of these markup languages.</li>
-<li>the implementation is in <a class="reference external" href="compiler/docgen.html">module compiler/docgen</a>.</li>
+<li>the implementation is in <a class="reference internal" href="#module compiler/docgen">module compiler/docgen</a>.</li>
 </ul>
 <p>The output for HTML and LaTeX comes from the <tt class="docutils literal"><span class="pre">config/nimdoc.cfg</span></tt> and <tt class="docutils literal"><span class="pre">config/nimdoc.tex.cfg</span></tt> configuration files. You can add and modify these files to your project to change the look of the docgen output.</p>
 <p>You can import the <a class="reference external" href="rstgen.html">packages/docutils/rstgen module</a> in your programs if you want to reuse the compiler's documentation generation procs. </p>
@@ -507,7 +507,7 @@ Again, the same <tt class="docutils literal"><span class="pre option">--outdir:O
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-26 01:14:45 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-04 01:05:48 UTC</small>
       </div>
     </div>
   </div>

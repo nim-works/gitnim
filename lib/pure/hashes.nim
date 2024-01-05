@@ -190,7 +190,7 @@ proc hashData*(data: pointer, size: int): Hash =
   var h: Hash = 0
   when defined(js):
     var p: cstring
-    asm """`p` = `Data`"""
+    {.emit: """`p` = `Data`""".}
   else:
     var p = cast[cstring](data)
   var i = 0
@@ -217,7 +217,7 @@ else:
 when defined(js):
   var objectID = 0
   proc getObjectId(x: pointer): int =
-    asm """
+    {.emit: """
       if (typeof `x` == "object") {
         if ("_NimID" in `x`)
           `result` = `x`["_NimID"];
@@ -226,7 +226,7 @@ when defined(js):
           `x`["_NimID"] = `result`;
         }
       }
-    """
+    """.}
 
 proc hash*(x: pointer): Hash {.inline.} =
   ## Efficient `hash` overload.
@@ -319,16 +319,24 @@ proc murmurHash(x: openArray[byte]): Hash =
     h1: uint32
     i = 0
 
+
+  template impl =
+    var j = stepSize
+    while j > 0:
+      dec j
+      k1 = (k1 shl 8) or (ord(x[i+j])).uint32
+
   # body
   while i < n * stepSize:
     var k1: uint32
-    when defined(js) or defined(sparc) or defined(sparc64):
-      var j = stepSize
-      while j > 0:
-        dec j
-        k1 = (k1 shl 8) or (ord(x[i+j])).uint32
+
+    when nimvm:
+      impl()
     else:
-      k1 = cast[ptr uint32](unsafeAddr x[i])[]
+      when declared(copyMem):
+        copyMem(addr k1, addr x[i], 4)
+      else:
+        impl()
     inc i, stepSize
 
     k1 = imul(k1, c1)
@@ -360,16 +368,16 @@ proc murmurHash(x: openArray[byte]): Hash =
   return cast[Hash](h1)
 
 proc hashVmImpl(x: cstring, sPos, ePos: int): Hash =
-  doAssert false, "implementation override in compiler/vmops.nim"
+  raiseAssert "implementation override in compiler/vmops.nim"
 
 proc hashVmImpl(x: string, sPos, ePos: int): Hash =
-  doAssert false, "implementation override in compiler/vmops.nim"
+  raiseAssert "implementation override in compiler/vmops.nim"
 
 proc hashVmImplChar(x: openArray[char], sPos, ePos: int): Hash =
-  doAssert false, "implementation override in compiler/vmops.nim"
+  raiseAssert "implementation override in compiler/vmops.nim"
 
 proc hashVmImplByte(x: openArray[byte], sPos, ePos: int): Hash =
-  doAssert false, "implementation override in compiler/vmops.nim"
+  raiseAssert "implementation override in compiler/vmops.nim"
 
 proc hash*(x: string): Hash =
   ## Efficient hashing of strings.
@@ -534,7 +542,7 @@ proc hash*[T: tuple | object | proc | iterator {.closure.}](x: T): Hash =
   when T is "closure":
     result = hash((rawProc(x), rawEnv(x)))
   elif T is (proc):
-    result = hash(pointer(x))
+    result = hash(cast[pointer](x))
   else:
     result = 0
     for f in fields(x):

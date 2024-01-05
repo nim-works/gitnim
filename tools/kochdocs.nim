@@ -93,17 +93,22 @@ proc nimCompileFold*(desc, input: string, outputDir = "bin", mode = "c", options
   let cmd = findNim().quoteShell() & " " & mode & " -o:" & output & " " & options & " " & input
   execFold(desc, cmd)
 
+const officialPackagesMarkdown = """
+pkgs/atlas/doc/atlas.md
+""".splitWhitespace()
+
 proc getMd2html(): seq[string] =
   for a in walkDirRecFilter("doc"):
     let path = a.path
     if a.kind == pcFile and path.splitFile.ext == ".md" and path.lastPathPart notin
-        ["docs.md", "nimfix.md",
+        ["docs.md",
          "docstyle.md" # docstyle.md shouldn't be converted to html separately;
                        # it's included in contributing.md.
         ]:
-          # maybe we should still show nimfix, could help reviving it
           # `docs` is redundant with `overview`, might as well remove that file?
       result.add path
+  for md in officialPackagesMarkdown:
+    result.add md
   doAssert "doc/manual/var_t_return.md".unixToNativePath in result # sanity check
 
 const
@@ -149,6 +154,7 @@ lib/posix/posix_openbsd_amd64.nim
 lib/posix/posix_haiku.nim
 lib/pure/md5.nim
 lib/std/sha1.nim
+lib/pure/htmlparser.nim
 """.splitWhitespace()
 
   officialPackagesList = """
@@ -162,6 +168,10 @@ pkgs/db_connector/src/db_connector/db_postgres.nim
 pkgs/db_connector/src/db_connector/db_sqlite.nim
 pkgs/checksums/src/checksums/md5.nim
 pkgs/checksums/src/checksums/sha1.nim
+pkgs/checksums/src/checksums/sha2.nim
+pkgs/checksums/src/checksums/sha3.nim
+pkgs/checksums/src/checksums/bcrypt.nim
+pkgs/htmlparser/src/htmlparser.nim
 """.splitWhitespace()
 
   officialPackagesListWithoutIndex = """
@@ -180,6 +190,7 @@ when (NimMajor, NimMinor) < (1, 1) or not declared(isRelativeTo):
     result = path.len > 0 and not ret.startsWith ".."
 
 proc getDocList(): seq[string] =
+  ##
   var docIgnore: HashSet[string]
   for a in withoutIndex: docIgnore.incl a
   for a in ignoredModules: docIgnore.incl a
@@ -336,7 +347,7 @@ proc buildJS(): string =
 proc buildDocsDir*(args: string, dir: string) =
   let args = nimArgs & " " & args
   let docHackJsSource = buildJS()
-  gitClonePackages(@["asyncftpclient", "punycode", "smtp", "db_connector", "checksums"])
+  gitClonePackages(@["asyncftpclient", "punycode", "smtp", "db_connector", "checksums", "atlas", "htmlparser"])
   createDir(dir)
   buildDocSamples(args, dir)
 

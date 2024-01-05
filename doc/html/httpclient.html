@@ -12,10 +12,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.1.1">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js"></script>
+<script type="text/javascript" src="dochack.js?v=2.1.1"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -43,7 +43,7 @@
     </div>
     <div id="searchInputDiv">
       Search: <input type="search" id="searchInput"
-        onkeyup="search()" />
+        oninput="search()" />
     </div>
     
     <ul class="simple simple-toc" id="toc-list">
@@ -69,8 +69,19 @@
   bodyStream*: FutureStream[string]">AsyncResponse</a></li>
 <li><a class="reference" href="#HttpClient" title="HttpClient = HttpClientBase[Socket]">HttpClient</a></li>
 <li><a class="reference" href="#HttpClientBase" title="HttpClientBase[SocketType] = ref object
+  ## Where we are currently connected.
   headers*: HttpHeaders      ## Headers to send in requests.
-  timeout*: int              ## Only used for blocking HttpClient for now.">HttpClientBase</a></li>
+  ## Maximum redirects, set to `0` to disable.
+  timeout*: int              ## Only used for blocking HttpClient for now.
+  ## `nil` or the callback to call when request progress changes.
+  when SocketType is Socket:
+    onProgressChanged*: ProgressChangedProc[void]
+  else:
+    onProgressChanged*: ProgressChangedProc[Future[void]]
+  when defined(ssl):
+  when SocketType is AsyncSocket:
+  else:
+  ## When `false`, the body is never read in requestAux.">HttpClientBase</a></li>
 <li><a class="reference" href="#HttpRequestError" title="HttpRequestError = object of IOError">HttpRequestError</a></li>
 <li><a class="reference" href="#MultipartData" title="MultipartData = ref object">MultipartData</a></li>
 <li><a class="reference" href="#MultipartEntries" title="MultipartEntries = openArray[tuple[name, content: string]]">MultipartEntries</a></li>
@@ -93,7 +104,7 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#10" id="60">Consts</a></summary>
     <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#defUserAgent" title="defUserAgent = &quot;Nim httpclient/1.9.3&quot;">defUserAgent</a></li>
+      <li><a class="reference" href="#defUserAgent" title="defUserAgent = &quot;Nim-httpclient/2.1.1&quot;">defUserAgent</a></li>
 
     </ul>
   </details>
@@ -287,9 +298,6 @@
     </ul>
   </details>
 </li>
-<li>
-  <a class="reference reference-toplevel" href="#19" id="69">Exports</a>
-</li>
 
 </ul>
 
@@ -304,13 +312,16 @@
 Validate untrusted inputs: URI parsers and getters are not detecting malicious URIs.</div>
 
 <h1><a class="toc-backref" id="retrieving-a-website" href="#retrieving-a-website">Retrieving a website</a></h1><p>This example uses HTTP GET to retrieve <tt class="docutils literal"><span class="pre"><span class="Identifier">http</span><span class="Punctuation">:</span><span class="Operator">//</span><span class="Identifier">google</span><span class="Operator">.</span><span class="Identifier">com</span></span></tt>:</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
 <span class="Keyword">var</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Keyword">try</span><span class="Punctuation">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">getContent</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://google.com&quot;</span><span class="Punctuation">)</span>
 <span class="Keyword">finally</span><span class="Punctuation">:</span>
-  <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>The same action can also be performed asynchronously, simply use the <tt class="docutils literal"><span class="pre"><span class="Identifier">AsyncHttpClient</span></span></tt>:</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Punctuation">[</span><span class="Identifier">asyncdispatch</span><span class="Punctuation">,</span> <span class="Identifier">httpclient</span><span class="Punctuation">]</span>
+  <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+<p>The same action can also be performed asynchronously, simply use the <tt class="docutils literal"><span class="pre"><span class="Identifier">AsyncHttpClient</span></span></tt>:</p>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Punctuation">[</span><span class="Identifier">asyncdispatch</span><span class="Punctuation">,</span> <span class="Identifier">httpclient</span><span class="Punctuation">]</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">Future</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">async</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
   <span class="Keyword">var</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newAsyncHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
@@ -319,12 +330,14 @@ Validate untrusted inputs: URI parsers and getters are not detecting malicious U
   <span class="Keyword">finally</span><span class="Punctuation">:</span>
     <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 
-<span class="Identifier">echo</span> <span class="Identifier">waitFor</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>The functionality implemented by <tt class="docutils literal"><span class="pre"><span class="Identifier">HttpClient</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">AsyncHttpClient</span></span></tt> is the same, so you can use whichever one suits you best in the examples shown here.</p>
+<span class="Identifier">echo</span> <span class="Identifier">waitFor</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+<p>The functionality implemented by <tt class="docutils literal"><span class="pre"><span class="Identifier">HttpClient</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">AsyncHttpClient</span></span></tt> is the same, so you can use whichever one suits you best in the examples shown here.</p>
 <p><strong>Note:</strong> You need to run asynchronous examples in an async proc otherwise you will get an <tt class="docutils literal"><span class="pre"><span class="Identifier">Undeclared</span> <span class="Identifier">identifier</span><span class="Punctuation">:</span> <span class="CharLit">'await'</span></span></tt> error.</p>
 <p><strong>Note:</strong> An asynchronous client instance can only deal with one request at a time. To send multiple requests in parallel, use multiple client instances.</p>
 
 <h1><a class="toc-backref" id="using-http-post" href="#using-http-post">Using HTTP POST</a></h1><p>This example demonstrates the usage of the W3 HTML Validator, it uses <tt class="docutils literal"><span class="pre"><span class="Identifier">multipart</span><span class="Operator">/</span><span class="Identifier">form</span><span class="Operator">-</span><span class="Identifier">data</span></span></tt> as the <tt class="docutils literal"><span class="pre"><span class="Identifier">Content</span><span class="Operator">-</span><span class="Keyword">Type</span></span></tt> to send the HTML to be validated to the server.</p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+<p><pre class="listing">
+<span class="Keyword">var</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">data</span> <span class="Operator">=</span> <span class="Identifier">newMultipartData</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Identifier">data</span><span class="Punctuation">[</span><span class="StringLit">&quot;output&quot;</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="StringLit">&quot;soap12&quot;</span>
 <span class="Identifier">data</span><span class="Punctuation">[</span><span class="StringLit">&quot;uploaded_file&quot;</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="StringLit">&quot;test.html&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;text/html&quot;</span><span class="Punctuation">,</span>
@@ -332,17 +345,21 @@ Validate untrusted inputs: URI parsers and getters are not detecting malicious U
 <span class="Keyword">try</span><span class="Punctuation">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">postContent</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://validator.w3.org/check&quot;</span><span class="Punctuation">,</span> <span class="Identifier">multipart</span><span class="Operator">=</span><span class="Identifier">data</span><span class="Punctuation">)</span>
 <span class="Keyword">finally</span><span class="Punctuation">:</span>
-  <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>To stream files from disk when performing the request, use <tt class="docutils literal"><span class="pre"><span class="Identifier">addFiles</span></span></tt>.</p>
+  <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+<p>To stream files from disk when performing the request, use <tt class="docutils literal"><span class="pre"><span class="Identifier">addFiles</span></span></tt>.</p>
 <p><strong>Note:</strong> This will allocate a new <tt class="docutils literal"><span class="pre"><span class="Identifier">Mimetypes</span></span></tt> database every time you call it, you can pass your own via the <tt class="docutils literal"><span class="pre"><span class="Identifier">mimeDb</span></span></tt> parameter to avoid this.</p>
-<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">mimes</span> <span class="Operator">=</span> <span class="Identifier">newMimetypes</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
+<p><pre class="listing">
+<span class="Keyword">let</span> <span class="Identifier">mimes</span> <span class="Operator">=</span> <span class="Identifier">newMimetypes</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Keyword">var</span> <span class="Identifier">data</span> <span class="Operator">=</span> <span class="Identifier">newMultipartData</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Identifier">data</span><span class="Operator">.</span><span class="Identifier">addFiles</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;uploaded_file&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;test.html&quot;</span><span class="Punctuation">}</span><span class="Punctuation">,</span> <span class="Identifier">mimeDb</span> <span class="Operator">=</span> <span class="Identifier">mimes</span><span class="Punctuation">)</span>
 <span class="Keyword">try</span><span class="Punctuation">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">postContent</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://validator.w3.org/check&quot;</span><span class="Punctuation">,</span> <span class="Identifier">multipart</span><span class="Operator">=</span><span class="Identifier">data</span><span class="Punctuation">)</span>
 <span class="Keyword">finally</span><span class="Punctuation">:</span>
-  <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>You can also make post requests with custom headers. This example sets <tt class="docutils literal"><span class="pre"><span class="Identifier">Content</span><span class="Operator">-</span><span class="Keyword">Type</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">application</span><span class="Operator">/</span><span class="Identifier">json</span></span></tt> and uses a json object for the body</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Punctuation">[</span><span class="Identifier">httpclient</span><span class="Punctuation">,</span> <span class="Identifier">json</span><span class="Punctuation">]</span>
+  <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+<p>You can also make post requests with custom headers. This example sets <tt class="docutils literal"><span class="pre"><span class="Identifier">Content</span><span class="Operator">-</span><span class="Keyword">Type</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">application</span><span class="Operator">/</span><span class="Identifier">json</span></span></tt> and uses a json object for the body</p>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Punctuation">[</span><span class="Identifier">httpclient</span><span class="Punctuation">,</span> <span class="Identifier">json</span><span class="Punctuation">]</span>
 
 <span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">headers</span> <span class="Operator">=</span> <span class="Identifier">newHttpHeaders</span><span class="Punctuation">(</span><span class="Punctuation">{</span> <span class="StringLit">&quot;Content-Type&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;application/json&quot;</span> <span class="Punctuation">}</span><span class="Punctuation">)</span>
@@ -353,9 +370,11 @@ Validate untrusted inputs: URI parsers and getters are not detecting malicious U
   <span class="Keyword">let</span> <span class="Identifier">response</span> <span class="Operator">=</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">request</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://some.api&quot;</span><span class="Punctuation">,</span> <span class="Identifier">httpMethod</span> <span class="Operator">=</span> <span class="Identifier">HttpPost</span><span class="Punctuation">,</span> <span class="Identifier">body</span> <span class="Operator">=</span> <span class="Operator">$</span><span class="Identifier">body</span><span class="Punctuation">)</span>
   <span class="Identifier">echo</span> <span class="Identifier">response</span><span class="Operator">.</span><span class="Identifier">status</span>
 <span class="Keyword">finally</span><span class="Punctuation">:</span>
-  <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre>
+  <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+
 <h1><a class="toc-backref" id="progress-reporting" href="#progress-reporting">Progress reporting</a></h1><p>You may specify a callback procedure to be called during an HTTP request. This callback will be executed every second with information about the progress of the HTTP request.</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Punctuation">[</span><span class="Identifier">asyncdispatch</span><span class="Punctuation">,</span> <span class="Identifier">httpclient</span><span class="Punctuation">]</span>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Punctuation">[</span><span class="Identifier">asyncdispatch</span><span class="Punctuation">,</span> <span class="Identifier">httpclient</span><span class="Punctuation">]</span>
 
 <span class="Keyword">proc</span> <span class="Identifier">onProgressChanged</span><span class="Punctuation">(</span><span class="Identifier">total</span><span class="Punctuation">,</span> <span class="Identifier">progress</span><span class="Punctuation">,</span> <span class="Identifier">speed</span><span class="Punctuation">:</span> <span class="Identifier">BiggestInt</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">async</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span>
   <span class="Identifier">echo</span><span class="Punctuation">(</span><span class="StringLit">&quot;Downloaded &quot;</span><span class="Punctuation">,</span> <span class="Identifier">progress</span><span class="Punctuation">,</span> <span class="StringLit">&quot; of &quot;</span><span class="Punctuation">,</span> <span class="Identifier">total</span><span class="Punctuation">)</span>
@@ -369,8 +388,11 @@ Validate untrusted inputs: URI parsers and getters are not detecting malicious U
   <span class="Keyword">finally</span><span class="Punctuation">:</span>
     <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">close</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 
-<span class="Identifier">waitFor</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre><p>If you would like to remove the callback simply set it to <tt class="docutils literal"><span class="pre"><span class="Keyword">nil</span></span></tt>.</p>
-<pre class="listing"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">onProgressChanged</span> <span class="Operator">=</span> <span class="Keyword">nil</span></pre><div class="admonition admonition-warning"><span class="admonition-warning-text"><b>Warning:</b></span>
+<span class="Identifier">waitFor</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
+<p>If you would like to remove the callback simply set it to <tt class="docutils literal"><span class="pre"><span class="Keyword">nil</span></span></tt>.</p>
+<p><pre class="listing">
+<span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">onProgressChanged</span> <span class="Operator">=</span> <span class="Keyword">nil</span></pre></p>
+<div class="admonition admonition-warning"><span class="admonition-warning-text"><b>Warning:</b></span>
 The <tt class="docutils literal"><span class="pre"><span class="Identifier">total</span></span></tt> reported by httpclient may be 0 in some cases.</div>
 
 <h1><a class="toc-backref" id="sslslashtls-support" href="#sslslashtls-support">SSL/TLS support</a></h1><p>This requires the OpenSSL library. Fortunately it's widely used and installed on many operating systems. httpclient will use SSL automatically if you give any of the functions a url with the <tt class="docutils literal"><span class="pre"><span class="Identifier">https</span></span></tt> schema, for example: <tt class="docutils literal"><span class="pre"><span class="Identifier">https</span><span class="Punctuation">:</span><span class="Operator">//</span><span class="Identifier">github</span><span class="Operator">.</span><span class="Identifier">com</span><span class="Operator">/</span></span></tt>.</p>
@@ -378,8 +400,10 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
 <p>Certificate validation is performed by default.</p>
 <p>A set of directories and files from the <a class="reference external" href="ssl_certs.html">ssl_certs</a> module are scanned to locate CA certificates.</p>
 <p>Example of setting SSL verification parameters in a new client:</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">httpclient</span>
-<span class="Keyword">var</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">sslContext</span><span class="Operator">=</span><span class="Identifier">newContext</span><span class="Punctuation">(</span><span class="Identifier">verifyMode</span><span class="Operator">=</span><span class="Identifier">CVerifyPeer</span><span class="Punctuation">)</span><span class="Punctuation">)</span></pre><p>There are three options for verify mode:</p>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">httpclient</span>
+<span class="Keyword">var</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">sslContext</span><span class="Operator">=</span><span class="Identifier">newContext</span><span class="Punctuation">(</span><span class="Identifier">verifyMode</span><span class="Operator">=</span><span class="Identifier">CVerifyPeer</span><span class="Punctuation">)</span><span class="Punctuation">)</span></pre></p>
+<p>There are three options for verify mode:</p>
 <ul class="simple"><li><tt class="docutils literal"><span class="pre">CVerifyNone</span></tt>: certificates are not verified;</li>
 <li><tt class="docutils literal"><span class="pre">CVerifyPeer</span></tt>: certificates are verified;</li>
 <li><tt class="docutils literal"><span class="pre">CVerifyPeerUseEnvVars</span></tt>: certificates are verified and the optional environment variables SSL_CERT_FILE and SSL_CERT_DIR are also used to locate certificates</li>
@@ -389,20 +413,27 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
 <h1><a class="toc-backref" id="timeouts" href="#timeouts">Timeouts</a></h1><p>Currently only the synchronous functions support a timeout. The timeout is measured in milliseconds, once it is set any call on a socket which may block will be susceptible to this timeout.</p>
 <p>It may be surprising but the function as a whole can take longer than the specified timeout, only individual internal calls on the socket are affected. In practice this means that as long as the server is sending data an exception will not be raised, if however data does not reach the client within the specified timeout a <tt class="docutils literal"><span class="pre"><span class="Identifier">TimeoutError</span></span></tt> exception will be raised.</p>
 <p>Here is how to set a timeout when creating an <tt class="docutils literal"><span class="pre"><span class="Identifier">HttpClient</span></span></tt> instance:</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
 
-<span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">timeout</span> <span class="Operator">=</span> <span class="DecNumber">42</span><span class="Punctuation">)</span></pre>
+<span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">timeout</span> <span class="Operator">=</span> <span class="DecNumber">42</span><span class="Punctuation">)</span></pre></p>
+
 <h1><a class="toc-backref" id="proxy" href="#proxy">Proxy</a></h1><p>A proxy can be specified as a param to any of the procedures defined in this module. To do this, use the <tt class="docutils literal"><span class="pre"><span class="Identifier">newProxy</span></span></tt> constructor. Unfortunately, only basic authentication is supported at the moment.</p>
 <p>Some examples on how to configure a Proxy for <tt class="docutils literal"><span class="pre"><span class="Identifier">HttpClient</span></span></tt>:</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
 
 <span class="Keyword">let</span> <span class="Identifier">myProxy</span> <span class="Operator">=</span> <span class="Identifier">newProxy</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://myproxy.network&quot;</span><span class="Punctuation">)</span>
-<span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">proxy</span> <span class="Operator">=</span> <span class="Identifier">myProxy</span><span class="Punctuation">)</span></pre><p>Use proxies with basic authentication:</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
+<span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">proxy</span> <span class="Operator">=</span> <span class="Identifier">myProxy</span><span class="Punctuation">)</span></pre></p>
+<p>Use proxies with basic authentication:</p>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
 
 <span class="Keyword">let</span> <span class="Identifier">myProxy</span> <span class="Operator">=</span> <span class="Identifier">newProxy</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://myproxy.network&quot;</span><span class="Punctuation">,</span> <span class="Identifier">auth</span><span class="Operator">=</span><span class="StringLit">&quot;user:password&quot;</span><span class="Punctuation">)</span>
-<span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">proxy</span> <span class="Operator">=</span> <span class="Identifier">myProxy</span><span class="Punctuation">)</span></pre><p>Get Proxy URL from environment variables:</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
+<span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">proxy</span> <span class="Operator">=</span> <span class="Identifier">myProxy</span><span class="Punctuation">)</span></pre></p>
+<p>Get Proxy URL from environment variables:</p>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
 
 <span class="Keyword">var</span> <span class="Identifier">url</span> <span class="Operator">=</span> <span class="StringLit">&quot;&quot;</span>
 <span class="Keyword">try</span><span class="Punctuation">:</span>
@@ -414,12 +445,15 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <span class="Identifier">echo</span> <span class="StringLit">&quot;Unable to parse proxy from environment variables.&quot;</span>
 
 <span class="Keyword">let</span> <span class="Identifier">myProxy</span> <span class="Operator">=</span> <span class="Identifier">newProxy</span><span class="Punctuation">(</span><span class="Identifier">url</span> <span class="Operator">=</span> <span class="Identifier">url</span><span class="Punctuation">)</span>
-<span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">proxy</span> <span class="Operator">=</span> <span class="Identifier">myProxy</span><span class="Punctuation">)</span></pre>
+<span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">proxy</span> <span class="Operator">=</span> <span class="Identifier">myProxy</span><span class="Punctuation">)</span></pre></p>
+
 <h1><a class="toc-backref" id="redirects" href="#redirects">Redirects</a></h1><p>The maximum redirects can be set with the <tt class="docutils literal"><span class="pre"><span class="Identifier">maxRedirects</span></span></tt> of <tt class="docutils literal"><span class="pre"><span class="Identifier">int</span></span></tt> type, it specifies the maximum amount of redirects to follow, it defaults to <tt class="docutils literal"><span class="pre"><span class="DecNumber">5</span></span></tt>, you can set it to <tt class="docutils literal"><span class="pre"><span class="DecNumber">0</span></span></tt> to disable redirects.</p>
 <p>Here you can see an example about how to set the <tt class="docutils literal"><span class="pre"><span class="Identifier">maxRedirects</span></span></tt> of <tt class="docutils literal"><span class="pre"><span class="Identifier">HttpClient</span></span></tt>:</p>
-<pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
+<p><pre class="listing">
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">httpclient</span>
 
 <span class="Keyword">let</span> <span class="Identifier">client</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Identifier">maxRedirects</span> <span class="Operator">=</span> <span class="DecNumber">0</span><span class="Punctuation">)</span></pre></p>
+</p>
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
@@ -434,8 +468,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L642" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L642" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L660" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L660" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -444,13 +478,12 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <span class="Identifier">version</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
   <span class="Identifier">status</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
   <span class="Identifier">headers</span><span class="Operator">*</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a>
-  <span class="Identifier">bodyStream</span><span class="Operator">*</span><span class="Other">:</span> <a href="asyncstreams.html#FutureStream"><span class="Identifier">FutureStream</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span>
-</pre></dt>
+  <span class="Identifier">bodyStream</span><span class="Operator">*</span><span class="Other">:</span> <a href="asyncstreams.html#FutureStream"><span class="Identifier">FutureStream</span></a><span class="Other">[</span><a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L267" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L267" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L280" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L280" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -459,21 +492,31 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L599" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L599" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L617" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L617" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="HttpClientBase">
   <dt><pre><a href="httpclient.html#HttpClientBase"><span class="Identifier">HttpClientBase</span></a><span class="Other">[</span><span class="Identifier">SocketType</span><span class="Other">]</span> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
+  <span class="Comment">## Where we are currently connected.</span>
   <span class="Identifier">headers</span><span class="Operator">*</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a>      <span class="Comment">## Headers to send in requests.</span>
+  <span class="Comment">## Maximum redirects, set to `0` to disable.</span>
   <span class="Identifier">timeout</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>              <span class="Comment">## Only used for blocking HttpClient for now.</span>
-  </pre></dt>
+  <span class="Comment">## `nil` or the callback to call when request progress changes.</span>
+  <span class="Keyword">when</span> <span class="Identifier">SocketType</span> <span class="Keyword">is</span> <span class="Identifier">Socket</span><span class="Other">:</span>
+    <span class="Identifier">onProgressChanged</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">ProgressChangedProc</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span>
+  <span class="Keyword">else</span><span class="Other">:</span>
+    <span class="Identifier">onProgressChanged</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">ProgressChangedProc</span><span class="Other">[</span><span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">void</span><span class="Other">]</span><span class="Other">]</span>
+  <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">ssl</span><span class="Other">)</span><span class="Other">:</span>
+  <span class="Keyword">when</span> <span class="Identifier">SocketType</span> <span class="Keyword">is</span> <span class="Identifier">AsyncSocket</span><span class="Other">:</span>
+  <span class="Keyword">else</span><span class="Other">:</span>
+  <span class="Comment">## When `false`, the body is never read in requestAux.</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L571" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L571" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L589" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L589" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -482,19 +525,18 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Thrown in the <tt class="docutils literal"><span class="pre"><span class="Identifier">getContent</span></span></tt> proc and <tt class="docutils literal"><span class="pre"><span class="Identifier">postContent</span></span></tt> proc, when the server returns an error
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L345" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L345" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L358" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L358" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="MultipartData">
-  <dt><pre><a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
-  </pre></dt>
+  <dt><pre><a href="httpclient.html#MultipartData"><span class="Identifier">MultipartData</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L338" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L338" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L351" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L351" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -503,8 +545,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L337" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L337" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L350" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L350" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -514,8 +556,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L567" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L567" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L585" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L585" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -524,21 +566,20 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     exception that is raised when server does not conform to the implemented protocol
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L341" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L341" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L354" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L354" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="Proxy">
   <dt><pre><a href="httpclient.html#Proxy"><span class="Identifier">Proxy</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
   <span class="Identifier">url</span><span class="Operator">*</span><span class="Other">:</span> <a href="uri.html#Uri"><span class="Identifier">Uri</span></a>
-  <span class="Identifier">auth</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
-</pre></dt>
+  <span class="Identifier">auth</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L324" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L324" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L337" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L337" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -547,13 +588,12 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <span class="Identifier">version</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
   <span class="Identifier">status</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
   <span class="Identifier">headers</span><span class="Operator">*</span><span class="Other">:</span> <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a>
-  <span class="Identifier">bodyStream</span><span class="Operator">*</span><span class="Other">:</span> <a href="streams.html#Stream"><span class="Identifier">Stream</span></a>
-</pre></dt>
+  <span class="Identifier">bodyStream</span><span class="Operator">*</span><span class="Other">:</span> <a href="streams.html#Stream"><span class="Identifier">Stream</span></a></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L260" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L260" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L273" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L273" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -564,12 +604,12 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <h1><a class="toc-backref" href="#10">Consts</a></h1>
   <dl class="item">
     <div id="defUserAgent">
-  <dt><pre><a href="httpclient.html#defUserAgent"><span class="Identifier">defUserAgent</span></a> <span class="Other">=</span> <span class="StringLit">&quot;Nim httpclient/1.9.3&quot;</span></pre></dt>
+  <dt><pre><a href="httpclient.html#defUserAgent"><span class="Identifier">defUserAgent</span></a> <span class="Other">=</span> <span class="StringLit">&quot;Nim-httpclient/2.1.1&quot;</span></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L349" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L349" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L362" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L362" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -585,8 +625,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     convert MultipartData to string so it's human readable when echo see <a class="reference external" href="https://github.com/nim-lang/Nim/issues/11863">https://github.com/nim-lang/Nim/issues/11863</a>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L387" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L387" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L400" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L400" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -598,9 +638,12 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Add a multipart entry to the multipart data <tt class="docutils literal"><span class="pre"><span class="Identifier">p</span></span></tt>. The value is added without a filename and without a content type.<pre class="listing"><span class="Identifier">data</span><span class="Punctuation">[</span><span class="StringLit">&quot;username&quot;</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="StringLit">&quot;NimUser&quot;</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L469" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L469" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <p>Add a multipart entry to the multipart data <tt class="docutils literal"><span class="pre"><span class="Identifier">p</span></span></tt>. The value is added without a filename and without a content type.</p>
+<p><pre class="listing">
+<span class="Identifier">data</span><span class="Punctuation">[</span><span class="StringLit">&quot;username&quot;</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="StringLit">&quot;NimUser&quot;</span></pre></p>
+
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L485" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L485" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -610,10 +653,13 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Add a file to the multipart data <tt class="docutils literal"><span class="pre"><span class="Identifier">p</span></span></tt>, specifying filename, contentType and content manually.<pre class="listing"><span class="Identifier">data</span><span class="Punctuation">[</span><span class="StringLit">&quot;uploaded_file&quot;</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="StringLit">&quot;test.html&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;text/html&quot;</span><span class="Punctuation">,</span>
-  <span class="StringLit">&quot;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&lt;p&gt;test&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L477" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L477" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <p>Add a file to the multipart data <tt class="docutils literal"><span class="pre"><span class="Identifier">p</span></span></tt>, specifying filename, contentType and content manually.</p>
+<p><pre class="listing">
+<span class="Identifier">data</span><span class="Punctuation">[</span><span class="StringLit">&quot;uploaded_file&quot;</span><span class="Punctuation">]</span> <span class="Operator">=</span> <span class="Punctuation">(</span><span class="StringLit">&quot;test.html&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;text/html&quot;</span><span class="Punctuation">,</span>
+  <span class="StringLit">&quot;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&lt;p&gt;test&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&quot;</span><span class="Punctuation">)</span></pre></p>
+
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L494" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L494" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -630,8 +676,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
 <p>When <tt class="docutils literal"><span class="pre"><span class="Identifier">useStream</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">false</span></span></tt>, the file will be read into memory.</p>
 <p>Raises a <tt class="docutils literal"><span class="pre"><span class="Identifier">ValueError</span></span></tt> exception if <tt class="docutils literal"><span class="pre"><span class="Identifier">name</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">filename</span></span></tt> or <tt class="docutils literal"><span class="pre"><span class="Identifier">contentType</span></span></tt> contain newline characters.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L399" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L399" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L412" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L412" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -640,9 +686,12 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Add a list of multipart entries to the multipart data <tt class="docutils literal"><span class="pre"><span class="Identifier">p</span></span></tt>. All values are added without a filename and without a content type.<pre class="listing"><span class="Identifier">data</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;action&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;login&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;format&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;json&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L427" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L427" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <p>Add a list of multipart entries to the multipart data <tt class="docutils literal"><span class="pre"><span class="Identifier">p</span></span></tt>. All values are added without a filename and without a content type.</p>
+<p><pre class="listing">
+<span class="Identifier">data</span><span class="Operator">.</span><span class="Identifier">add</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;action&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;login&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;format&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;json&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre></p>
+
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L440" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L440" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -656,9 +705,12 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Add files to a multipart data object. The files will be streamed from disk when the request is being made. When <tt class="docutils literal"><span class="pre"><span class="Identifier">stream</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">false</span></span></tt>, the files are instead read into memory, but beware this is very memory ineffecient even for small files. The MIME types will automatically be determined. Raises an <tt class="docutils literal"><span class="pre"><span class="Identifier">IOError</span></span></tt> if the file cannot be opened or reading fails. To manually specify file content, filename and MIME type, use <tt class="docutils literal"><span class="pre"><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">=</span></span></tt> instead.<pre class="listing"><span class="Identifier">data</span><span class="Operator">.</span><span class="Identifier">addFiles</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;uploaded_file&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;public/test.html&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L448" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L448" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <p>Add files to a multipart data object. The files will be streamed from disk when the request is being made. When <tt class="docutils literal"><span class="pre"><span class="Identifier">stream</span></span></tt> is <tt class="docutils literal"><span class="pre"><span class="Identifier">false</span></span></tt>, the files are instead read into memory, but beware this is very memory ineffecient even for small files. The MIME types will automatically be determined. Raises an <tt class="docutils literal"><span class="pre"><span class="Identifier">IOError</span></span></tt> if the file cannot be opened or reading fails. To manually specify file content, filename and MIME type, use <tt class="docutils literal"><span class="pre"><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">=</span></span></tt> instead.</p>
+<p><pre class="listing">
+<span class="Identifier">data</span><span class="Operator">.</span><span class="Identifier">addFiles</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;uploaded_file&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;public/test.html&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre></p>
+
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L463" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L463" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -671,8 +723,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Reads the response's body and caches it. The read is performed only once.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L316" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L316" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L329" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L329" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -684,8 +736,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <p>Retrieves the specified response's body.</p>
 <p>The response's body stream is read synchronously.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L308" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L308" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L321" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L321" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -697,8 +749,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Closes any connections held by the HTTP client.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L684" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L684" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L702" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L702" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -713,8 +765,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <p>Retrieves the specified response's <tt class="docutils literal"><span class="pre"><span class="Identifier">HttpCode</span></span></tt>.</p>
 <p>Raises a <tt class="docutils literal"><span class="pre"><span class="Identifier">ValueError</span></span></tt> if the response's <tt class="docutils literal"><span class="pre"><span class="Identifier">status</span></span></tt> does not have a corresponding <tt class="docutils literal"><span class="pre"><span class="Identifier">HttpCode</span></span></tt>.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L274" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L274" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L287" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L287" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -729,8 +781,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
 <p>This is effectively the value of the &quot;Content-Length&quot; header.</p>
 <p>A <tt class="docutils literal"><span class="pre"><span class="Identifier">ValueError</span></span></tt> exception will be raised if the value is not an integer. If the Content-Length header is not set in the response, ContentLength is set to the value -1.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L288" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L288" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L301" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L301" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -744,8 +796,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <p>Retrieves the specified response's content type.</p>
 <p>This is effectively the value of the &quot;Content-Type&quot; header.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L282" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L282" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L295" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L295" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -758,8 +810,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Connects to the hostname specified by the URL and performs a DELETE request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1227" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1227" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1259" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1259" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -768,8 +820,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1228" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1228" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1260" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1260" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -782,8 +834,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Connects to the hostname specified by the URL and returns the content of a DELETE request.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1233" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1233" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1265" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1265" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -792,8 +844,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1234" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1234" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1266" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1266" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -806,8 +858,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1318" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1318" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1350" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1350" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -816,8 +868,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Downloads <tt class="docutils literal"><span class="pre"><span class="Identifier">url</span></span></tt> and saves it to <tt class="docutils literal"><span class="pre"><span class="Identifier">filename</span></span></tt>.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1280" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1280" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1312" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1312" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -832,8 +884,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <p>Connects to the hostname specified by the URL and performs a GET request.</p>
 <p>This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1214" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1214" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1246" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1246" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -842,8 +894,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1215" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1215" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1247" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1247" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -856,8 +908,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Connects to the hostname specified by the URL and returns the content of a GET request.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1221" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1221" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1253" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1253" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -866,8 +918,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1222" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1222" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1254" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1254" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -880,8 +932,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L702" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L702" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L720" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L720" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -890,13 +942,15 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    <p>Get network socket, useful if you want to find out more details about the connection</p>
-<p>this example shows info about local and remote endpoints</p>
-<pre class="listing"><span class="Keyword">if</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">connected</span><span class="Punctuation">:</span>
+    <p>Get network socket, useful if you want to find out more details about the connection.</p>
+<p>This example shows info about local and remote endpoints:</p>
+<p><pre class="listing">
+<span class="Keyword">if</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">connected</span><span class="Punctuation">:</span>
   <span class="Identifier">echo</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">getSocket</span><span class="Operator">.</span><span class="Identifier">getLocalAddr</span>
-  <span class="Identifier">echo</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">getSocket</span><span class="Operator">.</span><span class="Identifier">getPeerAddr</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L690" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L690" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+  <span class="Identifier">echo</span> <span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">getSocket</span><span class="Operator">.</span><span class="Identifier">getPeerAddr</span></pre></p>
+
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L708" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L708" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -911,8 +965,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <p>Connects to the hostname specified by the URL and performs a HEAD request.</p>
 <p>This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1207" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1207" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1239" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1239" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -921,8 +975,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1208" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1208" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1240" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1240" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -937,8 +991,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
 <p>This is effectively the value of the &quot;Last-Modified&quot; header.</p>
 <p>Raises a <tt class="docutils literal"><span class="pre"><span class="Identifier">ValueError</span></span></tt> if the parsing fails or the value is not a correctly formatted time.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L298" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L298" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L311" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L311" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -969,8 +1023,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
 <span class="Keyword">let</span> <span class="Identifier">exampleHtml</span> <span class="Operator">=</span> <span class="Identifier">waitFor</span> <span class="Identifier">asyncProc</span><span class="Punctuation">(</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;Example Domain&quot;</span> <span class="Keyword">in</span> <span class="Identifier">exampleHtml</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;Pizza&quot;</span> <span class="Keyword">notin</span> <span class="Identifier">exampleHtml</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L644" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L644" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L662" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L662" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -998,8 +1052,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
 <span class="Keyword">let</span> <span class="Identifier">exampleHtml</span> <span class="Operator">=</span> <span class="Identifier">newHttpClient</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">getContent</span><span class="Punctuation">(</span><span class="StringLit">&quot;http://example.com&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;Example Domain&quot;</span> <span class="Keyword">in</span> <span class="Identifier">exampleHtml</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;Pizza&quot;</span> <span class="Keyword">notin</span> <span class="Identifier">exampleHtml</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L601" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L601" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L619" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L619" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1012,8 +1066,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Constructs a new <tt class="docutils literal"><span class="pre"><span class="Identifier">MultipartData</span></span></tt> object.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L383" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L383" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L396" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L396" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1022,9 +1076,12 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Create a new multipart data object and fill it with the entries <tt class="docutils literal"><span class="pre"><span class="Identifier">xs</span></span></tt> directly.<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">data</span> <span class="Operator">=</span> <span class="Identifier">newMultipartData</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;action&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;login&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;format&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;json&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L438" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L438" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <p>Create a new multipart data object and fill it with the entries <tt class="docutils literal"><span class="pre"><span class="Identifier">xs</span></span></tt> directly.</p>
+<p><pre class="listing">
+<span class="Keyword">var</span> <span class="Identifier">data</span> <span class="Operator">=</span> <span class="Identifier">newMultipartData</span><span class="Punctuation">(</span><span class="Punctuation">{</span><span class="StringLit">&quot;action&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;login&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;format&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;json&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre></p>
+
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L452" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L452" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1036,8 +1093,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Constructs a new <tt class="docutils literal"><span class="pre"><span class="Identifier">TProxy</span></span></tt> object.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L375" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L375" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L388" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L388" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1046,8 +1103,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Constructs a new <tt class="docutils literal"><span class="pre"><span class="Identifier">TProxy</span></span></tt> object.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L379" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L379" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L392" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L392" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1061,8 +1118,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Connects to the hostname specified by the URL and performs a PATCH request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1266" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1266" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1298" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1298" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1072,8 +1129,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1268" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1268" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1300" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1300" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1087,8 +1144,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Connects to the hostname specified by the URL and returns the content of a PATCH request.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1273" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1273" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1305" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1305" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1098,8 +1155,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1275" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1275" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1307" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1307" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1113,8 +1170,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Connects to the hostname specified by the URL and performs a POST request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1239" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1239" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1271" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1271" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1124,8 +1181,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1241" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1241" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1273" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1273" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1139,8 +1196,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Connects to the hostname specified by the URL and returns the content of a POST request.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1246" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1246" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1278" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1278" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1150,8 +1207,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1248" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1248" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1280" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1280" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1165,8 +1222,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Connects to the hostname specified by the URL and performs a PUT request. This procedure uses httpClient values such as <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">maxRedirects</span></span></tt>.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1253" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1253" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1285" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1285" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1176,8 +1233,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1255" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1255" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1287" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1287" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1191,8 +1248,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     Connects to the hostname specified by the URL andreturns the content of a PUT request.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1260" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1260" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1292" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1292" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1202,8 +1259,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1261" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1261" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1293" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1293" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1224,8 +1281,8 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
 <p><tt class="docutils literal"><span class="pre"><span class="Identifier">headers</span></span></tt> are HTTP headers that override the <tt class="docutils literal"><span class="pre"><span class="Identifier">client</span><span class="Operator">.</span><span class="Identifier">headers</span></span></tt> for this specific request only and will not be persisted.</p>
 <p><strong>Deprecated since v1.5</strong>: use HttpMethod enum instead; string parameter httpMethod is deprecated</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1095" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1095" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1127" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1127" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -1236,20 +1293,14 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1099" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1099" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/httpclient.nim#L1131" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/httpclient.nim#L1131" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 
 </div>
 
-  </dl>
-</div>
-<div class="section" id="19">
-  <h1><a class="toc-backref" href="#19">Exports</a></h1>
-  <dl class="item">
-    <a href="httpcore.html#Http417"><span class="Identifier">Http417</span></a>, <a href="httpcore.html#Http503"><span class="Identifier">Http503</span></a>, <a href="httpcore.html#Http431"><span class="Identifier">Http431</span></a>, <a href="httpcore.html#HttpTrace"><span class="Identifier">HttpTrace</span></a>, <a href="httpcore.html#contains,set[HttpMethod],string"><span class="Identifier">contains</span></a>, <a href="httpcore.html#Http304"><span class="Identifier">Http304</span></a>, <a href="httpcore.html#Http406"><span class="Identifier">Http406</span></a>, <a href="httpcore.html#$,HttpHeaders"><span class="Identifier">$</span></a>, <a href="httpcore.html#HttpMethod"><span class="Identifier">HttpMethod</span></a>, <a href="httpcore.html#Http408"><span class="Identifier">Http408</span></a>, <a href="httpcore.html#is4xx,HttpCode"><span class="Identifier">is4xx</span></a>, <a href="httpcore.html#is1xx,HttpCode"><span class="Identifier">is1xx</span></a>, <a href="httpcore.html#Http411"><span class="Identifier">Http411</span></a>, <a href="httpcore.html#is3xx,HttpCode"><span class="Identifier">is3xx</span></a>, <a href="httpcore.html#Http207"><span class="Identifier">Http207</span></a>, <a href="httpcore.html#Http418"><span class="Identifier">Http418</span></a>, <a href="httpcore.html#Http206"><span class="Identifier">Http206</span></a>, <a href="httpcore.html#HttpHead"><span class="Identifier">HttpHead</span></a>, <a href="httpcore.html#HttpPost"><span class="Identifier">HttpPost</span></a>, <a href="httpcore.html#clear,HttpHeaders"><span class="Identifier">clear</span></a>, <a href="httpcore.html#Http101"><span class="Identifier">Http101</span></a>, <a href="httpcore.html#httpNewLine"><span class="Identifier">httpNewLine</span></a>, <a href="httpcore.html#Http505"><span class="Identifier">Http505</span></a>, <a href="httpcore.html#Http413"><span class="Identifier">Http413</span></a>, <a href="httpcore.html#Http423"><span class="Identifier">Http423</span></a>, <a href="httpcore.html#Http409"><span class="Identifier">Http409</span></a>, <a href="httpcore.html#hasKey,HttpHeaders,string"><span class="Identifier">hasKey</span></a>, <a href="httpcore.html#Http200"><span class="Identifier">Http200</span></a>, <a href="httpcore.html#[]=,HttpHeaders,string,seq[string]"><span class="Identifier">[]=</span></a>, <a href="httpcore.html#Http414"><span class="Identifier">Http414</span></a>, <a href="httpcore.html#add,HttpHeaders,string,string"><span class="Identifier">add</span></a>, <a href="httpcore.html#Http401"><span class="Identifier">Http401</span></a>, <a href="httpcore.html#Http511"><span class="Identifier">Http511</span></a>, <a href="httpcore.html#Http205"><span class="Identifier">Http205</span></a>, <a href="httpcore.html#==,HttpCode,HttpCode"><span class="Identifier">==</span></a>, <a href="httpcore.html#Http407"><span class="Identifier">Http407</span></a>, <a href="httpcore.html#Http500"><span class="Identifier">Http500</span></a>, <a href="httpcore.html#Http404"><span class="Identifier">Http404</span></a>, <a href="httpcore.html#Http416"><span class="Identifier">Http416</span></a>, <a href="httpcore.html#Http507"><span class="Identifier">Http507</span></a>, <a href="httpcore.html#Http302"><span class="Identifier">Http302</span></a>, <a href="httpcore.html#HttpHeaders"><span class="Identifier">HttpHeaders</span></a>, <a href="httpcore.html#Http300"><span class="Identifier">Http300</span></a>, <a href="httpcore.html#Http428"><span class="Identifier">Http428</span></a>, <a href="httpcore.html#Http410"><span class="Identifier">Http410</span></a>, <a href="httpcore.html#is2xx,HttpCode"><span class="Identifier">is2xx</span></a>, <a href="httpcore.html#Http202"><span class="Identifier">Http202</span></a>, <a href="httpcore.html#Http502"><span class="Identifier">Http502</span></a>, <a href="httpcore.html#headerLimit"><span class="Identifier">headerLimit</span></a>, <a href="httpcore.html#HttpHeaderValues"><span class="Identifier">HttpHeaderValues</span></a>, <a href="httpcore.html#Http425"><span class="Identifier">Http425</span></a>, <a href="httpcore.html#contains,HttpHeaderValues,string"><span class="Identifier">contains</span></a>, <a href="httpcore.html#newHttpHeaders"><span class="Identifier">newHttpHeaders</span></a>, <a href="httpcore.html#$,HttpCode"><span class="Identifier">$</span></a>, <a href="httpcore.html#[],HttpHeaders,string,int"><span class="Identifier">[]</span></a>, <a href="httpcore.html#Http510"><span class="Identifier">Http510</span></a>, <a href="httpcore.html#newHttpHeaders,openArray[tuple[string,string]]"><span class="Identifier">newHttpHeaders</span></a>, <a href="httpcore.html#Http305"><span class="Identifier">Http305</span></a>, <a href="httpcore.html#Http451"><span class="Identifier">Http451</span></a>, <a href="httpcore.html#Http504"><span class="Identifier">Http504</span></a>, <a href="httpcore.html#Http426"><span class="Identifier">Http426</span></a>, <a href="httpcore.html#HttpConnect"><span class="Identifier">HttpConnect</span></a>, <a href="httpcore.html#==,tuple[string,int,int],HttpVersion"><span class="Identifier">==</span></a>, <a href="httpcore.html#Http308"><span class="Identifier">Http308</span></a>, <a href="httpcore.html#del,HttpHeaders,string"><span class="Identifier">del</span></a>, <a href="httpcore.html#HttpPut"><span class="Identifier">HttpPut</span></a>, <a href="httpcore.html#Http402"><span class="Identifier">Http402</span></a>, <a href="httpcore.html#pairs.i,HttpHeaders"><span class="Identifier">pairs</span></a>, <a href="httpcore.html#Http429"><span class="Identifier">Http429</span></a>, <a href="httpcore.html#HttpVersion"><span class="Identifier">HttpVersion</span></a>, <a href="httpcore.html#HttpDelete"><span class="Identifier">HttpDelete</span></a>, <a href="httpcore.html#is5xx,HttpCode"><span class="Identifier">is5xx</span></a>, <a href="httpcore.html#Http421"><span class="Identifier">Http421</span></a>, <a href="httpcore.html#HttpOptions"><span class="Identifier">HttpOptions</span></a>, <a href="httpcore.html#Http307"><span class="Identifier">Http307</span></a>, <a href="httpcore.html#Http102"><span class="Identifier">Http102</span></a>, <a href="httpcore.html#Http301"><span class="Identifier">Http301</span></a>, <a href="httpcore.html#HttpPatch"><span class="Identifier">HttpPatch</span></a>, <a href="httpcore.html#Http201"><span class="Identifier">Http201</span></a>, <a href="httpcore.html#Http203"><span class="Identifier">Http203</span></a>, <a href="httpcore.html#getOrDefault,HttpHeaders,string"><span class="Identifier">getOrDefault</span></a>, <a href="httpcore.html#Http100"><span class="Identifier">Http100</span></a>, <a href="httpcore.html#Http208"><span class="Identifier">Http208</span></a>, <a href="httpcore.html#Http501"><span class="Identifier">Http501</span></a>, <a href="httpcore.html#[]=,HttpHeaders,string,string"><span class="Identifier">[]=</span></a>, <a href="httpcore.html#len,HttpHeaders"><span class="Identifier">len</span></a>, <a href="httpcore.html#Http506"><span class="Identifier">Http506</span></a>, <a href="httpcore.html#Http400"><span class="Identifier">Http400</span></a>, <a href="httpcore.html#Http403"><span class="Identifier">Http403</span></a>, <a href="httpcore.html#HttpGet"><span class="Identifier">HttpGet</span></a>, <a href="httpcore.html#Http508"><span class="Identifier">Http508</span></a>, <a href="httpcore.html#Http415"><span class="Identifier">Http415</span></a>, <a href="httpcore.html#toString.c,HttpHeaderValues"><span class="Identifier">toString</span></a>, <a href="httpcore.html#Http412"><span class="Identifier">Http412</span></a>, <a href="httpcore.html#Http103"><span class="Identifier">Http103</span></a>, <a href="httpcore.html#Http405"><span class="Identifier">Http405</span></a>, <a href="httpcore.html#Http303"><span class="Identifier">Http303</span></a>, <a href="httpcore.html#Http204"><span class="Identifier">Http204</span></a>, <a href="httpcore.html#Http424"><span class="Identifier">Http424</span></a>, <a href="httpcore.html#HttpCode"><span class="Identifier">HttpCode</span></a>, <a href="httpcore.html#Http422"><span class="Identifier">Http422</span></a>, <a href="httpcore.html#Http226"><span class="Identifier">Http226</span></a>, <a href="httpcore.html#[],HttpHeaders,string"><span class="Identifier">[]</span></a>
   </dl>
 </div>
 
@@ -1259,7 +1310,7 @@ The <tt class="docutils literal"><span class="pre"><span class="Identifier">tota
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-26 01:15:23 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-04 01:06:27 UTC</small>
       </div>
     </div>
   </div>

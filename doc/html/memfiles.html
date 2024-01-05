@@ -12,10 +12,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.1.1">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js"></script>
+<script type="text/javascript" src="dochack.js?v=2.1.1"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -43,7 +43,7 @@
     </div>
     <div id="searchInputDiv">
       Search: <input type="search" id="searchInput"
-        onkeyup="search()" />
+        oninput="search()" />
     </div>
     
     <ul class="simple simple-toc" id="toc-list">
@@ -58,7 +58,15 @@
   mem*: pointer              ## a pointer to the memory mapped file. The pointer
                              ## can be used directly to change the contents of the
                              ## file, if it was opened with write access.
-  size*: int                 ## size of the memory mapped file">MemFile</a></li>
+  size*: int                 ## size of the memory mapped file
+  when defined(windows):
+    fHandle*: Handle ## **Caution**: Windows specific public field to allow
+                     ## even more low level trickery.
+    mapHandle*: Handle       ## **Caution**: Windows specific public field.
+    wasOpened*: bool         ## **Caution**: Windows specific public field.
+  else:
+    handle*: cint            ## **Caution**: Posix specific public field.
+    ## **Caution**: Platform specific private field.">MemFile</a></li>
 <li><a class="reference" href="#MemMapFileStream" title="MemMapFileStream = ref MemMapFileStreamObj">MemMapFileStream</a></li>
 <li><a class="reference" href="#MemMapFileStreamObj" title="MemMapFileStreamObj = object of Stream">MemMapFileStreamObj</a></li>
 <li><a class="reference" href="#MemSlice" title="MemSlice = object
@@ -164,7 +172,14 @@
                              <span class="Comment">## can be used directly to change the contents of the</span>
                              <span class="Comment">## file, if it was opened with write access.</span>
   <span class="Identifier">size</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>                 <span class="Comment">## size of the memory mapped file</span>
-  </pre></dt>
+  <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">windows</span><span class="Other">)</span><span class="Other">:</span>
+    <span class="Identifier">fHandle</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Handle</span> <span class="Comment">## **Caution**: Windows specific public field to allow</span>
+                     <span class="Comment">## even more low level trickery.</span>
+    <span class="Identifier">mapHandle</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Handle</span>       <span class="Comment">## **Caution**: Windows specific public field.</span>
+    <span class="Identifier">wasOpened</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>         <span class="Comment">## **Caution**: Windows specific public field.</span>
+  <span class="Keyword">else</span><span class="Other">:</span>
+    <span class="Identifier">handle</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">cint</span>            <span class="Comment">## **Caution**: Posix specific public field.</span>
+    <span class="Comment">## **Caution**: Platform specific private field.</span></pre></dt>
   <dd>
     
     represents a memory mapped file
@@ -178,32 +193,30 @@
   <dd>
     
     a stream that encapsulates a <tt class="docutils literal"><span class="pre"><span class="Identifier">MemFile</span></span></tt>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L511" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L511" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L512" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L512" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="MemMapFileStreamObj">
-  <dt><pre><a href="memfiles.html#MemMapFileStreamObj"><span class="Identifier">MemMapFileStreamObj</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="streams.html#Stream"><span class="Identifier">Stream</span></a>
-  </pre></dt>
+  <dt><pre><a href="memfiles.html#MemMapFileStreamObj"><span class="Identifier">MemMapFileStreamObj</span></a> <span class="Other">=</span> <span class="Keyword">object</span> <span class="Keyword">of</span> <a href="streams.html#Stream"><span class="Identifier">Stream</span></a></pre></dt>
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L512" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L512" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L513" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L513" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="MemSlice">
   <dt><pre><a href="memfiles.html#MemSlice"><span class="Identifier">MemSlice</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">data</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a>
-  <span class="Identifier">size</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a>
-</pre></dt>
+  <span class="Identifier">size</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int"><span class="Identifier">int</span></a></pre></dt>
   <dd>
     
     represent slice of a MemFile for iteration over delimited lines/records
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L409" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L409" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L410" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L410" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -219,8 +232,8 @@
   <dd>
     
     Return a Nim string built from a MemSlice.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L417" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L417" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L418" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L418" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -232,8 +245,8 @@
   <dd>
     
     Compare a pair of MemSlice for strict equality.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L413" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L413" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L414" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L414" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -245,8 +258,8 @@
   <dd>
     
     closes the memory mapped file <tt class="docutils literal"><span class="pre"><span class="Identifier">f</span></span></tt>. All changes are written back to the file system, if <tt class="docutils literal"><span class="pre"><span class="Identifier">f</span></span></tt> was opened with write access.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L374" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L374" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L375" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L375" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -259,8 +272,8 @@
   <dd>
     
     Flushes <tt class="docutils literal"><span class="pre"><span class="Identifier">f</span></span></tt>'s buffer for the number of attempts equal to <tt class="docutils literal"><span class="pre"><span class="Identifier">attempts</span></span></tt>. If were errors an exception <tt class="docutils literal"><span class="pre"><span class="Identifier">OSError</span></span></tt> will be raised.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L299" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L299" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L300" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L300" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -291,8 +304,8 @@
   <dd>
     
     creates a new stream from the file named <tt class="docutils literal"><span class="pre"><span class="Identifier">filename</span></span></tt> with the mode <tt class="docutils literal"><span class="pre"><span class="Identifier">mode</span></span></tt>. Raises ## <tt class="docutils literal"><span class="pre"><span class="Identifier">OSError</span></span></tt> if the file cannot be opened. See the <a class="reference external" href="system.html">system</a> module for a list of available FileMode enums. <tt class="docutils literal"><span class="pre"><span class="Identifier">fileSize</span></span></tt> can only be set if the file does not exist and is opened with write access (e.g., with fmReadWrite).
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L555" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L555" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L556" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L556" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -312,7 +325,8 @@
 <p><tt class="docutils literal"><span class="pre"><span class="Identifier">allowRemap</span></span></tt> only needs to be true if you want to call <tt class="docutils literal"><span class="pre"><span class="Identifier">mapMem</span></span></tt> on the resulting MemFile; else file handles are not kept open.</p>
 <p><tt class="docutils literal"><span class="pre"><span class="Identifier">mapFlags</span></span></tt> allows callers to override default choices for memory mapping flags with a bitwise mask of a variety of likely platform-specific flags which may be ignored or even cause <tt class="docutils literal"><span class="pre"><span class="Identifier">open</span></span></tt> to fail if misspecified.</p>
 <p>Example:</p>
-<pre class="listing"><span class="Keyword">var</span>
+<p><pre class="listing">
+<span class="Keyword">var</span>
   <span class="Identifier">mm</span><span class="Punctuation">,</span> <span class="Identifier">mm_full</span><span class="Punctuation">,</span> <span class="Identifier">mm_half</span><span class="Punctuation">:</span> <span class="Identifier">MemFile</span>
 
 <span class="Identifier">mm</span> <span class="Operator">=</span> <span class="Identifier">memfiles</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;/tmp/test.mmap&quot;</span><span class="Punctuation">,</span> <span class="Identifier">mode</span> <span class="Operator">=</span> <span class="Identifier">fmWrite</span><span class="Punctuation">,</span> <span class="Identifier">newFileSize</span> <span class="Operator">=</span> <span class="DecNumber">1024</span><span class="Punctuation">)</span>    <span class="Comment"># Create a new file</span>
@@ -322,7 +336,8 @@
 <span class="Identifier">mm_full</span> <span class="Operator">=</span> <span class="Identifier">memfiles</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;/tmp/test.mmap&quot;</span><span class="Punctuation">,</span> <span class="Identifier">mode</span> <span class="Operator">=</span> <span class="Identifier">fmReadWrite</span><span class="Punctuation">,</span> <span class="Identifier">mappedSize</span> <span class="Operator">=</span> <span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">)</span>
 
 <span class="Comment"># Read the first 512 bytes</span>
-<span class="Identifier">mm_half</span> <span class="Operator">=</span> <span class="Identifier">memfiles</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;/tmp/test.mmap&quot;</span><span class="Punctuation">,</span> <span class="Identifier">mode</span> <span class="Operator">=</span> <span class="Identifier">fmReadWrite</span><span class="Punctuation">,</span> <span class="Identifier">mappedSize</span> <span class="Operator">=</span> <span class="DecNumber">512</span><span class="Punctuation">)</span></pre>
+<span class="Identifier">mm_half</span> <span class="Operator">=</span> <span class="Identifier">memfiles</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;/tmp/test.mmap&quot;</span><span class="Punctuation">,</span> <span class="Identifier">mode</span> <span class="Operator">=</span> <span class="Identifier">fmReadWrite</span><span class="Punctuation">,</span> <span class="Identifier">mappedSize</span> <span class="Operator">=</span> <span class="DecNumber">512</span><span class="Punctuation">)</span></pre></p>
+
     <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L130" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L130" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
@@ -337,8 +352,8 @@
   <dd>
     
     Resize &amp; re-map the file underlying an <tt class="docutils literal"><span class="pre"><span class="Identifier">allowRemap</span> <span class="Identifier">MemFile</span></span></tt>.  If the OS/FS supports it, file space is reserved to ensure room for new virtual pages. Caller should wait often enough for <tt class="docutils literal"><span class="pre"><span class="Identifier">flush</span></span></tt> to finish to limit use of system RAM for write buffering, perhaps just prior to this call. <strong>Note</strong>: this assumes the entire file is mapped read-write at offset 0. Also, the value of <tt class="docutils literal"><span class="pre"><span class="Operator">.</span><span class="Identifier">mem</span></span></tt> will probably change.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L321" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L321" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L322" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L322" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -374,11 +389,13 @@
     
     <p>Replace contents of passed buffer with each new line, like <a class="reference external" href="syncio.html#readLine,File,string">readLine(File)</a>. <tt class="docutils literal"><span class="pre"><span class="Identifier">delim</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">eat</span></span></tt>, and delimiting logic is exactly as for <a class="reference external" href="#memSlices.i,MemFile,char,char">memSlices</a>, but Nim strings are returned.</p>
 <p>Example:</p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">buffer</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span> <span class="StringLit">&quot;&quot;</span>
+<p><pre class="listing">
+<span class="Keyword">var</span> <span class="Identifier">buffer</span><span class="Punctuation">:</span> <span class="Identifier">string</span> <span class="Operator">=</span> <span class="StringLit">&quot;&quot;</span>
 <span class="Keyword">for</span> <span class="Identifier">line</span> <span class="Keyword">in</span> <span class="Identifier">lines</span><span class="Punctuation">(</span><span class="Identifier">memfiles</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">)</span><span class="Punctuation">,</span> <span class="Identifier">buffer</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-  <span class="Identifier">echo</span> <span class="Identifier">line</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L474" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L474" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+  <span class="Identifier">echo</span> <span class="Identifier">line</span></pre></p>
+
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L475" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L475" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -389,10 +406,12 @@
     
     <p>Return each line in a file as a Nim string, like <a class="reference external" href="syncio.html#lines.i,File">lines(File)</a>. <tt class="docutils literal"><span class="pre"><span class="Identifier">delim</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">eat</span></span></tt>, and delimiting logic is exactly as for <a class="reference external" href="#memSlices.i,MemFile,char,char">memSlices</a>, but Nim strings are returned.</p>
 <p>Example:</p>
-<pre class="listing"><span class="Keyword">for</span> <span class="Identifier">line</span> <span class="Keyword">in</span> <span class="Identifier">lines</span><span class="Punctuation">(</span><span class="Identifier">memfiles</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-  <span class="Identifier">echo</span> <span class="Identifier">line</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L494" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L494" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+<p><pre class="listing">
+<span class="Keyword">for</span> <span class="Identifier">line</span> <span class="Keyword">in</span> <span class="Identifier">lines</span><span class="Punctuation">(</span><span class="Identifier">memfiles</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+  <span class="Identifier">echo</span> <span class="Identifier">line</span></pre></p>
+
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L495" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L495" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -410,13 +429,15 @@
 <p>Non-default delimiters can be passed to allow iteration over other sorts of &quot;line-like&quot; variable length records.  Pass eat='\0' to be strictly <tt class="docutils literal"><span class="pre"><span class="Identifier">delim</span></span></tt>-delimited. (Eating an optional prefix equal to '\0' is not supported.)</p>
 <p>This zero copy, memchr-limited interface is probably the fastest way to iterate over line-like records in a file.  However, returned (data,size) objects are not Nim strings, bounds checked Nim arrays, or even terminated C strings.  So, care is required to access the data (e.g., think C mem* functions, not str* functions).</p>
 <p>Example:</p>
-<pre class="listing"><span class="Keyword">var</span> <span class="Identifier">count</span> <span class="Operator">=</span> <span class="DecNumber">0</span>
+<p><pre class="listing">
+<span class="Keyword">var</span> <span class="Identifier">count</span> <span class="Operator">=</span> <span class="DecNumber">0</span>
 <span class="Keyword">for</span> <span class="Identifier">slice</span> <span class="Keyword">in</span> <span class="Identifier">memSlices</span><span class="Punctuation">(</span><span class="Identifier">memfiles</span><span class="Operator">.</span><span class="Identifier">open</span><span class="Punctuation">(</span><span class="StringLit">&quot;foo&quot;</span><span class="Punctuation">)</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
   <span class="Keyword">if</span> <span class="Identifier">slice</span><span class="Operator">.</span><span class="Identifier">size</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span> <span class="Keyword">and</span> <span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Identifier">cstring</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Identifier">slice</span><span class="Operator">.</span><span class="Identifier">data</span><span class="Punctuation">)</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span> <span class="Operator">!=</span> <span class="CharLit">'#'</span><span class="Punctuation">:</span>
     <span class="Identifier">inc</span><span class="Punctuation">(</span><span class="Identifier">count</span><span class="Punctuation">)</span>
-<span class="Identifier">echo</span> <span class="Identifier">count</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L422" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L422" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+<span class="Identifier">echo</span> <span class="Identifier">count</span></pre></p>
+
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/memfiles.nim#L423" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/memfiles.nim#L423" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -432,7 +453,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-26 01:15:26 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-04 01:06:19 UTC</small>
       </div>
     </div>
   </div>

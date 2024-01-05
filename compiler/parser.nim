@@ -49,8 +49,10 @@ when isMainModule or defined(nimTestGrammar):
     checkGrammarFile()
 
 import
-  llstream, lexer, idents, strutils, ast, msgs, options, lineinfos,
+  llstream, lexer, idents, ast, msgs, options, lineinfos,
   pathutils
+
+import std/strutils
 
 when defined(nimpretty):
   import layouter
@@ -80,10 +82,6 @@ type
 
   PrimaryMode = enum
     pmNormal, pmTypeDesc, pmTypeDef, pmTrySimple
-
-proc parseAll*(p: var Parser): PNode
-proc closeParser*(p: var Parser)
-proc parseTopLevelStmt*(p: var Parser): PNode
 
 # helpers for the other parsers
 proc isOperator*(tok: Token): bool
@@ -142,7 +140,7 @@ proc openParser*(p: var Parser, fileIdx: FileIndex, inputStream: PLLStream,
                  cache: IdentCache; config: ConfigRef) =
   ## Open a parser, using the given arguments to set up its internal state.
   ##
-  initToken(p.tok)
+  reset(p.tok)
   openLexer(p.lex, fileIdx, inputStream, cache, config)
   when defined(nimpretty):
     openEmitter(p.em, cache, config, fileIdx)
@@ -154,11 +152,9 @@ proc openParser*(p: var Parser, filename: AbsoluteFile, inputStream: PLLStream,
                  cache: IdentCache; config: ConfigRef) =
   openParser(p, fileInfoIdx(config, filename), inputStream, cache, config)
 
-proc closeParser(p: var Parser) =
+proc closeParser*(p: var Parser) =
   ## Close a parser, freeing up its resources.
   closeLexer(p.lex)
-  when defined(nimpretty):
-    closeEmitter(p.em)
 
 proc parMessage(p: Parser, msg: TMsgKind, arg = "") =
   ## Produce and emit the parser message `arg` to output.
@@ -310,7 +306,7 @@ proc checkBinary(p: Parser) {.inline.} =
     if p.tok.spacing == {tsTrailing}:
       parMessage(p, warnInconsistentSpacing, prettyTok(p.tok))
 
-#| module = stmt ^* (';' / IND{=})
+#| module = complexOrSimpleStmt ^* (';' / IND{=})
 #|
 #| comma = ',' COMMENT?
 #| semicolon = ';' COMMENT?
@@ -436,7 +432,8 @@ proc colonOrEquals(p: var Parser, a: PNode): PNode =
     result = equals(p, a)
 
 proc exprColonEqExpr(p: var Parser): PNode =
-  #| exprColonEqExpr = expr (':'|'=' expr)?
+  #| exprColonEqExpr = expr ((':'|'=') expr
+  #|                        / doBlock extraPostExprBlock*)?
   var a = parseExpr(p)
   if p.tok.tokType == tkDo:
     result = postExprBlocks(p, a)
@@ -444,7 +441,8 @@ proc exprColonEqExpr(p: var Parser): PNode =
     result = colonOrEquals(p, a)
 
 proc exprEqExpr(p: var Parser): PNode =
-  #| exprEqExpr = expr ('=' expr)?
+  #| exprEqExpr = expr ('=' expr
+  #|                   / doBlock extraPostExprBlock*)?
   var a = parseExpr(p)
   if p.tok.tokType == tkDo:
     result = postExprBlocks(p, a)
@@ -647,7 +645,8 @@ proc parsePar(p: var Parser): PNode =
   #|           ( &parKeyw (ifExpr / complexOrSimpleStmt) ^+ ';'
   #|           | ';' (ifExpr / complexOrSimpleStmt) ^+ ';'
   #|           | pragmaStmt
-  #|           | simpleExpr ( ('=' expr (';' (ifExpr / complexOrSimpleStmt) ^+ ';' )? )
+  #|           | simpleExpr ( (doBlock extraPostExprBlock*)
+  #|                        | ('=' expr (';' (ifExpr / complexOrSimpleStmt) ^+ ';' )? )
   #|                        | (':' expr (',' exprColonEqExpr     ^+ ',' )? ) ) )
   #|           optPar ')'
   #
@@ -1174,6 +1173,7 @@ proc optPragmas(p: var Parser): PNode =
 
 proc parseDoBlock(p: var Parser; info: TLineInfo): PNode =
   #| doBlock = 'do' paramListArrow pragma? colcom stmt
+  result = nil
   var params = parseParamList(p, retColon=false)
   let pragmas = optPragmas(p)
   colcom(p, result)
@@ -1336,7 +1336,7 @@ proc primary(p: var Parser, mode: PrimaryMode): PNode =
   #| simplePrimary = SIGILLIKEOP? identOrLiteral primarySuffix*
   #| commandStart = &('`'|IDENT|literal|'cast'|'addr'|'type'|'var'|'out'|
   #|                  'static'|'enum'|'tuple'|'object'|'proc')
-  #| primary = simplePrimary (commandStart expr)
+  #| primary = simplePrimary (commandStart expr (doBlock extraPostExprBlock*)?)?
   #|         / operatorB primary
   #|         / routineExpr
   #|         / rawTypeDesc
@@ -1393,7 +1393,7 @@ proc binaryNot(p: var Parser; a: PNode): PNode =
     let notOpr = newIdentNodeP(p.tok.ident, p)
     getTok(p)
     optInd(p, notOpr)
-    let b = parseExpr(p)
+    let b = primary(p, pmTypeDesc)
     result = newNodeP(nkInfix, p)
     result.add notOpr
     result.add a
@@ -1404,8 +1404,8 @@ proc binaryNot(p: var Parser; a: PNode): PNode =
 proc parseTypeDesc(p: var Parser, fullExpr = false): PNode =
   #| rawTypeDesc = (tupleType | routineType | 'enum' | 'object' |
   #|                 ('var' | 'out' | 'ref' | 'ptr' | 'distinct') typeDesc?)
-  #|                 ('not' expr)?
-  #| typeDescExpr = (routineType / simpleExpr) ('not' expr)?
+  #|                 ('not' primary)?
+  #| typeDescExpr = (routineType / simpleExpr) ('not' primary)?
   #| typeDesc = rawTypeDesc / typeDescExpr
   newlineWasSplitting(p)
   if fullExpr:
@@ -1427,6 +1427,7 @@ proc parseTypeDesc(p: var Parser, fullExpr = false): PNode =
       result = newNodeP(nkObjectTy, p)
       getTok(p)
     of tkConcept:
+      result = nil
       parMessage(p, "the 'concept' keyword is only valid in 'type' sections")
     of tkVar: result = parseTypeDescKAux(p, nkVarTy, pmTypeDesc)
     of tkOut: result = parseTypeDescKAux(p, nkOutTy, pmTypeDesc)
@@ -1441,8 +1442,8 @@ proc parseTypeDesc(p: var Parser, fullExpr = false): PNode =
 proc parseTypeDefValue(p: var Parser): PNode =
   #| typeDefValue = ((tupleDecl | enumDecl | objectDecl | conceptDecl |
   #|                  ('ref' | 'ptr' | 'distinct') (tupleDecl | objectDecl))
-  #|                / (simpleExpr (exprEqExpr ^+ comma postExprBlocks)?))
-  #|                ('not' expr)?
+  #|                / (simpleExpr (exprEqExpr ^+ comma postExprBlocks?)?))
+  #|                ('not' primary)?
   case p.tok.tokType
   of tkTuple: result = parseTuple(p, true)
   of tkRef: result = parseTypeDescKAux(p, nkRefTy, pmTypeDef)
@@ -1478,12 +1479,13 @@ proc makeCall(n: PNode): PNode =
     result.add n
 
 proc postExprBlocks(p: var Parser, x: PNode): PNode =
-  #| postExprBlocks = ':' stmt? ( IND{=} doBlock
-  #|                            | IND{=} 'of' exprList ':' stmt
-  #|                            | IND{=} 'elif' expr ':' stmt
-  #|                            | IND{=} 'except' optionalExprList ':' stmt
-  #|                            | IND{=} 'finally' ':' stmt
-  #|                            | IND{=} 'else' ':' stmt )*
+  #| extraPostExprBlock = ( IND{=} doBlock
+  #|                      | IND{=} 'of' exprList ':' stmt
+  #|                      | IND{=} 'elif' expr ':' stmt
+  #|                      | IND{=} 'except' optionalExprList ':' stmt
+  #|                      | IND{=} 'finally' ':' stmt
+  #|                      | IND{=} 'else' ':' stmt )
+  #| postExprBlocks = (doBlock / ':' (extraPostExprBlock / stmt)) extraPostExprBlock*
   result = x
   if p.tok.indent >= 0: return
 
@@ -1500,7 +1502,7 @@ proc postExprBlocks(p: var Parser, x: PNode): PNode =
     result = makeCall(result)
     getTok(p)
     skipComment(p, result)
-    if p.tok.tokType notin {tkOf, tkElif, tkElse, tkExcept, tkFinally}:
+    if not (p.tok.tokType in {tkOf, tkElif, tkElse, tkExcept, tkFinally} and sameInd(p)):
       var stmtList = newNodeP(nkStmtList, p)
       stmtList.add parseStmt(p)
       # to keep backwards compatibility (see tests/vm/tstringnil)
@@ -2281,7 +2283,7 @@ proc parseTypeDef(p: var Parser): PNode =
   setEndInfo()
 
 proc parseVarTuple(p: var Parser): PNode =
-  #| varTupleLhs = '(' optInd (identWithPragma / varTupleLhs) ^+ comma optPar ')'
+  #| varTupleLhs = '(' optInd (identWithPragma / varTupleLhs) ^+ comma optPar ')' (':' optInd typeDescExpr)?
   #| varTuple = varTupleLhs '=' optInd expr
   result = newNodeP(nkVarTuple, p)
   getTok(p)                   # skip '('
@@ -2298,9 +2300,14 @@ proc parseVarTuple(p: var Parser): PNode =
     if p.tok.tokType != tkComma: break
     getTok(p)
     skipComment(p, a)
-  result.add(p.emptyNode)         # no type desc
   optPar(p)
   eat(p, tkParRi)
+  if p.tok.tokType == tkColon:
+    getTok(p)
+    optInd(p, result)
+    result.add(parseTypeDesc(p, fullExpr = true))
+  else:
+    result.add(p.emptyNode)         # no type desc
   setEndInfo()
 
 proc parseVariable(p: var Parser): PNode =
@@ -2507,27 +2514,11 @@ proc parseStmt(p: var Parser): PNode =
           if err and p.tok.tokType == tkEof: break
   setEndInfo()
 
-proc parseAll(p: var Parser): PNode =
-  ## Parses the rest of the input stream held by the parser into a PNode.
-  result = newNodeP(nkStmtList, p)
-  while p.tok.tokType != tkEof:
-    p.hasProgress = false
-    var a = complexOrSimpleStmt(p)
-    if a.kind != nkEmpty and p.hasProgress:
-      result.add(a)
-    else:
-      parMessage(p, errExprExpected, p.tok)
-      # bugfix: consume a token here to prevent an endless loop:
-      getTok(p)
-    if p.tok.indent != 0:
-      parMessage(p, errInvalidIndentation)
-  setEndInfo()
-
 proc checkFirstLineIndentation*(p: var Parser) =
   if p.tok.indent != 0 and tsLeading in p.tok.spacing:
     parMessage(p, errInvalidIndentation)
 
-proc parseTopLevelStmt(p: var Parser): PNode =
+proc parseTopLevelStmt*(p: var Parser): PNode =
   ## Implements an iterator which, when called repeatedly, returns the next
   ## top-level statement or emptyNode if end of stream.
   result = p.emptyNode
@@ -2557,6 +2548,16 @@ proc parseTopLevelStmt(p: var Parser): PNode =
       break
   setEndInfo()
 
+proc parseAll*(p: var Parser): PNode =
+  ## Parses the rest of the input stream held by the parser into a PNode.
+  result = newNodeP(nkStmtList, p)
+  while true:
+    let nextStmt = p.parseTopLevelStmt()
+    if nextStmt.kind == nkEmpty:
+      break
+    result &= nextStmt
+  setEndInfo()
+
 proc parseString*(s: string; cache: IdentCache; config: ConfigRef;
                   filename: string = ""; line: int = 0;
                   errorHandler: ErrorHandler = nil): PNode =
@@ -2567,7 +2568,7 @@ proc parseString*(s: string; cache: IdentCache; config: ConfigRef;
   var stream = llStreamOpen(s)
   stream.lineOffset = line
 
-  var p: Parser
+  var p = Parser()
   p.lex.errorHandler = errorHandler
   openParser(p, AbsoluteFile filename, stream, cache, config)
 

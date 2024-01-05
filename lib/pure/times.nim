@@ -20,7 +20,7 @@
   Examples
   ========
 
-  .. code-block:: nim
+    ```nim
     import std/[times, os]
     # Simple benchmarking
     let time = cpuTime()
@@ -37,6 +37,7 @@
     # Arithmetic using TimeInterval
     echo "One year from now      : ", now() + 1.years
     echo "One month from now     : ", now() + 1.months
+    ```
 
   Parsing and Formatting Dates
   ============================
@@ -44,10 +45,10 @@
   The `DateTime` type can be parsed and formatted using the different
   `parse` and `format` procedures.
 
-  .. code-block:: nim
-
+    ```nim
     let dt = parse("2000-01-01", "yyyy-MM-dd")
     echo dt.format("yyyy-MM-dd")
+    ```
 
   The different format patterns that are supported are documented below.
 
@@ -202,7 +203,7 @@
   * `monotimes module <monotimes.html>`_
 ]##
 
-import strutils, math, options
+import std/[strutils, math, options]
 
 import std/private/since
 include "system/inclrtl"
@@ -212,7 +213,7 @@ when defined(nimPreviewSlimSystem):
 
 
 when defined(js):
-  import jscore
+  import std/jscore
 
   # This is really bad, but overflow checks are broken badly for
   # ints on the JS backend. See #6752.
@@ -236,7 +237,7 @@ when defined(js):
   {.pop.}
 
 elif defined(posix):
-  import posix
+  import std/posix
 
   type CTime = posix.Time
 
@@ -245,7 +246,7 @@ elif defined(posix):
       {.importc: "gettimeofday", header: "<sys/time.h>", sideEffect.}
 
 elif defined(windows):
-  import winlean, std/time_t
+  import std/winlean, std/time_t
 
   type
     CTime = time_t.Time
@@ -652,11 +653,10 @@ template eqImpl(a: Duration|Time, b: Duration|Time): bool =
 
 const DurationZero* = Duration() ## \
   ## Zero value for durations. Useful for comparisons.
-  ##
-  ## .. code-block:: nim
-  ##
+  ##   ```nim
   ##   doAssert initDuration(seconds = 1) > DurationZero
   ##   doAssert initDuration(seconds = 0) == DurationZero
+  ##   ```
 
 proc initDuration*(nanoseconds, microseconds, milliseconds,
                    seconds, minutes, hours, days, weeks: int64 = 0): Duration =
@@ -1523,31 +1523,17 @@ proc getClockStr*(dt = now()): string {.rtl, extern: "nt$1", tags: [TimeEffect].
 
 
 #
-# Iso week
+# Iso week forward declarations
 #
 
 proc initDateTime*(weekday: WeekDay, isoweek: IsoWeekRange, isoyear: IsoYear,
                    hour: HourRange, minute: MinuteRange, second: SecondRange,
                    nanosecond: NanosecondRange,
-                   zone: Timezone = local()): DateTime {.since: (1, 5).} =
-  ## Create a new `DateTime <#DateTime>`_ from a weekday and an ISO 8601 week number and year
-  ## in the specified timezone.
-  ##
-  ## .. warning:: The ISO week-based year can correspond to the following or previous year from 29 December to January 3.
-  runnableExamples:
-    assert initDateTime(21, mApr, 2018, 00, 00, 00) == initDateTime(dSat, 16, 2018.IsoYear, 00, 00, 00)
-    assert initDateTime(30, mDec, 2019, 00, 00, 00) == initDateTime(dMon, 01, 2020.IsoYear, 00, 00, 00)
-    assert initDateTime(13, mSep, 2020, 00, 00, 00) == initDateTime(dSun, 37, 2020.IsoYear, 00, 00, 00)
-    assert initDateTime(2, mJan, 2021, 00, 00, 00) == initDateTime(dSat, 53, 2020.IsoYear, 00, 00, 00)
-
-  # source https://webspace.science.uu.nl/~gent0113/calendar/isocalendar.htm
-  let d = isoweek * 7 + weekday.int - initDateTime(4, mJan, isoyear.int, 00, 00, 00).weekday.int - 4
-  initDateTime(1, mJan, isoyear.int, hour, minute, second, nanosecond, zone) + initDuration(days=d)
+                   zone: Timezone = local()): DateTime {.gcsafe, raises: [], tags: [], since: (1, 5).}
 
 proc initDateTime*(weekday: WeekDay, isoweek: IsoWeekRange, isoyear: IsoYear,
                    hour: HourRange, minute: MinuteRange, second: SecondRange,
-                   zone: Timezone = local()): DateTime {.since: (1, 5).} =
-  initDateTime(weekday, isoweek, isoyear, hour, minute, second, 0, zone)
+                   zone: Timezone = local()): DateTime {.gcsafe, raises: [], tags: [], since: (1, 5).}
 
 #
 # TimeFormat
@@ -2103,7 +2089,7 @@ proc parsePattern(input: string, pattern: FormatPattern, i: var int,
       i.inc 2
     else:
       result = false
-  of Lit: doAssert false, "Can't happen"
+  of Lit: raiseAssert "Can't happen"
 
 proc toDateTime(p: ParsedTime, zone: Timezone, f: TimeFormat,
                 input: string): DateTime =
@@ -2762,6 +2748,33 @@ proc `-=`*(t: var Time, b: TimeInterval) =
   t = t - b
 
 #
+# Iso week
+#
+
+proc initDateTime*(weekday: WeekDay, isoweek: IsoWeekRange, isoyear: IsoYear,
+                   hour: HourRange, minute: MinuteRange, second: SecondRange,
+                   nanosecond: NanosecondRange,
+                   zone: Timezone = local()): DateTime {.raises: [], tags: [], since: (1, 5).} =
+  ## Create a new `DateTime <#DateTime>`_ from a weekday and an ISO 8601 week number and year
+  ## in the specified timezone.
+  ##
+  ## .. warning:: The ISO week-based year can correspond to the following or previous year from 29 December to January 3.
+  runnableExamples:
+    assert initDateTime(21, mApr, 2018, 00, 00, 00) == initDateTime(dSat, 16, 2018.IsoYear, 00, 00, 00)
+    assert initDateTime(30, mDec, 2019, 00, 00, 00) == initDateTime(dMon, 01, 2020.IsoYear, 00, 00, 00)
+    assert initDateTime(13, mSep, 2020, 00, 00, 00) == initDateTime(dSun, 37, 2020.IsoYear, 00, 00, 00)
+    assert initDateTime(2, mJan, 2021, 00, 00, 00) == initDateTime(dSat, 53, 2020.IsoYear, 00, 00, 00)
+
+  # source https://webspace.science.uu.nl/~gent0113/calendar/isocalendar.htm
+  let d = isoweek * 7 + weekday.int - initDateTime(4, mJan, isoyear.int, 00, 00, 00, zone).weekday.int - 4
+  initDateTime(1, mJan, isoyear.int, hour, minute, second, nanosecond, zone) + initTimeInterval(days=d)
+
+proc initDateTime*(weekday: WeekDay, isoweek: IsoWeekRange, isoyear: IsoYear,
+                   hour: HourRange, minute: MinuteRange, second: SecondRange,
+                   zone: Timezone = local()): DateTime {.raises: [], tags: [], since: (1, 5).} =
+  initDateTime(weekday, isoweek, isoyear, hour, minute, second, 0, zone)
+
+#
 # Other
 #
 
@@ -2774,7 +2787,9 @@ proc epochTime*(): float {.tags: [TimeEffect].} =
   ##
   ## .. warning:: Unsuitable for benchmarking (but still better than `now`),
   ##    use `monotimes.getMonoTime` or `cpuTime` instead, depending on the use case.
-  when defined(macosx):
+  when defined(js):
+    result = newDate().getTime() / 1000
+  elif defined(macosx):
     var a {.noinit.}: Timeval
     gettimeofday(a)
     result = toBiggestFloat(a.tv_sec.int64) + toBiggestFloat(
@@ -2791,8 +2806,6 @@ proc epochTime*(): float {.tags: [TimeEffect].} =
     var secs = i64 div rateDiff
     var subsecs = i64 mod rateDiff
     result = toFloat(int(secs)) + toFloat(int(subsecs)) * 0.0000001
-  elif defined(js):
-    result = newDate().getTime() / 1000
   else:
     {.error: "unknown OS".}
 

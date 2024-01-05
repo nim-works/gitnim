@@ -19,7 +19,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/lib/nim
       docdir=/usr/share/nim/doc
       datadir=/usr/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/nim-1.9.3"
+      nimbleDir="/opt/nimble/pkgs/nim-2.1.1"
       ;;
     "/usr/local/bin")
       bindir=/usr/local/bin
@@ -27,7 +27,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/local/lib/nim
       docdir=/usr/local/share/nim/doc
       datadir=/usr/local/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/nim-1.9.3"
+      nimbleDir="/opt/nimble/pkgs/nim-2.1.1"
       ;;
     "/opt")
       bindir="/opt/nim/bin"
@@ -35,7 +35,7 @@ if [ $# -eq 1 ] ; then
       libdir="/opt/nim/lib"
       docdir="/opt/nim/doc"
       datadir="/opt/nim/data"
-      nimbleDir="/opt/nimble/pkgs/nim-1.9.3"
+      nimbleDir="/opt/nimble/pkgs/nim-2.1.1"
       ;;
     *)
       bindir="$1/nim/bin"
@@ -63,6 +63,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/ast.nim
     rm -f $nimbleDir/compiler/astalgo.nim
     rm -f $nimbleDir/compiler/astmsgs.nim
+    rm -f $nimbleDir/compiler/astyaml.nim
     rm -f $nimbleDir/compiler/backendpragmas.nim
     rm -f $nimbleDir/compiler/bitsets.nim
     rm -f $nimbleDir/compiler/btrees.nim
@@ -82,6 +83,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/closureiters.nim
     rm -f $nimbleDir/compiler/cmdlinehelper.nim
     rm -f $nimbleDir/compiler/commands.nim
+    rm -f $nimbleDir/compiler/compiler.nimble
     rm -f $nimbleDir/compiler/concepts.nim
     rm -f $nimbleDir/compiler/condsyms.nim
     rm -f $nimbleDir/compiler/debuginfo.nim
@@ -94,22 +96,23 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/errorhandling.nim
     rm -f $nimbleDir/compiler/evalffi.nim
     rm -f $nimbleDir/compiler/evaltempl.nim
+    rm -f $nimbleDir/compiler/expanddefaults.nim
     rm -f $nimbleDir/compiler/extccomp.nim
     rm -f $nimbleDir/compiler/filter_tmpl.nim
     rm -f $nimbleDir/compiler/filters.nim
     rm -f $nimbleDir/compiler/gorgeimpl.nim
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
-    rm -f $nimbleDir/compiler/ic/rodfiles.nim
-    rm -f $nimbleDir/compiler/ic/cbackend.nim
-    rm -f $nimbleDir/compiler/ic/ic.nim
-    rm -f $nimbleDir/compiler/ic/replayer.nim
-    rm -f $nimbleDir/compiler/ic/dce.nim
-    rm -f $nimbleDir/compiler/ic/integrity.nim
-    rm -f $nimbleDir/compiler/ic/design.rst
-    rm -f $nimbleDir/compiler/ic/packed_ast.nim
     rm -f $nimbleDir/compiler/ic/bitabs.nim
+    rm -f $nimbleDir/compiler/ic/rodfiles.nim
     rm -f $nimbleDir/compiler/ic/navigator.nim
+    rm -f $nimbleDir/compiler/ic/packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/dce.nim
+    rm -f $nimbleDir/compiler/ic/replayer.nim
+    rm -f $nimbleDir/compiler/ic/integrity.nim
+    rm -f $nimbleDir/compiler/ic/ic.nim
+    rm -f $nimbleDir/compiler/ic/cbackend.nim
+    rm -f $nimbleDir/compiler/ic/design.rst
     rm -f $nimbleDir/compiler/idents.nim
     rm -f $nimbleDir/compiler/importer.nim
     rm -f $nimbleDir/compiler/index.nim
@@ -144,12 +147,21 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/nimblecmd.nim
     rm -f $nimbleDir/compiler/nimconf.nim
     rm -f $nimbleDir/compiler/nimeval.nim
-    rm -f $nimbleDir/compiler/nimfix/prettybase.nim
-    rm -f $nimbleDir/compiler/nimfix/nimfix.nim.cfg
-    rm -f $nimbleDir/compiler/nimfix/nimfix.nim
     rm -f $nimbleDir/compiler/nimlexbase.nim
     rm -f $nimbleDir/compiler/nimpaths.nim
     rm -f $nimbleDir/compiler/nimsets.nim
+    rm -f $nimbleDir/compiler/nir/cir.nim
+    rm -f $nimbleDir/compiler/nir/stringcases.nim
+    rm -f $nimbleDir/compiler/nir/nirinsts.nim
+    rm -f $nimbleDir/compiler/nir/nirlineinfos.nim
+    rm -f $nimbleDir/compiler/nir/ast2ir.nim
+    rm -f $nimbleDir/compiler/nir/nirvm.nim
+    rm -f $nimbleDir/compiler/nir/types2ir.nim
+    rm -f $nimbleDir/compiler/nir/nirc.nim
+    rm -f $nimbleDir/compiler/nir/nir.nim
+    rm -f $nimbleDir/compiler/nir/nirslots.nim
+    rm -f $nimbleDir/compiler/nir/nirfiles.nim
+    rm -f $nimbleDir/compiler/nir/nirtypes.nim
     rm -f $nimbleDir/compiler/nodejs.nim
     rm -f $nimbleDir/compiler/nversion.nim
     rm -f $nimbleDir/compiler/optimizer.nim
@@ -165,9 +177,9 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/pipelines.nim
     rm -f $nimbleDir/compiler/pipelineutils.nim
     rm -f $nimbleDir/compiler/platform.nim
+    rm -f $nimbleDir/compiler/plugins/active.nim
     rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/itersgen.nim
-    rm -f $nimbleDir/compiler/plugins/active.nim
     rm -f $nimbleDir/compiler/pluginsupport.nim
     rm -f $nimbleDir/compiler/pragmas.nim
     rm -f $nimbleDir/compiler/prefixmatches.nim
@@ -223,6 +235,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/vmmarshal.nim
     rm -f $nimbleDir/compiler/vmops.nim
     rm -f $nimbleDir/compiler/vmprofiler.nim
+    rm -f $nimbleDir/compiler/vtables.nim
     rm -f $nimbleDir/compiler/wordrecg.nim
     rm -f $nimbleDir/doc/basicopt.txt
     rm -f $nimbleDir/doc/advopt.txt

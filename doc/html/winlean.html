@@ -12,10 +12,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.1.1">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js"></script>
+<script type="text/javascript" src="dochack.js?v=2.1.1"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -43,7 +43,7 @@
     </div>
     <div id="searchInputDiv">
       Search: <input type="search" id="searchInput"
-        onkeyup="search()" />
+        oninput="search()" />
     </div>
     
     <ul class="simple simple-toc" id="toc-list">
@@ -146,7 +146,13 @@
   bInheritHandle*: WINBOOL">SECURITY_ATTRIBUTES</a></li>
 <li><a class="reference" href="#Servent" title="Servent = object
   s_name*: cstring
-  s_aliases*: cstringArray">Servent</a></li>
+  s_aliases*: cstringArray
+  when defined(cpu64):
+    s_proto*: cstring
+    s_port*: int16
+  else:
+    s_port*: int16
+    s_proto*: cstring">Servent</a></li>
 <li><a class="reference" href="#SID" title="SID {.importc, header: &quot;&lt;windows.h&gt;&quot;.} = object">SID</a></li>
 <li><a class="reference" href="#SID_IDENTIFIER_AUTHORITY" title="SID_IDENTIFIER_AUTHORITY {.importc, header: &quot;&lt;windows.h&gt;&quot;.} = object
   value* {.importc: &quot;Value&quot;.}: array[6, BYTE]">SID_IDENTIFIER_AUTHORITY</a></li>
@@ -1189,8 +1195,7 @@
   <span class="Identifier">ai_addrlen</span><span class="Operator">*</span><span class="Other">:</span> <a href="ctypes.html#csize_t"><span class="Identifier">csize_t</span></a>       <span class="Comment">## Length of socket address.</span>
   <span class="Identifier">ai_canonname</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a>     <span class="Comment">## Canonical name of service location.</span>
   <span class="Identifier">ai_addr</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="winlean.html#SockAddr"><span class="Identifier">SockAddr</span></a>     <span class="Comment">## Socket address of socket.</span>
-  <span class="Identifier">ai_next</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="winlean.html#AddrInfo"><span class="Identifier">AddrInfo</span></a>     <span class="Comment">## Pointer to next in list.</span>
-  </pre></dt>
+  <span class="Identifier">ai_next</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="winlean.html#AddrInfo"><span class="Identifier">AddrInfo</span></a>     <span class="Comment">## Pointer to next in list.</span></pre></dt>
   <dd>
     
     
@@ -1210,8 +1215,7 @@
   <span class="Identifier">nFileSizeLow</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
   <span class="Identifier">nNumberOfLinks</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
   <span class="Identifier">nFileIndexHigh</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
-  <span class="Identifier">nFileIndexLow</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
-</pre></dt>
+  <span class="Identifier">nFileIndexLow</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a></pre></dt>
   <dd>
     
     
@@ -1243,8 +1247,7 @@
 <div id="FILETIME">
   <dt><pre><a href="winlean.html#FILETIME"><span class="Identifier">FILETIME</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">dwLowDateTime</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
-  <span class="Identifier">dwHighDateTime</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
-</pre></dt>
+  <span class="Identifier">dwHighDateTime</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a></pre></dt>
   <dd>
     
     CANNOT BE int64 BECAUSE OF ALIGNMENT
@@ -1258,8 +1261,7 @@
   <span class="Identifier">D1</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a>
   <span class="Identifier">D2</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int16"><span class="Identifier">int16</span></a>
   <span class="Identifier">D3</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int16"><span class="Identifier">int16</span></a>
-  <span class="Identifier">D4</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">7</span><span class="Other">,</span> <a href="system.html#int8"><span class="Identifier">int8</span></a><span class="Other">]</span>
-</pre></dt>
+  <span class="Identifier">D4</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">7</span><span class="Other">,</span> <a href="system.html#int8"><span class="Identifier">int8</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
     
@@ -1304,8 +1306,7 @@
   <span class="Identifier">h_aliases</span><span class="Operator">*</span><span class="Other">:</span> <a href="ctypes.html#cstringArray"><span class="Identifier">cstringArray</span></a>
   <span class="Identifier">h_addrtype</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int16"><span class="Identifier">int16</span></a>
   <span class="Identifier">h_length</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int16"><span class="Identifier">int16</span></a>
-  <span class="Identifier">h_addr_list</span><span class="Operator">*</span><span class="Other">:</span> <a href="ctypes.html#cstringArray"><span class="Identifier">cstringArray</span></a>
-</pre></dt>
+  <span class="Identifier">h_addr_list</span><span class="Operator">*</span><span class="Other">:</span> <a href="ctypes.html#cstringArray"><span class="Identifier">cstringArray</span></a></pre></dt>
   <dd>
     
     
@@ -1316,8 +1317,7 @@
 </div>
 <div id="In6_addr">
   <dt><pre><a href="winlean.html#In6_addr"><span class="Identifier">In6_addr</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;IN6_ADDR&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;winsock2.h&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">bytes</span><span class="Operator">*</span> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;u.Byte&quot;</span>.}<span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">15</span><span class="Other">,</span> <a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span>
-</pre></dt>
+  <span class="Identifier">bytes</span><span class="Operator">*</span> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;u.Byte&quot;</span>.}<span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">15</span><span class="Other">,</span> <a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
     
@@ -1328,8 +1328,7 @@
 </div>
 <div id="InAddr">
   <dt><pre><a href="winlean.html#InAddr"><span class="Identifier">InAddr</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;IN_ADDR&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;winsock2.h&quot;</span><span class="Other">,</span> <span class="Identifier">union</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">s_addr</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#uint32"><span class="Identifier">uint32</span></a>
-</pre></dt>
+  <span class="Identifier">s_addr</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#uint32"><span class="Identifier">uint32</span></a></pre></dt>
   <dd>
     
     
@@ -1346,8 +1345,7 @@
   <span class="Identifier">wVirtualKeyCode</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int16"><span class="Identifier">int16</span></a>
   <span class="Identifier">wVirtualScanCode</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int16"><span class="Identifier">int16</span></a>
   <span class="Identifier">uChar</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int16"><span class="Identifier">int16</span></a>
-  <span class="Identifier">dwControlKeyState</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
-</pre></dt>
+  <span class="Identifier">dwControlKeyState</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a></pre></dt>
   <dd>
     
     
@@ -1403,8 +1401,7 @@
   <span class="Identifier">dwMinorVersion</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
   <span class="Identifier">dwBuildNumber</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
   <span class="Identifier">dwPlatformId</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
-  <span class="Identifier">szCSDVersion</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">127</span><span class="Other">,</span> <a href="winlean.html#WinChar"><span class="Identifier">WinChar</span></a><span class="Other">]</span>
-</pre></dt>
+  <span class="Identifier">szCSDVersion</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">127</span><span class="Other">,</span> <a href="winlean.html#WinChar"><span class="Identifier">WinChar</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
     
@@ -1419,8 +1416,7 @@
   <span class="Identifier">internalHigh</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#PULONG"><span class="Identifier">PULONG</span></a>
   <span class="Identifier">offset</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
   <span class="Identifier">offsetHigh</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#DWORD"><span class="Identifier">DWORD</span></a>
-  <span class="Identifier">hEvent</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#Handle"><span class="Identifier">Handle</span></a>
-</pre></dt>
+  <span class="Identifier">hEvent</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#Handle"><span class="Identifier">Handle</span></a></pre></dt>
   <dd>
     
     
@@ -1475,8 +1471,7 @@
   <span class="Identifier">hProcess</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#Handle"><span class="Identifier">Handle</span></a>
   <span class="Identifier">hThread</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#Handle"><span class="Identifier">Handle</span></a>
   <span class="Identifier">dwProcessId</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a>
-  <span class="Identifier">dwThreadId</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a>
-</pre></dt>
+  <span class="Identifier">dwThreadId</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a></pre></dt>
   <dd>
     
     
@@ -1489,8 +1484,7 @@
   <dt><pre><a href="winlean.html#Protoent"><span class="Identifier">Protoent</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">p_name</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a>
   <span class="Identifier">p_aliases</span><span class="Operator">*</span><span class="Other">:</span> <a href="ctypes.html#cstringArray"><span class="Identifier">cstringArray</span></a>
-  <span class="Identifier">p_proto</span><span class="Operator">*</span><span class="Other">:</span> <a href="ctypes.html#cshort"><span class="Identifier">cshort</span></a>
-</pre></dt>
+  <span class="Identifier">p_proto</span><span class="Operator">*</span><span class="Other">:</span> <a href="ctypes.html#cshort"><span class="Identifier">cshort</span></a></pre></dt>
   <dd>
     
     
@@ -1543,8 +1537,7 @@
   <dt><pre><a href="winlean.html#SECURITY_ATTRIBUTES"><span class="Identifier">SECURITY_ATTRIBUTES</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">nLength</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a>
   <span class="Identifier">lpSecurityDescriptor</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a>
-  <span class="Identifier">bInheritHandle</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#WINBOOL"><span class="Identifier">WINBOOL</span></a>
-</pre></dt>
+  <span class="Identifier">bInheritHandle</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#WINBOOL"><span class="Identifier">WINBOOL</span></a></pre></dt>
   <dd>
     
     
@@ -1557,7 +1550,12 @@
   <dt><pre><a href="winlean.html#Servent"><span class="Identifier">Servent</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">s_name</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a>
   <span class="Identifier">s_aliases</span><span class="Operator">*</span><span class="Other">:</span> <a href="ctypes.html#cstringArray"><span class="Identifier">cstringArray</span></a>
-</pre></dt>
+  <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">cpu64</span><span class="Other">)</span><span class="Other">:</span>
+    <span class="Identifier">s_proto</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">cstring</span>
+    <span class="Identifier">s_port</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int16</span>
+  <span class="Keyword">else</span><span class="Other">:</span>
+    <span class="Identifier">s_port</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int16</span>
+    <span class="Identifier">s_proto</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">cstring</span></pre></dt>
   <dd>
     
     
@@ -1567,8 +1565,7 @@
   </dd>
 </div>
 <div id="SID">
-  <dt><pre><a href="winlean.html#SID"><span class="Identifier">SID</span></a> {.<span class="Identifier">importc</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;&lt;windows.h&gt;&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  </pre></dt>
+  <dt><pre><a href="winlean.html#SID"><span class="Identifier">SID</span></a> {.<span class="Identifier">importc</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;&lt;windows.h&gt;&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     
@@ -1579,8 +1576,7 @@
 </div>
 <div id="SID_IDENTIFIER_AUTHORITY">
   <dt><pre><a href="winlean.html#SID_IDENTIFIER_AUTHORITY"><span class="Identifier">SID_IDENTIFIER_AUTHORITY</span></a> {.<span class="Identifier">importc</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;&lt;windows.h&gt;&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">value</span><span class="Operator">*</span> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;Value&quot;</span>.}<span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">6</span><span class="Other">,</span> <a href="winlean.html#BYTE"><span class="Identifier">BYTE</span></a><span class="Other">]</span>
-</pre></dt>
+  <span class="Identifier">value</span><span class="Operator">*</span> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;Value&quot;</span>.}<span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">6</span><span class="Other">,</span> <a href="winlean.html#BYTE"><span class="Identifier">BYTE</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
     
@@ -1592,8 +1588,7 @@
 <div id="SockAddr">
   <dt><pre><a href="winlean.html#SockAddr"><span class="Identifier">SockAddr</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;SOCKADDR&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;winsock2.h&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">sa_family</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#uint16"><span class="Identifier">uint16</span></a>
-  <span class="Identifier">sa_data</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">13</span><span class="Other">,</span> <a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span>
-</pre></dt>
+  <span class="Identifier">sa_data</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">13</span><span class="Other">,</span> <a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
     
@@ -1607,8 +1602,7 @@
   <span class="Identifier">sin_family</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#uint16"><span class="Identifier">uint16</span></a>
   <span class="Identifier">sin_port</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#uint16"><span class="Identifier">uint16</span></a>
   <span class="Identifier">sin_addr</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#InAddr"><span class="Identifier">InAddr</span></a>
-  <span class="Identifier">sin_zero</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">7</span><span class="Other">,</span> <a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span>
-</pre></dt>
+  <span class="Identifier">sin_zero</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">7</span><span class="Other">,</span> <a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
     
@@ -1623,8 +1617,7 @@
   <span class="Identifier">sin6_port</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#uint16"><span class="Identifier">uint16</span></a>
   <span class="Identifier">sin6_flowinfo</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a>
   <span class="Identifier">sin6_addr</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#In6_addr"><span class="Identifier">In6_addr</span></a>
-  <span class="Identifier">sin6_scope_id</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a>
-</pre></dt>
+  <span class="Identifier">sin6_scope_id</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a></pre></dt>
   <dd>
     
     
@@ -1635,8 +1628,7 @@
 </div>
 <div id="Sockaddr_storage">
   <dt><pre><a href="winlean.html#Sockaddr_storage"><span class="Identifier">Sockaddr_storage</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;SOCKADDR_STORAGE&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;winsock2.h&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">ss_family</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#uint16"><span class="Identifier">uint16</span></a>
-</pre></dt>
+  <span class="Identifier">ss_family</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#uint16"><span class="Identifier">uint16</span></a></pre></dt>
   <dd>
     
     
@@ -1684,8 +1676,7 @@
   <span class="Identifier">lpReserved2</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#pointer"><span class="Identifier">pointer</span></a>
   <span class="Identifier">hStdInput</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#Handle"><span class="Identifier">Handle</span></a>
   <span class="Identifier">hStdOutput</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#Handle"><span class="Identifier">Handle</span></a>
-  <span class="Identifier">hStdError</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#Handle"><span class="Identifier">Handle</span></a>
-</pre></dt>
+  <span class="Identifier">hStdError</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#Handle"><span class="Identifier">Handle</span></a></pre></dt>
   <dd>
     
     
@@ -1697,8 +1688,7 @@
 <div id="TFdSet">
   <dt><pre><a href="winlean.html#TFdSet"><span class="Identifier">TFdSet</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">fd_count</span><span class="Operator">*</span><span class="Other">:</span> <a href="ctypes.html#cint"><span class="Identifier">cint</span></a>
-  <span class="Identifier">fd_array</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">64</span> <span class="Operator">-</span> <span class="DecNumber">1</span><span class="Other">,</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">]</span>
-</pre></dt>
+  <span class="Identifier">fd_array</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">64</span> <span class="Operator">-</span> <span class="DecNumber">1</span><span class="Other">,</span> <a href="winlean.html#SocketHandle"><span class="Identifier">SocketHandle</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
     
@@ -1709,8 +1699,7 @@
 </div>
 <div id="Timeval">
   <dt><pre><a href="winlean.html#Timeval"><span class="Identifier">Timeval</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">tv_sec</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">tv_usec</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a>
-</pre></dt>
+  <span class="Identifier">tv_sec</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">tv_usec</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a></pre></dt>
   <dd>
     
     
@@ -1722,8 +1711,7 @@
 <div id="TWSABuf">
   <dt><pre><a href="winlean.html#TWSABuf"><span class="Identifier">TWSABuf</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;WSABUF&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;winsock2.h&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">len</span><span class="Operator">*</span><span class="Other">:</span> <a href="winlean.html#ULONG"><span class="Identifier">ULONG</span></a>
-  <span class="Identifier">buf</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a>
-</pre></dt>
+  <span class="Identifier">buf</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#cstring"><span class="Identifier">cstring</span></a></pre></dt>
   <dd>
     
     
@@ -1771,8 +1759,7 @@
   <span class="Identifier">nFileSizeHigh</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a>
   <span class="Identifier">nFileSizeLow</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#int32"><span class="Identifier">int32</span></a>
   <span class="Identifier">cFileName</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">260</span> <span class="Operator">-</span> <span class="DecNumber">1</span><span class="Other">,</span> <a href="winlean.html#WinChar"><span class="Identifier">WinChar</span></a><span class="Other">]</span>
-  <span class="Identifier">cAlternateFileName</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">13</span><span class="Other">,</span> <a href="winlean.html#WinChar"><span class="Identifier">WinChar</span></a><span class="Other">]</span>
-</pre></dt>
+  <span class="Identifier">cAlternateFileName</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">13</span><span class="Other">,</span> <a href="winlean.html#WinChar"><span class="Identifier">WinChar</span></a><span class="Other">]</span></pre></dt>
   <dd>
     
     
@@ -1822,8 +1809,7 @@
   </dd>
 </div>
 <div id="WSAData">
-  <dt><pre><a href="winlean.html#WSAData"><span class="Identifier">WSAData</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;WSADATA&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;winsock2.h&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
-  </pre></dt>
+  <dt><pre><a href="winlean.html#WSAData"><span class="Identifier">WSAData</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;WSADATA&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;winsock2.h&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     
@@ -5809,7 +5795,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-26 01:15:06 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-04 01:06:10 UTC</small>
       </div>
     </div>
   </div>

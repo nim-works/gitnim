@@ -12,10 +12,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.1.1">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js"></script>
+<script type="text/javascript" src="dochack.js?v=2.1.1"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -43,7 +43,7 @@
     </div>
     <div id="searchInputDiv">
       Search: <input type="search" id="searchInput"
-        onkeyup="search()" />
+        oninput="search()" />
     </div>
     <div class="search-groupby">
   Group by:
@@ -126,8 +126,21 @@
   #   &quot;run&quot;: expect successful compilation and execution
   #   &quot;reject&quot;: expect failed compilation. The &quot;reject&quot; action can catch
   #             {.error.} pragmas but not {.fatal.} pragmas because
+  #             {.error.} calls are expected to originate from the test-file,
+  #             and can explicitly be specified using the &quot;file&quot;, &quot;line&quot; and
+  #             &quot;column&quot; options.
   #             {.fatal.} pragmas guarantee that compilation will be aborted.
   action: &quot;run&quot;
+  
+  # For testing failed compilations you can specify the expected origin of the
+  # compilation error.
+  # With the &quot;file&quot;, &quot;line&quot; and &quot;column&quot; options you can define the file,
+  # line and column that a compilation-error should have originated from.
+  # Use only with action: &quot;reject&quot; as it expects a failed compilation.
+  # Requires errormsg or msg to be defined.
+  # file: &quot;&quot;
+  # line: &quot;&quot;
+  # column: &quot;&quot;
   
   # The exit code that the test is expected to return. Typically, the default
   # value of 0 is fine. Note that if the test will be run by valgrind, then
@@ -141,13 +154,14 @@
   output: &quot;&quot;
   outputsub: &quot;&quot;
   
-  # Whether to sort the output lines before comparing them to the desired
-  # output.
+  # Whether to sort the compiler output lines before comparing them to the
+  # expected output.
   sortoutput: true
   
-  # Each line in the string given here appears in the same order in the
-  # compiler output, but there may be more lines that appear before, after, or
-  # in between them.
+  # Provide a `nimout` string to assert that the compiler during compilation
+  # prints the defined lines to the standard out.
+  # The lines must match in order, but there may be more lines that appear
+  # before, after, or in between them.
   nimout: '''
 a very long,
 multi-line
@@ -173,6 +187,9 @@ string'''
   #   false: run the without Valgrind
   #   &quot;leaks&quot;: run the test with Valgrind, but do not check for memory leaks
   valgrind: false   # Can use Valgrind to check for memory leaks, or not (Linux 64Bit only).
+  
+  # Checks that the specified piece of C-code is within the generated C-code.
+  ccodecheck: &quot;'Assert error message'&quot;
   
   # Command the test should use to run. If left out or an empty string is
   # provided, the command is taken to be:
@@ -206,7 +223,7 @@ string'''
 <span class="Identifier">assert</span> <span class="DecNumber">42</span> <span class="Operator">==</span> <span class="DecNumber">42</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Assert error message&quot;</span></pre></p>
 <ul class="simple"><li>As you can see the &quot;Spec&quot; is just a <tt class="docutils literal"><span class="pre"><span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot; &quot;&quot;&quot;</span></span></tt>.</li>
 <li>Spec has sane defaults, so you don't need to provide them all, any simple assert will work just fine.</li>
-<li>This is not the full spec of Testament, check <a class="reference external" href="https://github.com/nim-lang/Nim/blob/devel/testament/specs.nim#L315">the Testament Spec on GitHub, see parseSpec()</a>.</li>
+<li>This is not the full spec of Testament, check <a class="reference external" href="https://github.com/nim-lang/Nim/blob/devel/testament/specs.nim#L317">the Testament Spec on GitHub, see parseSpec()</a>.</li>
 <li>Nim itself uses Testament, so <a class="reference external" href=" https://github.com/nim-lang/Nim/tree/devel/tests">there are plenty of test examples</a>.</li>
 <li>Has some built-in CI compatibility, like Azure Pipelines, etc.</li>
 </ul>
@@ -257,6 +274,32 @@ string'''
   errormsg: &quot;undeclared identifier: 'not_defined'&quot;
 &quot;&quot;&quot;</span>
 <span class="Identifier">assert</span> <span class="Identifier">not_defined</span> <span class="Operator">==</span> <span class="StringLit">&quot;not_defined&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;not_defined is not defined&quot;</span></pre></p>
+<p>Expected to fail with error thrown from another file:</p>
+<p><pre class="listing">
+<span class="Comment"># test.nim</span>
+<span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
+  action: &quot;reject&quot;
+  errorMsg: &quot;I break&quot;
+  file: &quot;breakPragma.nim&quot;
+&quot;&quot;&quot;</span>
+<span class="Keyword">import</span> <span class="Operator">./</span><span class="Identifier">breakPragma</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">x</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">justDo</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">discard</span>
+
+<span class="Comment"># breakPragma.nim</span>
+<span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">macros</span>
+
+<span class="Keyword">macro</span> <span class="Identifier">justDo</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">procDef</span><span class="Punctuation">:</span> <span class="Identifier">typed</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">untyped</span> <span class="Operator">=</span>
+  <span class="Identifier">error</span><span class="Punctuation">(</span><span class="StringLit">&quot;I break&quot;</span><span class="Punctuation">)</span>
+  <span class="Keyword">return</span> <span class="Identifier">procDef</span></pre></p>
+<p>Expecting generated C to contain a given piece of code:</p>
+<p><pre class="listing">
+<span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
+  # Checks that the string &quot;Assert error message&quot; is in the generated
+  # C code.
+  ccodecheck: &quot;'Assert error message'&quot;
+&quot;&quot;&quot;</span>
+<span class="Identifier">assert</span> <span class="DecNumber">42</span> <span class="Operator">==</span> <span class="DecNumber">42</span><span class="Punctuation">,</span> <span class="StringLit">&quot;Assert error message&quot;</span></pre></p>
 <p>Non-Zero exit code:</p>
 <p><pre class="listing">
 <span class="Keyword">discard</span> <span class="LongStringLit">&quot;&quot;&quot;
@@ -306,7 +349,7 @@ string'''
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-26 01:14:33 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-04 01:05:45 UTC</small>
       </div>
     </div>
   </div>

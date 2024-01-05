@@ -27,7 +27,7 @@ jobs:
             builder: ubuntu-20.04
           - target:
               os: macos
-            builder: macos-10.15
+            builder: macos-11
           - target:
               os: windows
             builder: windows-2019
@@ -40,9 +40,9 @@ jobs:
         working-directory: checksums
 
     steps:
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
       - name: Checkout checksums
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: checksums
 
@@ -110,7 +110,7 @@ jobs:
         run: testament all
 
       - name: Build docs
-        if: matrix.branch == 'devel'
+        if: matrix.branch == 'master'
         run: nimble docs
 
       - name: Deploy docs
@@ -120,8 +120,8 @@ jobs:
         if: |
           github.event_name == 'push' && github.ref == 'refs/heads/master' &&
           matrix.target.os == 'linux' && matrix.target.cpu == 'amd64' &&
-          matrix.branch == 'devel'
-        uses: crazy-max/ghaction-github-pages@v2
+          matrix.branch == 'master'
+        uses: crazy-max/ghaction-github-pages@v4
         with:
           build_dir: checksums/htmldocs
           target_branch: gh-pages

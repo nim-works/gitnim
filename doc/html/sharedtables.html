@@ -12,10 +12,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.1.1">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js"></script>
+<script type="text/javascript" src="dochack.js?v=2.1.1"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -43,7 +43,7 @@
     </div>
     <div id="searchInputDiv">
       Search: <input type="search" id="searchInput"
-        onkeyup="search()" />
+        oninput="search()" />
     </div>
     
     <ul class="simple simple-toc" id="toc-list">
@@ -157,8 +157,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="SharedTable">
-  <dt><pre><a href="sharedtables.html#SharedTable"><span class="Identifier">SharedTable</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">;</span> <span class="Identifier">B</span><span class="Other">]</span> <span class="Other">=</span> <span class="Keyword">object</span>
-  </pre></dt>
+  <dt><pre><a href="sharedtables.html#SharedTable"><span class="Identifier">SharedTable</span></a><span class="Other">[</span><span class="Identifier">A</span><span class="Other">;</span> <span class="Identifier">B</span><span class="Other">]</span> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     generic hash SharedTable
@@ -323,13 +322,15 @@
 <p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">mapper</span></span></tt> can can modify <tt class="docutils literal"><span class="pre"><span class="Identifier">val</span></span></tt> and <tt class="docutils literal"><span class="pre"><span class="Identifier">pairExists</span></span></tt> values to change the mapping of the key or delete it from the table. When adding a value, make sure to set <tt class="docutils literal"><span class="pre"><span class="Identifier">pairExists</span></span></tt> to <tt class="docutils literal"><span class="pre"><span class="Identifier">true</span></span></tt> along with modifying the <tt class="docutils literal"><span class="pre"><span class="Identifier">val</span></span></tt>.</p>
 <p>The operation is performed atomically and other operations on the table will be blocked while the <tt class="docutils literal"><span class="pre"><span class="Identifier">mapper</span></span></tt> is invoked, so it should be short and simple.</p>
 <p>Example usage:</p>
-<pre class="listing"><span class="Comment"># If value exists, decrement it.</span>
+<p><pre class="listing">
+<span class="Comment"># If value exists, decrement it.</span>
 <span class="Comment"># If it becomes zero or less, delete the key</span>
 <span class="Identifier">t</span><span class="Operator">.</span><span class="Identifier">withKey</span><span class="Punctuation">(</span><span class="DecNumber">1'i64</span><span class="Punctuation">)</span> <span class="Keyword">do</span> <span class="Punctuation">(</span><span class="Identifier">k</span><span class="Punctuation">:</span> <span class="Identifier">int64</span><span class="Punctuation">,</span> <span class="Identifier">v</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">int</span><span class="Punctuation">,</span> <span class="Identifier">pairExists</span><span class="Punctuation">:</span> <span class="Keyword">var</span> <span class="Identifier">bool</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
   <span class="Keyword">if</span> <span class="Identifier">pairExists</span><span class="Punctuation">:</span>
     <span class="Identifier">dec</span> <span class="Identifier">v</span>
     <span class="Keyword">if</span> <span class="Identifier">v</span> <span class="Operator">&lt;=</span> <span class="DecNumber">0</span><span class="Punctuation">:</span>
-      <span class="Identifier">pairExists</span> <span class="Operator">=</span> <span class="Identifier">false</span></pre>
+      <span class="Identifier">pairExists</span> <span class="Operator">=</span> <span class="Identifier">false</span></pre></p>
+
     <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/collections/sharedtables.nim#L170" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/collections/sharedtables.nim#L170" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
@@ -420,7 +421,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-26 01:15:40 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-04 01:06:33 UTC</small>
       </div>
     </div>
   </div>

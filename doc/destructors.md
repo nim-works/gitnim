@@ -30,16 +30,19 @@ Motivating example
 With the language mechanisms described here, a custom seq could be
 written as:
 
-  ```nim
+  ```nim test
   type
     myseq*[T] = object
       len, cap: int
       data: ptr UncheckedArray[T]
 
-  proc `=destroy`*[T](x: var myseq[T]) =
+  proc `=destroy`*[T](x: myseq[T]) =
     if x.data != nil:
       for i in 0..<x.len: `=destroy`(x.data[i])
       dealloc(x.data)
+
+  proc `=wasMoved`*[T](x: var myseq[T]) =
+    x.data = nil
 
   proc `=trace`[T](x: var myseq[T]; env: pointer) =
     # `=trace` allows the cycle collector `--mm:orc`
@@ -51,7 +54,7 @@ written as:
     # do nothing for self-assignments:
     if a.data == b.data: return
     `=destroy`(a)
-    wasMoved(a)
+    `=wasMoved`(a)
     a.len = b.len
     a.cap = b.cap
     if b.data != nil:
@@ -59,11 +62,19 @@ written as:
       for i in 0..<a.len:
         a.data[i] = b.data[i]
 
+  proc `=dup`*[T](a: myseq[T]): myseq[T] {.nodestroy.} =
+    # an optimized version of `=wasMoved(tmp); `=copy(tmp, src)`
+    # usually present if a custom `=copy` hook is overridden
+    result = myseq[T](len: a.len, cap: a.cap, data: nil)
+    if a.data != nil:
+      result.data = cast[typeof(result.data)](alloc(result.cap * sizeof(T)))
+      for i in 0..<result.len:
+        result.data[i] = `=dup`(a.data[i])
+
   proc `=sink`*[T](a: var myseq[T]; b: myseq[T]) =
     # move assignment, optional.
     # Compiler is using `=destroy` and `copyMem` when not provided
     `=destroy`(a)
-    wasMoved(a)
     a.len = b.len
     a.cap = b.cap
     a.data = b.data
@@ -84,9 +95,10 @@ written as:
     x.data[i] = y
 
   proc createSeq*[T](elems: varargs[T]): myseq[T] =
-    result.cap = elems.len
-    result.len = elems.len
-    result.data = cast[typeof(result.data)](alloc(result.cap * sizeof(T)))
+    result = myseq[T](
+      len: elems.len,
+      cap: elems.len,
+      data: cast[typeof(result.data)](alloc(result.cap * sizeof(T))))
     for i in 0..<result.len: result.data[i] = elems[i]
 
   proc len*[T](x: myseq[T]): int {.inline.} = x.len
@@ -117,16 +129,16 @@ other associated resources. Variables are destroyed via this hook when
 they go out of scope or when the routine they were declared in is about
 to return.
 
-The prototype of this hook for a type `T` needs to be:
+A `=destroy` hook is allowed to have a parameter of a `var T` or `T` type. Taking a `var T` type is deprecated. The prototype of this hook for a type `T` needs to be:
 
   ```nim
-  proc `=destroy`(x: var T)
+  proc `=destroy`(x: T)
   ```
 
 The general pattern in `=destroy` looks like:
 
   ```nim
-  proc `=destroy`(x: var T) =
+  proc `=destroy`(x: T) =
     # first check if 'x' was moved to somewhere else:
     if x.field != nil:
       freeResource(x.field)
@@ -139,6 +151,25 @@ produces a warning for a `=destroy` that does raise.
 A `=destroy` can explicitly list the exceptions it can raise, if any,
 but this of little utility as a raising destructor is implementation defined
 behavior. Later versions of the language specification might cover this case precisely.
+
+
+`=wasMoved` hook
+----------------
+
+A `=wasMoved` hook sets the object to a state that signifies to the destructor there is nothing to destroy.
+
+The prototype of this hook for a type `T` needs to be:
+
+  ```nim
+  proc `=wasMoved`(x: var T)
+  ```
+
+Usually some pointer field inside the object is set to `nil`:
+
+  ```nim
+  proc `=wasMoved`(x: var T) =
+    x.field = nil
+  ```
 
 
 `=sink` hook
@@ -246,10 +277,10 @@ The general pattern in using `=destroy` with `=trace` looks like:
     Test[T](size: size, arr: cast[ptr UncheckedArray[T]](alloc0(sizeof(T) * size)))
 
 
-  proc `=destroy`[T](dest: var Test[T]) =
+  proc `=destroy`[T](dest: Test[T]) =
     if dest.arr != nil:
       for i in 0 ..< dest.size: dest.arr[i].`=destroy`
-      dest.arr.dealloc
+      dealloc dest.arr
 
   proc `=trace`[T](dest: var Test[T]; env: pointer) =
     if dest.arr != nil:
@@ -262,21 +293,11 @@ The general pattern in using `=destroy` with `=trace` looks like:
 **Note**: The `=trace` hooks (which are only used by `--mm:orc`) are currently more experimental and less refined
 than the other hooks.
 
-`=WasMoved` hook
-----------------
-
-A `wasMoved` hook resets the memory of an object to its initial (binary zero) value to signify it was "moved" and to signify its destructor should do nothing and ideally be optimized away.
-
-The prototype of this hook for a type `T` needs to be:
-
-  ```nim
-  proc `=wasMoved`(x: var T)
-  ```
 
 `=dup` hook
 -----------
 
-A `=dup` hook duplicates the memory of an object. `=dup(x)` can be regarded as an optimization replacing the `wasMoved(dest); =copy(dest, x)` operation.
+A `=dup` hook duplicates an object. `=dup(x)` can be regarded as an optimization replacing a `wasMoved(dest); =copy(dest, x)` operation.
 
 The prototype of this hook for a type `T` needs to be:
 
@@ -306,6 +327,24 @@ copy operation is not used afterward, the copy can be replaced by a move. This
 document uses the notation `lastReadOf(x)` to describe that `x` is not
 used afterward. This property is computed by a static control flow analysis
 but can also be enforced by using `system.move` explicitly.
+
+One can query if the analysis is able to perform a move with `system.ensureMove`.
+`move` enforces a move operation and calls `=wasMoved` whereas `ensureMove` is
+an annotation that implies no runtime operation. An `ensureMove` annotation leads to a static error
+if the compiler cannot prove that a move would be safe.
+
+For example:
+
+  ```nim
+  proc main(normalParam: string; sinkParam: sink string) =
+    var x = "abc"
+    # valid:
+    let valid = ensureMove x
+    # invalid:
+    let invalid = ensureMove normalParam
+    # valid:
+    let alsoValid = ensureMove sinkParam
+  ```
 
 
 Swap
@@ -424,7 +463,7 @@ destroyed at the scope exit.
     x = lastReadOf z
     ------------------          (move-optimization)
     `=sink`(x, z)
-    wasMoved(z)
+    `=wasMoved`(z)
 
 
     v = v
@@ -444,14 +483,14 @@ destroyed at the scope exit.
 
     f_sink(notLastReadOf y)
     --------------------------     (copy-to-sink)
-    (let tmp; `=copy`(tmp, y);
+    (let tmp = `=dup`(y);
     f_sink(tmp))
 
 
     f_sink(lastReadOf y)
     -----------------------     (move-to-sink)
     f_sink(y)
-    wasMoved(y)
+    `=wasMoved`(y)
 
 
 Object and array construction
@@ -464,7 +503,7 @@ function has `sink` parameters.
 Destructor removal
 ==================
 
-`wasMoved(x);` followed by a `=destroy(x)` operation cancel each other
+`=wasMoved(x)` followed by a `=destroy(x)` operation cancel each other
 out. An implementation is encouraged to exploit this in order to improve
 efficiency and code sizes. The current implementation does perform this
 optimization.
@@ -473,11 +512,11 @@ optimization.
 Self assignments
 ================
 
-`=sink` in combination with `wasMoved` can handle self-assignments but
+`=sink` in combination with `=wasMoved` can handle self-assignments but
 it's subtle.
 
 The simple case of `x = x` cannot be turned
-into `=sink(x, x); wasMoved(x)` because that would lose `x`'s value.
+into `=sink(x, x); =wasMoved(x)` because that would lose `x`'s value.
 The solution is that simple self-assignments that consist of
 
 - Symbols: `x = x`
@@ -512,10 +551,10 @@ Is transformed into:
     try:
       if cond:
         `=sink`(result, a)
-        wasMoved(a)
+        `=wasMoved`(a)
       else:
         `=sink`(result, b)
-        wasMoved(b)
+        `=wasMoved`(b)
     finally:
       `=destroy`(b)
       `=destroy`(a)
@@ -529,10 +568,10 @@ Is transformed into:
       `=sink`(y, "xyz")
       `=sink`(x, select(true,
         let blitTmp = x
-        wasMoved(x)
+        `=wasMoved`(x)
         blitTmp,
         let blitTmp = y
-        wasMoved(y)
+        `=wasMoved`(y)
         blitTmp))
       echo [x]
     finally:
@@ -560,7 +599,7 @@ that the pointer does not outlive its origin. No destructor call is injected
 for expressions of type `lent T` or of type `var T`.
 
 
-  ```nim
+  ```nim test
   type
     Tree = object
       kids: seq[Tree]
@@ -568,13 +607,13 @@ for expressions of type `lent T` or of type `var T`.
   proc construct(kids: sink seq[Tree]): Tree =
     result = Tree(kids: kids)
     # converted into:
-    `=sink`(result.kids, kids); wasMoved(kids)
+    `=sink`(result.kids, kids); `=wasMoved`(kids)
     `=destroy`(kids)
 
   proc `[]`*(x: Tree; i: int): lent Tree =
     result = x.kids[i]
     # borrows from 'x', this is transformed into:
-    result = addr x.kids[i]
+    # result = addr x.kids[i]
     # This means 'lent' is like 'var T' a hidden pointer.
     # Unlike 'var' this hidden pointer cannot be used to mutate the object.
 
@@ -680,11 +719,11 @@ The ability to override a hook leads to a phase ordering problem:
     # error: destructor for 'f' called here before
     # it was seen in this module.
 
-  proc `=destroy`[T](f: var Foo[T]) =
+  proc `=destroy`[T](f: Foo[T]) =
     discard
   ```
 
-The solution is to define ``proc `=destroy`[T](f: var Foo[T])`` before
+The solution is to define ``proc `=destroy`[T](f: Foo[T])`` before
 it is used. The compiler generates implicit
 hooks for all types in *strategic places* so that an explicitly provided
 hook that comes too "late" can be detected reliably. These *strategic places*
@@ -705,7 +744,7 @@ The experimental `nodestroy`:idx: pragma inhibits hook injections. This can be
 used to specialize the object traversal in order to avoid deep recursions:
 
 
-  ```nim
+  ```nim test
   type Node = ref object
     x, y: int32
     left, right: Node
@@ -713,15 +752,15 @@ used to specialize the object traversal in order to avoid deep recursions:
   type Tree = object
     root: Node
 
-  proc `=destroy`(t: var Tree) {.nodestroy.} =
+  proc `=destroy`(t: Tree) {.nodestroy.} =
     # use an explicit stack so that we do not get stack overflows:
     var s: seq[Node] = @[t.root]
     while s.len > 0:
       let x = s.pop
       if x.left != nil: s.add(x.left)
       if x.right != nil: s.add(x.right)
-      # free the memory explicit:
-      dispose(x)
+      # free the memory explicitly:
+      `=dispose`(x)
     # notice how even the destructor for 's' is not called implicitly
     # anymore thanks to .nodestroy, so we have to call it on our own:
     `=destroy`(s)

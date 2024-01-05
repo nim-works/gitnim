@@ -73,6 +73,9 @@ when defined(js):
   proc inc*(a: var CompatUint64; b: CompatUint64) {.inline.} =
     a = a + b
 
+  proc `+=`*(a: var CompatUint64; b: CompatUint64) {.inline.} =
+    a = a + b
+
   proc `shl`*(a: CompatUint64; offset: int): CompatUint64 =
     if offset == 0:
       # Annoying wrapping behaviour when "a.hi shl (32 - offset)" turns into "<< 32"
