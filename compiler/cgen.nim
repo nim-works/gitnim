@@ -216,13 +216,9 @@ macro ropecg(m: BModule, frmt: static[FormatStr], args: untyped): Rope =
     elif frmt[i] == '#' and frmt[i+1] == '#':
       inc(i, 2)
       strLit.add("#")
-
-    var start = i
-    while i < frmt.len:
-      if frmt[i] != '$' and frmt[i] != '#': inc(i)
-      else: break
-    if i - 1 >= start:
-      strLit.add(substr(frmt, start, i - 1))
+    else:
+      strLit.add(frmt[i])
+      inc(i)
 
   flushStrLit()
   result.add newCall(ident"rope", resVar)
@@ -315,10 +311,10 @@ proc genLineDir(p: BProc, t: PNode) =
       (p.prc == nil or sfPure notin p.prc.flags) and t.info.fileIndex != InvalidFileIdx:
       if freshLine:
         if lastFileIndex == t.info.fileIndex:
-          linefmt(p, cpsStmts, "nimln_($1);\n",
+          linefmt(p, cpsStmts, "nimln_($1);",
               [line])
         else:
-          linefmt(p, cpsStmts, "nimlf_($1, $2);\n",
+          linefmt(p, cpsStmts, "nimlf_($1, $2);",
               [line, quotedFilename(p.config, t.info)])
 
 proc accessThreadLocalVar(p: BProc, s: PSym)
@@ -594,7 +590,7 @@ proc localVarDecl(p: BProc; n: PNode): Rope =
   genCLineDir(result, p, n.info, p.config)
 
   result.add getTypeDesc(p.module, s.typ, dkVar)
-  if s.constraint.isNil:
+  if sfCodegenDecl notin s.flags:
     if sfRegister in s.flags: result.add(" register")
     #elif skipTypes(s.typ, abstractInst).kind in GcTypeKinds:
     #  decl.add(" GC_GUARD")
@@ -623,9 +619,9 @@ proc treatGlobalDifferentlyForHCR(m: BModule, s: PSym): bool =
       # and s.owner.kind == skModule # owner isn't always a module (global pragma on local var)
       # and s.loc.k == locGlobalVar  # loc isn't always initialized when this proc is used
 
-proc genGlobalVarDecl(p: BProc, n: PNode; td, value: Rope; decl: var Rope) = 
+proc genGlobalVarDecl(p: BProc, n: PNode; td, value: Rope; decl: var Rope) =
   let s = n.sym
-  if s.constraint.isNil:
+  if sfCodegenDecl notin s.flags:
     if s.kind in {skLet, skVar, skField, skForVar} and s.alignment > 0:
       decl.addf "NIM_ALIGN($1) ", [rope(s.alignment)]
     if p.hcrOn: decl.add("static ")
@@ -644,9 +640,9 @@ proc genGlobalVarDecl(p: BProc, n: PNode; td, value: Rope; decl: var Rope) =
     else:
       decl = runtimeFormat(s.cgDeclFrmt & ";$n", [td, s.loc.r])
 
-proc genCppVarForConstructor(p: BProc, v: PSym; vn, value: PNode; decl: var Rope) 
+proc genCppVarForCtor(p: BProc, v: PSym; vn, value: PNode; decl: var Rope)
 
-proc callGlobalVarCppConstructor(p: BProc; v: PSym; vn, value: PNode) =
+proc callGlobalVarCppCtor(p: BProc; v: PSym; vn, value: PNode) =
   let s = vn.sym
   fillBackendName(p.module, s)
   fillLoc(s.loc, locGlobalVar, vn, OnHeap)
@@ -654,7 +650,7 @@ proc callGlobalVarCppConstructor(p: BProc; v: PSym; vn, value: PNode) =
   let td = getTypeDesc(p.module, vn.sym.typ, dkVar)
   genGlobalVarDecl(p, vn, td, "", decl)
   decl.add " " & $s.loc.r
-  genCppVarForConstructor(p, v, vn, value, decl)
+  genCppVarForCtor(p, v, vn, value, decl)
   p.module.s[cfsVars].add decl
 
 proc assignGlobalVar(p: BProc, n: PNode; value: Rope) =
@@ -705,7 +701,7 @@ proc assignGlobalVar(p: BProc, n: PNode; value: Rope) =
             decl.addf(" $1 = $2;$n", [s.loc.r, value])
         else:
           decl.addf(" $1;$n", [s.loc.r])
-      
+
       p.module.s[cfsVars].add(decl)
   if p.withinLoop > 0 and value == "":
     # fixes tests/run/tzeroarray:
@@ -939,7 +935,9 @@ proc cgsymValue(m: BModule, name: string): Rope =
     result.addActualSuffixForHCR(m.module, sym)
 
 proc generateHeaders(m: BModule) =
-  m.s[cfsHeaders].add("\L#include \"nimbase.h\"\L")
+  var nimbase = m.config.nimbasePattern
+  if nimbase == "": nimbase = "nimbase.h"
+  m.s[cfsHeaders].addf("\L#include \"$1\"\L", [nimbase])
 
   for it in m.headerFiles:
     if it[0] == '#':
@@ -988,21 +986,25 @@ proc closureSetup(p: BProc, prc: PSym) =
     linefmt(p, cpsStmts, "$1 = ($2) ClE_0;$n",
             [rdLoc(env.loc), getTypeDesc(p.module, env.typ)])
 
+const harmless = {nkConstSection, nkTypeSection, nkEmpty, nkCommentStmt, nkTemplateDef,
+                  nkMacroDef, nkMixinStmt, nkBindStmt, nkFormalParams} +
+                  declarativeDefs
+
 proc containsResult(n: PNode): bool =
   result = false
   case n.kind
-  of nkEmpty..pred(nkSym), succ(nkSym)..nkNilLit, nkFormalParams:
+  of succ(nkEmpty)..pred(nkSym), succ(nkSym)..nkNilLit, harmless:
     discard
+  of nkReturnStmt:
+    for i in 0..<n.len:
+      if containsResult(n[i]): return true
+    result = n.len > 0 and n[0].kind == nkEmpty
   of nkSym:
     if n.sym.kind == skResult:
       result = true
   else:
     for i in 0..<n.len:
       if containsResult(n[i]): return true
-
-const harmless = {nkConstSection, nkTypeSection, nkEmpty, nkCommentStmt, nkTemplateDef,
-                  nkMacroDef, nkMixinStmt, nkBindStmt, nkFormalParams} +
-                  declarativeDefs
 
 proc easyResultAsgn(n: PNode): PNode =
   case n.kind
@@ -1136,7 +1138,7 @@ proc getProcTypeCast(m: BModule, prc: PSym): Rope =
 
 proc genProcBody(p: BProc; procBody: PNode) =
   genStmts(p, procBody) # modifies p.locals, p.init, etc.
-  if {nimErrorFlagAccessed, nimErrorFlagDeclared} * p.flags == {nimErrorFlagAccessed}:
+  if {nimErrorFlagAccessed, nimErrorFlagDeclared, nimErrorFlagDisabled} * p.flags == {nimErrorFlagAccessed}:
     p.flags.incl nimErrorFlagDeclared
     p.blocks[0].sections[cpsLocals].add(ropecg(p.module, "NIM_BOOL* nimErr_;$n", []))
     p.blocks[0].sections[cpsInit].add(ropecg(p.module, "nimErr_ = #nimErrorFlag();$n", []))
@@ -1147,8 +1149,8 @@ proc isNoReturn(m: BModule; s: PSym): bool {.inline.} =
 proc genProcAux*(m: BModule, prc: PSym) =
   var p = newProc(prc, m)
   var header = newRopeAppender()
-  if m.config.backend == backendCpp and sfVirtual in prc.flags:
-    genVirtualProcHeader(m, prc, header)
+  if m.config.backend == backendCpp and {sfVirtual, sfConstructor} * prc.flags != {}:
+    genMemberProcHeader(m, prc, header)
   else:
     genProcHeader(m, prc, header)
   var returnStmt: Rope = ""
@@ -1166,7 +1168,7 @@ proc genProcAux*(m: BModule, prc: PSym) =
       internalError(m.config, prc.info, "proc has no result symbol")
     let resNode = prc.ast[resultPos]
     let res = resNode.sym # get result symbol
-    if not isInvalidReturnType(m.config, prc.typ):
+    if not isInvalidReturnType(m.config, prc.typ) and sfConstructor notin prc.flags:
       if sfNoInit in prc.flags: incl(res.flags, sfNoInit)
       if sfNoInit in prc.flags and p.module.compileToCpp and (let val = easyResultAsgn(procBody); val != nil):
         var decl = localVarDecl(p, resNode)
@@ -1177,8 +1179,16 @@ proc genProcAux*(m: BModule, prc: PSym) =
         # declare the result symbol:
         assignLocalVar(p, resNode)
         assert(res.loc.r != "")
-        initLocalVar(p, res, immediateAsgn=false)
+        if p.config.selectedGC in {gcArc, gcAtomicArc, gcOrc} and
+            allPathsAsgnResult(procBody) == InitSkippable:
+          # In an ideal world the codegen could rely on injectdestructors doing its job properly
+          # and then the analysis step would not be required.
+          discard "result init optimized out"
+        else:
+          initLocalVar(p, res, immediateAsgn=false)
       returnStmt = ropecg(p.module, "\treturn $1;$n", [rdLoc(res.loc)])
+    elif sfConstructor in prc.flags:
+      fillLoc(resNode.sym.loc, locParam, resNode, "this", OnHeap)
     else:
       fillResult(p.config, resNode, prc.typ)
       assignParam(p, res, prc.typ[0])
@@ -1256,7 +1266,7 @@ proc requiresExternC(m: BModule; sym: PSym): bool {.inline.} =
 
 proc genProcPrototype(m: BModule, sym: PSym) =
   useHeader(m, sym)
-  if lfNoDecl in sym.loc.flags or sfVirtual in sym.flags: return
+  if lfNoDecl in sym.loc.flags or {sfVirtual, sfConstructor} * sym.flags != {}: return
   if lfDynamicLib in sym.loc.flags:
     if sym.itemId.module != m.module.position and
         not containsOrIncl(m.declaredThings, sym.id):
@@ -1387,10 +1397,10 @@ proc genVarPrototype(m: BModule, n: PNode) =
   if sym.owner.id != m.module.id:
     # else we already have the symbol generated!
     assert(sym.loc.r != "")
+    incl(m.declaredThings, sym.id)
     if sfThread in sym.flags:
       declareThreadVar(m, sym, true)
     else:
-      incl(m.declaredThings, sym.id)
       if sym.kind in {skLet, skVar, skField, skForVar} and sym.alignment > 0:
         m.s[cfsVars].addf "NIM_ALIGN($1) ", [rope(sym.alignment)]
       m.s[cfsVars].add(if m.hcrOn: "static " else: "extern ")
@@ -1479,20 +1489,23 @@ proc genMainProc(m: BModule) =
                        [handle, strLit])
 
     preMainCode.add(loadLib("hcr_handle", "hcrGetProc"))
-    preMainCode.add("\tvoid* rtl_handle;\L")
-    preMainCode.add(loadLib("rtl_handle", "nimGC_setStackBottom"))
-    preMainCode.add(hcrGetProcLoadCode(m, "nimGC_setStackBottom", "nimrtl_", "rtl_handle", "nimGetProcAddr"))
-    preMainCode.add("\tinner = PreMain;\L")
-    preMainCode.add("\tinitStackBottomWith_actual((void *)&inner);\L")
-    preMainCode.add("\t(*inner)();\L")
+    if m.config.selectedGC in {gcArc, gcAtomicArc, gcOrc}:
+      preMainCode.add("\t$1PreMain();\L" % [rope m.config.nimMainPrefix])
+    else:
+      preMainCode.add("\tvoid* rtl_handle;\L")
+      preMainCode.add(loadLib("rtl_handle", "nimGC_setStackBottom"))
+      preMainCode.add(hcrGetProcLoadCode(m, "nimGC_setStackBottom", "nimrtl_", "rtl_handle", "nimGetProcAddr"))
+      preMainCode.add("\tinner = $1PreMain;\L" % [rope m.config.nimMainPrefix])
+      preMainCode.add("\tinitStackBottomWith_actual((void *)&inner);\L")
+      preMainCode.add("\t(*inner)();\L")
   else:
     preMainCode.add("\t$1PreMain();\L" % [rope m.config.nimMainPrefix])
 
   var posixCmdLine: Rope
   if optNoMain notin m.config.globalOptions:
-    posixCmdLine.add "\tN_LIB_PRIVATE int cmdCount;\L"
-    posixCmdLine.add "\tN_LIB_PRIVATE char** cmdLine;\L"
-    posixCmdLine.add "\tN_LIB_PRIVATE char** gEnv;\L"
+    posixCmdLine.add "N_LIB_PRIVATE int cmdCount;\L"
+    posixCmdLine.add "N_LIB_PRIVATE char** cmdLine;\L"
+    posixCmdLine.add "N_LIB_PRIVATE char** gEnv;\L"
 
   const
     # The use of a volatile function pointer to call Pre/NimMainInner
@@ -1517,7 +1530,7 @@ proc genMainProc(m: BModule) =
       "}$N$N"
 
     MainProcs =
-      "\t\t$^NimMain();$N"
+      "\t$^NimMain();$N"
 
     MainProcsWithResult =
       MainProcs & ("\treturn $1nim_program_result;$N")
@@ -1940,8 +1953,6 @@ proc genModule(m: BModule, cfile: Cfile): Rope =
     openNamespaceNim(m.config.cppCustomNamespace, result)
   if m.s[cfsFrameDefines].len > 0:
     result.add(m.s[cfsFrameDefines])
-  else:
-    result.add("#define nimfr_(x, y)\n#define nimln_(x)\n\n#define nimlf_(x, y)\n")
 
   for i in cfsForwardTypes..cfsProcs:
     if m.s[i].len > 0:
@@ -2182,7 +2193,10 @@ proc finalCodegenActions*(graph: ModuleGraph; m: BModule; n: PNode): PNode =
 
     if m.hcrOn:
       # make sure this is pulled in (meaning hcrGetGlobal() is called for it during init)
-      cgsym(m, "programResult")
+      let sym = magicsys.getCompilerProc(m.g.graph, "programResult")
+      # ignore when not available, could be a module imported early in `system`
+      if sym != nil:
+        cgsymImpl m, sym
       if m.inHcrInitGuard:
         endBlock(m.initProc)
 

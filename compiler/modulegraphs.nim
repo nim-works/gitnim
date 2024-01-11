@@ -57,6 +57,7 @@ type
   SymInfoPair* = object
     sym*: PSym
     info*: TLineInfo
+    isDecl*: bool
 
   PipelinePass* = enum
     NonePass
@@ -79,7 +80,7 @@ type
     procInstCache*: Table[ItemId, seq[LazyInstantiation]] # A symbol's ItemId.
     attachedOps*: array[TTypeAttachedOp, Table[ItemId, LazySym]] # Type ID, destructors, etc.
     methodsPerType*: Table[ItemId, seq[(int, LazySym)]] # Type ID, attached methods
-    virtualProcsPerType*: Table[ItemId, seq[PSym]] # Type ID, attached virtual procs
+    memberProcsPerType*: Table[ItemId, seq[PSym]] # Type ID, attached member procs (only c++, virtual and ctor so far)
     enumToStringProcs*: Table[ItemId, LazySym]
     emittedTypeInfo*: Table[string, FileIndex]
 

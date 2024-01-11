@@ -22,6 +22,7 @@ runnableExamples:
   assert myFile.changeFileExt("c") == "/path/to/my/file.c"
 
 ## **See also:**
+## * `paths <paths.html>`_ and `files <files.html>`_ modules for high-level file manipulation
 ## * `osproc module <osproc.html>`_ for process communication beyond
 ##   `execShellCmd proc`_
 ## * `uri module <uri.html>`_
@@ -637,14 +638,14 @@ proc getAppFilename*(): string {.rtl, extern: "nos$1", tags: [ReadIOEffect], noW
   # /proc/<pid>/path/a.out (complete pathname)
   when defined(windows):
     var bufsize = int32(MAX_PATH)
-    var buf = newWideCString("", bufsize)
+    var buf = newWideCString(bufsize)
     while true:
       var L = getModuleFileNameW(0, buf, bufsize)
       if L == 0'i32:
         result = "" # error!
         break
       elif L > bufsize:
-        buf = newWideCString("", L)
+        buf = newWideCString(L)
         bufsize = L
       else:
         result = buf$L

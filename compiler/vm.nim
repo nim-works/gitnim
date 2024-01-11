@@ -20,7 +20,6 @@ import
 
 when defined(nimPreviewSlimSystem):
   import std/formatfloat
-import astalgo
 import ast except getstr
 from semfold import leValueConv, ordinalValToString
 from evaltempl import evalTemplate
@@ -444,12 +443,16 @@ proc opConv(c: PCtx; dest: var TFullReg, src: TFullReg, desttyp, srctyp: PType):
       of tyFloat..tyFloat64:
         dest.intVal = int(src.floatVal)
       else:
-        let srcSize = getSize(c.config, styp)
         let destSize = getSize(c.config, desttyp)
-        let srcDist = (sizeof(src.intVal) - srcSize) * 8
         let destDist = (sizeof(dest.intVal) - destSize) * 8
         var value = cast[BiggestUInt](src.intVal)
-        value = (value shl srcDist) shr srcDist
+        when false:
+          # this would make uint64(-5'i8) evaluate to 251
+          # but at runtime, uint64(-5'i8) is 18446744073709551611
+          # so don't do it
+          let srcSize = getSize(c.config, styp)
+          let srcDist = (sizeof(src.intVal) - srcSize) * 8
+          value = (value shl srcDist) shr srcDist
         value = (value shl destDist) shr destDist
         dest.intVal = cast[BiggestInt](value)
     of tyBool:
@@ -634,6 +637,8 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
           regs[ra].intVal = cast[int](regs[rb].node.intVal)
         of rkNodeAddr:
           regs[ra].intVal = cast[int](regs[rb].nodeAddr)
+        of rkInt:
+          regs[ra].intVal = regs[rb].intVal
         else:
           stackTrace(c, tos, pc, "opcCastPtrToInt: got " & $regs[rb].kind)
       of 2: # tyRef
@@ -779,6 +784,8 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       else:
         if src.kind notin {nkEmpty..nkTripleStrLit} and idx <% src.len:
           takeAddress regs[ra], src.sons[idx]
+        elif src.kind in nkStrKinds and idx <% src.strVal.len:
+          regs[ra] = takeCharAddress(c, src, idx, pc)
         else:
           stackTrace(c, tos, pc, formatErrorIndexBound(idx, src.safeLen-1))
     of opcLdStrIdx:
@@ -1008,7 +1015,10 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
     of opcLenCstring:
       decodeBImm(rkInt)
       assert regs[rb].kind == rkNode
-      regs[ra].intVal = regs[rb].node.strVal.cstring.len - imm
+      if regs[rb].node.kind == nkNilLit:
+        regs[ra].intVal = -imm
+      else:
+        regs[ra].intVal = regs[rb].node.strVal.cstring.len - imm
     of opcIncl:
       decodeB(rkNode)
       let b = regs[rb].regToNode
@@ -1206,6 +1216,12 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
     of opcEqStr:
       decodeBC(rkInt)
       regs[ra].intVal = ord(regs[rb].node.strVal == regs[rc].node.strVal)
+    of opcEqCString:
+      decodeBC(rkInt)
+      let bNil = regs[rb].node.kind == nkNilLit
+      let cNil = regs[rc].node.kind == nkNilLit
+      regs[ra].intVal = ord((bNil and cNil) or
+        (not bNil and not cNil and regs[rb].node.strVal == regs[rc].node.strVal))
     of opcLeStr:
       decodeBC(rkInt)
       regs[ra].intVal = ord(regs[rb].node.strVal <= regs[rc].node.strVal)
@@ -1489,7 +1505,13 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
           regs[ra].node
       c.currentExceptionA = raised
       # Set the `name` field of the exception
-      c.currentExceptionA[2].skipColon.strVal = c.currentExceptionA.typ.sym.name.s
+      var exceptionNameNode = newStrNode(nkStrLit, c.currentExceptionA.typ.sym.name.s)
+      if c.currentExceptionA[2].kind == nkExprColonExpr:
+        exceptionNameNode.typ = c.currentExceptionA[2][1].typ
+        c.currentExceptionA[2][1] = exceptionNameNode
+      else:
+        exceptionNameNode.typ = c.currentExceptionA[2].typ
+        c.currentExceptionA[2] = exceptionNameNode
       c.exceptionInstr = pc
 
       var frame = tos

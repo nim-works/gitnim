@@ -595,7 +595,12 @@ proc semResolvedCall(c: PContext, x: TCandidate,
           else:
             x.call.add c.graph.emptyNode
         of skType:
-          x.call.add newSymNode(s, n.info)
+          var tn = newSymNode(s, n.info)
+          # this node will be used in template substitution,
+          # pretend this is an untyped node and let regular sem handle the type
+          # to prevent problems where a generic parameter is treated as a value
+          tn.typ = nil
+          x.call.add tn
         else:
           internalAssert c.config, false
 
@@ -627,7 +632,10 @@ proc semOverloadedCall(c: PContext, n, nOrig: PNode,
               candidates)
     result = semResolvedCall(c, r, n, flags)
   else:
-    if efExplain notin flags:
+    if efDetermineType in flags and c.inGenericContext > 0 and c.matchedConcept == nil:
+      result = semGenericStmt(c, n)
+      result.typ = makeTypeFromExpr(c, result.copyTree)
+    elif efExplain notin flags:
       # repeat the overload resolution,
       # this time enabling all the diagnostic output (this should fail again)
       result = semOverloadedCall(c, n, nOrig, filter, flags + {efExplain})
@@ -662,14 +670,18 @@ proc explicitGenericSym(c: PContext, n: PNode, s: PSym): PNode =
   onUse(info, s)
   result = newSymNode(newInst, info)
 
-proc explicitGenericInstantiation(c: PContext, n: PNode, s: PSym): PNode =
-  assert n.kind == nkBracketExpr
+proc setGenericParams(c: PContext, n: PNode) =
+  ## sems generic params in subscript expression
   for i in 1..<n.len:
     let e = semExprWithType(c, n[i])
     if e.typ == nil:
       n[i].typ = errorType(c)
     else:
       n[i].typ = e.typ.skipTypes({tyTypeDesc})
+
+proc explicitGenericInstantiation(c: PContext, n: PNode, s: PSym): PNode =
+  assert n.kind == nkBracketExpr
+  setGenericParams(c, n)
   var s = s
   var a = n[0]
   if a.kind == nkSym:

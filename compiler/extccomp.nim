@@ -580,7 +580,7 @@ proc getCompileCFileCmd*(conf: ConfigRef; cfile: Cfile,
 
     compilePattern = joinPath(conf.cCompilerPath, exe)
   else:
-    compilePattern = getCompilerExe(conf, c, isCpp)
+    compilePattern = exe
 
   includeCmd.add(join([CC[c].includeCmd, quoteShell(conf.projectPath.string)]))
 
@@ -834,7 +834,10 @@ proc linkViaResponseFile(conf: ConfigRef; cmd: string) =
   else:
     writeFile(linkerArgs, args)
   try:
-    execLinkCmd(conf, cmd.substr(0, last) & " @" & linkerArgs)
+    when defined(macosx):
+      execLinkCmd(conf, "xargs " & cmd.substr(0, last) & " < " & linkerArgs)
+    else:
+      execLinkCmd(conf, cmd.substr(0, last) & " @" & linkerArgs)
   finally:
     removeFile(linkerArgs)
 

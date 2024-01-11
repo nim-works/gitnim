@@ -81,7 +81,16 @@ proc cmpSuggestions(a, b: Suggest): int =
   # independent of hashing order:
   result = cmp(a.name[], b.name[])
 
-proc getTokenLenFromSource(conf: ConfigRef; ident: string; info: TLineInfo): int =
+proc scanForTrailingAsterisk(line: string, start: int): int =
+  result = 0
+  while start+result < line.len and line[start+result] in {' ', '\t'}:
+    inc result
+  if start+result < line.len and line[start+result] == '*':
+    inc result
+  else:
+    result = 0
+
+proc getTokenLenFromSource(conf: ConfigRef; ident: string; info: TLineInfo; skipTrailingAsterisk: bool = false): int =
   let
     line = sourceLine(conf, info)
     column = toColumn(info)
@@ -103,8 +112,10 @@ proc getTokenLenFromSource(conf: ConfigRef; ident: string; info: TLineInfo): int
       result = 0
   elif ident[0] in linter.Letters and ident[^1] != '=':
     result = identLen(line, column)
-    if cmpIgnoreStyle(line[column..column + result - 1], ident) != 0:
+    if cmpIgnoreStyle(line[column..column + result - 1], ident[0..min(result-1,len(ident)-1)]) != 0:
       result = 0
+    if skipTrailingAsterisk and result > 0:
+      result += scanForTrailingAsterisk(line, column + result)
   else:
     var sourceIdent: string
     result = parseWhile(line, sourceIdent,
@@ -154,7 +165,10 @@ proc symToSuggest*(g: ModuleGraph; s: PSym, isLocal: bool, section: IdeCmd, info
       result.qualifiedPath.add(s.name.s)
 
     if s.typ != nil:
-      result.forth = typeToString(s.typ)
+      if section == ideInlayHints:
+        result.forth = typeToString(s.typ, preferInlayHint)
+      else:
+        result.forth = typeToString(s.typ)
     else:
       result.forth = ""
     when defined(nimsuggest) and not defined(noDocgen) and not defined(leanCompiler):
@@ -173,58 +187,90 @@ proc symToSuggest*(g: ModuleGraph; s: PSym, isLocal: bool, section: IdeCmd, info
     result.filePath = toFullPath(g.config, infox)
     result.line = toLinenumber(infox)
     result.column = toColumn(infox)
-    result.tokenLen = if section != ideHighlight:
+    result.tokenLen = if section notin {ideHighlight, ideInlayHints}:
                         s.name.s.len
                       else:
-                        getTokenLenFromSource(g.config, s.name.s, infox)
+                        getTokenLenFromSource(g.config, s.name.s, infox, section == ideInlayHints)
   result.version = g.config.suggestVersion
   result.endLine = endLine
   result.endCol = endCol
 
-proc `$`*(suggest: Suggest): string =
-  result = $suggest.section
+proc `$`*(suggest: SuggestInlayHint): string =
+  result = $suggest.kind
   result.add(sep)
-  if suggest.section == ideHighlight:
-    if suggest.symkind.TSymKind == skVar and suggest.isGlobal:
-      result.add("skGlobalVar")
-    elif suggest.symkind.TSymKind == skLet and suggest.isGlobal:
-      result.add("skGlobalLet")
+  result.add($suggest.line)
+  result.add(sep)
+  result.add($suggest.column)
+  result.add(sep)
+  result.add(suggest.label)
+  result.add(sep)
+  result.add($suggest.paddingLeft)
+  result.add(sep)
+  result.add($suggest.paddingRight)
+  result.add(sep)
+  result.add($suggest.allowInsert)
+  result.add(sep)
+  result.add(suggest.tooltip)
+
+proc `$`*(suggest: Suggest): string =
+  if suggest.section == ideInlayHints:
+    result = $suggest.inlayHintInfo
+  else:
+    result = $suggest.section
+    result.add(sep)
+    if suggest.section == ideHighlight:
+      if suggest.symkind.TSymKind == skVar and suggest.isGlobal:
+        result.add("skGlobalVar")
+      elif suggest.symkind.TSymKind == skLet and suggest.isGlobal:
+        result.add("skGlobalLet")
+      else:
+        result.add($suggest.symkind.TSymKind)
+      result.add(sep)
+      result.add($suggest.line)
+      result.add(sep)
+      result.add($suggest.column)
+      result.add(sep)
+      result.add($suggest.tokenLen)
     else:
       result.add($suggest.symkind.TSymKind)
-    result.add(sep)
-    result.add($suggest.line)
-    result.add(sep)
-    result.add($suggest.column)
-    result.add(sep)
-    result.add($suggest.tokenLen)
-  else:
-    result.add($suggest.symkind.TSymKind)
-    result.add(sep)
-    if suggest.qualifiedPath.len != 0:
-      result.add(suggest.qualifiedPath.join("."))
-    result.add(sep)
-    result.add(suggest.forth)
-    result.add(sep)
-    result.add(suggest.filePath)
-    result.add(sep)
-    result.add($suggest.line)
-    result.add(sep)
-    result.add($suggest.column)
-    result.add(sep)
-    when defined(nimsuggest) and not defined(noDocgen) and not defined(leanCompiler):
-      result.add(suggest.doc.escape)
-    if suggest.version == 0 or suggest.version == 3:
       result.add(sep)
-      result.add($suggest.quality)
-      if suggest.section == ideSug:
+      if suggest.qualifiedPath.len != 0:
+        result.add(suggest.qualifiedPath.join("."))
+      result.add(sep)
+      result.add(suggest.forth)
+      result.add(sep)
+      result.add(suggest.filePath)
+      result.add(sep)
+      result.add($suggest.line)
+      result.add(sep)
+      result.add($suggest.column)
+      result.add(sep)
+      when defined(nimsuggest) and not defined(noDocgen) and not defined(leanCompiler):
+        result.add(suggest.doc.escape)
+      if suggest.version == 0 or suggest.version == 3:
         result.add(sep)
-        result.add($suggest.prefix)
+        result.add($suggest.quality)
+        if suggest.section == ideSug:
+          result.add(sep)
+          result.add($suggest.prefix)
 
-  if (suggest.version == 3 and suggest.section in {ideOutline, ideExpand}):
-    result.add(sep)
-    result.add($suggest.endLine)
-    result.add(sep)
-    result.add($suggest.endCol)
+    if (suggest.version == 3 and suggest.section in {ideOutline, ideExpand}):
+      result.add(sep)
+      result.add($suggest.endLine)
+      result.add(sep)
+      result.add($suggest.endCol)
+
+proc suggestToSuggestInlayHint*(sug: Suggest): SuggestInlayHint =
+  SuggestInlayHint(
+    kind: sihkType,
+    line: sug.line,
+    column: sug.column + sug.tokenLen,
+    label: ": " & sug.forth,
+    paddingLeft: false,
+    paddingRight: false,
+    allowInsert: true,
+    tooltip: ""
+  )
 
 proc suggestResult*(conf: ConfigRef; s: Suggest) =
   if not isNil(conf.suggestionResultHook):
@@ -277,6 +323,7 @@ proc fieldVisible*(c: PContext, f: PSym): bool {.inline.} =
       var symObj = f.owner
       if symObj.typ.skipTypes({tyGenericBody, tyGenericInst, tyGenericInvocation, tyAlias}).kind in {tyRef, tyPtr}:
         symObj = symObj.typ.toObjectFromRefPtrGeneric.sym
+        assert symObj != nil
       for scope in allScopes(c.currentScope):
         for sym in scope.allowPrivateAccess:
           if symObj.id == sym.id: return true
@@ -439,7 +486,15 @@ proc suggestFieldAccess(c: PContext, n, field: PNode, outputs: var Suggestions) 
         if t[0] == nil: break
         t = skipTypes(t[0], skipPtrs)
     elif typ.kind == tyTuple and typ.n != nil:
-      suggestSymList(c, typ.n, field, n.info, outputs)
+      # All tuple fields are in scope
+      # So go through each field and add it to the suggestions (If it passes the filter)
+      for node in typ.n:
+        if node.kind == nkSym:
+          let s = node.sym
+          var pm: PrefixMatch
+          if filterSym(s, field, pm):
+            outputs.add(symToSuggest(c.graph, s, isLocal=true, ideSug, n.info,
+                                     s.getQuality, pm, c.inTypeContext > 0, 0))
 
     suggestOperations(c, n, field, orig, outputs)
     if typ != orig:
@@ -498,7 +553,7 @@ proc findDefinition(g: ModuleGraph; info: TLineInfo; s: PSym; usageSym: var PSym
   if s.isNil: return
   if isTracked(info, g.config.m.trackPos, s.name.s.len) or (s == usageSym and sfForward notin s.flags):
     suggestResult(g.config, symToSuggest(g, s, isLocal=false, ideDef, info, 100, PrefixMatch.None, false, 0, useSuppliedInfo = s == usageSym))
-    if sfForward notin s.flags and g.config.suggestVersion != 3:
+    if sfForward notin s.flags and g.config.suggestVersion < 3:
       suggestQuit()
     else:
       usageSym = s
@@ -513,7 +568,7 @@ proc suggestSym*(g: ModuleGraph; info: TLineInfo; s: PSym; usageSym: var PSym; i
   ## misnamed: should be 'symDeclared'
   let conf = g.config
   when defined(nimsuggest):
-    g.suggestSymbols.mgetOrPut(info.fileIndex, @[]).add SymInfoPair(sym: s, info: info)
+    g.suggestSymbols.mgetOrPut(info.fileIndex, @[]).add SymInfoPair(sym: s, info: info, isDecl: isDecl)
 
     if conf.suggestVersion == 0:
       if s.allUsages.len == 0:
@@ -702,7 +757,7 @@ proc suggestSentinel*(c: PContext) =
 
 when defined(nimsuggest):
   proc onDef(graph: ModuleGraph, s: PSym, info: TLineInfo) =
-    if graph.config.suggestVersion == 3 and info.exactEquals(s.info):
+    if graph.config.suggestVersion >= 3 and info.exactEquals(s.info):
        suggestSym(graph, info, s, graph.usageSym)
 
   template getPContext(): untyped =

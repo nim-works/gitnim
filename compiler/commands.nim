@@ -240,7 +240,7 @@ proc processCompile(conf: ConfigRef; filename: string) =
 const
   errNoneBoehmRefcExpectedButXFound = "'arc', 'orc', 'atomicArc', 'markAndSweep', 'boehm', 'go', 'none', 'regions', or 'refc' expected, but '$1' found"
   errNoneSpeedOrSizeExpectedButXFound = "'none', 'speed' or 'size' expected, but '$1' found"
-  errGuiConsoleOrLibExpectedButXFound = "'gui', 'console' or 'lib' expected, but '$1' found"
+  errGuiConsoleOrLibExpectedButXFound = "'gui', 'console', 'lib' or 'staticlib' expected, but '$1' found"
   errInvalidExceptionSystem = "'goto', 'setjmp', 'cpp' or 'quirky' expected, but '$1' found"
 
 template warningOptionNoop(switch: string) =
@@ -527,10 +527,11 @@ proc registerArcOrc(pass: TCmdLinePass, conf: ConfigRef) =
   if conf.exc == excNone and conf.backend != backendCpp:
     conf.exc = excGoto
 
-proc unregisterArcOrc(conf: ConfigRef) =
+proc unregisterArcOrc*(conf: ConfigRef) =
   undefSymbol(conf.symbols, "gcdestructors")
   undefSymbol(conf.symbols, "gcarc")
   undefSymbol(conf.symbols, "gcorc")
+  undefSymbol(conf.symbols, "gcatomicarc")
   undefSymbol(conf.symbols, "nimSeqsV2")
   undefSymbol(conf.symbols, "nimV2")
   excl conf.globalOptions, optSeqDestructors
@@ -613,6 +614,8 @@ proc processSwitch*(switch, arg: string, pass: TCmdLinePass, info: TLineInfo;
       var path = processPath(conf, arg, info, notRelativeToProj=true)
       let nimbleDir = AbsoluteDir getEnv("NIMBLE_DIR")
       if not nimbleDir.isEmpty and pass == passPP:
+        path = nimbleDir / RelativeDir"pkgs2"
+        nimblePath(conf, path, info)
         path = nimbleDir / RelativeDir"pkgs"
       nimblePath(conf, path, info)
   of "nonimblepath", "nobabelpath":
@@ -804,6 +807,7 @@ proc processSwitch*(switch, arg: string, pass: TCmdLinePass, info: TLineInfo;
       defineSymbol(conf.symbols, "dll")
     of "staticlib":
       incl(conf.globalOptions, optGenStaticLib)
+      incl(conf.globalOptions, optNoMain)
       excl(conf.globalOptions, optGenGuiApp)
       defineSymbol(conf.symbols, "library")
       defineSymbol(conf.symbols, "staticlib")
@@ -827,6 +831,8 @@ proc processSwitch*(switch, arg: string, pass: TCmdLinePass, info: TLineInfo;
   of "header":
     if conf != nil: conf.headerFile = arg
     incl(conf.globalOptions, optGenIndex)
+  of "nimbasepattern":
+    if conf != nil: conf.nimbasePattern = arg
   of "index":
     case arg.normalize
     of "", "on": conf.globalOptions.incl {optGenIndex}

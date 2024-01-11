@@ -46,7 +46,8 @@ proc searchInstTypes*(g: ModuleGraph; key: PType): PType =
       # XXX: This happens for prematurely cached
       # types such as Channel[empty]. Why?
       # See the notes for PActor in handleGenericInvocation
-      return
+      # if this is return the same type gets cached more than it needs to
+      continue
     if not sameFlags(inst, key):
       continue
 
@@ -141,27 +142,28 @@ proc isTypeParam(n: PNode): bool =
          (n.sym.kind == skGenericParam or
            (n.sym.kind == skType and sfFromGeneric in n.sym.flags))
 
-proc reResolveCallsWithTypedescParams(cl: var TReplTypeVars, n: PNode): PNode =
-  # This is needed for tgenericshardcases
-  # It's possible that a generic param will be used in a proc call to a
-  # typedesc accepting proc. After generic param substitution, such procs
-  # should be optionally instantiated with the correct type. In order to
-  # perform this instantiation, we need to re-run the generateInstance path
-  # in the compiler, but it's quite complicated to do so at the moment so we
-  # resort to a mild hack; the head symbol of the call is temporary reset and
-  # overload resolution is executed again (which may trigger generateInstance).
-  if n.kind in nkCallKinds and sfFromGeneric in n[0].sym.flags:
-    var needsFixing = false
-    for i in 1..<n.safeLen:
-      if isTypeParam(n[i]): needsFixing = true
-    if needsFixing:
-      n[0] = newSymNode(n[0].sym.owner)
-      return cl.c.semOverloadedCall(cl.c, n, n, {skProc, skFunc}, {})
+when false: # old workaround
+  proc reResolveCallsWithTypedescParams(cl: var TReplTypeVars, n: PNode): PNode =
+    # This is needed for tuninstantiatedgenericcalls
+    # It's possible that a generic param will be used in a proc call to a
+    # typedesc accepting proc. After generic param substitution, such procs
+    # should be optionally instantiated with the correct type. In order to
+    # perform this instantiation, we need to re-run the generateInstance path
+    # in the compiler, but it's quite complicated to do so at the moment so we
+    # resort to a mild hack; the head symbol of the call is temporary reset and
+    # overload resolution is executed again (which may trigger generateInstance).
+    if n.kind in nkCallKinds and sfFromGeneric in n[0].sym.flags:
+      var needsFixing = false
+      for i in 1..<n.safeLen:
+        if isTypeParam(n[i]): needsFixing = true
+      if needsFixing:
+        n[0] = newSymNode(n[0].sym.owner)
+        return cl.c.semOverloadedCall(cl.c, n, n, {skProc, skFunc}, {})
 
-  for i in 0..<n.safeLen:
-    n[i] = reResolveCallsWithTypedescParams(cl, n[i])
+    for i in 0..<n.safeLen:
+      n[i] = reResolveCallsWithTypedescParams(cl, n[i])
 
-  return n
+    return n
 
 proc replaceObjBranches(cl: TReplTypeVars, n: PNode): PNode =
   result = n
@@ -203,7 +205,7 @@ proc hasValuelessStatics(n: PNode): bool =
         a
     proc doThing(_: MyThing)
   ]#
-  if n.safeLen == 0:
+  if n.safeLen == 0 and n.kind != nkEmpty: # Some empty nodes can get in here
     n.typ == nil or n.typ.kind == tyStatic
   else:
     for x in n:
@@ -250,7 +252,8 @@ proc replaceTypeVarsN(cl: var TReplTypeVars, n: PNode; start=0): PNode =
       result = newNodeI(nkRecList, n.info)
   of nkStaticExpr:
     var n = prepareNode(cl, n)
-    n = reResolveCallsWithTypedescParams(cl, n)
+    when false:
+      n = reResolveCallsWithTypedescParams(cl, n)
     result = if cl.allowMetaTypes: n
              else: cl.c.semExpr(cl.c, n)
     if not cl.allowMetaTypes:

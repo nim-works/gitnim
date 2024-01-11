@@ -12,10 +12,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.0.3">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js"></script>
+<script type="text/javascript" src="dochack.js?v=2.0.3"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -60,7 +60,15 @@
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
       <li><a class="reference" href="#Certificate" title="Certificate = string">Certificate</a></li>
-<li><a class="reference" href="#IpAddress" title="IpAddress = object">IpAddress</a></li>
+<li><a class="reference" href="#IpAddress" title="IpAddress = object
+  case family*: IpAddressFamily ## the type of the IP address (IPv4 or IPv6)
+  of IpAddressFamily.IPv6:
+      address_v6*: array[0 .. 15, uint8] ## Contains the IP address in bytes in
+                                         ## case of IPv6
+    
+  of IpAddressFamily.IPv4:
+      address_v4*: array[0 .. 3, uint8] ## Contains the IP address in bytes in
+                                        ## case of IPv4">IpAddress</a></li>
 <li><a class="reference" href="#IpAddressFamily" title="IpAddressFamily {.pure.} = enum
   IPv6,                     ## IPv6 address
   IPv4                       ## IPv4 address">IpAddressFamily</a></li>
@@ -72,7 +80,10 @@
 <li><a class="reference" href="#Socket" title="Socket = ref SocketImpl">Socket</a></li>
 <li><a class="reference" href="#SocketFlag" title="SocketFlag {.pure.} = enum
   Peek, SafeDisconn          ## Ensures disconnection exceptions (ECONNRESET, EPIPE etc) are not thrown.">SocketFlag</a></li>
-<li><a class="reference" href="#SocketImpl" title="SocketImpl = object">SocketImpl</a></li>
+<li><a class="reference" href="#SocketImpl" title="SocketImpl = object
+  when defineSsl:
+    
+  ## stores the last error on this socket">SocketImpl</a></li>
 <li><a class="reference" href="#SslAcceptResult" title="SslAcceptResult = enum
   AcceptNoClient = 0, AcceptNoHandshake, AcceptSuccess">SslAcceptResult</a></li>
 <li><a class="reference" href="#SslClientGetPskFunc" title="SslClientGetPskFunc = proc (hint: string): tuple[identity: string, psk: string]">SslClientGetPskFunc</a></li>
@@ -484,6 +495,15 @@
 </div>
 <div id="IpAddress">
   <dt><pre><a href="net.html#IpAddress"><span class="Identifier">IpAddress</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Keyword">case</span> <span class="Identifier">family</span><span class="Operator">*</span><span class="Other">:</span> <a href="net.html#IpAddressFamily"><span class="Identifier">IpAddressFamily</span></a> <span class="Comment">## the type of the IP address (IPv4 or IPv6)</span>
+  <span class="Keyword">of</span> <span class="Identifier">IpAddressFamily</span><span class="Other">.</span><span class="Identifier">IPv6</span><span class="Other">:</span>
+      <span class="Identifier">address_v6</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">15</span><span class="Other">,</span> <a href="system.html#uint8"><span class="Identifier">uint8</span></a><span class="Other">]</span> <span class="Comment">## Contains the IP address in bytes in</span>
+                                         <span class="Comment">## case of IPv6</span>
+    
+  <span class="Keyword">of</span> <span class="Identifier">IpAddressFamily</span><span class="Other">.</span><span class="Identifier">IPv4</span><span class="Other">:</span>
+      <span class="Identifier">address_v4</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#array"><span class="Identifier">array</span></a><span class="Other">[</span><span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">3</span><span class="Other">,</span> <a href="system.html#uint8"><span class="Identifier">uint8</span></a><span class="Other">]</span> <span class="Comment">## Contains the IP address in bytes in</span>
+                                        <span class="Comment">## case of IPv4</span>
+    
   </pre></dt>
   <dd>
     
@@ -551,6 +571,9 @@
 </div>
 <div id="SocketImpl">
   <dt><pre><a href="net.html#SocketImpl"><span class="Identifier">SocketImpl</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Keyword">when</span> <span class="Identifier">defineSsl</span><span class="Other">:</span>
+    
+  <span class="Comment">## stores the last error on this socket</span>
   </pre></dt>
   <dd>
     
@@ -584,7 +607,7 @@
 <div id="SslContext">
   <dt><pre><a href="net.html#SslContext"><span class="Identifier">SslContext</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
   <span class="Identifier">context</span><span class="Operator">*</span><span class="Other">:</span> <a href="openssl.html#SslCtx"><span class="Identifier">SslCtx</span></a>
-</pre></dt>
+  </pre></dt>
   <dd>
     
     
@@ -1794,7 +1817,7 @@ Only the <tt class="docutils literal"><span class="pre"><span class="Identifier"
 <div class="section" id="19">
   <h1><a class="toc-backref" href="#19">Exports</a></h1>
   <dl class="item">
-    <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a>, <a href="nativesockets.html#$,Port"><span class="Identifier">$</span></a>, <a href="system.html#==,float32,float32"><span class="Identifier">==</span></a>, <a href="system.html#==,int32,int32"><span class="Identifier">==</span></a>, <a href="options.html#==,Option[T],Option[T]"><span class="Identifier">==</span></a>, <a href="system.html#==,array[I,T],array[I,T]"><span class="Identifier">==</span></a>, <a href="system.html#==,uint16,uint16"><span class="Identifier">==</span></a>, <a href="system.html#==,uint32,uint32"><span class="Identifier">==</span></a>, <a href="system.html#==,int64,int64"><span class="Identifier">==</span></a>, <a href="system.html#==,int,int"><span class="Identifier">==</span></a>, <a href="system.html#==,T,T"><span class="Identifier">==</span></a>, <a href="system.html#==,ref.T,ref.T"><span class="Identifier">==</span></a>, <a href="system.html#==,ptr.T,ptr.T"><span class="Identifier">==</span></a>, <a href="oserrors.html#==,OSErrorCode,OSErrorCode"><span class="Identifier">==</span></a>, <a href="system.html#==,uint8,uint8"><span class="Identifier">==</span></a>, <a href="system.html#==,int16,int16"><span class="Identifier">==</span></a>, <a href="system.html#==,string,string"><span class="Identifier">==</span></a>, <a href="system.html#==,char,char"><span class="Identifier">==</span></a>, <a href="system.html#==,int8,int8"><span class="Identifier">==</span></a>, <a href="system.html#==,pointer,pointer"><span class="Identifier">==</span></a>, <a href="winlean.html#==,SocketHandle,SocketHandle"><span class="Identifier">==</span></a>, <a href="system.html#==,T,T_2"><span class="Identifier">==</span></a>, <a href="system.html#==,float,float"><span class="Identifier">==</span></a>, <a href="system.html#==,bool,bool"><span class="Identifier">==</span></a>, <a href="system.html#==,Enum,Enum"><span class="Identifier">==</span></a>, <a href="system.html#==,openArray[T],openArray[T]"><span class="Identifier">==</span></a>, <a href="system.html#==,cstring,cstring"><span class="Identifier">==</span></a>, <a href="system.html#==,uint,uint"><span class="Identifier">==</span></a>, <a href="system.html#==,seq[T],seq[T]"><span class="Identifier">==</span></a>, <a href="system.html#==,uint64,uint64"><span class="Identifier">==</span></a>, <a href="system.html#==,set[T],set[T]"><span class="Identifier">==</span></a>, <a href="nativesockets.html#==,Port,Port"><span class="Identifier">==</span></a>, <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a>, <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a>, <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a>
+    <a href="nativesockets.html#Port"><span class="Identifier">Port</span></a>, <a href="nativesockets.html#$,Port"><span class="Identifier">$</span></a>, <a href="system.html#==,ref.T,ref.T"><span class="Identifier">==</span></a>, <a href="system.html#==,bool,bool"><span class="Identifier">==</span></a>, <a href="options.html#==,Option[T],Option[T]"><span class="Identifier">==</span></a>, <a href="system.html#==,string,string"><span class="Identifier">==</span></a>, <a href="system.html#==,pointer,pointer"><span class="Identifier">==</span></a>, <a href="system.html#==,float32,float32"><span class="Identifier">==</span></a>, <a href="system.html#==,int16,int16"><span class="Identifier">==</span></a>, <a href="system.html#==,uint32,uint32"><span class="Identifier">==</span></a>, <a href="system.html#==,uint64,uint64"><span class="Identifier">==</span></a>, <a href="system.html#==,uint16,uint16"><span class="Identifier">==</span></a>, <a href="system.html#==,int32,int32"><span class="Identifier">==</span></a>, <a href="oserrors.html#==,OSErrorCode,OSErrorCode"><span class="Identifier">==</span></a>, <a href="system.html#==,seq[T],seq[T]"><span class="Identifier">==</span></a>, <a href="system.html#==,uint,uint"><span class="Identifier">==</span></a>, <a href="system.html#==,Enum,Enum"><span class="Identifier">==</span></a>, <a href="system.html#==,T,T"><span class="Identifier">==</span></a>, <a href="system.html#==,int,int"><span class="Identifier">==</span></a>, <a href="system.html#==,float,float"><span class="Identifier">==</span></a>, <a href="winlean.html#==,SocketHandle,SocketHandle"><span class="Identifier">==</span></a>, <a href="system.html#==,uint8,uint8"><span class="Identifier">==</span></a>, <a href="system.html#==,ptr.T,ptr.T"><span class="Identifier">==</span></a>, <a href="system.html#==,array[I,T],array[I,T]"><span class="Identifier">==</span></a>, <a href="system.html#==,char,char"><span class="Identifier">==</span></a>, <a href="system.html#==,int64,int64"><span class="Identifier">==</span></a>, <a href="system.html#==,cstring,cstring"><span class="Identifier">==</span></a>, <a href="system.html#==,openArray[T],openArray[T]"><span class="Identifier">==</span></a>, <a href="system.html#==,set[T],set[T]"><span class="Identifier">==</span></a>, <a href="system.html#==,int8,int8"><span class="Identifier">==</span></a>, <a href="system.html#==,T,T_2"><span class="Identifier">==</span></a>, <a href="nativesockets.html#==,Port,Port"><span class="Identifier">==</span></a>, <a href="nativesockets.html#Domain"><span class="Identifier">Domain</span></a>, <a href="nativesockets.html#SockType"><span class="Identifier">SockType</span></a>, <a href="nativesockets.html#Protocol"><span class="Identifier">Protocol</span></a>
   </dl>
 </div>
 
@@ -1804,7 +1827,7 @@ Only the <tt class="docutils literal"><span class="pre"><span class="Identifier"
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-26 01:15:16 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-10 01:19:48 UTC</small>
       </div>
     </div>
   </div>

@@ -37,7 +37,7 @@ type
     wMemTracker = "memtracker", wObjChecks = "objchecks",
     wIntDefine = "intdefine", wStrDefine = "strdefine", wBoolDefine = "booldefine",
     wCursor = "cursor", wNoalias = "noalias", wEffectsOf = "effectsOf",
-    wUncheckedAssign = "uncheckedAssign",
+    wUncheckedAssign = "uncheckedAssign", wRunnableExamples = "runnableExamples",
 
     wImmediate = "immediate", wConstructor = "constructor", wDestructor = "destructor",
     wDelegator = "delegator", wOverride = "override", wImportCpp = "importcpp",
@@ -89,6 +89,7 @@ type
     wGuard = "guard", wLocks = "locks", wPartial = "partial", wExplain = "explain",
     wLiftLocals = "liftlocals", wEnforceNoRaises = "enforceNoRaises", wSystemRaisesDefect = "systemRaisesDefect",
     wRedefine = "redefine", wCallsite = "callsite",
+    wQuirky = "quirky",
 
     wAuto = "auto", wBool = "bool", wCatch = "catch", wChar = "char",
     wClass = "class", wCompl = "compl", wConstCast = "const_cast", wDefault = "default",

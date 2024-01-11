@@ -12,10 +12,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.0.3">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js"></script>
+<script type="text/javascript" src="dochack.js?v=2.0.3"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -62,13 +62,18 @@
 <li><a class="reference" href="#InvalidUnicodeError" title="InvalidUnicodeError = ref object of RegexError
   pos*: int                  ## the location of the invalid unicode in bytes">InvalidUnicodeError</a></li>
 <li><a class="reference" href="#Regex" title="Regex = ref object
-  pattern*: string">Regex</a></li>
+  pattern*: string
+  ## not nil
+  ## nil">Regex</a></li>
 <li><a class="reference" href="#RegexError" title="RegexError = ref object of CatchableError">RegexError</a></li>
 <li><a class="reference" href="#RegexInternalError" title="RegexInternalError = ref object of RegexError">RegexInternalError</a></li>
 <li><a class="reference" href="#RegexMatch" title="RegexMatch = object
   pattern*: Regex            ## The regex doing the matching.
                              ## Not nil.
-  str*: string               ## The string that was matched against.">RegexMatch</a></li>
+  str*: string               ## The string that was matched against.
+  ## First item is the bounds of the match
+  ## Other items are the captures
+  ## `a` is inclusive start, `b` is exclusive end">RegexMatch</a></li>
 <li><a class="reference" href="#StudyError" title="StudyError = ref object of RegexError">StudyError</a></li>
 <li><a class="reference" href="#SyntaxError" title="SyntaxError = ref object of RegexError
   pos*: int                  ## the location of the syntax error in bytes
@@ -294,7 +299,9 @@ There are also alternative nimble packages such as <a class="reference external"
 <div id="Regex">
   <dt><pre><a href="nre.html#Regex"><span class="Identifier">Regex</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
   <span class="Identifier">pattern</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>
-</pre></dt>
+  <span class="Comment">## not nil</span>
+  <span class="Comment">## nil</span>
+  </pre></dt>
   <dd>
     
     Represents the pattern that things are matched against, constructed with <tt class="docutils literal"><span class="pre"><span class="Identifier">re</span><span class="Punctuation">(</span><span class="Identifier">string</span><span class="Punctuation">)</span></span></tt>. Examples: <tt class="docutils literal"><span class="pre"><span class="RawData">re&quot;foo&quot;</span></span></tt>, <tt class="docutils literal"><span class="pre"><span class="Identifier">re</span><span class="Punctuation">(</span><span class="RawData">r&quot;(*ANYCRLF)(?x)foo # comment&quot;</span><span class="Operator">.</span></span></tt><dl class="docutils"><dt><tt class="docutils literal"><span class="pre"><span class="Identifier">pattern</span><span class="Punctuation">:</span> <span class="Identifier">string</span></span></tt></dt>
@@ -363,6 +370,9 @@ There are also alternative nimble packages such as <a class="reference external"
   <span class="Identifier">pattern</span><span class="Operator">*</span><span class="Other">:</span> <a href="nre.html#Regex"><span class="Identifier">Regex</span></a>            <span class="Comment">## The regex doing the matching.</span>
                              <span class="Comment">## Not nil.</span>
   <span class="Identifier">str</span><span class="Operator">*</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a>               <span class="Comment">## The string that was matched against.</span>
+  <span class="Comment">## First item is the bounds of the match</span>
+  <span class="Comment">## Other items are the captures</span>
+  <span class="Comment">## `a` is inclusive start, `b` is exclusive end</span>
   </pre></dt>
   <dd>
     
@@ -427,8 +437,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L405" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L405" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L407" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L407" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -440,8 +450,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L408" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L408" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L410" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L410" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -450,8 +460,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L416" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L416" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L418" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L418" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -464,8 +474,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L317" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L317" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L319" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L319" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -475,8 +485,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L351" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L351" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L353" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L353" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -485,8 +495,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L325" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L325" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L327" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L327" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -496,8 +506,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L357" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L357" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L359" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L359" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -510,8 +520,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L306" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L306" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L308" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L308" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -524,8 +534,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L278" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L278" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L280" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L280" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -538,8 +548,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L281" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L281" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L283" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L283" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -551,8 +561,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L308" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L308" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L310" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L310" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -565,8 +575,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L310" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L310" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L312" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L312" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -576,8 +586,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L337" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L337" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L339" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L339" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -587,8 +597,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L314" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L314" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L316" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L316" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -598,8 +608,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L344" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L344" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L346" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L346" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -614,8 +624,8 @@ There are also alternative nimble packages such as <a class="reference external"
 <pre class="listing"><span class="Identifier">assert</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="RawData">re&quot;bc&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="RawData">re&quot;cd&quot;</span><span class="Punctuation">)</span>
 <span class="Identifier">assert</span> <span class="Keyword">not</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">contains</span><span class="Punctuation">(</span><span class="RawData">re&quot;a&quot;</span><span class="Punctuation">,</span> <span class="Identifier">start</span> <span class="Operator">=</span> <span class="DecNumber">1</span><span class="Punctuation">)</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L604" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L604" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L606" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L606" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -633,8 +643,8 @@ There are also alternative nimble packages such as <a class="reference external"
 <pre class="listing"><span class="Identifier">assert</span> <span class="Identifier">escapeRe</span><span class="Punctuation">(</span><span class="StringLit">&quot;fly+wind&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;fly</span><span class="EscapeSequence">\\</span><span class="StringLit">+wind&quot;</span>
 <span class="Identifier">assert</span> <span class="Identifier">escapeRe</span><span class="Punctuation">(</span><span class="StringLit">&quot;!&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;</span><span class="EscapeSequence">\\</span><span class="StringLit">!&quot;</span>
 <span class="Identifier">assert</span> <span class="Identifier">escapeRe</span><span class="Punctuation">(</span><span class="StringLit">&quot;nim*&quot;</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="StringLit">&quot;nim</span><span class="EscapeSequence">\\</span><span class="StringLit">*&quot;</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L728" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L728" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L730" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L730" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -653,8 +663,8 @@ There are also alternative nimble packages such as <a class="reference external"
 <dd>The maximum index for a match; <tt class="docutils literal"><span class="pre"><span class="Identifier">int</span><span class="Operator">.</span><span class="Identifier">high</span></span></tt> means the end of the string, otherwise it’s an inclusive upper bound.</dd>
 </dl>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L586" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L586" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L588" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L588" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -668,8 +678,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L599" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L599" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L601" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L601" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -681,8 +691,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L331" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L331" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L333" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L333" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -705,8 +715,8 @@ There are also alternative nimble packages such as <a class="reference external"
 <span class="Identifier">assert</span> <span class="DecNumber">0</span> <span class="Keyword">in</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="RawData">re&quot;(\w)&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Operator">.</span><span class="Identifier">captureBounds</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="RawData">re&quot;&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Operator">.</span><span class="Identifier">captureBounds</span><span class="Punctuation">[</span><span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">]</span> <span class="Operator">==</span> <span class="DecNumber">0</span> <span class="Operator">..</span> <span class="Operator">-</span><span class="DecNumber">1</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;abc&quot;</span><span class="Operator">.</span><span class="Identifier">match</span><span class="Punctuation">(</span><span class="RawData">re&quot;abc&quot;</span><span class="Punctuation">)</span><span class="Operator">.</span><span class="Identifier">get</span><span class="Operator">.</span><span class="Identifier">captureBounds</span><span class="Punctuation">[</span><span class="Operator">-</span><span class="DecNumber">1</span><span class="Punctuation">]</span> <span class="Operator">==</span> <span class="DecNumber">0</span> <span class="Operator">..</span> <span class="DecNumber">2</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L518" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L518" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L520" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L520" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -719,8 +729,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L334" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L334" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L336" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L336" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -733,8 +743,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L475" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L475" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L477" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L477" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -748,8 +758,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L723" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L723" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L725" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L725" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -774,8 +784,8 @@ There are also alternative nimble packages such as <a class="reference external"
 </ul>
 <p>If a given capture is missing, <tt class="docutils literal"><span class="pre"><span class="Identifier">IndexDefect</span></span></tt> thrown for un-named captures and <tt class="docutils literal"><span class="pre"><span class="Identifier">KeyError</span></span></tt> for named captures.</p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L694" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L694" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L696" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L696" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -786,8 +796,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L719" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L719" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L721" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L721" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -815,8 +825,8 @@ There are also alternative nimble packages such as <a class="reference external"
 <span class="Comment">#    `maxsplit - 1` times. This means that there will be `maxsplit`</span>
 <span class="Comment">#    strings in the output seq.</span>
 <span class="Identifier">assert</span> <span class="StringLit">&quot;1.2.3&quot;</span><span class="Operator">.</span><span class="Identifier">split</span><span class="Punctuation">(</span><span class="RawData">re&quot;\.&quot;</span><span class="Punctuation">,</span> <span class="Identifier">maxsplit</span> <span class="Operator">=</span> <span class="DecNumber">2</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Operator">@</span><span class="Punctuation">[</span><span class="StringLit">&quot;1&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;2.3&quot;</span><span class="Punctuation">]</span></pre>
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L615" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L615" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L617" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L617" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -829,8 +839,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L395" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L395" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L397" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L397" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -840,8 +850,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L400" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L400" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L402" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L402" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -854,8 +864,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L372" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L372" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L374" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L374" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -865,8 +875,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L368" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L368" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L370" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L370" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -894,8 +904,8 @@ There are also alternative nimble packages such as <a class="reference external"
 <ul class="simple"><li><tt class="docutils literal"><span class="pre"><span class="Keyword">proc</span> <span class="Identifier">findAll</span><span class="Punctuation">(</span><span class="Operator">...</span><span class="Punctuation">)</span></span></tt> returns a <tt class="docutils literal"><span class="pre"><span class="Identifier">seq</span><span class="Punctuation">[</span><span class="Identifier">string</span><span class="Punctuation">]</span></span></tt></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L535" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L535" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L537" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L537" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -908,8 +918,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L387" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L387" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L389" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L389" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -919,8 +929,8 @@ There are also alternative nimble packages such as <a class="reference external"
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L391" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L391" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/impure/nre.nim#L393" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/impure/nre.nim#L393" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -942,7 +952,7 @@ There are also alternative nimble packages such as <a class="reference external"
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-26 01:15:44 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-10 01:19:25 UTC</small>
       </div>
     </div>
   </div>

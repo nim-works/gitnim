@@ -283,7 +283,7 @@ type
     sfNamedParamCall, # symbol needs named parameter call syntax in target
                       # language; for interfacing with Objective C
     sfDiscardable,    # returned value may be discarded implicitly
-    sfOverriden,      # proc is overridden
+    sfOverridden,      # proc is overridden
     sfCallsite        # A flag for template symbols to tell the
                       # compiler it should use line information from
                       # the calling side of the macro, not from the
@@ -314,6 +314,7 @@ type
                       # an infinite loop, this flag is used as a sentinel to stop it.
     sfVirtual         # proc is a C++ virtual function
     sfByCopy          # param is marked as pass bycopy
+    sfCodegenDecl     # type, proc, global or proc param is marked as codegenDecl
 
   TSymFlags* = set[TSymFlag]
 
@@ -339,8 +340,8 @@ const
 
   sfCompileToCpp* = sfInfixCall       # compile the module as C++ code
   sfCompileToObjc* = sfNamedParamCall # compile the module as Objective-C code
-  sfExperimental* = sfOverriden       # module uses the .experimental switch
-  sfGoto* = sfOverriden               # var is used for 'goto' code generation
+  sfExperimental* = sfOverridden       # module uses the .experimental switch
+  sfGoto* = sfOverridden               # var is used for 'goto' code generation
   sfWrittenTo* = sfBorrow             # param is assigned to
                                       # currently unimplemented
   sfBase* = sfDiscriminant
@@ -689,7 +690,7 @@ type
     mIsPartOf, mAstToStr, mParallel,
     mSwap, mIsNil, mArrToSeq, mOpenArrayToSeq,
     mNewString, mNewStringOfCap, mParseBiggestFloat,
-    mMove, mWasMoved, mDup, mDestroy, mTrace,
+    mMove, mEnsureMove, mWasMoved, mDup, mDestroy, mTrace,
     mDefault, mUnown, mFinished, mIsolate, mAccessEnv, mAccessTypeField, mReset,
     mArray, mOpenArray, mRange, mSet, mSeq, mVarargs,
     mRef, mPtr, mVar, mDistinct, mVoid, mTuple,
@@ -822,9 +823,6 @@ type
     locOther                  # location is something other
   TLocFlag* = enum
     lfIndirect,               # backend introduced a pointer
-    lfFullExternalName, # only used when 'conf.cmd == cmdNimfix': Indicates
-      # that the symbol has been imported via 'importc: "fullname"' and
-      # no format string.
     lfNoDeepCopy,             # no need for a deep copy
     lfNoDecl,                 # do not declare it in C
     lfDynamicLib,             # link symbol to dynamic library
@@ -859,7 +857,7 @@ type
                               # keep in sync with PackedLib
     kind*: TLibKind
     generated*: bool          # needed for the backends:
-    isOverriden*: bool
+    isOverridden*: bool
     name*: Rope
     path*: PNode              # can be a string literal!
 
@@ -900,6 +898,7 @@ type
     info*: TLineInfo
     when defined(nimsuggest):
       endInfo*: TLineInfo
+      hasUserSpecifiedType*: bool  # used for determining whether to display inlay type hints
     owner*: PSym
     flags*: TSymFlags
     ast*: PNode               # syntax tree of proc, iterator, etc.:
@@ -944,10 +943,10 @@ type
     attachedWasMoved,
     attachedDestructor,
     attachedAsgn,
+    attachedDup,
     attachedSink,
     attachedTrace,
-    attachedDeepCopy,
-    attachedDup
+    attachedDeepCopy
 
   TType* {.acyclic.} = object of TIdObj # \
                               # types are identical iff they have the
@@ -1128,11 +1127,10 @@ const
 
 proc getPIdent*(a: PNode): PIdent {.inline.} =
   ## Returns underlying `PIdent` for `{nkSym, nkIdent}`, or `nil`.
-  # xxx consider whether also returning the 1st ident for {nkOpenSymChoice, nkClosedSymChoice}
-  # which may simplify code.
   case a.kind
   of nkSym: a.sym.name
   of nkIdent: a.ident
+  of nkOpenSymChoice, nkClosedSymChoice: a.sons[0].sym.name
   else: nil
 
 const
@@ -1518,7 +1516,7 @@ proc newProcNode*(kind: TNodeKind, info: TLineInfo, body: PNode,
 
 const
   AttachedOpToStr*: array[TTypeAttachedOp, string] = [
-    "=wasMoved", "=destroy", "=copy", "=sink", "=trace", "=deepcopy", "=dup"]
+    "=wasMoved", "=destroy", "=copy", "=dup", "=sink", "=trace", "=deepcopy"]
 
 proc `$`*(s: PSym): string =
   if s != nil:
@@ -1930,11 +1928,6 @@ proc isCompileTimeProc*(s: PSym): bool {.inline.} =
   result = s.kind == skMacro or
            s.kind in {skProc, skFunc} and sfCompileTime in s.flags
 
-proc isRunnableExamples*(n: PNode): bool =
-  # Templates and generics don't perform symbol lookups.
-  result = n.kind == nkSym and n.sym.magic == mRunnableExamples or
-    n.kind == nkIdent and n.ident.s == "runnableExamples"
-
 proc hasPattern*(s: PSym): bool {.inline.} =
   result = isRoutine(s) and s.ast[patternPos].kind != nkEmpty
 
@@ -2008,7 +2001,7 @@ proc toObjectFromRefPtrGeneric*(typ: PType): PType =
     of tyRef, tyPtr, tyGenericInst, tyGenericInvocation, tyAlias: result = result[0]
       # automatic dereferencing is deep, refs #18298.
     else: break
-  assert result.sym != nil
+  # result does not have to be object type
 
 proc isImportedException*(t: PType; conf: ConfigRef): bool =
   assert t != nil

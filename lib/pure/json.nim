@@ -438,7 +438,7 @@ macro `%*`*(x: untyped): untyped =
   ## `%` for every element.
   result = toJsonImpl(x)
 
-proc `==`*(a, b: JsonNode): bool {.noSideEffect.} =
+proc `==`*(a, b: JsonNode): bool {.noSideEffect, raises: [].} =
   ## Check two nodes for equality
   if a.isNil:
     if b.isNil: return true
@@ -458,7 +458,8 @@ proc `==`*(a, b: JsonNode): bool {.noSideEffect.} =
     of JNull:
       result = true
     of JArray:
-      result = a.elems == b.elems
+      {.cast(raises: []).}: # bug #19303
+        result = a.elems == b.elems
     of JObject:
       # we cannot use OrderedTable's equality here as
       # the order does not matter for equality here.
@@ -856,7 +857,7 @@ proc parseJson(p: var JsonParser; rawIntegers, rawFloats: bool, depth = 0): Json
   case p.tok
   of tkString:
     # we capture 'p.a' here, so we need to give it a fresh buffer afterwards:
-    when defined(gcArc) or defined(gcOrc):
+    when defined(gcArc) or defined(gcOrc) or defined(gcAtomicArc):
       result = JsonNode(kind: JString, str: move p.a)
     else:
       result = JsonNode(kind: JString)

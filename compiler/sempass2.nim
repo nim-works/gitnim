@@ -90,7 +90,10 @@ const
   errLetNeedsInit = "'let' symbol requires an initialization"
 
 proc createTypeBoundOps(tracked: PEffects, typ: PType; info: TLineInfo) =
-  if typ == nil: return
+  if typ == nil or sfGeneratedOp in tracked.owner.flags:
+    # don't create type bound ops for anything in a function with a `nodestroy` pragma
+    # bug #21987
+    return
   when false:
     let realType = typ.skipTypes(abstractInst)
     if realType.kind == tyRef and
@@ -1220,6 +1223,7 @@ proc track(tracked: PEffects, n: PNode) =
   of nkTupleConstr:
     for i in 0..<n.len:
       track(tracked, n[i])
+      notNilCheck(tracked, n[i].skipColon, n[i].typ)
       if tracked.owner.kind != skMacro:
         if n[i].kind == nkExprColonExpr:
           createTypeBoundOps(tracked, n[i][0].typ, n.info)

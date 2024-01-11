@@ -49,6 +49,7 @@ type                          # please make sure we have under 32 options
     optSinkInference          # 'sink T' inference
     optCursorInference
     optImportHidden
+    optQuirky
 
   TOptions* = set[TOption]
   TGlobalOption* = enum
@@ -166,7 +167,6 @@ type
     cmdInteractive # start interactive session
     cmdNop
     cmdJsonscript # compile a .json build file
-    cmdNimfix
     # old unused: cmdInterpret, cmdDef: def feature (find definition for IDEs)
 
 const
@@ -195,7 +195,7 @@ type
   IdeCmd* = enum
     ideNone, ideSug, ideCon, ideDef, ideUse, ideDus, ideChk, ideChkFile, ideMod,
     ideHighlight, ideOutline, ideKnown, ideMsg, ideProject, ideGlobalSymbols,
-    ideRecompile, ideChanged, ideType, ideDeclaration, ideExpand
+    ideRecompile, ideChanged, ideType, ideDeclaration, ideExpand, ideInlayHints
 
   Feature* = enum  ## experimental features; DO NOT RENAME THESE!
     dotOperators,
@@ -280,8 +280,23 @@ type
     version*: int
     endLine*: uint16
     endCol*: int
+    inlayHintInfo*: SuggestInlayHint
 
   Suggestions* = seq[Suggest]
+
+  SuggestInlayHintKind* = enum
+    sihkType = "Type",
+    sihkParameter = "Parameter"
+
+  SuggestInlayHint* = ref object
+    kind*: SuggestInlayHintKind
+    line*: int                   # Starts at 1
+    column*: int                 # Starts at 0
+    label*: string
+    paddingLeft*: bool
+    paddingRight*: bool
+    allowInsert*: bool
+    tooltip*: string
 
   ProfileInfo* = object
     time*: float
@@ -334,6 +349,7 @@ type
 
     cppDefines*: HashSet[string] # (*)
     headerFile*: string
+    nimbasePattern*: string # pattern to find nimbase.h
     features*: set[Feature]
     legacyFeatures*: set[LegacyFeature]
     arguments*: string ## the arguments to be passed to the program that
@@ -415,6 +431,8 @@ type
     expandLevels*: int
     expandNodeResult*: string
     expandPosition*: TLineInfo
+
+    clientProcessId*: int
 
 
 proc parseNimVersion*(a: string): NimVer =
@@ -911,6 +929,7 @@ proc findFile*(conf: ConfigRef; f: string; suppressStdlib = false): AbsoluteFile
 proc findModule*(conf: ConfigRef; modulename, currentModule: string): AbsoluteFile =
   # returns path to module
   var m = addFileExt(modulename, NimExt)
+  var hasRelativeDot = false
   if m.startsWith(pkgPrefix):
     result = findFile(conf, m.substr(pkgPrefix.len), suppressStdlib = true)
   else:
@@ -924,7 +943,11 @@ proc findModule*(conf: ConfigRef; modulename, currentModule: string): AbsoluteFi
     else: # If prefixed with std/ why would we add the current module path!
       let currentPath = currentModule.splitFile.dir
       result = AbsoluteFile currentPath / m
-    if not fileExists(result):
+      if m.startsWith('.') and not fileExists(result):
+        result = AbsoluteFile ""
+        hasRelativeDot = true
+
+    if not fileExists(result) and not hasRelativeDot:
       result = findFile(conf, m)
   patchModule(conf)
 
@@ -1051,6 +1074,7 @@ proc `$`*(c: IdeCmd): string =
   of ideRecompile: "recompile"
   of ideChanged: "changed"
   of ideType: "type"
+  of ideInlayHints: "inlayHints"
 
 proc floatInt64Align*(conf: ConfigRef): int16 =
   ## Returns either 4 or 8 depending on reasons.

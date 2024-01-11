@@ -11,7 +11,7 @@
 
 import
   intsets, ast, astalgo, trees, msgs, strutils, platform, renderer, options,
-  lineinfos, int128, modulegraphs, astmsgs
+  lineinfos, int128, modulegraphs, astmsgs, wordrecg
 
 when defined(nimPreviewSlimSystem):
   import std/[assertions, formatfloat]
@@ -28,6 +28,7 @@ type
     preferMixed,
       # most useful, shows: symbol + resolved symbols if it differs, e.g.:
       # tuple[a: MyInt{int}, b: float]
+    preferInlayHint,
 
   TTypeRelation* = enum      # order is important!
     isNone, isConvertible,
@@ -209,6 +210,8 @@ proc iterOverNode(marker: var IntSet, n: PNode, iter: TTypeIter,
       # a leaf
       result = iterOverTypeAux(marker, n.typ, iter, closure)
     else:
+      result = iterOverTypeAux(marker, n.typ, iter, closure)
+      if result: return
       for i in 0..<n.len:
         result = iterOverNode(marker, n[i], iter, closure)
         if result: return
@@ -410,7 +413,7 @@ proc canFormAcycleAux(g: ModuleGraph, marker: var IntSet, typ: PType, orig: PTyp
     elif not containsOrIncl(marker, t.id):
       var hasTrace = hasTrace
       let op = getAttachedOp(g, t.skipTypes({tyRef}), attachedTrace)
-      if op != nil and sfOverriden in op.flags:
+      if op != nil and sfOverridden in op.flags:
         hasTrace = true
       for i in 0..<t.len:
         result = canFormAcycleAux(g, marker, t[i], orig, withRef, hasTrace)
@@ -480,6 +483,7 @@ proc valueToString(a: PNode): string =
     result = $a.intVal
   of nkFloatLit..nkFloat128Lit: result = $a.floatVal
   of nkStrLit..nkTripleStrLit: result = a.strVal
+  of nkStaticExpr: result = "static(" & a[0].renderTree & ")"
   else: result = "<invalid value>"
 
 proc rangeToStr(n: PNode): string =
@@ -505,7 +509,7 @@ const
     "void", "iterable"]
 
 const preferToResolveSymbols = {preferName, preferTypeName, preferModuleInfo,
-  preferGenericArg, preferResolved, preferMixed}
+  preferGenericArg, preferResolved, preferMixed, preferInlayHint}
 
 template bindConcreteTypeToUserTypeClass*(tc, concrete: PType) =
   tc.add concrete
@@ -539,7 +543,10 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
     if prefer in preferToResolveSymbols and t.sym != nil and
          sfAnon notin t.sym.flags and t.kind != tySequence:
       if t.kind == tyInt and isIntLit(t):
-        result = t.sym.name.s & " literal(" & $t.n.intVal & ")"
+        if prefer == preferInlayHint:
+          result = t.sym.name.s
+        else:
+          result = t.sym.name.s & " literal(" & $t.n.intVal & ")"
       elif t.kind == tyAlias and t[0].kind != tyAlias:
         result = typeToString(t[0])
       elif prefer in {preferResolved, preferMixed}:
@@ -555,7 +562,7 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
           result = t.sym.name.s
         if prefer == preferMixed and result != t.sym.name.s:
           result = t.sym.name.s & "{" & result & "}"
-      elif prefer in {preferName, preferTypeName} or t.sym.owner.isNil:
+      elif prefer in {preferName, preferTypeName, preferInlayHint} or t.sym.owner.isNil:
         # note: should probably be: {preferName, preferTypeName, preferGenericArg}
         result = t.sym.name.s
         if t.kind == tyGenericParam and t.len > 0:
@@ -574,8 +581,11 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
       if not isIntLit(t) or prefer == preferExported:
         result = typeToStr[t.kind]
       else:
-        if prefer == preferGenericArg:
+        case prefer:
+        of preferGenericArg:
           result = $t.n.intVal
+        of preferInlayHint:
+          result = "int"
         else:
           result = "int literal(" & $t.n.intVal & ")"
     of tyGenericInst, tyGenericInvocation:
@@ -748,6 +758,14 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
       result.add(')')
       if t.len > 0 and t[0] != nil: result.add(": " & typeToString(t[0]))
       var prag = if t.callConv == ccNimCall and tfExplicitCallConv notin t.flags: "" else: $t.callConv
+      if not isNil(t.owner) and not isNil(t.owner.ast) and (t.owner.ast.len - 1) >= pragmasPos:
+        let pragmasNode = t.owner.ast[pragmasPos]
+        let raisesSpec = effectSpec(pragmasNode, wRaises)
+        if not isNil(raisesSpec):
+          addSep(prag)
+          prag.add("raises: ")
+          prag.add($raisesSpec)
+
       if tfNoSideEffect in t.flags:
         addSep(prag)
         prag.add("noSideEffect")
@@ -1434,6 +1452,19 @@ proc compatibleEffectsAux(se, re: PNode): bool =
       return false
   result = true
 
+proc isDefectException*(t: PType): bool
+proc compatibleExceptions(se, re: PNode): bool =
+  if re.isNil: return false
+  for r in items(re):
+    block search:
+      if isDefectException(r.typ):
+        break search
+      for s in items(se):
+        if safeInheritanceDiff(r.typ, s.typ) <= 0:
+          break search
+      return false
+  result = true
+
 proc hasIncompatibleEffect(se, re: PNode): bool =
   if re.isNil: return false
   for r in items(re):
@@ -1472,7 +1503,7 @@ proc compatibleEffects*(formal, actual: PType): EffectsCompat =
     if not isNil(se) and se.kind != nkArgList:
       # spec requires some exception or tag, but we don't know anything:
       if real.len == 0: return efRaisesUnknown
-      let res = compatibleEffectsAux(se, real[exceptionEffects])
+      let res = compatibleExceptions(se, real[exceptionEffects])
       if not res: return efRaisesDiffer
 
     let st = spec[tagEffects]
@@ -1500,7 +1531,7 @@ proc compatibleEffects*(formal, actual: PType): EffectsCompat =
 
 
 proc isCompileTimeOnly*(t: PType): bool {.inline.} =
-  result = t.kind in {tyTypeDesc, tyStatic}
+  result = t.kind in {tyTypeDesc, tyStatic, tyGenericParam}
 
 proc containsCompileTimeOnly*(t: PType): bool =
   if isCompileTimeOnly(t): return true

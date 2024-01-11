@@ -12,10 +12,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.0.3">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js"></script>
+<script type="text/javascript" src="dochack.js?v=2.0.3"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -51,14 +51,37 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#CpuSet" title="CpuSet {.importc: &quot;cpu_set_t&quot;, header: &quot;#define _GNU_SOURCE\n#include &lt;sched.h&gt;&quot;.} = object">CpuSet</a></li>
-<li><a class="reference" href="#GcThread" title="GcThread {.pure, inheritable.} = object">GcThread</a></li>
+      <li><a class="reference" href="#CpuSet" title="CpuSet {.importc: &quot;cpu_set_t&quot;, header: &quot;#define _GNU_SOURCE\n#include &lt;sched.h&gt;&quot;.} = object
+  when defined(linux) and defined(amd64):">CpuSet</a></li>
+<li><a class="reference" href="#GcThread" title="GcThread {.pure, inheritable.} = object
+  when emulatedThreadVars:
+      tls*: ThreadLocalStorage
+
+  else:
+      nil
+
+  when hasSharedHeap:
+      next*, prev*: PGcThread
+      stackBottom*, stackTop*: pointer
+      stackSize*: int
+
+  else:
+      nil">GcThread</a></li>
 <li><a class="reference" href="#PGcThread" title="PGcThread = ptr GcThread">PGcThread</a></li>
 <li><a class="reference" href="#Pthread_attr" title="Pthread_attr {.importc: &quot;pthread_attr_t&quot;, header: &quot;&lt;sys/types.h&gt;&quot;.} = object">Pthread_attr</a></li>
 <li><a class="reference" href="#SysThread" title="SysThread {.importc: &quot;pthread_t&quot;, header: &quot;&lt;sys/types.h&gt;&quot;.} = distinct culong">SysThread</a></li>
 <li><a class="reference" href="#Thread" title="Thread[TArg] = object
   core*: PGcThread
-  sys*: SysThread">Thread</a></li>
+  sys*: SysThread
+  when TArg is void:
+      dataFn*: proc () {.nimcall, gcsafe.}
+
+  else:
+      dataFn*: proc (m: TArg) {.nimcall, gcsafe.}
+      data*: TArg
+
+  when hasAllocStack:
+      rawStack*: pointer">Thread</a></li>
 <li><a class="reference" href="#ThreadLocalStorage" title="ThreadLocalStorage = array[0 .. (nimTlsSize div 8), float]">ThreadLocalStorage</a></li>
 <li><a class="reference" href="#Timespec" title="Timespec {.importc: &quot;struct timespec&quot;, header: &quot;&lt;time.h&gt;&quot;.} = object
   tv_sec*: Time
@@ -149,6 +172,8 @@
   <dl class="item">
     <div id="CpuSet">
   <dt><pre><a href="threadtypes.html#CpuSet"><span class="Identifier">CpuSet</span></a> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;cpu_set_t&quot;</span><span class="Other">,</span> <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;#define _GNU_SOURCE\n#include &lt;sched.h&gt;&quot;</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">linux</span><span class="Other">)</span> <span class="Keyword">and</span> <span class="Identifier">defined</span><span class="Other">(</span><span class="Identifier">amd64</span><span class="Other">)</span><span class="Other">:</span>
+    
   </pre></dt>
   <dd>
     
@@ -160,6 +185,20 @@
 </div>
 <div id="GcThread">
   <dt><pre><a href="threadtypes.html#GcThread"><span class="Identifier">GcThread</span></a> {.<span class="Identifier">pure</span><span class="Other">,</span> <span class="Identifier">inheritable</span>.} <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Keyword">when</span> <span class="Identifier">emulatedThreadVars</span><span class="Other">:</span>
+      <span class="Identifier">tls</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">ThreadLocalStorage</span>
+
+  <span class="Keyword">else</span><span class="Other">:</span>
+      <span class="Keyword">nil</span>
+
+  <span class="Keyword">when</span> <span class="Identifier">hasSharedHeap</span><span class="Other">:</span>
+      <span class="Identifier">next</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">prev</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">PGcThread</span>
+      <span class="Identifier">stackBottom</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">stackTop</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">pointer</span>
+      <span class="Identifier">stackSize</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+
+  <span class="Keyword">else</span><span class="Other">:</span>
+      <span class="Keyword">nil</span>
+
   </pre></dt>
   <dd>
     
@@ -204,7 +243,17 @@
   <dt><pre><a href="threadtypes.html#Thread"><span class="Identifier">Thread</span></a><span class="Other">[</span><span class="Identifier">TArg</span><span class="Other">]</span> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">core</span><span class="Operator">*</span><span class="Other">:</span> <a href="threadtypes.html#PGcThread"><span class="Identifier">PGcThread</span></a>
   <span class="Identifier">sys</span><span class="Operator">*</span><span class="Other">:</span> <a href="threadtypes.html#SysThread"><span class="Identifier">SysThread</span></a>
-</pre></dt>
+  <span class="Keyword">when</span> <span class="Identifier">TArg</span> <span class="Keyword">is</span> <span class="Identifier">void</span><span class="Other">:</span>
+      <span class="Identifier">dataFn</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Other">)</span> {.<span class="Identifier">nimcall</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span></span>.}
+
+  <span class="Keyword">else</span><span class="Other">:</span>
+      <span class="Identifier">dataFn</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">m</span><span class="Other">:</span> <span class="Identifier">TArg</span><span class="Other">)</span> {.<span class="Identifier">nimcall</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span></span>.}
+      <span class="Identifier">data</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">TArg</span>
+
+  <span class="Keyword">when</span> <span class="Identifier">hasAllocStack</span><span class="Other">:</span>
+      <span class="Identifier">rawStack</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">pointer</span>
+
+  </pre></dt>
   <dd>
     
     
@@ -463,7 +512,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2023-05-26 01:15:04 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-10 01:19:20 UTC</small>
       </div>
     </div>
   </div>

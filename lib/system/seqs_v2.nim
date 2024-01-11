@@ -11,6 +11,11 @@
 # import typetraits
 # strs already imported allocateds for us.
 
+
+# Some optimizations here may be not to empty-seq-initialize some symbols, then StrictNotNil complains.
+{.push warning[StrictNotNil]: off.}  # See https://github.com/nim-lang/Nim/issues/21401
+
+
 proc supportsCopyMem(t: typedesc): bool {.magic: "TypeTrait".}
 
 ## Default seq implementation used by Nim's core.
@@ -97,7 +102,7 @@ proc grow*[T](x: var seq[T]; newLen: Natural; value: T) =
   for i in oldLen .. newLen-1:
     xu.p.data[i] = value
 
-proc add*[T](x: var seq[T]; value: sink T) {.magic: "AppendSeqElem", noSideEffect, nodestroy.} =
+proc add*[T](x: var seq[T]; y: sink T) {.magic: "AppendSeqElem", noSideEffect, nodestroy.} =
   ## Generic proc for adding a data item `y` to a container `x`.
   ##
   ## For containers that have an order, `add` means *append*. New generic
@@ -114,7 +119,7 @@ proc add*[T](x: var seq[T]; value: sink T) {.magic: "AppendSeqElem", noSideEffec
     # copyMem(). This is fine as know by construction that
     # in `xu.p.data[oldLen]` there is nothing to destroy.
     # We also save the `wasMoved + destroy` pair for the sink parameter.
-    xu.p.data[oldLen] = value
+    xu.p.data[oldLen] = y
 
 proc setLen[T](s: var seq[T], newlen: Natural) =
   {.noSideEffect.}:
@@ -135,8 +140,6 @@ proc newSeq[T](s: var seq[T], len: Natural) =
   setLen(s, len)
 
 
-template capacityImpl(sek: NimSeqV2): int =
-  if sek.p != nil: (xu.p.cap and not strlitFlag) else: 0
 
 func capacity*[T](self: seq[T]): int {.inline.} =
   ## Returns the current capacity of the seq.
@@ -146,6 +149,8 @@ func capacity*[T](self: seq[T]): int {.inline.} =
     lst.add "Nim"
     assert lst.capacity == 42
 
-  {.cast(noSideEffect).}:
-    let sek = unsafeAddr self
-    result = capacityImpl(cast[ptr NimSeqV2](sek)[])
+  let sek = cast[ptr NimSeqV2[T]](unsafeAddr self)
+  result = if sek.p != nil: sek.p.cap and not strlitFlag else: 0
+
+
+{.pop.}  # See https://github.com/nim-lang/Nim/issues/21401

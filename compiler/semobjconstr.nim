@@ -21,6 +21,7 @@ type
                              # set this to true while visiting
                              # parent types.
     missingFields: seq[PSym] # Fields that the user failed to specify
+    checkDefault: bool       # Checking defaults
 
   InitStatus = enum # This indicates the result of object construction
     initUnknown
@@ -342,6 +343,16 @@ proc semConstructFields(c: PContext, n: PNode, constrCtx: var ObjConstrContext,
           # All bets are off. If any of the branches has a mandatory
           # fields we must produce an error:
           for i in 1..<n.len:
+            let branchNode = n[i]
+            if branchNode != nil:
+              let oldCheckDefault = constrCtx.checkDefault
+              constrCtx.checkDefault = true
+              let (_, defaults) = semConstructFields(c, branchNode[^1], constrCtx, flags)
+              constrCtx.checkDefault = oldCheckDefault
+              if len(defaults) > 0:
+                localError(c.config, discriminatorVal.info, "branch initialization " &
+                            "with a runtime discriminator is not supported " &
+                            "for a branch whose fields have default values.")
             discard collectMissingCaseFields(c, n[i], constrCtx, @[])
   of nkSym:
     let field = n.sym
@@ -353,7 +364,7 @@ proc semConstructFields(c: PContext, n: PNode, constrCtx: var ObjConstrContext,
       result.defaults.add newTree(nkExprColonExpr, n, field.ast)
     else:
       if efWantNoDefaults notin flags: # cannot compute defaults at the typeRightPass
-        let defaultExpr = defaultNodeField(c, n)
+        let defaultExpr = defaultNodeField(c, n, constrCtx.checkDefault)
         if defaultExpr != nil:
           result.status = initUnknown
           result.defaults.add newTree(nkExprColonExpr, n, defaultExpr)
@@ -376,7 +387,9 @@ proc semConstructTypeAux(c: PContext,
     if status in {initPartial, initNone, initUnknown}:
       discard collectMissingFields(c, t.n, constrCtx, result.defaults)
     let base = t[0]
-    if base == nil: break
+    if base == nil or base.id == t.id or 
+      base.kind in { tyRef, tyPtr } and base[0].id == t.id: 
+        break
     t = skipTypes(base, skipPtrs)
     if t.kind != tyObject:
       # XXX: This is not supposed to happen, but apparently
