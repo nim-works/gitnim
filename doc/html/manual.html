@@ -4430,21 +4430,39 @@ Exception
 </ul>
 
 <h3><a class="toc-backref" id="scope-rules-module-scope" href="#scope-rules-module-scope">Module scope</a></h3><p>All identifiers of a module are valid from the point of declaration until the end of the module. Identifiers from indirectly dependent modules are <em>not</em> available. The <span id="system_1">system</span> module is automatically imported in every module.</p>
-<p>If a module imports an identifier by two different modules, each occurrence of the identifier has to be qualified unless it is an overloaded procedure or iterator in which case the overloading resolution takes place:</p>
+<p>If a module imports the same identifier from two different modules, the identifier is considered ambiguous, which can be resolved in the following ways:</p>
+<ul class="simple"><li>Qualifying the identifier as <tt class="docutils literal"><span class="pre"><span class="Identifier">module</span><span class="Operator">.</span><span class="Identifier">identifier</span></span></tt> resolves ambiguity between modules. (See below for the case that the module name itself is ambiguous.)</li>
+<li>Calling the identifier as a routine makes overload resolution take place, which resolves ambiguity in the case that one overload matches stronger than the others.</li>
+<li><p>Using the identifier in a context where the compiler can infer the type of the identifier resolves ambiguity in the case that one definition matches the type stronger than the others.</p>
 <p><pre class="listing">
 <span class="Comment"># Module A</span>
-<span class="Keyword">var</span> <span class="Identifier">x</span><span class="Operator">*:</span> <span class="Identifier">string</span></pre></p>
+<span class="Keyword">var</span> <span class="Identifier">x</span><span class="Operator">*:</span> <span class="Identifier">string</span>
+<span class="Keyword">proc</span> <span class="Identifier">foo</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Identifier">echo</span> <span class="StringLit">&quot;A: &quot;</span><span class="Punctuation">,</span> <span class="Identifier">a</span></pre></p>
 <p><pre class="listing">
 <span class="Comment"># Module B</span>
-<span class="Keyword">var</span> <span class="Identifier">x</span><span class="Operator">*:</span> <span class="Identifier">int</span></pre></p>
+<span class="Keyword">var</span> <span class="Identifier">x</span><span class="Operator">*:</span> <span class="Identifier">int</span>
+<span class="Keyword">proc</span> <span class="Identifier">foo</span><span class="Operator">*</span><span class="Punctuation">(</span><span class="Identifier">b</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span> <span class="Operator">=</span>
+  <span class="Identifier">echo</span> <span class="StringLit">&quot;B: &quot;</span><span class="Punctuation">,</span> <span class="Identifier">b</span></pre></p>
 <p><pre class="listing">
 <span class="Comment"># Module C</span>
 <span class="Keyword">import</span> <span class="Identifier">A</span><span class="Punctuation">,</span> <span class="Identifier">B</span>
+
+<span class="Identifier">foo</span><span class="Punctuation">(</span><span class="StringLit">&quot;abc&quot;</span><span class="Punctuation">)</span> <span class="Comment"># A: abc</span>
+<span class="Identifier">foo</span><span class="Punctuation">(</span><span class="DecNumber">123</span><span class="Punctuation">)</span> <span class="Comment"># B: 123</span>
+<span class="Keyword">let</span> <span class="Identifier">inferred</span><span class="Punctuation">:</span> <span class="Keyword">proc</span> <span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">string</span><span class="Punctuation">)</span> <span class="Operator">=</span> <span class="Identifier">foo</span>
+<span class="Identifier">foo</span><span class="Punctuation">(</span><span class="StringLit">&quot;def&quot;</span><span class="Punctuation">)</span> <span class="Comment"># A: def</span>
+
 <span class="Identifier">write</span><span class="Punctuation">(</span><span class="Identifier">stdout</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">)</span> <span class="Comment"># error: x is ambiguous</span>
 <span class="Identifier">write</span><span class="Punctuation">(</span><span class="Identifier">stdout</span><span class="Punctuation">,</span> <span class="Identifier">A</span><span class="Operator">.</span><span class="Identifier">x</span><span class="Punctuation">)</span> <span class="Comment"># no error: qualifier used</span>
 
+<span class="Keyword">proc</span> <span class="Identifier">bar</span><span class="Punctuation">(</span><span class="Identifier">a</span><span class="Punctuation">:</span> <span class="Identifier">int</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">int</span> <span class="Operator">=</span> <span class="Identifier">a</span> <span class="Operator">+</span> <span class="DecNumber">1</span>
+<span class="Identifier">assert</span> <span class="Identifier">bar</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">)</span> <span class="Operator">==</span> <span class="Identifier">x</span> <span class="Operator">+</span> <span class="DecNumber">1</span> <span class="Comment"># no error: only A.x of type int matches</span>
+
 <span class="Keyword">var</span> <span class="Identifier">x</span> <span class="Operator">=</span> <span class="DecNumber">4</span>
 <span class="Identifier">write</span><span class="Punctuation">(</span><span class="Identifier">stdout</span><span class="Punctuation">,</span> <span class="Identifier">x</span><span class="Punctuation">)</span> <span class="Comment"># not ambiguous: uses the module C's x</span></pre></p>
+</li>
+</ul>
 <p>Modules can share their name, however, when trying to qualify an identifier with the module name the compiler will fail with ambiguous identifier error. One can qualify the identifier by aliasing the module.</p>
 <p><pre class="listing">
 <span class="Comment"># Module A/C</span>
@@ -4456,7 +4474,7 @@ Exception
 <span class="Keyword">import</span> <span class="Identifier">A</span><span class="Operator">/</span><span class="Identifier">C</span>
 <span class="Keyword">import</span> <span class="Identifier">B</span><span class="Operator">/</span><span class="Identifier">C</span>
 
-<span class="Identifier">C</span><span class="Operator">.</span><span class="Identifier">fb</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># Error: ambiguous identifier: 'fb'</span></pre></p>
+<span class="Identifier">C</span><span class="Operator">.</span><span class="Identifier">fb</span><span class="Punctuation">(</span><span class="Punctuation">)</span> <span class="Comment"># Error: ambiguous identifier: 'C'</span></pre></p>
 <p><pre class="listing">
 <span class="Keyword">import</span> <span class="Identifier">A</span><span class="Operator">/</span><span class="Identifier">C</span> <span class="Keyword">as</span> <span class="Identifier">fizz</span>
 <span class="Keyword">import</span> <span class="Identifier">B</span><span class="Operator">/</span><span class="Identifier">C</span>
@@ -5240,7 +5258,51 @@ using namespace gui;
     <span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">,</span> <span class="Identifier">z</span><span class="Punctuation">:</span> <span class="Identifier">float</span></pre></p>
 <p>The Nim compiler automatically determines whether a parameter is passed by value or by reference based on the parameter type's size. If a parameter must be passed by value or by reference, (such as when interfacing with a C library) use the bycopy or byref pragmas. Notice params marked as <tt class="docutils literal"><span class="pre"><span class="Identifier">byref</span></span></tt> takes precedence over types marked as <tt class="docutils literal"><span class="pre"><span class="Identifier">bycopy</span></span></tt>.</p>
 
-<h2><a class="toc-backref" id="foreign-function-interface-byref-pragma" href="#foreign-function-interface-byref-pragma">Byref pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">byref</span></span></tt> pragma can be applied to an object or tuple type or a proc param. When applied to a type it instructs the compiler to pass the type by reference (hidden pointer) to procs. When applied to a param it will take precedence, even if the the type was marked as <tt class="docutils literal"><span class="pre"><span class="Identifier">bycopy</span></span></tt>. When using the Cpp backend, params marked as byref will translate to cpp references <tt class="docutils literal"><span class="pre"><span class="Operator">&amp;</span></span></tt>.</p>
+<h2><a class="toc-backref" id="foreign-function-interface-byref-pragma" href="#foreign-function-interface-byref-pragma">Byref pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">byref</span></span></tt> pragma can be applied to an object or tuple type or a proc param. When applied to a type it instructs the compiler to pass the type by reference (hidden pointer) to procs. When applied to a param it will take precedence, even if the the type was marked as <tt class="docutils literal"><span class="pre"><span class="Identifier">bycopy</span></span></tt>. When an <tt class="docutils literal"><span class="pre"><span class="Identifier">importc</span></span></tt> type has a <tt class="docutils literal"><span class="pre"><span class="Identifier">byref</span></span></tt> pragma or parameters are marked as <tt class="docutils literal"><span class="pre"><span class="Identifier">byref</span></span></tt> in an <tt class="docutils literal"><span class="pre"><span class="Identifier">importc</span></span></tt> proc, these params translate to pointers. When an <tt class="docutils literal"><span class="pre"><span class="Identifier">importcpp</span></span></tt> type has a <tt class="docutils literal"><span class="pre"><span class="Identifier">byref</span></span></tt> pragma, these params translate to C++ references <tt class="docutils literal"><span class="pre"><span class="Operator">&amp;</span></span></tt>.</p>
+<p><pre class="listing">
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">emit</span><span class="Punctuation">:</span> <span class="LongStringLit">&quot;&quot;&quot;/*TYPESECTION*/
+typedef struct {
+  int x;
+} CStruct;
+&quot;&quot;&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
+
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">emit</span><span class="Punctuation">:</span> <span class="LongStringLit">&quot;&quot;&quot;
+#ifdef __cplusplus
+extern &quot;C&quot;
+#endif
+int takesCStruct(CStruct* x) {
+  return x-&gt;x;
+}
+&quot;&quot;&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
+
+<span class="Keyword">type</span>
+  <span class="Identifier">CStruct</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importc</span><span class="Punctuation">,</span> <span class="Identifier">byref</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+    <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">cint</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">takesCStruct</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">CStruct</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">cint</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importc</span><span class="Operator">.</span><span class="Punctuation">}</span></pre></p>
+<p>or</p>
+<p><pre class="listing">
+<span class="Keyword">type</span>
+  <span class="Identifier">CStruct</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importc</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+    <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">cint</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">takesCStruct</span><span class="Punctuation">(</span><span class="Identifier">x</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">byref</span><span class="Operator">.</span><span class="Punctuation">}</span><span class="Punctuation">:</span> <span class="Identifier">CStruct</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">cint</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importc</span><span class="Operator">.</span><span class="Punctuation">}</span></pre></p>
+<p><pre class="listing">
+<span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">emit</span><span class="Punctuation">:</span> <span class="LongStringLit">&quot;&quot;&quot;/*TYPESECTION*/
+struct CppStruct {
+  int x;
+  
+  int takesCppStruct(CppStruct&amp; y) {
+    return x + y.x;
+  }
+};
+&quot;&quot;&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span>
+
+<span class="Keyword">type</span>
+  <span class="Identifier">CppStruct</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importcpp</span><span class="Punctuation">,</span> <span class="Identifier">byref</span><span class="Operator">.</span><span class="Punctuation">}</span> <span class="Operator">=</span> <span class="Keyword">object</span>
+    <span class="Identifier">x</span><span class="Punctuation">:</span> <span class="Identifier">cint</span>
+
+<span class="Keyword">proc</span> <span class="Identifier">takesCppStruct</span><span class="Punctuation">(</span><span class="Identifier">x</span><span class="Punctuation">,</span> <span class="Identifier">y</span><span class="Punctuation">:</span> <span class="Identifier">CppStruct</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">cint</span> <span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">importcpp</span><span class="Operator">.</span><span class="Punctuation">}</span></pre></p>
 
 <h2><a class="toc-backref" id="foreign-function-interface-varargs-pragma" href="#foreign-function-interface-varargs-pragma">Varargs pragma</a></h2><p>The <tt class="docutils literal"><span class="pre"><span class="Identifier">varargs</span></span></tt> pragma can be applied to procedures only (and procedure types). It tells Nim that the proc can take a variable number of parameters after the last specified parameter. Nim string values will be converted to C strings automatically:</p>
 <p><pre class="listing">
@@ -5391,7 +5453,7 @@ libtcl8.3.so.0</pre>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-06 01:04:26 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-01-13 01:07:08 UTC</small>
       </div>
     </div>
   </div>

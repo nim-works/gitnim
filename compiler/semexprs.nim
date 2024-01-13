@@ -54,17 +54,6 @@ proc semOperand(c: PContext, n: PNode, flags: TExprFlags = {}): PNode =
   # same as 'semExprWithType' but doesn't check for proc vars
   result = semExpr(c, n, flags + {efOperand, efAllowSymChoice})
   if result.typ != nil:
-    # XXX tyGenericInst here?
-    if result.typ.kind == tyProc and hasUnresolvedParams(result, {efOperand}):
-      #and tfUnresolved in result.typ.flags:
-      let owner = result.typ.owner
-      let err =
-        # consistent error message with evaltempl/semMacroExpr
-        if owner != nil and owner.kind in {skTemplate, skMacro}:
-          errMissingGenericParamsForTemplate % n.renderTree
-        else:
-          errProcHasNoConcreteType % n.renderTree
-      localError(c.config, n.info, err)
     if result.typ.kind in {tyVar, tyLent}: result = newDeref(result)
   elif {efWantStmt, efAllowStmt} * flags != {}:
     result.typ = newTypeS(tyVoid, c)
@@ -630,7 +619,7 @@ proc changeType(c: PContext; n: PNode, newType: PType, check: bool) =
           a.add m
           changeType(m, tup[i], check)
   of nkCharLit..nkUInt64Lit:
-    if check and n.kind != nkUInt64Lit and not sameType(n.typ, newType):
+    if check and n.kind != nkUInt64Lit and not sameTypeOrNil(n.typ, newType):
       let value = n.intVal
       if value < firstOrd(c.config, newType) or value > lastOrd(c.config, newType):
         localError(c.config, n.info, "cannot convert " & $value &
@@ -1012,6 +1001,30 @@ proc bracketedMacro(n: PNode): PSym =
       result = nil
   else:
     result = nil
+
+proc finishOperand(c: PContext, a: PNode): PNode =
+  if a.typ.isNil:
+    result = c.semOperand(c, a, {efDetermineType})
+  else:
+    result = a
+  # XXX tyGenericInst here?
+  if result.typ.kind == tyProc and hasUnresolvedParams(result, {efOperand}):
+    #and tfUnresolved in result.typ.flags:
+    let owner = result.typ.owner
+    let err =
+      # consistent error message with evaltempl/semMacroExpr
+      if owner != nil and owner.kind in {skTemplate, skMacro}:
+        errMissingGenericParamsForTemplate % a.renderTree
+      else:
+        errProcHasNoConcreteType % a.renderTree
+    localError(c.config, a.info, err)
+  considerGenSyms(c, result)
+
+proc semFinishOperands(c: PContext; n: PNode) =
+  # this needs to be called to ensure that after overloading resolution every
+  # argument has been sem'checked:
+  for i in 1..<n.len:
+    n[i] = finishOperand(c, n[i])
 
 proc afterCallActions(c: PContext; n, orig: PNode, flags: TExprFlags; expectedType: PType = nil): PNode =
   if efNoSemCheck notin flags and n.typ != nil and n.typ.kind == tyError:
@@ -3152,7 +3165,6 @@ proc semExpr(c: PContext, n: PNode, flags: TExprFlags = {}, expectedType: PType 
           expected.kind in {tyInt..tyInt64,
             tyUInt..tyUInt64,
             tyFloat..tyFloat128}):
-        result.typ = expected
         if expected.kind in {tyFloat..tyFloat128}:
           n.transitionIntToFloatKind(nkFloatLit)
         changeType(c, result, expectedType, check=true)

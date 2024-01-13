@@ -1710,7 +1710,7 @@ proc typeRel(c: var TCandidate, f, aOrig: PType,
           if tfExplicitCallConv in target.flags and
               target.callConv != effectiveArgType.callConv:
             return isNone
-        put(c, f, a)
+        if doBind: put(c, f, a)
         return isGeneric
       else:
         return isNone
@@ -2703,12 +2703,6 @@ proc matchesAux(c: PContext, n, nOrig: PNode, m: var TCandidate, marker: var Int
   # for some edge cases (see tdont_return_unowned_from_owned test case)
   m.firstMismatch.arg = a
   m.firstMismatch.formal = formal
-
-proc semFinishOperands*(c: PContext, n: PNode) =
-  # this needs to be called to ensure that after overloading resolution every
-  # argument has been sem'checked:
-  for i in 1..<n.len:
-    n[i] = prepareOperand(c, n[i])
 
 proc partialMatch*(c: PContext, n, nOrig: PNode, m: var TCandidate) =
   # for 'suggest' support:
