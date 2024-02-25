@@ -415,13 +415,16 @@ proc semArray(c: PContext, n: PNode, prev: PType): PType =
     if indxB.kind in {tyGenericInst, tyAlias, tySink}: indxB = skipModifier(indxB)
     if indxB.kind notin {tyGenericParam, tyStatic, tyFromExpr} and
         tfUnresolved notin indxB.flags:
-      if indxB.skipTypes({tyRange}).kind in {tyUInt, tyUInt64}:
-        discard
-      elif not isOrdinalType(indxB):
+      if not isOrdinalType(indxB):
         localError(c.config, n[1].info, errOrdinalTypeExpected % typeToString(indxB, preferDesc))
       elif enumHasHoles(indxB):
         localError(c.config, n[1].info, "enum '$1' has holes" %
                    typeToString(indxB.skipTypes({tyRange})))
+      elif indxB.kind != tyRange and
+          lengthOrd(c.config, indxB) > high(uint16).int:
+        # assume range type is intentional
+        localError(c.config, n[1].info,
+          "index type '$1' for array is too large" % typeToString(indxB))
     base = semTypeNode(c, n[2], nil)
     # ensure we only construct a tyArray when there was no error (bug #3048):
     # bug #6682: Do not propagate initialization requirements etc for the
@@ -2177,6 +2180,10 @@ proc semTypeNode(c: PContext, n: PNode, prev: PType): PType =
     else:
       let symKind = if n.kind == nkIteratorTy: skIterator else: skProc
       result = semProcTypeWithScope(c, n, prev, symKind)
+      if result == nil:
+        localError(c.config, n.info, "type expected, but got: " & renderTree(n))
+        result = newOrPrevType(tyError, prev, c)
+
       if n.kind == nkIteratorTy and result.kind == tyProc:
         result.flags.incl(tfIterator)
       if result.callConv == ccClosure and c.config.selectedGC in {gcArc, gcOrc, gcAtomicArc}:

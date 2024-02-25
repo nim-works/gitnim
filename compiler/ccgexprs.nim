@@ -285,15 +285,22 @@ proc genGenericAsgn(p: BProc, dest, src: TLoc, flags: TAssignmentFlags) =
     linefmt(p, cpsStmts, "#genericAssign((void*)$1, (void*)$2, $3);$n",
             [addrLoc(p.config, dest), addrLoc(p.config, src), genTypeInfoV1(p.module, dest.t, dest.lode.info)])
 
-proc genOpenArrayConv(p: BProc; d: TLoc; a: TLoc) =
+proc genOpenArrayConv(p: BProc; d: TLoc; a: TLoc; flags: TAssignmentFlags) =
   assert d.k != locNone
   #  getTemp(p, d.t, d)
 
   case a.t.skipTypes(abstractVar).kind
   of tyOpenArray, tyVarargs:
     if reifiedOpenArray(a.lode):
-      linefmt(p, cpsStmts, "$1.Field0 = $2.Field0; $1.Field1 = $2.Field1;$n",
-        [rdLoc(d), a.rdLoc])
+      if needTempForOpenArray in flags:
+        var tmp: TLoc = getTemp(p, a.t)
+        linefmt(p, cpsStmts, "$2 = $1; $n",
+                [a.rdLoc, tmp.rdLoc])
+        linefmt(p, cpsStmts, "$1.Field0 = $2.Field0; $1.Field1 = $2.Field1;$n",
+          [rdLoc(d), tmp.rdLoc])
+      else:
+        linefmt(p, cpsStmts, "$1.Field0 = $2.Field0; $1.Field1 = $2.Field1;$n",
+          [rdLoc(d), a.rdLoc])
     else:
       linefmt(p, cpsStmts, "$1.Field0 = $2; $1.Field1 = $2Len_0;$n",
         [rdLoc(d), a.rdLoc])
@@ -391,7 +398,7 @@ proc genAssignment(p: BProc, dest, src: TLoc, flags: TAssignmentFlags) =
     # open arrays are always on the stack - really? What if a sequence is
     # passed to an open array?
     if reifiedOpenArray(dest.lode):
-      genOpenArrayConv(p, dest, src)
+      genOpenArrayConv(p, dest, src, flags)
     elif containsGarbageCollectedRef(dest.t):
       linefmt(p, cpsStmts,     # XXX: is this correct for arrays?
            "#genericAssignOpenArray((void*)$1, (void*)$2, $1Len_0, $3);$n",
@@ -604,7 +611,7 @@ proc binaryArithOverflow(p: BProc, e: PNode, d: var TLoc, m: TMagic) =
         if t.kind == tyInt64: prc64[m] else: prc[m])
       putIntoDest(p, d, e, "($#)($#)" % [getTypeDesc(p.module, e.typ), res])
     else:
-      let res = "($1)($2 $3 $4)" % [getTypeDesc(p.module, e.typ), rdLoc(a), rope(opr[m]), rdLoc(b)]
+      let res = "($1)(($2) $3 ($4))" % [getTypeDesc(p.module, e.typ), rdLoc(a), rope(opr[m]), rdLoc(b)]
       putIntoDest(p, d, e, res)
 
 proc unaryArithOverflow(p: BProc, e: PNode, d: var TLoc, m: TMagic) =
@@ -1850,9 +1857,9 @@ proc genArrayLen(p: BProc, e: PNode, d: var TLoc, op: TMagic) =
       if optBoundsCheck in p.options:
         genBoundsCheck(p, m, b, c)
       if op == mHigh:
-        putIntoDest(p, d, e, ropecg(p.module, "($2)-($1)", [rdLoc(b), rdLoc(c)]))
+        putIntoDest(p, d, e, ropecg(p.module, "(($2)-($1))", [rdLoc(b), rdLoc(c)]))
       else:
-        putIntoDest(p, d, e, ropecg(p.module, "($2)-($1)+1", [rdLoc(b), rdLoc(c)]))
+        putIntoDest(p, d, e, ropecg(p.module, "(($2)-($1)+1)", [rdLoc(b), rdLoc(c)]))
     else:
       if not reifiedOpenArray(a):
         if op == mHigh: unaryExpr(p, e, d, "($1Len_0-1)")

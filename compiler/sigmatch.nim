@@ -246,7 +246,8 @@ proc sumGeneric(t: PType): int =
           result += sumGeneric(a)
       break
     of tyProc:
-      result += sumGeneric(t.returnType)
+      if t.returnType != nil:
+        result += sumGeneric(t.returnType)
       for _, a in t.paramTypes:
         result += sumGeneric(a)
       break
@@ -587,8 +588,14 @@ proc recordRel(c: var TCandidate, f, a: PType, flags: TTypeRelFlags): TTypeRelat
     let firstField = if f.kind == tyTuple: 0
                      else: 1
     for _, ff, aa in tupleTypePairs(f, a):
+      let oldInheritancePenalty = c.inheritancePenalty
       var m = typeRel(c, ff, aa, flags)
       if m < isSubtype: return isNone
+      if m == isSubtype and c.inheritancePenalty > oldInheritancePenalty:
+        # we can't process individual element type conversions from a
+        # type conversion for the whole tuple
+        # subtype relations need type conversions when inheritance is used
+        return isNone
       result = minRel(result, m)
     if f.n != nil and a.n != nil:
       for i in 0..<f.n.len:
@@ -2304,6 +2311,9 @@ proc paramTypesMatchAux(m: var TCandidate, f, a: PType,
       if f.n != nil:
         # Forward to the varargs converter
         result = localConvMatch(c, m, f, a, arg)
+      elif f[0].kind == tyTyped:
+        inc m.genericMatches
+        result = arg
       else:
         r = typeRel(m, base(f), a)
         case r
@@ -2353,7 +2363,11 @@ proc paramTypesMatch*(m: var TCandidate, f, a: PType,
     var best = -1
     result = arg
     
-    if f.kind in {tyTyped, tyUntyped}:
+    var actingF = f
+    if f.kind == tyVarargs:
+      if m.calleeSym.kind in {skTemplate, skMacro}:
+        actingF = f[0]
+    if actingF.kind in {tyTyped, tyUntyped}:
       var
         bestScope = -1
         counts = 0
@@ -2369,6 +2383,7 @@ proc paramTypesMatch*(m: var TCandidate, f, a: PType,
       if best == -1:
         result = nil
       elif counts > 0:
+        m.genericMatches = 1
         best = -1
     else:
       # CAUTION: The order depends on the used hashing scheme. Thus it is
@@ -2489,6 +2504,9 @@ proc incrIndexType(t: PType) =
 
 template isVarargsUntyped(x): untyped =
   x.kind == tyVarargs and x[0].kind == tyUntyped
+
+template isVarargsTyped(x): untyped =
+  x.kind == tyVarargs and x[0].kind == tyTyped
 
 proc findFirstArgBlock(m: var TCandidate, n: PNode): int =
   # see https://github.com/nim-lang/RFCs/issues/405
@@ -2664,7 +2682,15 @@ proc matchesAux(c: PContext, n, nOrig: PNode, m: var TCandidate, marker: var Int
                                     n[a], nOrig[a])
           if arg == nil:
             noMatch()
-          if m.baseTypeMatch:
+          if formal.typ.isVarargsTyped and m.calleeSym.kind in {skTemplate, skMacro}:
+            if container.isNil:
+              container = newNodeIT(nkBracket, n[a].info, arrayConstr(c, n.info))
+              setSon(m.call, formal.position + 1, implicitConv(nkHiddenStdConv, formal.typ, container, m, c))
+            else:
+              incrIndexType(container.typ)
+            container.add n[a]
+            f = max(f, formalLen - n.len + a + 1)
+          elif m.baseTypeMatch:
             assert formal.typ.kind == tyVarargs
             #assert(container == nil)
             if container.isNil:
