@@ -113,13 +113,29 @@ Alias for the operating system specific <em>&quot;open&quot;</em> command, <tt c
   <dl class="item">
     <div id="openDefaultBrowser-procs-all">
   <div id="openDefaultBrowser">
-  <dt><pre><span class="Keyword">proc</span> <a href="#openDefaultBrowser"><span class="Identifier">openDefaultBrowser</span></a><span class="Other">(</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#openDefaultBrowser"><span class="Identifier">openDefaultBrowser</span></a><span class="Other">(</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">deprecated</span><span class="Other">:</span> <span class="StringLit">&quot;not implemented, please open with a specific url instead&quot;</span><span class="Other">,</span>
+                            <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span>
                             <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ExecIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span>
                             <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
-    
-    <p>Opens the user's default browser without any <tt class="docutils literal"><span class="pre"><span class="Identifier">url</span></span></tt> (blank page). This does not block. Implements IETF RFC-6694 Section 3, &quot;about:blank&quot; must be reserved for a blank page.</p>
-<p>Under Windows, <tt class="docutils literal"><span class="pre"><span class="Identifier">ShellExecute</span></span></tt> is used. Under Mac OS X the <tt class="docutils literal"><span class="pre"><span class="Identifier">open</span></span></tt> command is used. Under Unix, it is checked if <tt class="docutils literal"><span class="pre"><span class="Identifier">xdg</span><span class="Operator">-</span><span class="Identifier">open</span></span></tt> exists and used if it does. Otherwise the environment variable <tt class="docutils literal"><span class="pre"><span class="Identifier">BROWSER</span></span></tt> is used to determine the default browser to use.</p>
+    <div class="deprecation-message">
+  <b>Deprecated:</b> not implemented, please open with a specific url instead
+</div>
+
+    <p>Intends to open the user's default browser without any <tt class="docutils literal"><span class="pre"><span class="Identifier">url</span></span></tt> (blank page). This does not block. Intends to implement IETF RFC-6694 Section 3, (&quot;about:blank&quot; is reserved for a blank page).</p>
+<p>Beware that this intended behavior is <strong>not</strong> implemented and considered not worthy to implement here.</p>
+<p>The following describes the behavior of current implementation:</p>
+<ul class="simple"><li>Under Windows, this will only cause a pop-up dialog 
+asking the assocated application with <tt class="docutils literal"><span class="pre"><span class="Identifier">about</span></span></tt> 
+(as Windows simply treats <tt class="docutils literal"><span class="pre"><span class="Identifier">about</span><span class="Punctuation">:</span></span></tt> as a protocol like <tt class="docutils literal"><span class="pre"><span class="Identifier">http</span></span></tt>).</li>
+<li>Under Mac OS X the <tt class="docutils literal"><span class="pre"><span class="Identifier">open</span> <span class="StringLit">&quot;about:blank&quot;</span></span></tt> command is used.</li>
+<li>Under Unix, it is checked if <tt class="docutils literal"><span class="pre"><span class="Identifier">xdg</span><span class="Operator">-</span><span class="Identifier">open</span></span></tt> exists and used 
+if it does and open the application assocated with <tt class="docutils literal"><span class="pre"><span class="Identifier">text</span><span class="Operator">/</span><span class="Identifier">html</span></span></tt> mime 
+(not <tt class="docutils literal"><span class="pre"><span class="Identifier">x</span><span class="Operator">-</span><span class="Identifier">scheme</span><span class="Operator">-</span><span class="Identifier">handler</span><span class="Operator">/</span><span class="Identifier">http</span></span></tt>, so maybe html-viewer 
+other than your default browser is opened). 
+Otherwise the environment variable <tt class="docutils literal"><span class="pre"><span class="Identifier">BROWSER</span></span></tt> is used 
+to determine the default browser to use.</li>
+</ul>
 <p>This proc doesn't raise an exception on error, beware.</p>
 <p><pre class="listing">
 <span class="Keyword">block</span><span class="Punctuation">:</span> <span class="Identifier">openDefaultBrowser</span><span class="Punctuation">(</span><span class="Punctuation">)</span></pre></p>
@@ -127,14 +143,14 @@ Alias for the operating system specific <em>&quot;open&quot;</em> command, <tt c
 <ul class="simple"><li><a class="reference external" href="https://tools.ietf.org/html/rfc6694#section-3">https://tools.ietf.org/html/rfc6694#section-3</a></li>
 </ul>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/browsers.nim#L83" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/browsers.nim#L83" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/browsers.nim#L80" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/browsers.nim#L80" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
 <div id="openDefaultBrowser,string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#openDefaultBrowser%2Cstring"><span class="Identifier">openDefaultBrowser</span></a><span class="Other">(</span><span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">ExecIOEffect</span><span class="Other">,</span> <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#openDefaultBrowser%2Cstring"><span class="Identifier">openDefaultBrowser</span></a><span class="Other">(</span><span class="Identifier">url</span><span class="Other">:</span> <a href="system.html#string"><span class="Identifier">string</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ExecIOEffect</span><span class="Other">,</span>
+    <span class="Identifier">ReadEnvEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     <p>Opens <tt class="docutils literal"><span class="pre"><span class="Identifier">url</span></span></tt> with the user's default browser. This does not block. The URL must not be empty string, to open on a blank page see <tt class="docutils literal"><span class="pre"><span class="Identifier">openDefaultBrowser</span><span class="Punctuation">(</span><span class="Punctuation">)</span></span></tt>.</p>
@@ -143,8 +159,8 @@ Alias for the operating system specific <em>&quot;open&quot;</em> command, <tt c
 <p><pre class="listing">
 <span class="Keyword">block</span><span class="Punctuation">:</span> <span class="Identifier">openDefaultBrowser</span><span class="Punctuation">(</span><span class="StringLit">&quot;https://nim-lang.org&quot;</span><span class="Punctuation">)</span></pre></p>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/browsers.nim#L66" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/browsers.nim#L66" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/pure/browsers.nim#L63" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/pure/browsers.nim#L63" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -160,7 +176,7 @@ Alias for the operating system specific <em>&quot;open&quot;</em> command, <tt c
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2024-02-27 01:04:55 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2024-03-10 01:07:19 UTC</small>
       </div>
     </div>
   </div>
