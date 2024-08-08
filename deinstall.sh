@@ -19,7 +19,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/lib/nim
       docdir=/usr/share/nim/doc
       datadir=/usr/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/nim-2.1.1"
+      nimbleDir="/opt/nimble/pkgs/nim-2.1.9"
       ;;
     "/usr/local/bin")
       bindir=/usr/local/bin
@@ -27,7 +27,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/local/lib/nim
       docdir=/usr/local/share/nim/doc
       datadir=/usr/local/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/nim-2.1.1"
+      nimbleDir="/opt/nimble/pkgs/nim-2.1.9"
       ;;
     "/opt")
       bindir="/opt/nim/bin"
@@ -35,7 +35,7 @@ if [ $# -eq 1 ] ; then
       libdir="/opt/nim/lib"
       docdir="/opt/nim/doc"
       datadir="/opt/nim/data"
-      nimbleDir="/opt/nimble/pkgs/nim-2.1.1"
+      nimbleDir="/opt/nimble/pkgs/nim-2.1.9"
       ;;
     *)
       bindir="$1/nim/bin"
@@ -103,16 +103,17 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/gorgeimpl.nim
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
-    rm -f $nimbleDir/compiler/ic/packed_ast.nim
-    rm -f $nimbleDir/compiler/ic/bitabs.nim
-    rm -f $nimbleDir/compiler/ic/design.rst
-    rm -f $nimbleDir/compiler/ic/ic.nim
-    rm -f $nimbleDir/compiler/ic/integrity.nim
     rm -f $nimbleDir/compiler/ic/cbackend.nim
-    rm -f $nimbleDir/compiler/ic/replayer.nim
-    rm -f $nimbleDir/compiler/ic/dce.nim
-    rm -f $nimbleDir/compiler/ic/rodfiles.nim
     rm -f $nimbleDir/compiler/ic/navigator.nim
+    rm -f $nimbleDir/compiler/ic/rodfiles.nim
+    rm -f $nimbleDir/compiler/ic/iclineinfos.nim
+    rm -f $nimbleDir/compiler/ic/packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/integrity.nim
+    rm -f $nimbleDir/compiler/ic/dce.nim
+    rm -f $nimbleDir/compiler/ic/design.rst
+    rm -f $nimbleDir/compiler/ic/bitabs.nim
+    rm -f $nimbleDir/compiler/ic/ic.nim
+    rm -f $nimbleDir/compiler/ic/replayer.nim
     rm -f $nimbleDir/compiler/idents.nim
     rm -f $nimbleDir/compiler/importer.nim
     rm -f $nimbleDir/compiler/index.nim
@@ -135,6 +136,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/macrocacheimpl.nim
     rm -f $nimbleDir/compiler/magicsys.nim
     rm -f $nimbleDir/compiler/main.nim
+    rm -f $nimbleDir/compiler/mangleutils.nim
     rm -f $nimbleDir/compiler/mapping.txt
     rm -f $nimbleDir/compiler/modulegraphs.nim
     rm -f $nimbleDir/compiler/modulepaths.nim
@@ -150,19 +152,8 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/nimlexbase.nim
     rm -f $nimbleDir/compiler/nimpaths.nim
     rm -f $nimbleDir/compiler/nimsets.nim
-    rm -f $nimbleDir/compiler/nir/nirfiles.nim
-    rm -f $nimbleDir/compiler/nir/nirinsts.nim
-    rm -f $nimbleDir/compiler/nir/types2ir.nim
-    rm -f $nimbleDir/compiler/nir/nir.nim
-    rm -f $nimbleDir/compiler/nir/nirslots.nim
-    rm -f $nimbleDir/compiler/nir/ast2ir.nim
-    rm -f $nimbleDir/compiler/nir/stringcases.nim
-    rm -f $nimbleDir/compiler/nir/nirc.nim
-    rm -f $nimbleDir/compiler/nir/nirtypes.nim
-    rm -f $nimbleDir/compiler/nir/cir.nim
-    rm -f $nimbleDir/compiler/nir/nirlineinfos.nim
-    rm -f $nimbleDir/compiler/nir/nirvm.nim
     rm -f $nimbleDir/compiler/nodejs.nim
+    rm -f $nimbleDir/compiler/nodekinds.nim
     rm -f $nimbleDir/compiler/nversion.nim
     rm -f $nimbleDir/compiler/optimizer.nim
     rm -f $nimbleDir/compiler/options.nim
@@ -177,9 +168,11 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/pipelines.nim
     rm -f $nimbleDir/compiler/pipelineutils.nim
     rm -f $nimbleDir/compiler/platform.nim
-    rm -f $nimbleDir/compiler/plugins/locals.nim
+    rm -f $nimbleDir/compiler/plugins/customast.nim
     rm -f $nimbleDir/compiler/plugins/itersgen.nim
+    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/active.nim
+    rm -f $nimbleDir/compiler/plugins/plugins.nimble
     rm -f $nimbleDir/compiler/pluginsupport.nim
     rm -f $nimbleDir/compiler/pragmas.nim
     rm -f $nimbleDir/compiler/prefixmatches.nim
@@ -217,6 +210,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/sourcemap.nim
     rm -f $nimbleDir/compiler/spawn.nim
     rm -f $nimbleDir/compiler/suggest.nim
+    rm -f $nimbleDir/compiler/suggestsymdb.nim
     rm -f $nimbleDir/compiler/syntaxes.nim
     rm -f $nimbleDir/compiler/tccgen.nim
     rm -f $nimbleDir/compiler/transf.nim

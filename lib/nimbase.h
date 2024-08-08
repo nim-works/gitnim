@@ -14,6 +14,7 @@ __GNUC__
 __TINYC__
 __clang__
 __AVR__
+__EMSCRIPTEN__
 */
 
 
@@ -177,12 +178,13 @@ __AVR__
 #  define N_THISCALL_PTR(rettype, name) rettype (__thiscall *name)
 #  define N_SAFECALL_PTR(rettype, name) rettype (__stdcall *name)
 
-#  ifdef __cplusplus
-#    define N_LIB_EXPORT  NIM_EXTERNC __declspec(dllexport)
+#  ifdef __EMSCRIPTEN__
+#    define N_LIB_EXPORT  NIM_EXTERNC __declspec(dllexport) __attribute__((used))
+#    define N_LIB_EXPORT_VAR  __declspec(dllexport) __attribute__((used))
 #  else
 #    define N_LIB_EXPORT  NIM_EXTERNC __declspec(dllexport)
+#    define N_LIB_EXPORT_VAR  __declspec(dllexport)
 #  endif
-#  define N_LIB_EXPORT_VAR  __declspec(dllexport)
 #  define N_LIB_IMPORT  extern __declspec(dllimport)
 #else
 #  define N_LIB_PRIVATE __attribute__((visibility("hidden")))
@@ -211,8 +213,13 @@ __AVR__
 #    define N_FASTCALL_PTR(rettype, name) rettype (*name)
 #    define N_SAFECALL_PTR(rettype, name) rettype (*name)
 #  endif
-#  define N_LIB_EXPORT NIM_EXTERNC __attribute__((visibility("default")))
-#  define N_LIB_EXPORT_VAR  __attribute__((visibility("default")))
+#  ifdef __EMSCRIPTEN__
+#    define N_LIB_EXPORT NIM_EXTERNC __attribute__((visibility("default"), used))
+#    define N_LIB_EXPORT_VAR  __attribute__((visibility("default"), used))
+#  else
+#    define N_LIB_EXPORT NIM_EXTERNC __attribute__((visibility("default")))
+#    define N_LIB_EXPORT_VAR  __attribute__((visibility("default")))
+#  endif
 #  define N_LIB_IMPORT  extern
 #endif
 
@@ -265,11 +272,15 @@ __AVR__
 #elif defined(__cplusplus)
 #define NIM_STATIC_ASSERT(x, msg) static_assert((x), msg)
 #else
-#define NIM_STATIC_ASSERT(x, msg) typedef int NIM_STATIC_ASSERT_AUX[(x) ? 1 : -1];
+#define _NIM_STATIC_ASSERT_FINAL(x, append_name) typedef int NIM_STATIC_ASSERT_AUX ## append_name[(x) ? 1 : -1];
+#define _NIM_STATIC_ASSERT_STAGE_3(x, line)      _NIM_STATIC_ASSERT_FINAL(x, _AT_LINE_##line)
+#define _NIM_STATIC_ASSERT_STAGE_2(x, line)      _NIM_STATIC_ASSERT_STAGE_3(x, line)
+#define NIM_STATIC_ASSERT(x, msg)                _NIM_STATIC_ASSERT_STAGE_2(x,__LINE__)
 // On failure, your C compiler will say something like:
-//   "error: 'NIM_STATIC_ASSERT_AUX' declared as an array with a negative size"
-// we could use a better fallback to also show line number, using:
-// http://www.pixelbeat.org/programming/gcc/static_assert.html
+//   "error: 'NIM_STATIC_ASSERT_AUX_AT_LINE_XXX' declared as an array with a negative size"
+// Adding the line number helps to avoid redefinitions which are not allowed in
+// old GCC versions, however the order of evaluation for __LINE__ is a little tricky,
+// hence all the helper macros. See https://stackoverflow.com/a/3385694 for more info.
 #endif
 
 /* C99 compiler? */
