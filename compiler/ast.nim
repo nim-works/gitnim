@@ -10,7 +10,7 @@
 # abstract syntax tree + symbol table
 
 import
-  lineinfos, hashes, options, ropes, idents, int128, tables
+  lineinfos, hashes, options, ropes, idents, int128, tables, wordrecg
 from strutils import toLowerAscii
 
 when defined(nimPreviewSlimSystem):
@@ -231,7 +231,7 @@ type
   TNodeKinds* = set[TNodeKind]
 
 type
-  TSymFlag* = enum    # 51 flags!
+  TSymFlag* = enum    # 52 flags!
     sfUsed,           # read access of sym (for warnings) or simply used
     sfExported,       # symbol is exported from module
     sfFromGeneric,    # symbol is instantiation of a generic; this is needed
@@ -315,6 +315,7 @@ type
     sfVirtual         # proc is a C++ virtual function
     sfByCopy          # param is marked as pass bycopy
     sfCodegenDecl     # type, proc, global or proc param is marked as codegenDecl
+    sfWasGenSym       # symbol was 'gensym'ed
 
   TSymFlags* = set[TSymFlag]
 
@@ -516,6 +517,7 @@ type
     nfFirstWrite # this node is a first write
     nfHasComment # node has a comment
     nfSkipFieldChecking # node skips field visable checking
+    nfOpenSym # node is a captured sym but can be overriden by local symbols
 
   TNodeFlags* = set[TNodeFlag]
   TTypeFlag* = enum   # keep below 32 for efficiency reasons (now: 47)
@@ -589,6 +591,7 @@ type
     tfEffectSystemWorkaround
     tfIsOutParam
     tfSendable
+    tfImplicitStatic
 
   TTypeFlags* = set[TTypeFlag]
 
@@ -638,7 +641,7 @@ const
   skError* = skUnknown
 
 var
-  eqTypeFlags* = {tfIterator, tfNotNil, tfVarIsPtr, tfGcSafe, tfNoSideEffect, tfIsOutParam, tfSendable}
+  eqTypeFlags* = {tfIterator, tfNotNil, tfVarIsPtr, tfGcSafe, tfNoSideEffect, tfIsOutParam}
     ## type flags that are essential for type equality.
     ## This is now a variable because for emulation of version:1.0 we
     ## might exclude {tfGcSafe, tfNoSideEffect}.
@@ -1087,7 +1090,8 @@ const
                                       nfIsRef, nfIsPtr, nfPreventCg, nfLL,
                                       nfFromTemplate, nfDefaultRefsParam,
                                       nfExecuteOnReload, nfLastRead,
-                                      nfFirstWrite, nfSkipFieldChecking}
+                                      nfFirstWrite, nfSkipFieldChecking,
+                                      nfOpenSym}
   namePos* = 0
   patternPos* = 1    # empty except for term rewriting macros
   genericParamsPos* = 2
@@ -2015,7 +2019,7 @@ proc isImportedException*(t: PType; conf: ConfigRef): bool =
     result = true
 
 proc isInfixAs*(n: PNode): bool =
-  return n.kind == nkInfix and n[0].kind == nkIdent and n[0].ident.s == "as"
+  return n.kind == nkInfix and n[0].kind == nkIdent and n[0].ident.id == ord(wAs)
 
 proc skipColon*(n: PNode): PNode =
   result = n
@@ -2023,10 +2027,12 @@ proc skipColon*(n: PNode): PNode =
     result = n[1]
 
 proc findUnresolvedStatic*(n: PNode): PNode =
-  # n.typ == nil: see issue #14802
   if n.kind == nkSym and n.typ != nil and n.typ.kind == tyStatic and n.typ.n == nil:
     return n
-
+  if n.typ != nil and n.typ.kind == tyTypeDesc:
+    let t = skipTypes(n.typ, {tyTypeDesc})
+    if t.kind == tyGenericParam and t.len == 0:
+      return n
   for son in n:
     let n = son.findUnresolvedStatic
     if n != nil: return n
@@ -2063,6 +2069,12 @@ proc isClosureIterator*(typ: PType): bool {.inline.} =
 
 proc isClosure*(typ: PType): bool {.inline.} =
   typ.kind == tyProc and typ.callConv == ccClosure
+
+proc isNimcall*(s: PSym): bool {.inline.} =
+  s.typ.callConv == ccNimCall
+
+proc isExplicitCallConv*(s: PSym): bool {.inline.} =
+  tfExplicitCallConv in s.typ.flags
 
 proc isSinkParam*(s: PSym): bool {.inline.} =
   s.kind == skParam and (s.typ.kind == tySink or tfHasOwned in s.typ.flags)

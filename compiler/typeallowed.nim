@@ -26,6 +26,8 @@ type
     taIsTemplateOrMacro
     taProcContextIsNotMacro
     taIsCastable
+    taIsDefaultField
+    taVoid # only allow direct void fields of objects/tuples
 
   TTypeAllowedFlags* = set[TTypeAllowedFlag]
 
@@ -57,6 +59,8 @@ proc typeAllowedAux(marker: var IntSet, typ: PType, kind: TSymKind,
   if typ == nil: return nil
   if containsOrIncl(marker, typ.id): return nil
   var t = skipTypes(typ, abstractInst-{tyTypeDesc, tySink})
+
+  let flags = if t.kind == tyVoid: flags else: flags-{taVoid}
   case t.kind
   of tyVar, tyLent:
     if kind in {skProc, skFunc, skConst} and (views notin c.features):
@@ -112,7 +116,7 @@ proc typeAllowedAux(marker: var IntSet, typ: PType, kind: TSymKind,
   of tyStatic:
     if kind notin {skParam}: result = t
   of tyVoid:
-    if taField notin flags: result = t
+    if taVoid notin flags: result = t
   of tyTypeClasses:
     if tfGenericTypeParam in t.flags or taConcept in flags: #or taField notin flags:
       discard
@@ -170,7 +174,7 @@ proc typeAllowedAux(marker: var IntSet, typ: PType, kind: TSymKind,
     elif kind in {skVar, skLet}:
       result = t[1]
   of tyRef:
-    if kind == skConst: result = t
+    if kind == skConst and taIsDefaultField notin flags: result = t
     else: result = typeAllowedAux(marker, t.lastSon, kind, c, flags+{taHeap})
   of tyPtr:
     result = typeAllowedAux(marker, t.lastSon, kind, c, flags+{taHeap})
@@ -180,10 +184,10 @@ proc typeAllowedAux(marker: var IntSet, typ: PType, kind: TSymKind,
       if result != nil: break
   of tyObject, tyTuple:
     if kind in {skProc, skFunc, skConst} and
-        t.kind == tyObject and t[0] != nil:
+        t.kind == tyObject and t[0] != nil and taIsDefaultField notin flags:
       result = t
     else:
-      let flags = flags+{taField}
+      let flags = flags+{taField, taVoid}
       for i in 0..<t.len:
         result = typeAllowedAux(marker, t[i], kind, c, flags)
         if result != nil: break

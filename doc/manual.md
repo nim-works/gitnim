@@ -5358,6 +5358,8 @@ To override the compiler's side effect analysis a `{.noSideEffect.}`
 **Side effects are usually inferred. The inference for side effects is
 analogous to the inference for exception tracking.**
 
+When the compiler cannot infer side effects, as is the case for imported
+functions, one can annotate them with the `sideEffect` pragma.
 
 GC safety effect
 ----------------
@@ -5517,7 +5519,7 @@ type Foo[T] = object
 proc p[H;T: Foo[H]](param: T): H
 ```
 
-A constraint definition may have more than one symbol defined by seperating each definition by
+A constraint definition may have more than one symbol defined by separating each definition by
 a `;`. Notice how `T` is composed of `H` and the return  type of `p` is defined as `H`. When this
 generic proc is instantiated `H` will be bound to a concrete type, thus making `T` concrete and
 the return type of `p` will be bound to the same concrete type used to define `H`.
@@ -5800,7 +5802,7 @@ at definition and the context at instantiation are considered:
   echo a == b # works!
   ```
 
-In the example, the generic `==` for tuples (as defined in the system module)
+In the example, the [generic `==` for tuples](system.html#%3D%3D%2CT%2CT_2) (as defined in the system module)
 uses the `==` operators of the tuple's components. However, the `==` for
 the `Index` type is defined *after* the `==` for tuples; yet the example
 compiles as the instantiation takes the currently defined symbols into account
@@ -6152,9 +6154,12 @@ scope is controlled by the `inject`:idx: and `gensym`:idx: pragmas:
 `gensym`'ed symbols are not exposed but `inject`'ed symbols are.
 
 The default for symbols of entity `type`, `var`, `let` and `const`
-is `gensym` and for `proc`, `iterator`, `converter`, `template`,
-`macro` is `inject`. However, if the name of the entity is passed as a
-template parameter, it is an `inject`'ed symbol:
+is `gensym`. For `proc`, `iterator`, `converter`, `template`,
+`macro`, the default is `inject`, but if a `gensym` symbol with the same name
+is defined in the same syntax-level scope, it will be `gensym` by default.
+This can be overriden by marking the routine as `inject`. 
+
+If the name of the entity is passed as a template parameter, it is an `inject`'ed symbol:
 
   ```nim
   template withFile(f, fn, mode: untyped, actions: untyped): untyped =

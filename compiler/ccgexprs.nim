@@ -285,15 +285,23 @@ proc genGenericAsgn(p: BProc, dest, src: TLoc, flags: TAssignmentFlags) =
     linefmt(p, cpsStmts, "#genericAssign((void*)$1, (void*)$2, $3);$n",
             [addrLoc(p.config, dest), addrLoc(p.config, src), genTypeInfoV1(p.module, dest.t, dest.lode.info)])
 
-proc genOpenArrayConv(p: BProc; d: TLoc; a: TLoc) =
+proc genOpenArrayConv(p: BProc; d: TLoc; a: TLoc; flags: TAssignmentFlags) =
   assert d.k != locNone
   #  getTemp(p, d.t, d)
 
   case a.t.skipTypes(abstractVar).kind
   of tyOpenArray, tyVarargs:
     if reifiedOpenArray(a.lode):
-      linefmt(p, cpsStmts, "$1.Field0 = $2.Field0; $1.Field1 = $2.Field1;$n",
-        [rdLoc(d), a.rdLoc])
+      if needTempForOpenArray in flags:
+        var tmp: TLoc
+        getTemp(p, a.t, tmp)
+        linefmt(p, cpsStmts, "$2 = $1; $n",
+                [a.rdLoc, tmp.rdLoc])
+        linefmt(p, cpsStmts, "$1.Field0 = $2.Field0; $1.Field1 = $2.Field1;$n",
+          [rdLoc(d), tmp.rdLoc])
+      else:
+        linefmt(p, cpsStmts, "$1.Field0 = $2.Field0; $1.Field1 = $2.Field1;$n",
+          [rdLoc(d), a.rdLoc])
     else:
       linefmt(p, cpsStmts, "$1.Field0 = $2; $1.Field1 = $2Len_0;$n",
         [rdLoc(d), a.rdLoc])
@@ -336,7 +344,7 @@ proc genAssignment(p: BProc, dest, src: TLoc, flags: TAssignmentFlags) =
   of tyString:
     if optSeqDestructors in p.config.globalOptions:
       genGenericAsgn(p, dest, src, flags)
-    elif (needToCopy notin flags and src.storage != OnStatic) or canMove(p, src.lode, dest):
+    elif ({needToCopy, needToCopySinkParam} * flags == {} and src.storage != OnStatic) or canMove(p, src.lode, dest):
       genRefAssign(p, dest, src)
     else:
       if (dest.storage == OnStack and p.config.selectedGC != gcGo) or not usesWriteBarrier(p.config):
@@ -392,7 +400,7 @@ proc genAssignment(p: BProc, dest, src: TLoc, flags: TAssignmentFlags) =
     # open arrays are always on the stack - really? What if a sequence is
     # passed to an open array?
     if reifiedOpenArray(dest.lode):
-      genOpenArrayConv(p, dest, src)
+      genOpenArrayConv(p, dest, src, flags)
     elif containsGarbageCollectedRef(dest.t):
       linefmt(p, cpsStmts,     # XXX: is this correct for arrays?
            "#genericAssignOpenArray((void*)$1, (void*)$2, $1Len_0, $3);$n",
@@ -616,7 +624,7 @@ proc binaryArithOverflow(p: BProc, e: PNode, d: var TLoc, m: TMagic) =
         if t.kind == tyInt64: prc64[m] else: prc[m])
       putIntoDest(p, d, e, "($#)($#)" % [getTypeDesc(p.module, e.typ), res])
     else:
-      let res = "($1)($2 $3 $4)" % [getTypeDesc(p.module, e.typ), rdLoc(a), rope(opr[m]), rdLoc(b)]
+      let res = "($1)(($2) $3 ($4))" % [getTypeDesc(p.module, e.typ), rdLoc(a), rope(opr[m]), rdLoc(b)]
       putIntoDest(p, d, e, res)
 
 proc unaryArithOverflow(p: BProc, e: PNode, d: var TLoc, m: TMagic) =
@@ -824,6 +832,8 @@ proc genAddr(p: BProc, e: PNode, d: var TLoc) =
     #Message(e.info, warnUser, "HERE NEW &")
   elif mapType(p.config, e[0].typ, mapTypeChooser(e[0]) == skParam) == ctArray or isCppRef(p, e.typ):
     expr(p, e[0], d)
+    # bug #19497
+    d.lode = e
   else:
     var a: TLoc
     initLocExpr(p, e[0], a)
@@ -1496,7 +1506,7 @@ proc genNewSeqOfCap(p: BProc; e: PNode; d: var TLoc) =
   initLocExpr(p, e[1], a)
   if optSeqDestructors in p.config.globalOptions:
     if d.k == locNone: getTemp(p, e.typ, d, needsInit=false)
-    linefmt(p, cpsStmts, "$1.len = 0; $1.p = ($4*) #newSeqPayload($2, sizeof($3), NIM_ALIGNOF($3));$n",
+    linefmt(p, cpsStmts, "$1.len = 0; $1.p = ($4*) #newSeqPayloadUninit($2, sizeof($3), NIM_ALIGNOF($3));$n",
       [d.rdLoc, a.rdLoc, getTypeDesc(p.module, seqtype.lastSon),
       getSeqPayloadType(p.module, seqtype),
     ])
@@ -1881,9 +1891,9 @@ proc genArrayLen(p: BProc, e: PNode, d: var TLoc, op: TMagic) =
       if optBoundsCheck in p.options:
         genBoundsCheck(p, m, b, c)
       if op == mHigh:
-        putIntoDest(p, d, e, ropecg(p.module, "($2)-($1)", [rdLoc(b), rdLoc(c)]))
+        putIntoDest(p, d, e, ropecg(p.module, "(($2)-($1))", [rdLoc(b), rdLoc(c)]))
       else:
-        putIntoDest(p, d, e, ropecg(p.module, "($2)-($1)+1", [rdLoc(b), rdLoc(c)]))
+        putIntoDest(p, d, e, ropecg(p.module, "(($2)-($1)+1)", [rdLoc(b), rdLoc(c)]))
     else:
       if not reifiedOpenArray(a):
         if op == mHigh: unaryExpr(p, e, d, "($1Len_0-1)")
@@ -2125,7 +2135,7 @@ proc genSetOp(p: BProc, e: PNode, d: var TLoc, op: TMagic) =
     of mCard:
       var a: TLoc
       initLocExpr(p, e[1], a)
-      putIntoDest(p, d, e, ropecg(p.module, "#cardSet($1, $2)", [addrLoc(p.config, a), size]))
+      putIntoDest(p, d, e, ropecg(p.module, "#cardSet($1, $2)", [rdCharLoc(a), size]))
     of mLtSet, mLeSet:
       getTemp(p, getSysType(p.module.g.graph, unknownLineInfo, tyInt), i) # our counter
       initLocExpr(p, e[1], a)
@@ -2368,12 +2378,31 @@ proc genMove(p: BProc; n: PNode; d: var TLoc) =
       if op == nil:
         resetLoc(p, a)
       else:
-        let addrExp = makeAddr(n[1], p.module.idgen)
-        let wasMovedCall = newTreeI(nkCall, n.info, newSymNode(op), addrExp)
-        genCall(p, wasMovedCall, d)
+        var b: TLoc
+        initLocExpr(p, newSymNode(op), b)
+        case skipTypes(a.t, abstractVar+{tyStatic}).kind
+        of tyOpenArray, tyVarargs: # todo fixme generated `wasMoved` hooks for
+                                   # openarrays, but it probably shouldn't?
+          var s: string
+          if reifiedOpenArray(a.lode):
+            if a.t.kind in {tyVar, tyLent}:
+              s = "$1->Field0, $1->Field1" % [rdLoc(a)]
+            else:
+              s = "$1.Field0, $1.Field1" % [rdLoc(a)]
+          else:
+            s = "$1, $1Len_0" % [rdLoc(a)]
+          linefmt(p, cpsStmts, "$1($2);$n", [rdLoc(b), s])
+        else:
+          linefmt(p, cpsStmts, "$1($2);$n", [rdLoc(b), byRefLoc(p, a)])
     else:
-      let flags = if not canMove(p, n[1], d): {needToCopy} else: {}
-      genAssignment(p, d, a, flags)
+      if n[1].kind == nkSym and isSinkParam(n[1].sym):
+        var tmp: TLoc
+        getTemp(p, n[1].typ.skipTypes({tySink}), tmp)
+        genAssignment(p, tmp, a, {needToCopySinkParam})
+        genAssignment(p, d, tmp, {})
+        resetLoc(p, tmp)
+      else:
+        genAssignment(p, d, a, {})
       resetLoc(p, a)
 
 proc genDestroy(p: BProc; n: PNode) =
@@ -2612,7 +2641,7 @@ proc genMagicExpr(p: BProc, e: PNode, d: var TLoc, op: TMagic) =
   of mDeepCopy:
     if p.config.selectedGC in {gcArc, gcAtomicArc, gcOrc} and optEnableDeepCopy notin p.config.globalOptions:
       localError(p.config, e.info,
-        "for --gc:arc|orc 'deepcopy' support has to be enabled with --deepcopy:on")
+        "for --mm:arc|atomicArc|orc 'deepcopy' support has to be enabled with --deepcopy:on")
 
     var a, b: TLoc
     let x = if e[1].kind in {nkAddr, nkHiddenAddr}: e[1][0] else: e[1]

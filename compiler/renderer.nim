@@ -14,7 +14,7 @@
 {.used.}
 
 import
-  lexer, options, idents, strutils, ast, msgs, lineinfos
+  lexer, options, idents, strutils, ast, msgs, lineinfos, wordrecg
 
 when defined(nimPreviewSlimSystem):
   import std/[syncio, assertions, formatfloat]
@@ -848,7 +848,7 @@ proc gcase(g: var TSrcGen, n: PNode) =
     gsub(g, n[^1], c)
 
 proc genSymSuffix(result: var string, s: PSym) {.inline.} =
-  if sfGenSym in s.flags:
+  if sfGenSym in s.flags and s.name.id != ord(wUnderscore):
     result.add '_'
     result.addInt s.id
 
@@ -874,7 +874,7 @@ proc gproc(g: var TSrcGen, n: PNode) =
   if renderNoPragmas notin g.flags:
     gsub(g, n[pragmasPos])
   if renderNoBody notin g.flags:
-    if n[bodyPos].kind != nkEmpty:
+    if n.len > bodyPos and n[bodyPos].kind != nkEmpty:
       put(g, tkSpaces, Space)
       putWithSpace(g, tkEquals, "=")
       indentNL(g)
@@ -971,7 +971,9 @@ proc gident(g: var TSrcGen, n: PNode) =
       s.addInt localId
     if sfCursor in n.sym.flags:
       s.add "_cursor"
-  elif n.kind == nkSym and (renderIds in g.flags or sfGenSym in n.sym.flags or n.sym.kind == skTemp):
+  elif n.kind == nkSym and (renderIds in g.flags or
+      (sfGenSym in n.sym.flags and n.sym.name.id != ord(wUnderscore)) or
+      n.sym.kind == skTemp):
     s.add '_'
     s.addInt n.sym.id
     when defined(debugMagics):
@@ -1524,17 +1526,16 @@ proc gsub(g: var TSrcGen, n: PNode, c: TContext, fromStmtList = false) =
         gsub(g, n[0])
         gsub(g, n[1])
         gcoms(g)
+        indentNL(g)
         gsub(g, n[2])
+        dedent(g)
     else:
       put(g, tkObject, "object")
   of nkRecList:
-    indentNL(g)
     for i in 0..<n.len:
       optNL(g)
       gsub(g, n[i], c)
       gcoms(g)
-    dedent(g)
-    putNL(g)
   of nkOfInherit:
     putWithSpace(g, tkOf, "of")
     gsub(g, n, 0)

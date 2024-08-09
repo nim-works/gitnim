@@ -54,13 +54,31 @@ proc mangleField(m: BModule; name: PIdent): string =
   if isKeyword(name):
     result.add "_0"
 
+proc mangleProc(m: BModule; s: PSym; makeUnique: bool): string = 
+  result = "_Z"  # Common prefix in Itanium ABI
+  result.add encodeSym(m, s, makeUnique)
+  if s.typ.len > 1: #we dont care about the return param
+    for i in 1..<s.typ.len: 
+      if s.typ[i].isNil: continue
+      result.add encodeType(m, s.typ[i])
+  
+  if result in m.g.mangledPrcs:
+    result = mangleProc(m, s, true)
+  else:
+    m.g.mangledPrcs.incl(result)
+
 proc fillBackendName(m: BModule; s: PSym) =
   if s.loc.r == "":
-    var result = s.name.s.mangle.rope
-    result.add "__"
-    result.add m.g.graph.ifaces[s.itemId.module].uniqueName
-    result.add "_u"
-    result.addInt s.itemId.item # s.disamb #
+    var result: Rope
+    if not m.compileToCpp and s.kind in routineKinds and optCDebug in m.g.config.globalOptions and
+      m.g.config.symbolFiles == disabledSf: 
+      result = mangleProc(m, s, false).rope
+    else:
+      result = s.name.s.mangle.rope
+      result.add "__"
+      result.add m.g.graph.ifaces[s.itemId.module].uniqueName
+      result.add "_u"
+      result.addInt s.itemId.item # s.disamb #
     if m.hcrOn:
       result.add '_'
       result.add(idOrSig(s, m.module.name.s.mangle, m.sigConflicts, m.config))
@@ -252,9 +270,15 @@ proc isInvalidReturnType(conf: ConfigRef; typ: PType, isProc = true): bool =
           {tyVar, tyLent, tyRef, tyPtr})
     of ctStruct:
       let t = skipTypes(rettype, typedescInst)
-      if rettype.isImportedCppType or t.isImportedCppType: return false
-      result = containsGarbageCollectedRef(t) or
-          (t.kind == tyObject and not isObjLackingTypeField(t))
+      if rettype.isImportedCppType or t.isImportedCppType or
+          (typ.callConv == ccCDecl and conf.selectedGC in {gcArc, gcAtomicArc, gcOrc}):
+        # prevents nrvo for cdecl procs; # bug #23401
+        result = false
+      else:
+        result = containsGarbageCollectedRef(t) or
+            (t.kind == tyObject and not isObjLackingTypeField(t)) or
+            (getSize(conf, rettype) == szUnknownSize and (t.sym == nil or sfImportc notin t.sym.flags))
+
     else: result = false
 
 const
@@ -642,6 +666,13 @@ proc mangleRecFieldName(m: BModule; field: PSym): Rope =
     result = rope(mangleField(m, field.name))
   if result == "": internalError(m.config, field.info, "mangleRecFieldName")
 
+proc hasCppCtor(m: BModule; typ: PType): bool = 
+  result = false
+  if m.compileToCpp and typ != nil and typ.itemId in m.g.graph.memberProcsPerType:
+    for prc in m.g.graph.memberProcsPerType[typ.itemId]:
+      if sfConstructor in prc.flags:
+        return true
+
 proc genRecordFieldsAux(m: BModule; n: PNode,
                         rectype: PType,
                         check: var IntSet; result: var Rope; unionPrefix = "") =
@@ -706,7 +737,7 @@ proc genRecordFieldsAux(m: BModule; n: PNode,
       else:
         # don't use fieldType here because we need the
         # tyGenericInst for C++ template support
-        if fieldType.isOrHasImportedCppType():
+        if fieldType.isOrHasImportedCppType() or hasCppCtor(m, field.owner.typ):
           result.addf("\t$1$3 $2{};$n", [getTypeDescAux(m, field.loc.t, check, dkField), sname, noAlias])
         else:
           result.addf("\t$1$3 $2;$n", [getTypeDescAux(m, field.loc.t, check, dkField), sname, noAlias])
@@ -1404,7 +1435,7 @@ proc genObjectInfo(m: BModule; typ, origType: PType, name: Rope; info: TLineInfo
   else:
     genTypeInfoAuxBase(m, typ, origType, name, rope("0"), info)
   var tmp = getNimNode(m)
-  if not isImportedType(typ):
+  if (not isImportedType(typ)) or tfCompleteStruct in typ.flags:
     genObjectFields(m, typ, origType, typ.n, tmp, info)
   m.s[cfsTypeInit3].addf("$1.node = &$2;$n", [tiNameForHcr(m, name), tmp])
   var t = typ[0]
@@ -1909,8 +1940,11 @@ proc genTypeSection(m: BModule, n: PNode) =
     if len(n[i]) == 0: continue
     if n[i][0].kind != nkPragmaExpr: continue
     for p in 0..<n[i][0].len:
-      if (n[i][0][p].kind != nkSym): continue
-      if sfExportc in n[i][0][p].sym.flags:        
-        discard getTypeDescAux(m, n[i][0][p].typ, intSet, descKindFromSymKind(n[i][0][p].sym.kind))
+      if (n[i][0][p].kind notin {nkSym, nkPostfix}): continue
+      var s = n[i][0][p]
+      if s.kind == nkPostfix:
+        s = n[i][0][p][1]
+      if {sfExportc, sfCompilerProc} * s.sym.flags == {sfExportc}:
+        discard getTypeDescAux(m, s.typ, intSet, descKindFromSymKind(s.sym.kind))
         if m.g.generatedHeader != nil:
-          discard getTypeDescAux(m.g.generatedHeader, n[i][0][p].typ, intSet, descKindFromSymKind(n[i][0][p].sym.kind))
+          discard getTypeDescAux(m.g.generatedHeader, s.typ, intSet, descKindFromSymKind(s.sym.kind))

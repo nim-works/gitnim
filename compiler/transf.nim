@@ -452,6 +452,14 @@ proc transformYield(c: PTransf, n: PNode): PNode =
       let rhs = transform(c, e)
       result.add(asgnTo(lhs, rhs))
 
+
+  # bug #23536; note that the info of forLoopBody should't change
+  for idx in 0 ..< result.len:
+    var changeNode = result[idx]
+    changeNode.info = c.transCon.forStmt.info
+    for i, child in changeNode:
+      child.info = changeNode.info
+
   inc(c.transCon.yieldStmts)
   if c.transCon.yieldStmts <= 1:
     # common case
@@ -462,15 +470,10 @@ proc transformYield(c: PTransf, n: PNode): PNode =
     result.add(introduceNewLocalVars(c, c.transCon.forLoopBody))
     c.isIntroducingNewLocalVars = false
 
-  for idx in 0 ..< result.len:
-    var changeNode = result[idx]
-    changeNode.info = c.transCon.forStmt.info
-    for i, child in changeNode:
-      child.info = changeNode.info
-
 proc transformAddrDeref(c: PTransf, n: PNode, kinds: TNodeKinds): PNode =
   result = transformSons(c, n)
-  if c.graph.config.backend == backendCpp or sfCompileToCpp in c.module.flags: return
+  # inlining of 'var openarray' iterators; bug #19977
+  if n.typ.kind != tyOpenArray and (c.graph.config.backend == backendCpp or sfCompileToCpp in c.module.flags): return
   var n = result
   case n[0].kind
   of nkObjUpConv, nkObjDownConv, nkChckRange, nkChckRangeF, nkChckRange64:

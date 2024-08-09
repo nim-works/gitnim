@@ -304,7 +304,15 @@ proc myImportModule(c: PContext, n: var PNode, importStmtResult: PNode): PSym =
       var prefix = ""
       if realModule.constraint != nil: prefix = realModule.constraint.strVal & "; "
       message(c.config, n.info, warnDeprecated, prefix & realModule.name.s & " is deprecated")
-    suggestSym(c.graph, n.info, result, c.graph.usageSym, false)
+
+    proc suggestMod(n: PNode; s: PSym) =
+      if n.kind == nkImportAs:
+        suggestMod(n[0], realModule)
+      elif n.kind == nkInfix:
+        suggestMod(n[2], s)
+      else:
+        suggestSym(c.graph, n.info, s, c.graph.usageSym, false)
+    suggestMod(n, result)
     importStmtResult.add newSymNode(result, n.info)
     #newStrNode(toFullPath(c.config, f), n.info)
 
@@ -344,9 +352,11 @@ proc evalImport*(c: PContext, n: PNode): PNode =
           imp[lastPos] = x[1]
           impAs[1] = imp
           impAs[2] = x[2]
+          impAs.info = x[2].info
           impMod(c, impAs, result)
         else:
           imp[lastPos] = x
+          imp.info = x.info
           impMod(c, imp, result)
     else:
       impMod(c, it, result)

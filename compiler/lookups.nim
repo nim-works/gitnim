@@ -254,6 +254,41 @@ proc searchInScopesFilterBy*(c: PContext, s: PIdent, filter: TSymKinds): seq[PSy
         if s.kind in filter:
           result.add s
 
+proc isAmbiguous*(c: PContext, s: PIdent, filter: TSymKinds, sym: var PSym): bool =
+  result = false
+  block outer:
+    for scope in allScopes(c.currentScope):
+      var ti: TIdentIter
+      var candidate = initIdentIter(ti, scope.symbols, s)
+      var scopeHasCandidate = false
+      while candidate != nil:
+        if candidate.kind in filter:
+          if scopeHasCandidate:
+            # 2 candidates in same scope, ambiguous
+            return true
+          else:
+            scopeHasCandidate = true
+            sym = candidate
+        candidate = nextIdentIter(ti, scope.symbols)
+      if scopeHasCandidate:
+        # scope had a candidate but wasn't ambiguous
+        return false
+
+  var importsHaveCandidate = false
+  var marked = initIntSet()
+  for im in c.imports.mitems:
+    for s in symbols(im, marked, s, c.graph):
+      if s.kind in filter:
+        if importsHaveCandidate:
+          # 2 candidates among imports, ambiguous
+          return true
+        else:
+          importsHaveCandidate = true
+          sym = s
+  if importsHaveCandidate:
+    # imports had a candidate but wasn't ambiguous
+    return false
+
 proc errorSym*(c: PContext, n: PNode): PSym =
   ## creates an error symbol to avoid cascading errors (for IDE support)
   var m = n
@@ -531,7 +566,11 @@ proc errorUndeclaredIdentifier*(c: PContext; info: TLineInfo; name: string, extr
   if name == "_":
     err = "the special identifier '_' is ignored in declarations and cannot be used"
   else:
-    err = "undeclared identifier: '" & name & "'" & extra
+    err = "undeclared identifier: '" & name & "'"
+    if "`gensym" in name:
+      err.add "; if declared in a template, this identifier may be inconsistently marked inject or gensym"
+    if extra.len != 0:
+      err.add extra
     if c.recursiveDep.len > 0:
       err.add "\nThis might be caused by a recursive module dependency:\n"
       err.add c.recursiveDep
