@@ -24,6 +24,7 @@ proc canRaiseDisp(p: BProc; n: PNode): bool =
 
 proc preventNrvo(p: BProc; dest, le, ri: PNode): bool =
   proc locationEscapes(p: BProc; le: PNode; inTryStmt: bool): bool =
+    result = false
     var n = le
     while true:
       # do NOT follow nkHiddenDeref here!
@@ -82,6 +83,10 @@ proc fixupCall(p: BProc, le, ri: PNode, d: var TLoc,
   # getUniqueType() is too expensive here:
   var typ = skipTypes(ri[0].typ, abstractInst)
   if typ[0] != nil:
+    var flags: TAssignmentFlags = {}
+    if typ[0].kind in {tyOpenArray, tyVarargs}:
+      # perhaps generate no temp if the call doesn't have side effects
+      flags.incl needTempForOpenArray
     if isInvalidReturnType(p.config, typ):
       if params.len != 0: pl.add(", ")
       # beware of 'result = p(result)'. We may need to allocate a temporary:
@@ -129,7 +134,7 @@ proc fixupCall(p: BProc, le, ri: PNode, d: var TLoc,
         var list: TLoc
         initLoc(list, locCall, d.lode, OnUnknown)
         list.r = pl
-        genAssignment(p, d, list, {}) # no need for deep copying
+        genAssignment(p, d, list, flags) # no need for deep copying
         if canRaise: raiseExit(p)
       else:
         var tmp: TLoc
@@ -137,7 +142,7 @@ proc fixupCall(p: BProc, le, ri: PNode, d: var TLoc,
         var list: TLoc
         initLoc(list, locCall, d.lode, OnUnknown)
         list.r = pl
-        genAssignment(p, tmp, list, {}) # no need for deep copying
+        genAssignment(p, tmp, list, flags) # no need for deep copying
         if canRaise: raiseExit(p)
         genAssignment(p, d, tmp, {})
   else:
@@ -166,7 +171,10 @@ proc genOpenArraySlice(p: BProc; q: PNode; formalType, destType: PType; prepareF
     genBoundsCheck(p, a, b, c)
   if prepareForMutation:
     linefmt(p, cpsStmts, "#nimPrepareStrMutationV2($1);$n", [byRefLoc(p, a)])
-  let ty = skipTypes(a.t, abstractVar+{tyPtr})
+  # bug #23321: In the function mapType, ptrs (tyPtr, tyVar, tyLent, tyRef)
+  # are mapped into ctPtrToArray, the dereference of which is skipped
+  # in the `genref`. We need to skip these ptrs here
+  let ty = skipTypes(a.t, abstractVar+{tyPtr, tyRef})
   let dest = getTypeDesc(p.module, destType)
   let lengthExpr = "($1)-($2)+1" % [rdLoc(c), rdLoc(b)]
   case ty.kind
@@ -301,18 +309,33 @@ proc genArg(p: BProc, n: PNode, param: PSym; call: PNode; result: var Rope; need
       addAddrLoc(p.config, withTmpIfNeeded(p, a, needsTmp), result)
   elif p.module.compileToCpp and param.typ.kind in {tyVar} and
       n.kind == nkHiddenAddr:
-    initLocExprSingleUse(p, n[0], a)
+    # bug #23748: we need to introduce a temporary here. The expression type
+    # will be a reference in C++ and we cannot create a temporary reference
+    # variable. Thus, we create a temporary pointer variable instead.
+    let needsIndirect = mapType(p.config, n[0].typ, mapTypeChooser(n[0]) == skParam) != ctArray
+    if needsIndirect:
+      n.typ = n.typ.exactReplica
+      n.typ.flags.incl tfVarIsPtr
+    initLocExprSingleUse(p, n, a)
+    a = withTmpIfNeeded(p, a, needsTmp)
+    if needsIndirect: a.flags.incl lfIndirect
     # if the proc is 'importc'ed but not 'importcpp'ed then 'var T' still
     # means '*T'. See posix.nim for lots of examples that do that in the wild.
     let callee = call[0]
     if callee.kind == nkSym and
         {sfImportc, sfInfixCall, sfCompilerProc} * callee.sym.flags == {sfImportc} and
-        {lfHeader, lfNoDecl} * callee.sym.loc.flags != {}:
+        {lfHeader, lfNoDecl} * callee.sym.loc.flags != {} and
+        needsIndirect:
       addAddrLoc(p.config, a, result)
     else:
       addRdLoc(a, result)
   else:
     initLocExprSingleUse(p, n, a)
+    if param.typ.kind in abstractPtrs:
+      let typ = skipTypes(param.typ, abstractPtrs)
+      if typ.sym != nil and sfImportc in typ.sym.flags:
+        a.r = "(($1) ($2))" %
+          [getTypeDesc(p.module, param.typ), rdCharLoc(a)]
     addRdLoc(withTmpIfNeeded(p, a, needsTmp), result)
   #assert result != nil
 
@@ -394,9 +417,11 @@ proc genParams(p: BProc, ri: PNode, typ: PType; result: var Rope) =
         if not needTmp[i - 1]:
           needTmp[i - 1] = potentialAlias(n, potentialWrites)
       getPotentialWrites(ri[i], false, potentialWrites)
-    if ri[i].kind in {nkHiddenAddr, nkAddr}:
-      # Optimization: don't use a temp, if we would only take the address anyway
-      needTmp[i - 1] = false
+    when false:
+      # this optimization is wrong, see bug #23748
+      if ri[i].kind in {nkHiddenAddr, nkAddr}:
+        # Optimization: don't use a temp, if we would only take the address anyway
+        needTmp[i - 1] = false
 
   var oldLen = result.len
   for i in 1..<ri.len:

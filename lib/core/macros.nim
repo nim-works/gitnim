@@ -93,6 +93,8 @@ type
     nnkFuncDef,
     nnkTupleConstr,
     nnkError,  ## erroneous AST node
+    nnkModuleRef, nnkReplayAction, nnkNilRodNode ## internal IC nodes
+    nnkOpenSym
 
   NimNodeKinds* = set[NimNodeKind]
   NimTypeKind* = enum  # some types are no longer used, see ast.nim
@@ -347,8 +349,7 @@ proc getTypeImpl*(n: NimNode): NimNode {.magic: "NGetType", noSideEffect.} =
       newLit(x.getTypeImpl.repr)
     let t = """
 object
-  arr: array[0 .. 3, float32]
-"""
+  arr: array[0 .. 3, float32]"""
     doAssert(dumpTypeImpl(a) == t)
     doAssert(dumpTypeImpl(b) == t)
     doAssert(dumpTypeImpl(c) == t)
@@ -427,7 +428,12 @@ proc copyNimTree*(n: NimNode): NimNode {.magic: "NCopyNimTree", noSideEffect.} =
       let x = 12
       echo x
 
-proc error*(msg: string, n: NimNode = nil) {.magic: "NError", benign.}
+when defined(nimHasNoReturnError):
+  {.pragma: errorNoReturn, noreturn.}
+else:
+  {.pragma: errorNoReturn.}
+
+proc error*(msg: string, n: NimNode = nil) {.magic: "NError", benign, errorNoReturn.}
   ## Writes an error message at compile time. The optional `n: NimNode`
   ## parameter is used as the source for file and line number information in
   ## the compilation error message.
@@ -1403,7 +1409,7 @@ proc `$`*(node: NimNode): string =
     result = node.basename.strVal & "*"
   of nnkStrLit..nnkTripleStrLit, nnkCommentStmt, nnkSym, nnkIdent:
     result = node.strVal
-  of nnkOpenSymChoice, nnkClosedSymChoice:
+  of nnkOpenSymChoice, nnkClosedSymChoice, nnkOpenSym:
     result = $node[0]
   of nnkAccQuoted:
     result = ""

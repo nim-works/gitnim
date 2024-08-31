@@ -76,6 +76,7 @@ type
     efNoDiagnostics,
     efTypeAllowed # typeAllowed will be called after
     efWantNoDefaults
+    efAllowSymChoice # symchoice node should not be resolved
 
   TExprFlags* = set[TExprFlag]
 
@@ -168,7 +169,9 @@ type
     sideEffects*: Table[int, seq[(TLineInfo, PSym)]] # symbol.id index
     inUncheckedAssignSection*: int
     importModuleLookup*: Table[int, seq[int]] # (module.ident.id, [module.id])
-    skipTypes*: seq[PNode] # used to skip types between passes in type section. So far only used for inheritance and sets.
+    skipTypes*: seq[PNode] # used to skip types between passes in type section. So far only used for inheritance, sets and generic bodies.
+  TBorrowState* = enum
+    bsNone, bsReturnNotMatch, bsNoDistinct, bsGeneric, bsNotSupported, bsMatch
 
 template config*(c: PContext): ConfigRef = c.graph.config
 

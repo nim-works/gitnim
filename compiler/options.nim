@@ -220,7 +220,10 @@ type
     unicodeOperators, # deadcode
     flexibleOptionalParams,
     strictDefs,
-    strictCaseObjects
+    strictCaseObjects,
+    openSym, # remove nfDisabledOpenSym when this is default
+    # separated alternatives to above:
+    genericsOpenSym, templateOpenSym
 
   LegacyFeature* = enum
     allowSemcheckedAstModification,

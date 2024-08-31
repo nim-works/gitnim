@@ -334,9 +334,9 @@ func normalize*(s: string): string {.rtl, extern: "nsuNormalize".} =
 func cmpIgnoreCase*(a, b: string): int {.rtl, extern: "nsuCmpIgnoreCase".} =
   ## Compares two strings in a case insensitive manner. Returns:
   ##
-  ## | 0 if a == b
-  ## | < 0 if a < b
-  ## | > 0 if a > b
+  ## | `0` if a == b
+  ## | `< 0` if a < b
+  ## | `> 0` if a > b
   runnableExamples:
     doAssert cmpIgnoreCase("FooBar", "foobar") == 0
     doAssert cmpIgnoreCase("bar", "Foo") < 0
@@ -354,9 +354,9 @@ func cmpIgnoreStyle*(a, b: string): int {.rtl, extern: "nsuCmpIgnoreStyle".} =
   ##
   ## Returns:
   ##
-  ## | 0 if a == b
-  ## | < 0 if a < b
-  ## | > 0 if a > b
+  ## | `0` if a == b
+  ## | `< 0` if a < b
+  ## | `> 0` if a > b
   runnableExamples:
     doAssert cmpIgnoreStyle("foo_bar", "FooBar") == 0
     doAssert cmpIgnoreStyle("foo_bar_5", "FooBar4") > 0
@@ -559,7 +559,7 @@ iterator rsplit*(s: string, sep: char,
                  maxsplit: int = -1): string =
   ## Splits the string `s` into substrings from the right using a
   ## string separator. Works exactly the same as `split iterator
-  ## <#split.i,string,char,int>`_ except in reverse order.
+  ## <#split.i,string,char,int>`_ except in **reverse** order.
   ##
   ## .. code-block:: nim
   ##   for piece in "foo:bar".rsplit(':'):
@@ -584,7 +584,7 @@ iterator rsplit*(s: string, seps: set[char] = Whitespace,
                  maxsplit: int = -1): string =
   ## Splits the string `s` into substrings from the right using a
   ## string separator. Works exactly the same as `split iterator
-  ## <#split.i,string,char,int>`_ except in reverse order.
+  ## <#split.i,string,char,int>`_ except in **reverse** order.
   ##
   ## .. code-block:: nim
   ##   for piece in "foo bar".rsplit(WhiteSpace):
@@ -612,7 +612,7 @@ iterator rsplit*(s: string, sep: string, maxsplit: int = -1,
                  keepSeparators: bool = false): string =
   ## Splits the string `s` into substrings from the right using a
   ## string separator. Works exactly the same as `split iterator
-  ## <#split.i,string,string,int>`_ except in reverse order.
+  ## <#split.i,string,string,int>`_ except in **reverse** order.
   ##
   ## .. code-block:: nim
   ##   for piece in "foothebar".rsplit("the"):
@@ -789,7 +789,7 @@ func split*(s: string, sep: string, maxsplit: int = -1): seq[string] {.rtl,
 func rsplit*(s: string, sep: char, maxsplit: int = -1): seq[string] {.rtl,
     extern: "nsuRSplitChar".} =
   ## The same as the `rsplit iterator <#rsplit.i,string,char,int>`_, but is a func
-  ## that returns a sequence of substrings.
+  ## that returns a sequence of substrings in original order.
   ##
   ## A possible common use case for `rsplit` is path manipulation,
   ## particularly on systems that don't use a common delimiter.
@@ -817,7 +817,7 @@ func rsplit*(s: string, seps: set[char] = Whitespace,
              maxsplit: int = -1): seq[string]
              {.rtl, extern: "nsuRSplitCharSet".} =
   ## The same as the `rsplit iterator <#rsplit.i,string,set[char],int>`_, but is a
-  ## func that returns a sequence of substrings.
+  ## func that returns a sequence of substrings in original order.
   ##
   ## A possible common use case for `rsplit` is path manipulation,
   ## particularly on systems that don't use a common delimiter.
@@ -847,7 +847,7 @@ func rsplit*(s: string, seps: set[char] = Whitespace,
 func rsplit*(s: string, sep: string, maxsplit: int = -1): seq[string] {.rtl,
     extern: "nsuRSplitString".} =
   ## The same as the `rsplit iterator <#rsplit.i,string,string,int,bool>`_, but is a func
-  ## that returns a sequence of substrings.
+  ## that returns a sequence of substrings in original order.
   ##
   ## A possible common use case for `rsplit` is path manipulation,
   ## particularly on systems that don't use a common delimiter.
@@ -1852,7 +1852,7 @@ func join*(a: openArray[string], sep: string = ""): string {.rtl,
   else:
     result = ""
 
-func join*[T: not string](a: openArray[T], sep: string = ""): string =
+proc join*[T: not string](a: openArray[T], sep: string = ""): string =
   ## Converts all elements in the container `a` to strings using `$`,
   ## and concatenates them with `sep`.
   runnableExamples:
@@ -2417,8 +2417,8 @@ func validIdentifier*(s: string): bool {.rtl, extern: "nsuValidIdentifier".} =
 
 # floating point formatting:
 when not defined(js):
-  func c_sprintf(buf, frmt: cstring): cint {.header: "<stdio.h>",
-                                     importc: "sprintf", varargs.}
+  func c_snprintf(buf: cstring, n: csize_t, frmt: cstring): cint {.header: "<stdio.h>",
+                                     importc: "snprintf", varargs.}
 
 type
   FloatFormatMode* = enum
@@ -2451,7 +2451,7 @@ func formatBiggestFloat*(f: BiggestFloat, format: FloatFormatMode = ffDefault,
     when defined(js):
       var precision = precision
       if precision == -1:
-        # use the same default precision as c_sprintf
+        # use the same default precision as c_snprintf
         precision = 6
       var res: cstring
       case format
@@ -2482,11 +2482,11 @@ func formatBiggestFloat*(f: BiggestFloat, format: FloatFormatMode = ffDefault,
         frmtstr[3] = '*'
         frmtstr[4] = floatFormatToChar[format]
         frmtstr[5] = '\0'
-        L = c_sprintf(cast[cstring](addr buf), cast[cstring](addr frmtstr), precision, f)
+        L = c_snprintf(cast[cstring](addr buf), csize_t(2501), cast[cstring](addr frmtstr), precision, f)
       else:
         frmtstr[1] = floatFormatToChar[format]
         frmtstr[2] = '\0'
-        L = c_sprintf(cast[cstring](addr buf), cast[cstring](addr frmtstr), f)
+        L = c_snprintf(cast[cstring](addr buf), csize_t(2501), cast[cstring](addr frmtstr), f)
       result = newString(L)
       for i in 0 ..< L:
         # Depending on the locale either dot or comma is produced,

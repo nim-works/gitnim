@@ -34,7 +34,7 @@ when defined(js):
           # simple.
           doAssert false
 
-        (lo: forceUnsigned x, hi: 0)
+        (lo: forceUnsigned x, hi: 0'u32)
       else:
         (lo: forceUnsigned x, hi: forceUnsigned(x shr 32))
 

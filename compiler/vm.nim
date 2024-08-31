@@ -811,6 +811,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
       # a[b] = c
       decodeBC(rkNode)
       let idx = regs[rb].intVal.int
+      assert regs[ra].kind == rkNode
       let arr = regs[ra].node
       case arr.kind
       of nkTupleConstr: # refer to `opcSlice`
@@ -824,7 +825,11 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
           of nkStrKinds:
             src.strVal[int(realIndex)] = char(regs[rc].intVal)
           of nkBracket:
-            src[int(realIndex)] = regs[rc].node
+            if regs[rc].kind == rkInt:
+              src[int(realIndex)] = newIntNode(nkIntLit, regs[rc].intVal)
+            else:
+              assert regs[rc].kind == rkNode
+              src[int(realIndex)] = regs[rc].node
           else:
             stackTrace(c, tos, pc, "opcWrArr internal error")
         else:
@@ -1354,7 +1359,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
         else:
           internalError(c.config, c.debug[pc], "opcParseFloat: Incorrectly created openarray")
       else:
-        regs[ra].intVal = parseBiggestFloat(regs[ra].node.strVal, rcAddr.floatVal)
+        regs[ra].intVal = parseBiggestFloat(regs[rb].node.strVal, rcAddr.floatVal)
 
     of opcRangeChck:
       let rb = instr.regB
@@ -1924,6 +1929,8 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
                             proc (conf: ConfigRef; info: TLineInfo; msg: TMsgKind; arg: string) =
                               if error.len == 0 and msg <= errMax:
                                 error = formatMsg(conf, info, msg, arg))
+
+      regs[ra].node = newNode(nkEmpty)
       if error.len > 0:
         c.errorFlag = error
       elif ast.len != 1:
@@ -1941,6 +1948,7 @@ proc rawExecute(c: PCtx, start: int, tos: PStackFrame): TFullReg =
                                 error = formatMsg(conf, info, msg, arg))
       if error.len > 0:
         c.errorFlag = error
+        regs[ra].node = newNode(nkEmpty)
       else:
         regs[ra].node = ast
     of opcQueryErrorFlag:

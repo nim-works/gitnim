@@ -50,6 +50,7 @@ type
     graph: ModuleGraph
     config: ConfigRef
     sigConflicts: CountTable[SigHash]
+    initProc: PProc
 
   BModule = ref TJSGen
   TJSTypeKind = enum       # necessary JS "types"
@@ -158,6 +159,8 @@ proc newProc(globals: PGlobals, module: BModule, procDef: PNode,
              options: TOptions): PProc =
   result = PProc(
     blocks: @[],
+    optionsStack: if module.initProc != nil: module.initProc.optionsStack
+                  else: @[],
     options: options,
     module: module,
     procDef: procDef,
@@ -1195,7 +1198,7 @@ proc needsNoCopy(p: PProc; y: PNode): bool =
   return y.kind in nodeKindsNeedNoCopy or
         ((mapType(y.typ) != etyBaseIndex or (y.kind == nkSym and y.sym.kind == skParam)) and
           (skipTypes(y.typ, abstractInst).kind in
-            {tyRef, tyPtr, tyLent, tyVar, tyCstring, tyProc, tyOwned} + IntegralTypes))
+            {tyRef, tyPtr, tyLent, tyVar, tyCstring, tyProc, tyOwned, tyOpenArray} + IntegralTypes))
 
 proc genAsgnAux(p: PProc, x, y: PNode, noCopyNeeded: bool) =
   var a, b: TCompRes
@@ -1949,7 +1952,7 @@ proc createVar(p: PProc, typ: PType, indirect: bool): Rope =
       result = putToSeq("null", indirect)
   of tySequence, tyString:
     result = putToSeq("[]", indirect)
-  of tyCstring, tyProc:
+  of tyCstring, tyProc, tyOpenArray:
     result = putToSeq("null", indirect)
   of tyStatic:
     if t.n != nil:
@@ -3036,6 +3039,7 @@ proc processJSCodeGen*(b: PPassContext, n: PNode): PNode =
   if m.module == nil: internalError(m.config, n.info, "myProcess")
   let globals = PGlobals(m.graph.backend)
   var p = newInitProc(globals, m)
+  m.initProc = p
   p.unique = globals.unique
   genModule(p, n)
   p.g.code.add(p.locals)

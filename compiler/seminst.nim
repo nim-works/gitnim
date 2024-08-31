@@ -60,6 +60,15 @@ iterator instantiateGenericParamList(c: PContext, n: PNode, pt: TIdTable): PSym 
       elif t.kind in {tyGenericParam, tyConcept}:
         localError(c.config, a.info, errCannotInstantiateX % q.name.s)
         t = errorType(c)
+      elif isUnresolvedStatic(t) and (q.typ.kind == tyStatic or
+            (q.typ.kind == tyGenericParam and
+              q.typ.sons.len > 0 and
+              q.typ.sons[0].kind == tyStatic)) and
+          c.inGenericContext == 0 and c.matchedConcept == nil:
+        # generic/concept type bodies will try to instantiate static values but
+        # won't actually use them
+        localError(c.config, a.info, errCannotInstantiateX % q.name.s)
+        t = errorType(c)
       elif t.kind == tyGenericInvocation:
         #t = instGenericContainer(c, a, t)
         t = generateTypeInstance(c, pt, a, t)
@@ -272,11 +281,13 @@ proc instantiateProcType(c: PContext, pt: TIdTable,
     # call head symbol, because this leads to infinite recursion.
     if oldParam.ast != nil:
       var def = oldParam.ast.copyTree
-      if def.kind == nkCall:
+      if def.kind in nkCallKinds:
         for i in 1..<def.len:
-          def[i] = replaceTypeVarsN(cl, def[i])
+          def[i] = replaceTypeVarsN(cl, def[i], 1)
 
-      def = semExprWithType(c, def)
+      # allow symchoice since node will be fit later
+      # although expectedType should cover it
+      def = semExprWithType(c, def, {efAllowSymChoice}, typeToFit)
       if def.referencesAnotherParam(getCurrOwner(c)):
         def.flags.incl nfDefaultRefsParam
 
@@ -330,7 +341,8 @@ proc generateInstance(c: PContext, fn: PSym, pt: TIdTable,
   # generates an instantiated proc
   if c.instCounter > 50:
     globalError(c.config, info, "generic instantiation too nested")
-  inc(c.instCounter)
+  inc c.instCounter
+  defer: dec c.instCounter
   # careful! we copy the whole AST including the possibly nil body!
   var n = copyTree(fn.ast)
   # NOTE: for access of private fields within generics from a different module
@@ -364,10 +376,13 @@ proc generateInstance(c: PContext, fn: PSym, pt: TIdTable,
   # see ttypeor.nim test.
   var i = 0
   newSeq(entry.concreteTypes, fn.typ.len+gp.len-1)
+  # let param instantiation know we are in a concept for unresolved statics:
+  c.matchedConcept = oldMatchedConcept
   for s in instantiateGenericParamList(c, gp, pt):
     addDecl(c, s)
     entry.concreteTypes[i] = s.typ
     inc i
+  c.matchedConcept = nil
   pushProcCon(c, result)
   instantiateProcType(c, pt, result, info)
   for j in 1..<result.typ.len:
@@ -404,7 +419,6 @@ proc generateInstance(c: PContext, fn: PSym, pt: TIdTable,
   popOwner(c)
   c.currentScope = oldScope
   discard c.friendModules.pop()
-  dec(c.instCounter)
   c.matchedConcept = oldMatchedConcept
   if result.kind == skMethod: finishMethod(c, result)
 

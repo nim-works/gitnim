@@ -30,6 +30,12 @@ import strutils except `%`, addf # collides with ropes.`%`
 from ic / ic import ModuleBackendFlag
 import dynlib
 
+const
+  # we use some ASCII control characters to insert directives that will be converted to real code in a postprocessing pass
+  postprocessDirStart = '\1'
+  postprocessDirSep = '\31'
+  postprocessDirEnd = '\23'
+
 when not declared(dynlib.libCandidates):
   proc libCandidates(s: string, dest: var seq[string]) =
     ## given a library name pattern `s` write possible library names to `dest`.
@@ -266,24 +272,28 @@ proc safeLineNm(info: TLineInfo): int =
   result = toLinenumber(info)
   if result < 0: result = 0 # negative numbers are not allowed in #line
 
-proc genCLineDir(r: var Rope, filename: string, line: int; conf: ConfigRef) =
+proc genPostprocessDir(field1, field2, field3: string): string =
+  result = postprocessDirStart & field1 & postprocessDirSep & field2 & postprocessDirSep & field3 & postprocessDirEnd
+
+proc genCLineDir(r: var Rope, fileIdx: FileIndex, line: int; conf: ConfigRef) =
   assert line >= 0
   if optLineDir in conf.options and line > 0:
-    r.addf("\n#line $2 $1\n",
-        [rope(makeSingleLineCString(filename)), rope(line)])
+    if fileIdx == InvalidFileIdx:
+      r.add(rope("\n#line " & $line & " \"generated_not_to_break_here\"\n"))
+    else:
+      r.add(rope("\n#line " & $line & " FX_" & $fileIdx.int32 & "\n"))
 
-proc genCLineDir(r: var Rope, filename: string, line: int; p: BProc; info: TLineInfo; lastFileIndex: FileIndex) =
+proc genCLineDir(r: var Rope, fileIdx: FileIndex, line: int; p: BProc; info: TLineInfo; lastFileIndex: FileIndex) =
   assert line >= 0
   if optLineDir in p.config.options and line > 0:
-    if lastFileIndex == info.fileIndex:
-        r.addf("\n#line $1\n", [rope(line)])
+    if fileIdx == InvalidFileIdx:
+      r.add(rope("\n#line " & $line & " \"generated_not_to_break_here\"\n"))
     else:
-      r.addf("\n#line $2 $1\n",
-        [rope(makeSingleLineCString(filename)), rope(line)])
+      r.add(rope("\n#line " & $line & " FX_" & $fileIdx.int32 & "\n"))
 
 proc genCLineDir(r: var Rope, info: TLineInfo; conf: ConfigRef) =
   if optLineDir in conf.options:
-    genCLineDir(r, toFullPath(conf, info), info.safeLineNm, conf)
+    genCLineDir(r, info.fileIndex, info.safeLineNm, conf)
 
 proc freshLineInfo(p: BProc; info: TLineInfo): bool =
   if p.lastLineInfo.line != info.line or
@@ -296,7 +306,7 @@ proc genCLineDir(r: var Rope, p: BProc, info: TLineInfo; conf: ConfigRef) =
   if optLineDir in conf.options:
     let lastFileIndex = p.lastLineInfo.fileIndex
     if freshLineInfo(p, info):
-      genCLineDir(r, toFullPath(conf, info), info.safeLineNm, p, info, lastFileIndex)
+      genCLineDir(r, info.fileIndex, info.safeLineNm, p, info, lastFileIndex)
 
 proc genLineDir(p: BProc, t: PNode) =
   let line = t.info.safeLineNm
@@ -306,16 +316,11 @@ proc genLineDir(p: BProc, t: PNode) =
   let lastFileIndex = p.lastLineInfo.fileIndex
   let freshLine = freshLineInfo(p, t.info)
   if freshLine:
-    genCLineDir(p.s(cpsStmts), toFullPath(p.config, t.info), line, p, t.info, lastFileIndex)
+    genCLineDir(p.s(cpsStmts), t.info.fileIndex, line, p, t.info, lastFileIndex)
   if ({optLineTrace, optStackTrace} * p.options == {optLineTrace, optStackTrace}) and
       (p.prc == nil or sfPure notin p.prc.flags) and t.info.fileIndex != InvalidFileIdx:
       if freshLine:
-        if lastFileIndex == t.info.fileIndex:
-          linefmt(p, cpsStmts, "nimln_($1);",
-              [line])
-        else:
-          linefmt(p, cpsStmts, "nimlf_($1, $2);",
-              [line, quotedFilename(p.config, t.info)])
+        line(p, cpsStmts, genPostprocessDir("nimln", $line, $t.info.fileIndex.int32))
 
 proc accessThreadLocalVar(p: BProc, s: PSym)
 proc emulatedThreadVars(conf: ConfigRef): bool {.inline.}
@@ -401,6 +406,8 @@ proc rdCharLoc(a: TLoc): Rope =
 type
   TAssignmentFlag = enum
     needToCopy
+    needToCopySinkParam
+    needTempForOpenArray
   TAssignmentFlags = set[TAssignmentFlag]
 
 proc genObjConstr(p: BProc, e: PNode, d: var TLoc)
@@ -1025,7 +1032,7 @@ proc easyResultAsgn(n: PNode): PNode =
 type
   InitResultEnum = enum Unknown, InitSkippable, InitRequired
 
-proc allPathsAsgnResult(n: PNode): InitResultEnum =
+proc allPathsAsgnResult(p: BProc; n: PNode): InitResultEnum =
   # Exceptions coming from calls don't have not be considered here:
   #
   # proc bar(): string = raise newException(...)
@@ -1040,7 +1047,7 @@ proc allPathsAsgnResult(n: PNode): InitResultEnum =
   #   echo "a was not written to"
   #
   template allPathsInBranch(it) =
-    let a = allPathsAsgnResult(it)
+    let a = allPathsAsgnResult(p, it)
     case a
     of InitRequired: return InitRequired
     of InitSkippable: discard
@@ -1052,7 +1059,7 @@ proc allPathsAsgnResult(n: PNode): InitResultEnum =
   case n.kind
   of nkStmtList, nkStmtListExpr:
     for it in n:
-      result = allPathsAsgnResult(it)
+      result = allPathsAsgnResult(p, it)
       if result != Unknown: return result
   of nkAsgn, nkFastAsgn, nkSinkAsgn:
     if n[0].kind == nkSym and n[0].sym.kind == skResult:
@@ -1060,6 +1067,8 @@ proc allPathsAsgnResult(n: PNode): InitResultEnum =
       else: result = InitRequired
     elif containsResult(n):
       result = InitRequired
+    else:
+      result = allPathsAsgnResult(p, n[1])
   of nkReturnStmt:
     if n.len > 0:
       if n[0].kind == nkEmpty and result != InitSkippable:
@@ -1068,7 +1077,7 @@ proc allPathsAsgnResult(n: PNode): InitResultEnum =
         # initialized. This avoids cases like #9286 where this heuristic lead to
         # wrong code being generated.
         result = InitRequired
-      else: result = allPathsAsgnResult(n[0])
+      else: result = allPathsAsgnResult(p, n[0])
   of nkIfStmt, nkIfExpr:
     var exhaustive = false
     result = InitSkippable
@@ -1094,9 +1103,9 @@ proc allPathsAsgnResult(n: PNode): InitResultEnum =
   of nkWhileStmt:
     # some dubious code can assign the result in the 'while'
     # condition and that would be fine. Everything else isn't:
-    result = allPathsAsgnResult(n[0])
+    result = allPathsAsgnResult(p, n[0])
     if result == Unknown:
-      result = allPathsAsgnResult(n[1])
+      result = allPathsAsgnResult(p, n[1])
       # we cannot assume that the 'while' loop is really executed at least once:
       if result == InitSkippable: result = Unknown
   of harmless:
@@ -1121,9 +1130,17 @@ proc allPathsAsgnResult(n: PNode): InitResultEnum =
     allPathsInBranch(n[0])
     for i in 1..<n.len:
       if n[i].kind == nkFinally:
-        result = allPathsAsgnResult(n[i].lastSon)
+        result = allPathsAsgnResult(p, n[i].lastSon)
       else:
         allPathsInBranch(n[i].lastSon)
+  of nkCallKinds:
+    if canRaiseDisp(p, n[0]):
+      result = InitRequired
+    else:
+      for i in 0..<n.safeLen:
+        allPathsInBranch(n[i])
+  of nkRaiseStmt:
+    result = InitRequired
   else:
     for i in 0..<n.safeLen:
       allPathsInBranch(n[i])
@@ -1180,7 +1197,7 @@ proc genProcAux*(m: BModule, prc: PSym) =
         assignLocalVar(p, resNode)
         assert(res.loc.r != "")
         if p.config.selectedGC in {gcArc, gcAtomicArc, gcOrc} and
-            allPathsAsgnResult(procBody) == InitSkippable:
+            allPathsAsgnResult(p, procBody) == InitSkippable:
           # In an ideal world the codegen could rely on injectdestructors doing its job properly
           # and then the analysis step would not be required.
           discard "result init optimized out"
@@ -1199,7 +1216,7 @@ proc genProcAux*(m: BModule, prc: PSym) =
       # global is either 'nil' or points to valid memory and so the RC operation
       # succeeds without touching not-initialized memory.
       if sfNoInit in prc.flags: discard
-      elif allPathsAsgnResult(procBody) == InitSkippable: discard
+      elif allPathsAsgnResult(p, procBody) == InitSkippable: discard
       else:
         resetLoc(p, res.loc)
       if skipTypes(res.typ, abstractInst).kind == tyArray:
@@ -1785,7 +1802,7 @@ proc genDatInitCode(m: BModule) =
 
   # we don't want to break into such init code - could happen if a line
   # directive from a function written by the user spills after itself
-  genCLineDir(prc, "generated_not_to_break_here", 999999, m.config)
+  genCLineDir(prc, InvalidFileIdx, 999999, m.config)
 
   for i in cfsTypeInit1..cfsDynLibInit:
     if m.s[i].len != 0:
@@ -1826,7 +1843,7 @@ proc genInitCode(m: BModule) =
     [rope(if m.hcrOn: "N_LIB_EXPORT" else: "N_LIB_PRIVATE"), initname]
   # we don't want to break into such init code - could happen if a line
   # directive from a function written by the user spills after itself
-  genCLineDir(prc, "generated_not_to_break_here", 999999, m.config)
+  genCLineDir(prc, InvalidFileIdx, 999999, m.config)
   if m.typeNodes > 0:
     if m.hcrOn:
       appcg(m, m.s[cfsTypeInit1], "\t#TNimNode* $1;$N", [m.typeNodesName])
@@ -1890,13 +1907,13 @@ proc genInitCode(m: BModule) =
     if beforeRetNeeded in m.initProc.flags:
       prc.add("\tBeforeRet_: ;\n")
 
-    if sfMainModule in m.module.flags and m.config.exc == excGoto:
+    if m.config.exc == excGoto:
       if getCompilerProc(m.g.graph, "nimTestErrorFlag") != nil:
         m.appcg(prc, "\t#nimTestErrorFlag();$n", [])
 
     if optStackTrace in m.initProc.options and preventStackTrace notin m.flags:
       prc.add(deinitFrame(m.initProc))
-  elif sfMainModule in m.module.flags and m.config.exc == excGoto:
+  elif m.config.exc == excGoto:
     if getCompilerProc(m.g.graph, "nimTestErrorFlag") != nil:
       m.appcg(prc, "\t#nimTestErrorFlag();$n", [])
 
@@ -1941,6 +1958,40 @@ proc genInitCode(m: BModule) =
 
   registerModuleToMain(m.g, m)
 
+proc postprocessCode(conf: ConfigRef, r: var Rope) =
+  # find the first directive
+  var f = r.find(postprocessDirStart)
+  if f == -1:
+    return
+
+  var
+    nimlnDirLastF = ""
+
+  var res: Rope = r.substr(0, f - 1)
+  while f != -1:
+    var
+      e = r.find(postprocessDirEnd, f + 1)
+      dir = r.substr(f + 1, e - 1).split(postprocessDirSep)
+    case dir[0]
+    of "nimln":
+      if dir[2] == nimlnDirLastF:
+        res.add("nimln_(" & dir[1] & ");")
+      else:
+        res.add("nimlf_(" & dir[1] & ", " & quotedFilename(conf, dir[2].parseInt.FileIndex) & ");")
+        nimlnDirLastF = dir[2]
+    else:
+      raiseAssert "unexpected postprocess directive"
+
+    # find the next directive
+    f = r.find(postprocessDirStart, e + 1)
+    # copy the code until the next directive
+    if f != -1:
+      res.add(r.substr(e + 1, f - 1))
+    else:
+      res.add(r.substr(e + 1))
+
+  r = res
+
 proc genModule(m: BModule, cfile: Cfile): Rope =
   var moduleIsEmpty = true
 
@@ -1969,8 +2020,16 @@ proc genModule(m: BModule, cfile: Cfile): Rope =
   if m.config.cppCustomNamespace.len > 0:
     closeNamespaceNim(result)
 
+  if optLineDir in m.config.options:
+    var srcFileDefs = ""
+    for fi in 0..m.config.m.fileInfos.high:
+      srcFileDefs.add("#define FX_" & $fi & " " & makeSingleLineCString(toFullPath(m.config, fi.FileIndex)) & "\n")
+    result = srcFileDefs & result
+
   if moduleIsEmpty:
     result = ""
+
+  postprocessCode(m.config, result)
 
 proc initProcOptions(m: BModule): TOptions =
   let opts = m.config.options

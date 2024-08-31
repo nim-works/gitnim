@@ -29,6 +29,7 @@ type
       # most useful, shows: symbol + resolved symbols if it differs, e.g.:
       # tuple[a: MyInt{int}, b: float]
     preferInlayHint,
+    preferInferredEffects,
 
   TTypeRelation* = enum      # order is important!
     isNone, isConvertible,
@@ -509,7 +510,7 @@ const
     "void", "iterable"]
 
 const preferToResolveSymbols = {preferName, preferTypeName, preferModuleInfo,
-  preferGenericArg, preferResolved, preferMixed, preferInlayHint}
+  preferGenericArg, preferResolved, preferMixed, preferInlayHint, preferInferredEffects}
 
 template bindConcreteTypeToUserTypeClass*(tc, concrete: PType) =
   tc.add concrete
@@ -562,7 +563,7 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
           result = t.sym.name.s
         if prefer == preferMixed and result != t.sym.name.s:
           result = t.sym.name.s & "{" & result & "}"
-      elif prefer in {preferName, preferTypeName, preferInlayHint} or t.sym.owner.isNil:
+      elif prefer in {preferName, preferTypeName, preferInlayHint, preferInferredEffects} or t.sym.owner.isNil:
         # note: should probably be: {preferName, preferTypeName, preferGenericArg}
         result = t.sym.name.s
         if t.kind == tyGenericParam and t.len > 0:
@@ -758,6 +759,7 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
       result.add(')')
       if t.len > 0 and t[0] != nil: result.add(": " & typeToString(t[0]))
       var prag = if t.callConv == ccNimCall and tfExplicitCallConv notin t.flags: "" else: $t.callConv
+      var hasImplicitRaises = false
       if not isNil(t.owner) and not isNil(t.owner.ast) and (t.owner.ast.len - 1) >= pragmasPos:
         let pragmasNode = t.owner.ast[pragmasPos]
         let raisesSpec = effectSpec(pragmasNode, wRaises)
@@ -765,13 +767,27 @@ proc typeToString(typ: PType, prefer: TPreferedDesc = preferName): string =
           addSep(prag)
           prag.add("raises: ")
           prag.add($raisesSpec)
-
+          hasImplicitRaises = true
       if tfNoSideEffect in t.flags:
         addSep(prag)
         prag.add("noSideEffect")
       if tfThread in t.flags:
         addSep(prag)
         prag.add("gcsafe")
+      if not hasImplicitRaises and prefer == preferInferredEffects and not isNil(t.owner) and not isNil(t.owner.typ) and not isNil(t.owner.typ.n) and (t.owner.typ.n.len > 0):
+        let effects = t.owner.typ.n[0]
+        if effects.kind == nkEffectList and effects.len == effectListLen:
+          var inferredRaisesStr = ""
+          let effs = effects[exceptionEffects]
+          if not isNil(effs):
+            for eff in items(effs):
+              if not isNil(eff):
+                addSep(inferredRaisesStr)
+                inferredRaisesStr.add($eff.typ)
+          addSep(prag)
+          prag.add("raises: <inferred> [")
+          prag.add(inferredRaisesStr)
+          prag.add("]")
       if prag.len != 0: result.add("{." & prag & ".}")
     of tyVarargs:
       result = typeToStr[t.kind] % typeToString(t[0])
@@ -822,11 +838,11 @@ proc firstOrd*(conf: ConfigRef; t: PType): Int128 =
     result = firstOrd(conf, lastSon(t))
   of tyOrdinal:
     if t.len > 0: result = firstOrd(conf, lastSon(t))
-    else: internalError(conf, "invalid kind for firstOrd(" & $t.kind & ')')
+    else: fatal(conf, unknownLineInfo, "invalid kind for firstOrd(" & $t.kind & ')')
   of tyUncheckedArray, tyCstring:
     result = Zero
   else:
-    internalError(conf, "invalid kind for firstOrd(" & $t.kind & ')')
+    fatal(conf, unknownLineInfo, "invalid kind for firstOrd(" & $t.kind & ')')
     result = Zero
 
 proc firstFloat*(t: PType): BiggestFloat =
@@ -910,11 +926,11 @@ proc lastOrd*(conf: ConfigRef; t: PType): Int128 =
   of tyProxy: result = Zero
   of tyOrdinal:
     if t.len > 0: result = lastOrd(conf, lastSon(t))
-    else: internalError(conf, "invalid kind for lastOrd(" & $t.kind & ')')
+    else: fatal(conf, unknownLineInfo, "invalid kind for lastOrd(" & $t.kind & ')')
   of tyUncheckedArray:
     result = Zero
   else:
-    internalError(conf, "invalid kind for lastOrd(" & $t.kind & ')')
+    fatal(conf, unknownLineInfo, "invalid kind for lastOrd(" & $t.kind & ')')
     result = Zero
 
 proc lastFloat*(t: PType): BiggestFloat =
@@ -975,6 +991,7 @@ type
     ExactGcSafety
     AllowCommonBase
     PickyCAliases  # be picky about the distinction between 'cint' and 'int32'
+    IgnoreFlags    # used for borrowed functions and methods; ignores the tfVarIsPtr flag
 
   TTypeCmpFlags* = set[TTypeCmpFlag]
 
@@ -1168,6 +1185,13 @@ proc sameChildrenAux(a, b: PType, c: var TSameTypeClosure): bool =
 proc isGenericAlias*(t: PType): bool =
   return t.kind == tyGenericInst and t.lastSon.kind == tyGenericInst
 
+proc genericAliasDepth*(t: PType): int =
+  result = 0
+  var it = t
+  while it.isGenericAlias:
+    it = it.lastSon
+    inc result
+
 proc skipGenericAlias*(t: PType): PType =
   return if t.isGenericAlias: t.lastSon else: t
 
@@ -1289,7 +1313,7 @@ proc sameTypeAux(x, y: PType, c: var TSameTypeClosure): bool =
     cycleCheck()
     if a.kind == tyUserTypeClass and a.n != nil: return a.n == b.n
     result = sameChildrenAux(a, b, c)
-    if result:
+    if result and IgnoreFlags notin c.flags:
       if IgnoreTupleFields in c.flags:
         result = a.flags * {tfVarIsPtr, tfIsOutParam} == b.flags * {tfVarIsPtr, tfIsOutParam}
       else:
