@@ -1246,7 +1246,7 @@ Test1
         "input(8, 4) Warning: language 'anotherLang' not supported"
         ])
     check(output == "<pre class = \"listing\">anything</pre>" &
-                    "<p><pre class = \"listing\">\nsomeCode</pre> </p>")
+                    "<p><pre class = \"listing\">someCode</pre> </p>")
 
   test "RST admonitions":
     # check that all admonitions are implemented
@@ -1629,8 +1629,8 @@ suite "RST/Code highlight":
 
     """
 
-    let expected = """<blockquote><p><span class="Keyword">def</span> f_name<span class="Punctuation">(</span><span class="Punctuation">arg</span><span class="Operator">=</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-    print<span class="Punctuation">(</span><span class="RawData">f&quot;{arg}&quot;</span><span class="Punctuation">)</span></p></blockquote>"""
+    let expected = """<blockquote><p><span class="Keyword">def</span> <span class="Identifier">f_name</span><span class="Punctuation">(</span><span class="Identifier">arg</span><span class="Operator">=</span><span class="DecNumber">42</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+    <span class="Identifier">print</span><span class="Punctuation">(</span><span class="RawData">f&quot;{arg}&quot;</span><span class="Punctuation">)</span></p></blockquote>"""
 
     check strip(rstToHtml(pythonCode, {}, newStringTable(modeCaseSensitive))) ==
       strip(expected)

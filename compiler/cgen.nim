@@ -14,8 +14,8 @@ import
   nversion, nimsets, msgs, bitsets, idents, types,
   ccgutils, ropes, wordrecg, treetab, cgmeth,
   rodutils, renderer, cgendata, aliases,
-  lowerings, ndi, lineinfos, pathutils, transf,
-  injectdestructors, astmsgs, modulepaths, backendpragmas,
+  lowerings, lineinfos, pathutils, transf,
+  injectdestructors, astmsgs, modulepaths, pushpoppragmas,
   mangleutils
 
 from expanddefaults import caseObjDefaultBranch
@@ -97,7 +97,7 @@ proc t(a: TLoc): PType {.inline.} =
 
 proc lodeTyp(t: PType): PNode =
   result = newNode(nkEmpty)
-  result.typ = t
+  result.typ() = t
 
 proc isSimpleConst(typ: PType): bool =
   let t = skipTypes(typ, abstractVar)
@@ -373,6 +373,7 @@ proc dataField(p: BProc): Rope =
 
 proc genProcPrototype(m: BModule, sym: PSym)
 
+include cbuilder
 include ccgliterals
 include ccgtypes
 
@@ -482,7 +483,10 @@ include ccgreset
 proc resetLoc(p: BProc, loc: var TLoc) =
   let containsGcRef = optSeqDestructors notin p.config.globalOptions and containsGarbageCollectedRef(loc.t)
   let typ = skipTypes(loc.t, abstractVarRange)
-  if isImportedCppType(typ): return
+  if isImportedCppType(typ): 
+    var didGenTemp = false
+    linefmt(p, cpsStmts, "$1 = $2;$n", [rdLoc(loc), genCppInitializer(p.module, p, typ, didGenTemp)])
+    return
   if optSeqDestructors in p.config.globalOptions and typ.kind in {tyString, tySequence}:
     assert loc.snippet != ""
 
@@ -780,15 +784,11 @@ $1define nimfr_(proc, file) \
   TFrame FR_; \
   FR_.procname = proc; FR_.filename = file; FR_.line = 0; FR_.len = 0; #nimFrame(&FR_);
 
-  $1define nimfrs_(proc, file, slots, length) \
-    struct {TFrame* prev;NCSTRING procname;NI line;NCSTRING filename;NI len;VarSlot s[slots];} FR_; \
-    FR_.procname = proc; FR_.filename = file; FR_.line = 0; FR_.len = length; #nimFrame((TFrame*)&FR_);
+$1define nimln_(n) \
+  FR_.line = n;
 
-  $1define nimln_(n) \
-    FR_.line = n;
-
-  $1define nimlf_(n, file) \
-    FR_.line = n; FR_.filename = file;
+$1define nimlf_(n, file) \
+  FR_.line = n; FR_.filename = file;
 
 """
   if p.module.s[cfsFrameDefines].len == 0:
@@ -1937,9 +1937,6 @@ proc genInitCode(m: BModule) =
 
     if optStackTrace in m.initProc.options and preventStackTrace notin m.flags:
       prc.add(deinitFrame(m.initProc))
-  elif m.config.exc == excGoto:
-    if getCompilerProc(m.g.graph, "nimTestErrorFlag") != nil:
-      m.appcg(prc, "\t#nimTestErrorFlag();$n", [])
 
   prc.addf("}$N", [])
 
@@ -2088,9 +2085,6 @@ proc rawNewModule(g: BModuleList; module: PSym, filename: AbsoluteFile): BModule
   if sfSystemModule in module.flags:
     incl result.flags, preventStackTrace
     excl(result.preInitProc.options, optStackTrace)
-  let ndiName = if optCDebug in g.config.globalOptions: changeFileExt(completeCfilePath(g.config, filename), "ndi")
-                else: AbsoluteFile""
-  open(result.ndi, ndiName, g.config)
 
 proc rawNewModule(g: BModuleList; module: PSym; conf: ConfigRef): BModule =
   result = rawNewModule(g, module, AbsoluteFile toFullPath(conf, module.position.FileIndex))
@@ -2220,7 +2214,6 @@ proc shouldRecompile(m: BModule; code: Rope, cfile: Cfile): bool =
 # it would generate multiple 'main' procs, for instance.
 
 proc writeModule(m: BModule, pending: bool) =
-  template onExit() = close(m.ndi, m.config)
   let cfile = getCFile(m)
   if moduleHasChanged(m.g.graph, m.module):
     genInitCode(m)
@@ -2238,12 +2231,10 @@ proc writeModule(m: BModule, pending: bool) =
     when hasTinyCBackend:
       if m.config.cmd == cmdTcc:
         tccgen.compileCCode($code, m.config)
-        onExit()
         return
 
     if not shouldRecompile(m, code, cf): cf.flags = {CfileFlag.Cached}
     addFileToCompile(m.config, cf)
-  onExit()
 
 proc updateCachedModule(m: BModule) =
   let cfile = getCFile(m)
@@ -2255,12 +2246,13 @@ proc updateCachedModule(m: BModule) =
   addFileToCompile(m.config, cf)
 
 proc generateLibraryDestroyGlobals(graph: ModuleGraph; m: BModule; body: PNode; isDynlib: bool): PSym =
-  let procname = getIdent(graph.cache, "NimDestroyGlobals")
+  let prefixedName = m.config.nimMainPrefix & "NimDestroyGlobals"
+  let procname = getIdent(graph.cache, prefixedName)
   result = newSym(skProc, procname, m.idgen, m.module.owner, m.module.info)
   result.typ = newProcType(m.module.info, m.idgen, m.module.owner)
   result.typ.callConv = ccCDecl
   incl result.flags, sfExportc
-  result.loc.snippet = "NimDestroyGlobals"
+  result.loc.snippet = prefixedName
   if isDynlib:
     incl(result.loc.flags, lfExportLib)
 

@@ -1,6 +1,7 @@
 discard """
   cmd: "nim $target --mm:refc -d:ssl $options $file"
   disabled: "openbsd"
+  retries: 2
 """
 
 #            Nim - Basic SSL integration tests
@@ -13,7 +14,10 @@ discard """
 ## Test with:
 ## ./bin/nim c -d:ssl -p:. --threads:on -r tests/stdlib/thttpclient_ssl.nim
 
-when not defined(windows):
+
+from stdtest/testutils import disableSSLTesting
+
+when not defined(windows) and not disableSSLTesting():
   # Disabled on Windows due to old OpenSSL version
   import std/[formatfloat, syncio]
   import

@@ -11,7 +11,7 @@
 
 import
   ast, ropes, options,
-  ndi, lineinfos, pathutils, modulegraphs
+  lineinfos, pathutils, modulegraphs
 
 import std/[intsets, tables, sets]
 
@@ -88,7 +88,7 @@ type
     options*: TOptions        # options that should be used for code
                               # generation; this is the same as prc.options
                               # unless prc == nil
-    optionsStack*: seq[TOptions]
+    optionsStack*: seq[(TOptions, TNoteKinds)]
     module*: BModule          # used to prevent excessive parameter passing
     withinLoop*: int          # > 0 if we are within a loop
     splitDecls*: int          # > 0 if we are in some context for C++ that
@@ -172,7 +172,6 @@ type
                                              # OpenGL wrapper
     sigConflicts*: CountTable[SigHash]
     g*: BModuleList
-    ndi*: NdiFile
 
 template config*(m: BModule): ConfigRef = m.g.config
 template config*(p: BProc): ConfigRef = p.module.g.config

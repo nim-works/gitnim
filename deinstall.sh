@@ -19,7 +19,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/lib/nim
       docdir=/usr/share/nim/doc
       datadir=/usr/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/nim-2.1.9"
+      nimbleDir="/opt/nimble/pkgs/nim-2.2.2"
       ;;
     "/usr/local/bin")
       bindir=/usr/local/bin
@@ -27,7 +27,7 @@ if [ $# -eq 1 ] ; then
       libdir=/usr/local/lib/nim
       docdir=/usr/local/share/nim/doc
       datadir=/usr/local/share/nim/data
-      nimbleDir="/opt/nimble/pkgs/nim-2.1.9"
+      nimbleDir="/opt/nimble/pkgs/nim-2.2.2"
       ;;
     "/opt")
       bindir="/opt/nim/bin"
@@ -35,7 +35,7 @@ if [ $# -eq 1 ] ; then
       libdir="/opt/nim/lib"
       docdir="/opt/nim/doc"
       datadir="/opt/nim/data"
-      nimbleDir="/opt/nimble/pkgs/nim-2.1.9"
+      nimbleDir="/opt/nimble/pkgs/nim-2.2.2"
       ;;
     *)
       bindir="$1/nim/bin"
@@ -64,9 +64,9 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/astalgo.nim
     rm -f $nimbleDir/compiler/astmsgs.nim
     rm -f $nimbleDir/compiler/astyaml.nim
-    rm -f $nimbleDir/compiler/backendpragmas.nim
     rm -f $nimbleDir/compiler/bitsets.nim
     rm -f $nimbleDir/compiler/btrees.nim
+    rm -f $nimbleDir/compiler/cbuilder.nim
     rm -f $nimbleDir/compiler/ccgcalls.nim
     rm -f $nimbleDir/compiler/ccgexprs.nim
     rm -f $nimbleDir/compiler/ccgliterals.nim
@@ -104,16 +104,16 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/guards.nim
     rm -f $nimbleDir/compiler/hlo.nim
     rm -f $nimbleDir/compiler/ic/cbackend.nim
-    rm -f $nimbleDir/compiler/ic/navigator.nim
     rm -f $nimbleDir/compiler/ic/rodfiles.nim
-    rm -f $nimbleDir/compiler/ic/iclineinfos.nim
-    rm -f $nimbleDir/compiler/ic/packed_ast.nim
-    rm -f $nimbleDir/compiler/ic/integrity.nim
-    rm -f $nimbleDir/compiler/ic/dce.nim
     rm -f $nimbleDir/compiler/ic/design.rst
-    rm -f $nimbleDir/compiler/ic/bitabs.nim
-    rm -f $nimbleDir/compiler/ic/ic.nim
+    rm -f $nimbleDir/compiler/ic/integrity.nim
+    rm -f $nimbleDir/compiler/ic/packed_ast.nim
+    rm -f $nimbleDir/compiler/ic/navigator.nim
+    rm -f $nimbleDir/compiler/ic/iclineinfos.nim
+    rm -f $nimbleDir/compiler/ic/dce.nim
     rm -f $nimbleDir/compiler/ic/replayer.nim
+    rm -f $nimbleDir/compiler/ic/ic.nim
+    rm -f $nimbleDir/compiler/ic/bitabs.nim
     rm -f $nimbleDir/compiler/idents.nim
     rm -f $nimbleDir/compiler/importer.nim
     rm -f $nimbleDir/compiler/index.nim
@@ -124,6 +124,7 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/jsgen.nim
     rm -f $nimbleDir/compiler/jstypes.nim
     rm -f $nimbleDir/compiler/lambdalifting.nim
+    rm -f $nimbleDir/compiler/layeredtable.nim
     rm -f $nimbleDir/compiler/layouter.nim
     rm -f $nimbleDir/compiler/lexer.nim
     rm -f $nimbleDir/compiler/liftdestructors.nim
@@ -142,7 +143,6 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/modulepaths.nim
     rm -f $nimbleDir/compiler/modules.nim
     rm -f $nimbleDir/compiler/msgs.nim
-    rm -f $nimbleDir/compiler/ndi.nim
     rm -f $nimbleDir/compiler/nilcheck.nim
     rm -f $nimbleDir/compiler/nim.cfg
     rm -f $nimbleDir/compiler/nim.nim
@@ -168,15 +168,16 @@ if [ $# -eq 1 ] ; then
     rm -f $nimbleDir/compiler/pipelines.nim
     rm -f $nimbleDir/compiler/pipelineutils.nim
     rm -f $nimbleDir/compiler/platform.nim
-    rm -f $nimbleDir/compiler/plugins/customast.nim
     rm -f $nimbleDir/compiler/plugins/itersgen.nim
-    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/plugins/active.nim
+    rm -f $nimbleDir/compiler/plugins/customast.nim
     rm -f $nimbleDir/compiler/plugins/plugins.nimble
+    rm -f $nimbleDir/compiler/plugins/locals.nim
     rm -f $nimbleDir/compiler/pluginsupport.nim
     rm -f $nimbleDir/compiler/pragmas.nim
     rm -f $nimbleDir/compiler/prefixmatches.nim
     rm -f $nimbleDir/compiler/procfind.nim
+    rm -f $nimbleDir/compiler/pushpoppragmas.nim
     rm -f $nimbleDir/compiler/readme.md
     rm -f $nimbleDir/compiler/renderer.nim
     rm -f $nimbleDir/compiler/renderverbatim.nim

@@ -1,8 +1,7 @@
 
 
 import std/[unittest, os, strutils]
-
-import context, osutils, versions
+import basic/[context, osutils, versions]
 
 when false:
   from nameresolver import resolvePackage
@@ -30,7 +29,7 @@ let
 
 proc initBasicWorkspace(typ: type AtlasContext): AtlasContext =
   result.workspace = currentSourcePath().parentDir / "ws_basic"
-  result.depsDir = result.workspace
+  result.origDepsDir = result.workspace
 
 when false:
   suite "urls and naming":

@@ -102,6 +102,7 @@ nim	opcLtSet	vmdef.html#opcLtSet	TOpcode.opcLtSet		52
 nim	opcMulSet	vmdef.html#opcMulSet	TOpcode.opcMulSet		52
 nim	opcPlusSet	vmdef.html#opcPlusSet	TOpcode.opcPlusSet		52
 nim	opcMinusSet	vmdef.html#opcMinusSet	TOpcode.opcMinusSet		52
+nim	opcXorSet	vmdef.html#opcXorSet	TOpcode.opcXorSet		52
 nim	opcConcatStr	vmdef.html#opcConcatStr	TOpcode.opcConcatStr		52
 nim	opcContainsSet	vmdef.html#opcContainsSet	TOpcode.opcContainsSet		52
 nim	opcRepr	vmdef.html#opcRepr	TOpcode.opcRepr		52
@@ -217,47 +218,48 @@ nim	emStaticStmt	vmdef.html#emStaticStmt	TEvalMode.emStaticStmt		192
 nim	TEvalMode	vmdef.html#TEvalMode	enum TEvalMode		192
 nim	allowCast	vmdef.html#allowCast	TSandboxFlag.allowCast		201
 nim	allowInfiniteLoops	vmdef.html#allowInfiniteLoops	TSandboxFlag.allowInfiniteLoops		201
+nim	allowInfiniteRecursion	vmdef.html#allowInfiniteRecursion	TSandboxFlag.allowInfiniteRecursion		201
 nim	TSandboxFlag	vmdef.html#TSandboxFlag	enum TSandboxFlag		201
-nim	TSandboxFlags	vmdef.html#TSandboxFlags	type TSandboxFlags		204
-nim	slotEmpty	vmdef.html#slotEmpty	TSlotKind.slotEmpty		206
-nim	slotFixedVar	vmdef.html#slotFixedVar	TSlotKind.slotFixedVar		206
-nim	slotFixedLet	vmdef.html#slotFixedLet	TSlotKind.slotFixedLet		206
-nim	slotTempUnknown	vmdef.html#slotTempUnknown	TSlotKind.slotTempUnknown		206
-nim	slotTempInt	vmdef.html#slotTempInt	TSlotKind.slotTempInt		206
-nim	slotTempFloat	vmdef.html#slotTempFloat	TSlotKind.slotTempFloat		206
-nim	slotTempStr	vmdef.html#slotTempStr	TSlotKind.slotTempStr		206
-nim	slotTempComplex	vmdef.html#slotTempComplex	TSlotKind.slotTempComplex		206
-nim	slotTempPerm	vmdef.html#slotTempPerm	TSlotKind.slotTempPerm		206
-nim	TSlotKind	vmdef.html#TSlotKind	enum TSlotKind		206
-nim	rkNone	vmdef.html#rkNone	TRegisterKind.rkNone		220
-nim	rkNode	vmdef.html#rkNode	TRegisterKind.rkNode		220
-nim	rkInt	vmdef.html#rkInt	TRegisterKind.rkInt		220
-nim	rkFloat	vmdef.html#rkFloat	TRegisterKind.rkFloat		220
-nim	rkRegisterAddr	vmdef.html#rkRegisterAddr	TRegisterKind.rkRegisterAddr		220
-nim	rkNodeAddr	vmdef.html#rkNodeAddr	TRegisterKind.rkNodeAddr		220
-nim	TRegisterKind	vmdef.html#TRegisterKind	enum TRegisterKind		220
-nim	TFullReg	vmdef.html#TFullReg	object TFullReg		222
-nim	PProc	vmdef.html#PProc	type PProc		232
-nim	VmArgs	vmdef.html#VmArgs	object VmArgs		237
-nim	VmCallback	vmdef.html#VmCallback	type VmCallback		242
-nim	PCtx	vmdef.html#PCtx	type PCtx		244
-nim	TCtx	vmdef.html#TCtx	object TCtx		245
-nim	PStackFrame	vmdef.html#PStackFrame	type PStackFrame		274
-nim	TStackFrame	vmdef.html#TStackFrame	object TStackFrame		275
-nim	Profiler	vmdef.html#Profiler	object Profiler		284
-nim	TPosition	vmdef.html#TPosition	type TPosition		288
-nim	PEvalContext	vmdef.html#PEvalContext	type PEvalContext		290
-nim	newCtx	vmdef.html#newCtx,PSym,IdentCache,ModuleGraph,IdGenerator	proc newCtx(module: PSym; cache: IdentCache; g: ModuleGraph; idgen: IdGenerator): PCtx		292
-nim	refresh	vmdef.html#refresh,PCtx,PSym,IdGenerator	proc refresh(c: PCtx; module: PSym; idgen: IdGenerator)		299
-nim	registerCallback	vmdef.html#registerCallback,PCtx,string,VmCallback	proc registerCallback(c: PCtx; name: string; callback: VmCallback): int		313
-nim	firstABxInstr	vmdef.html#firstABxInstr	const firstABxInstr		319
-nim	largeInstrs	vmdef.html#largeInstrs	const largeInstrs		320
-nim	slotSomeTemp	vmdef.html#slotSomeTemp	const slotSomeTemp		323
-nim	relativeJumps	vmdef.html#relativeJumps	const relativeJumps		324
-nim	nimNodeFlag	vmdef.html#nimNodeFlag	const nimNodeFlag		327
-nim	opcode	vmdef.html#opcode.t,TInstr	template opcode(x: TInstr): TOpcode		329
-nim	regA	vmdef.html#regA.t,TInstr	template regA(x: TInstr): TRegister		330
-nim	regB	vmdef.html#regB.t,TInstr	template regB(x: TInstr): TRegister		331
-nim	regC	vmdef.html#regC.t,TInstr	template regC(x: TInstr): TRegister		332
-nim	regBx	vmdef.html#regBx.t,TInstr	template regBx(x: TInstr): int		333
-nim	jmpDiff	vmdef.html#jmpDiff.t,TInstr	template jmpDiff(x: TInstr): int		335
+nim	TSandboxFlags	vmdef.html#TSandboxFlags	type TSandboxFlags		205
+nim	slotEmpty	vmdef.html#slotEmpty	TSlotKind.slotEmpty		207
+nim	slotFixedVar	vmdef.html#slotFixedVar	TSlotKind.slotFixedVar		207
+nim	slotFixedLet	vmdef.html#slotFixedLet	TSlotKind.slotFixedLet		207
+nim	slotTempUnknown	vmdef.html#slotTempUnknown	TSlotKind.slotTempUnknown		207
+nim	slotTempInt	vmdef.html#slotTempInt	TSlotKind.slotTempInt		207
+nim	slotTempFloat	vmdef.html#slotTempFloat	TSlotKind.slotTempFloat		207
+nim	slotTempStr	vmdef.html#slotTempStr	TSlotKind.slotTempStr		207
+nim	slotTempComplex	vmdef.html#slotTempComplex	TSlotKind.slotTempComplex		207
+nim	slotTempPerm	vmdef.html#slotTempPerm	TSlotKind.slotTempPerm		207
+nim	TSlotKind	vmdef.html#TSlotKind	enum TSlotKind		207
+nim	rkNone	vmdef.html#rkNone	TRegisterKind.rkNone		221
+nim	rkNode	vmdef.html#rkNode	TRegisterKind.rkNode		221
+nim	rkInt	vmdef.html#rkInt	TRegisterKind.rkInt		221
+nim	rkFloat	vmdef.html#rkFloat	TRegisterKind.rkFloat		221
+nim	rkRegisterAddr	vmdef.html#rkRegisterAddr	TRegisterKind.rkRegisterAddr		221
+nim	rkNodeAddr	vmdef.html#rkNodeAddr	TRegisterKind.rkNodeAddr		221
+nim	TRegisterKind	vmdef.html#TRegisterKind	enum TRegisterKind		221
+nim	TFullReg	vmdef.html#TFullReg	object TFullReg		223
+nim	PProc	vmdef.html#PProc	type PProc		233
+nim	VmArgs	vmdef.html#VmArgs	object VmArgs		238
+nim	VmCallback	vmdef.html#VmCallback	type VmCallback		243
+nim	PCtx	vmdef.html#PCtx	type PCtx		245
+nim	TCtx	vmdef.html#TCtx	object TCtx		246
+nim	PStackFrame	vmdef.html#PStackFrame	type PStackFrame		276
+nim	TStackFrame	vmdef.html#TStackFrame	object TStackFrame		277
+nim	Profiler	vmdef.html#Profiler	object Profiler		286
+nim	TPosition	vmdef.html#TPosition	type TPosition		290
+nim	PEvalContext	vmdef.html#PEvalContext	type PEvalContext		292
+nim	newCtx	vmdef.html#newCtx,PSym,IdentCache,ModuleGraph,IdGenerator	proc newCtx(module: PSym; cache: IdentCache; g: ModuleGraph; idgen: IdGenerator): PCtx		294
+nim	refresh	vmdef.html#refresh,PCtx,PSym,IdGenerator	proc refresh(c: PCtx; module: PSym; idgen: IdGenerator)		302
+nim	registerCallback	vmdef.html#registerCallback,PCtx,string,VmCallback	proc registerCallback(c: PCtx; name: string; callback: VmCallback): int		317
+nim	firstABxInstr	vmdef.html#firstABxInstr	const firstABxInstr		323
+nim	largeInstrs	vmdef.html#largeInstrs	const largeInstrs		324
+nim	slotSomeTemp	vmdef.html#slotSomeTemp	const slotSomeTemp		327
+nim	relativeJumps	vmdef.html#relativeJumps	const relativeJumps		328
+nim	nimNodeFlag	vmdef.html#nimNodeFlag	const nimNodeFlag		331
+nim	opcode	vmdef.html#opcode.t,TInstr	template opcode(x: TInstr): TOpcode		333
+nim	regA	vmdef.html#regA.t,TInstr	template regA(x: TInstr): TRegister		334
+nim	regB	vmdef.html#regB.t,TInstr	template regB(x: TInstr): TRegister		335
+nim	regC	vmdef.html#regC.t,TInstr	template regC(x: TInstr): TRegister		336
+nim	regBx	vmdef.html#regBx.t,TInstr	template regBx(x: TInstr): int		337
+nim	jmpDiff	vmdef.html#jmpDiff.t,TInstr	template jmpDiff(x: TInstr): int		339

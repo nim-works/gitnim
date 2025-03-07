@@ -16,10 +16,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.1.9">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.2.2">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js?v=2.1.9"></script>
+<script type="text/javascript" src="dochack.js?v=2.2.2"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -64,7 +64,7 @@
   mask* {.importc: &quot;mask&quot;.}: uint32 ## Watch mask.
   cookie* {.importc: &quot;cookie&quot;.}: uint32 ## Cookie to synchronize two events.
   len* {.importc: &quot;len&quot;.}: uint32 ## Length (including NULs) of name.
-  name* {.importc: &quot;name&quot;.}: char ## Name.">InotifyEvent</a></li>
+  name* {.importc: &quot;name&quot;.}: UncheckedArray[char] ## Name.">InotifyEvent</a></li>
 
     </ul>
   </details>
@@ -142,7 +142,7 @@
 
   </div>
   <div class="nine columns" id="content">
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L1" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L1" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
     <div id="tocRoot"></div>
@@ -151,11 +151,13 @@
 <p><strong class="examples_text">Example:</strong></p>
 <pre class="listing"><span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">inotify</span>
 <span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">linux</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
-  <span class="Keyword">let</span> <span class="Identifier">inoty</span><span class="Punctuation">:</span> <span class="Identifier">FileHandle</span> <span class="Operator">=</span> <span class="Identifier">inotify_init</span><span class="Punctuation">(</span><span class="Punctuation">)</span>           <span class="Comment">## Create 1 Inotify.</span>
-  <span class="Identifier">doAssert</span> <span class="Identifier">inoty</span> <span class="Operator">&gt;=</span> <span class="DecNumber">0</span>                              <span class="Comment">## Check for errors (FileHandle is alias to cint).</span>
-  <span class="Keyword">let</span> <span class="Identifier">watchdoge</span><span class="Punctuation">:</span> <span class="Identifier">cint</span> <span class="Operator">=</span> <span class="Identifier">inotify_add_watch</span><span class="Punctuation">(</span><span class="Identifier">inoty</span><span class="Punctuation">,</span> <span class="StringLit">&quot;.&quot;</span><span class="Punctuation">,</span> <span class="Identifier">IN_ALL_EVENTS</span><span class="Punctuation">)</span> <span class="Comment">## Add directory to watchdog.</span>
-  <span class="Identifier">doAssert</span> <span class="Identifier">watchdoge</span> <span class="Operator">&gt;=</span> <span class="DecNumber">0</span>                          <span class="Comment">## Check for errors.</span>
-  <span class="Identifier">doAssert</span> <span class="Identifier">inotify_rm_watch</span><span class="Punctuation">(</span><span class="Identifier">inoty</span><span class="Punctuation">,</span> <span class="Identifier">watchdoge</span><span class="Punctuation">)</span> <span class="Operator">&gt;=</span> <span class="DecNumber">0</span> <span class="Comment">## Remove directory from the watchdog</span></pre></p>
+  <span class="Keyword">let</span> <span class="Identifier">inotifyFd</span> <span class="Operator">=</span> <span class="Identifier">inotify_init</span><span class="Punctuation">(</span><span class="Punctuation">)</span>  <span class="Comment"># create and get new inotify FileHandle</span>
+  <span class="Identifier">doAssert</span> <span class="Identifier">inotifyFd</span> <span class="Operator">&gt;=</span> <span class="DecNumber">0</span>         <span class="Comment"># check for errors</span>
+
+  <span class="Keyword">let</span> <span class="Identifier">wd</span> <span class="Operator">=</span> <span class="Identifier">inotifyFd</span><span class="Operator">.</span><span class="Identifier">inotify_add_watch</span><span class="Punctuation">(</span><span class="StringLit">&quot;/tmp&quot;</span><span class="Punctuation">,</span> <span class="Identifier">IN_CREATE</span> <span class="Keyword">or</span> <span class="Identifier">IN_DELETE</span><span class="Punctuation">)</span>  <span class="Comment"># Add new watch</span>
+  <span class="Identifier">doAssert</span> <span class="Identifier">wd</span> <span class="Operator">&gt;=</span> <span class="DecNumber">0</span>                 <span class="Comment"># check for errors</span>
+
+  <span class="Keyword">discard</span> <span class="Identifier">inotifyFd</span><span class="Operator">.</span><span class="Identifier">inotify_rm_watch</span><span class="Punctuation">(</span><span class="Identifier">wd</span><span class="Punctuation">)</span> <span class="Comment"># remove watch</span></pre></p>
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
@@ -172,11 +174,11 @@
   <span class="Identifier">mask</span><span class="Operator">*</span> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;mask&quot;</span>.}<span class="Other">:</span> <a href="system.html#uint32"><span class="Identifier">uint32</span></a> <span class="Comment">## Watch mask.</span>
   <span class="Identifier">cookie</span><span class="Operator">*</span> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;cookie&quot;</span>.}<span class="Other">:</span> <a href="system.html#uint32"><span class="Identifier">uint32</span></a> <span class="Comment">## Cookie to synchronize two events.</span>
   <span class="Identifier">len</span><span class="Operator">*</span> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;len&quot;</span>.}<span class="Other">:</span> <a href="system.html#uint32"><span class="Identifier">uint32</span></a> <span class="Comment">## Length (including NULs) of name.</span>
-  <span class="Identifier">name</span><span class="Operator">*</span> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;name&quot;</span>.}<span class="Other">:</span> <a href="system.html#char"><span class="Identifier">char</span></a> <span class="Comment">## Name.</span></pre></dt>
+  <span class="Identifier">name</span><span class="Operator">*</span> {.<span class="Identifier">importc</span><span class="Other">:</span> <span class="StringLit">&quot;name&quot;</span>.}<span class="Other">:</span> <a href="system.html#UncheckedArray"><span class="Identifier">UncheckedArray</span></a><span class="Other">[</span><a href="system.html#char"><span class="Identifier">char</span></a><span class="Other">]</span> <span class="Comment">## Name.</span></pre></dt>
   <dd>
     
     An Inotify event.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L18" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L18" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L18" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -192,7 +194,7 @@
   <dd>
     
     File was accessed.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L27" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L27" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L27" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -202,7 +204,7 @@
   <dd>
     
     
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L59" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L59" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L59" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -212,7 +214,7 @@
   <dd>
     
     Metadata changed.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L29" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L29" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L29" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -222,7 +224,7 @@
   <dd>
     
     Close.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L32" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L32" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L32" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -232,7 +234,7 @@
   <dd>
     
     Unwrittable file closed.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L31" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L31" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L31" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -242,7 +244,7 @@
   <dd>
     
     Writtable file was closed.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L30" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L30" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L30" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -252,7 +254,7 @@
   <dd>
     
     Subfile was created.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L37" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L37" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L37" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -262,7 +264,7 @@
   <dd>
     
     Subfile was deleted.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L38" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L38" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L38" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -272,7 +274,7 @@
   <dd>
     
     Self was deleted.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L39" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L39" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L39" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -282,7 +284,7 @@
   <dd>
     
     Do not follow a sym link.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L51" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L51" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L51" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -292,7 +294,7 @@
   <dd>
     
     Exclude events on unlinked objects.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L52" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L52" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L52" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -302,7 +304,7 @@
   <dd>
     
     File was ignored.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L46" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L46" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L46" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -312,7 +314,7 @@
   <dd>
     
     Event occurred against dir.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L54" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L54" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L54" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -322,7 +324,7 @@
   <dd>
     
     Add to the mask of an already existing watch.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L53" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L53" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L53" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -332,7 +334,7 @@
   <dd>
     
     File was modified.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L28" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L28" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L28" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -342,7 +344,7 @@
   <dd>
     
     Moves.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L36" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L36" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L36" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -352,7 +354,7 @@
   <dd>
     
     Self was moved.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L40" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L40" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L40" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -362,7 +364,7 @@
   <dd>
     
     File was moved from X.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L34" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L34" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L34" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -372,7 +374,7 @@
   <dd>
     
     File was moved to Y.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L35" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L35" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L35" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -382,7 +384,7 @@
   <dd>
     
     Only send event once.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L55" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L55" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L55" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -392,7 +394,7 @@
   <dd>
     
     Only watch the path if it is a directory.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L50" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L50" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L50" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -402,7 +404,7 @@
   <dd>
     
     File was opened.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L33" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L33" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L33" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -412,7 +414,7 @@
   <dd>
     
     Event queued overflowed.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L45" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L45" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L45" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -422,7 +424,7 @@
   <dd>
     
     Backing fs was unmounted.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L44" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L44" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L44" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -441,8 +443,8 @@
   <dd>
     
     Add watch of object NAME to inotify instance FD. Notify about events specified by MASK.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L72" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L72" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L73" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L73" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -456,7 +458,7 @@
   <dd>
     
     Create and initialize inotify instance.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L64" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L64" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L64" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -469,8 +471,8 @@
     <span class="Identifier">header</span><span class="Other">:</span> <span class="StringLit">&quot;&lt;sys/inotify.h&gt;&quot;</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Create and initialize inotify instance.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L68" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+    Like <a class="reference external" href="#inotify_init">inotify_init</a> , but has a flags argument that provides access to some extra functionality.
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L68" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
 <a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L68" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
@@ -485,8 +487,8 @@
   <dd>
     
     Remove the watch specified by WD from the inotify instance FD.
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L76" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L76" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L77" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L77" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -504,14 +506,21 @@
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    <p>Abstract the packed buffer interface to yield event object pointers.</p>
-<p><pre class="listing">
-<span class="Keyword">var</span> <span class="Identifier">evs</span> <span class="Operator">=</span> <span class="Identifier">newSeq</span><span class="Punctuation">[</span><span class="Identifier">byte</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="DecNumber">8192</span><span class="Punctuation">)</span>        <span class="Comment"># Already did inotify_init+add_watch</span>
-<span class="Keyword">while</span> <span class="Punctuation">(</span><span class="Keyword">let</span> <span class="Identifier">n</span> <span class="Operator">=</span> <span class="Identifier">read</span><span class="Punctuation">(</span><span class="Identifier">fd</span><span class="Punctuation">,</span> <span class="Identifier">evs</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Keyword">addr</span><span class="Punctuation">,</span> <span class="DecNumber">8192</span><span class="Punctuation">)</span><span class="Punctuation">;</span> <span class="Identifier">n</span><span class="Punctuation">)</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span><span class="Punctuation">:</span>     <span class="Comment"># read forever</span>
-  <span class="Keyword">for</span> <span class="Identifier">e</span> <span class="Keyword">in</span> <span class="Identifier">inotify_events</span><span class="Punctuation">(</span><span class="Identifier">evs</span><span class="Punctuation">[</span><span class="DecNumber">0</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Keyword">addr</span><span class="Punctuation">,</span> <span class="Identifier">n</span><span class="Punctuation">)</span><span class="Punctuation">:</span> <span class="Identifier">echo</span> <span class="Identifier">e</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">len</span> <span class="Comment"># echo name lens</span></pre></p>
+    Abstract the packed buffer interface to yield event object pointers.
+<p><strong class="examples_text">Example: cmd: -r:off</strong></p>
+<pre class="listing"><span class="Keyword">when</span> <span class="Identifier">defined</span><span class="Punctuation">(</span><span class="Identifier">linux</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+   <span class="Keyword">import</span> <span class="Identifier">std</span><span class="Operator">/</span><span class="Identifier">posix</span>  <span class="Comment"># needed for FileHandle read procedure</span>
+   <span class="Keyword">const</span> <span class="Identifier">MaxWatches</span> <span class="Operator">=</span> <span class="DecNumber">8192</span>
 
-    <a href="https://github.com/nim-lang/Nim/tree/devel/lib/posix/inotify.nim#L80" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
-<a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L80" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
+   <span class="Keyword">let</span> <span class="Identifier">inotifyFd</span> <span class="Operator">=</span> <span class="Identifier">inotify_init</span><span class="Punctuation">(</span><span class="Punctuation">)</span>  <span class="Comment"># create new inotify instance and get it's FileHandle</span>
+   <span class="Keyword">let</span> <span class="Identifier">wd</span> <span class="Operator">=</span> <span class="Identifier">inotifyFd</span><span class="Operator">.</span><span class="Identifier">inotify_add_watch</span><span class="Punctuation">(</span><span class="StringLit">&quot;/tmp&quot;</span><span class="Punctuation">,</span> <span class="Identifier">IN_CREATE</span> <span class="Keyword">or</span> <span class="Identifier">IN_DELETE</span><span class="Punctuation">)</span>  <span class="Comment"># Add new watch</span>
+
+   <span class="Keyword">var</span> <span class="Identifier">events</span><span class="Punctuation">:</span> <span class="Identifier">array</span><span class="Punctuation">[</span><span class="Identifier">MaxWatches</span><span class="Punctuation">,</span> <span class="Identifier">byte</span><span class="Punctuation">]</span>  <span class="Comment"># event buffer</span>
+   <span class="Keyword">while</span> <span class="Punctuation">(</span><span class="Keyword">let</span> <span class="Identifier">n</span> <span class="Operator">=</span> <span class="Identifier">read</span><span class="Punctuation">(</span><span class="Identifier">inotifyFd</span><span class="Punctuation">,</span> <span class="Keyword">addr</span> <span class="Identifier">events</span><span class="Punctuation">,</span> <span class="Identifier">MaxWatches</span><span class="Punctuation">)</span><span class="Punctuation">;</span> <span class="Identifier">n</span><span class="Punctuation">)</span> <span class="Operator">&gt;</span> <span class="DecNumber">0</span><span class="Punctuation">:</span>  <span class="Comment"># blocks until any events have been read</span>
+     <span class="Keyword">for</span> <span class="Identifier">e</span> <span class="Keyword">in</span> <span class="Identifier">inotify_events</span><span class="Punctuation">(</span><span class="Keyword">addr</span> <span class="Identifier">events</span><span class="Punctuation">,</span> <span class="Identifier">n</span><span class="Punctuation">)</span><span class="Punctuation">:</span>
+       <span class="Identifier">echo</span> <span class="Punctuation">(</span><span class="Identifier">e</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">wd</span><span class="Punctuation">,</span> <span class="Identifier">e</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">mask</span><span class="Punctuation">,</span> <span class="Keyword">cast</span><span class="Punctuation">[</span><span class="Identifier">cstring</span><span class="Punctuation">]</span><span class="Punctuation">(</span><span class="Keyword">addr</span> <span class="Identifier">e</span><span class="Punctuation">[</span><span class="Punctuation">]</span><span class="Operator">.</span><span class="Identifier">name</span><span class="Punctuation">)</span><span class="Punctuation">)</span>    <span class="Comment"># echo watch id, mask, and name value of each event</span></pre>
+    <a href="https://github.com/nim-lang/Nim/tree/version-2-2/lib/posix/inotify.nim#L81" class="link-seesrc" target="_blank">Source</a>&nbsp;&nbsp;
+<a href="https://github.com/nim-lang/Nim/edit/devel/lib/posix/inotify.nim#L81" class="link-seesrc" target="_blank" >Edit</a>&nbsp;&nbsp;
 
   </dd>
 </div>
@@ -527,7 +536,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2024-08-04 01:15:13 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2025-02-14 02:23:14 UTC</small>
       </div>
     </div>
   </div>
